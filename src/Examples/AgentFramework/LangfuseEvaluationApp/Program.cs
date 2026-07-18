@@ -1,7 +1,7 @@
 // =============================================================================
 // LangfuseEvaluationApp
 // -----------------------------------------------------------------------------
-// Demonstrates how little code it takes to send Needlr agent telemetry AND
+// Demonstrates how little code it takes to send Foundry agent telemetry AND
 // Microsoft.Extensions.AI.Evaluation scores to Langfuse.
 //
 // The Langfuse integration is four calls:
@@ -10,7 +10,7 @@
 //   3. scenario.RecordEvaluationAsync(...) -> evaluator metrics become Langfuse scores
 //   4. session.Shutdown(...)                -> bounded final drain + resource release
 //
-// Everything else here is an ordinary Needlr agent run + evaluation. A mock
+// Everything else here is an ordinary Foundry agent run + evaluation. A mock
 // chat client is used so the example runs with no LLM credentials, and the
 // Langfuse calls no-op cleanly when LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY
 // are not set — so this example always runs end to end.
@@ -27,13 +27,16 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.Langfuse;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
-Console.WriteLine("=== Needlr → Langfuse Evaluation Example ===");
+using LangfuseEvaluationApp;
+
+Console.WriteLine("=== Foundry → Langfuse Evaluation Example ===");
 Console.WriteLine();
 
-// ── Wire a Needlr agent with diagnostics and a credential-free mock client ──
+// ── Wire a Foundry agent with diagnostics and a credential-free mock client ─
 var configuration = new ConfigurationBuilder().Build();
 
 var serviceProvider = new Syringe()
@@ -186,50 +189,5 @@ static void PrintMetrics(string evaluatorName, Microsoft.Extensions.AI.Evaluatio
             _ => "n/a",
         };
         Console.WriteLine($"        • {metric.Name} = {value}");
-    }
-}
-
-internal sealed class MockChatClient : IChatClient
-{
-    private readonly ChatClientMetadata _metadata = new(
-        providerName: "mock-provider",
-        providerUri: new Uri("https://api.example.com:443"),
-        defaultModelId: "mock-model");
-
-    public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var response = new ChatResponse(
-            [new ChatMessage(ChatRole.Assistant, "Mock summary of the cached prompt content.")])
-        {
-            ModelId = "mock-model",
-            Usage = new UsageDetails
-            {
-                InputTokenCount = 4000,
-                OutputTokenCount = 180,
-                TotalTokenCount = 4180,
-                CachedInputTokenCount = 2500,
-                ReasoningTokenCount = 90,
-            },
-        };
-        return Task.FromResult(response);
-    }
-
-    public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException("Streaming is not used in this example.");
-
-    public void Dispose()
-    {
-    }
-
-    public object? GetService(Type serviceType, object? serviceKey = null)
-    {
-        ArgumentNullException.ThrowIfNull(serviceType);
-        return serviceType == typeof(ChatClientMetadata) ? _metadata : null;
     }
 }

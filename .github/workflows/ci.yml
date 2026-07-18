@@ -44,6 +44,7 @@ jobs:
             echo "::group::Testing $(basename "$project")"
             dotnet test "$project" \
               --configuration Release \
+              --no-build \
               --verbosity normal \
               --blame-hang \
               --blame-hang-dump-type none \
@@ -55,18 +56,91 @@ jobs:
 
       - name: Pack
         shell: bash
+        env:
+          GITHUB_ENV: /tmp/discard-pack-env
+          GITHUB_OUTPUT: /tmp/discard-pack-output
+          GITHUB_STEP_SUMMARY: /tmp/discard-pack-summary
         run: |
           mkdir -p artifacts/packages
-          while IFS= read -r project; do
+          mapfile -t projects < <(find src -name 'NexusLabs.Foundry*.csproj' \
+            ! -name '*.Tests.csproj' | sort)
+
+          if [ ${#projects[@]} -eq 0 ]; then
+            echo "::error::No Foundry package projects were found."
+            exit 1
+          fi
+
+          for project in "${projects[@]}"; do
             dotnet pack "$project" \
               --configuration Release \
               --no-build \
               --output artifacts/packages
-          done < <(find src -name 'NexusLabs.Foundry*.csproj' \
-            ! -name '*.Tests.csproj' | sort)
+          done
+
+      - name: Validate packages
+        shell: pwsh
+        run: scripts/validate-packages.ps1
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: foundry-packages
           path: artifacts/packages/*
+
+  docs:
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install documentation dependencies
+        run: python -m pip install --requirement requirements-docs.txt
+
+      - name: Build documentation
+        run: python -m mkdocs build --strict
+
+  aot:
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install NativeAOT dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev file
+
+      - name: Publish representative NativeAOT app
+        env:
+          GITHUB_ENV: /tmp/discard-aot-env
+          GITHUB_OUTPUT: /tmp/discard-aot-output
+          GITHUB_STEP_SUMMARY: /tmp/discard-aot-summary
+        run: |
+          dotnet publish src/Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained \
+            --output artifacts/aot
+
+      - name: Verify NativeAOT executable
+        run: |
+          test -f artifacts/aot/AotAgentFrameworkApp
+          file artifacts/aot/AotAgentFrameworkApp
+
+      - name: Upload NativeAOT artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-aot-linux-x64
+          path: artifacts/aot/AotAgentFrameworkApp

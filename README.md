@@ -23,8 +23,25 @@ runtime, evaluation, or provider packages.
 - `NexusLabs.Foundry.Needlr.MicrosoftAgentFramework` - optional Needlr integration for the Foundry runtime
 - `NexusLabs.Foundry.Needlr.SemanticKernel` - Needlr integration for Semantic Kernel
 
-Foundry is being extracted from the alpha Needlr AI packages. Package IDs,
-namespaces, and APIs may change during this migration.
+Foundry is currently alpha software. Package IDs, namespaces, and APIs may
+change before a stable release.
+
+## Build
+
+```powershell
+dotnet build src\NexusLabs.Foundry.slnx
+```
+
+The solution includes the production packages, test projects, and all examples.
+
+## Documentation
+
+Documentation lives under [`docs`](docs/index.md) and is built with MkDocs:
+
+```powershell
+python -m pip install --requirement requirements-docs.txt
+python -m mkdocs build --strict
+```
 
 ## Local CI
 

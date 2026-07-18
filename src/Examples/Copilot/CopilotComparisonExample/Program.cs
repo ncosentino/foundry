@@ -2,9 +2,9 @@
 // Copilot Comparison Example
 //
 // Demonstrates the SAME research query executed through TWO approaches, both
-// using Needlr's Syringe DI container and agent framework:
+// using Needlr's Syringe DI container with Foundry's agent framework:
 //
-//   Approach 1: Needlr Copilot — CopilotChatClient as IChatClient, web_search
+//   Approach 1: Foundry Copilot — CopilotChatClient as IChatClient, web_search
 //               exposed as an AIFunction tool, iterative agent loop runs the
 //               query. Your code gets structured WebSearchResult with citations.
 //
@@ -22,6 +22,8 @@
 
 using System.Text.Json;
 
+using GitHub.Copilot;
+
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 using NexusLabs.Foundry.Copilot;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -40,12 +43,12 @@ Console.WriteLine($"Query: \"{query}\"");
 Console.WriteLine(new string('═', 70));
 
 // ════════════════════════════════════════════════════════════════════════
-// APPROACH 1: Needlr Copilot + Syringe + Iterative Agent Loop
+// APPROACH 1: Foundry Copilot + Needlr Syringe + Iterative Agent Loop
 // ════════════════════════════════════════════════════════════════════════
 
 Console.WriteLine();
 Console.WriteLine("╔══════════════════════════════════════════════════════════════════╗");
-Console.WriteLine("║  APPROACH 1: Needlr Syringe + CopilotChatClient + web_search   ║");
+Console.WriteLine("║  APPROACH 1: Foundry + Needlr + CopilotChatClient            ║");
 Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
 Console.WriteLine();
 
@@ -72,7 +75,7 @@ var loopOptions = new IterativeLoopOptions
     Tools = copilotTools,
     MaxIterations = 1,
     ToolResultMode = ToolResultMode.OneRoundTrip,
-    LoopName = "needlr-copilot-research",
+    LoopName = "foundry-copilot-research",
     OnToolCall = (_, toolCall) =>
     {
         Console.WriteLine($"  🔧 Tool: {toolCall.FunctionName}");
@@ -130,17 +133,17 @@ Console.WriteLine();
 
 try
 {
-    await using var sdkClient = new GitHub.Copilot.SDK.CopilotClient();
+    await using var sdkClient = new CopilotClient();
     await using var session = await sdkClient.CreateSessionAsync(
-        new GitHub.Copilot.SDK.SessionConfig
+        new SessionConfig
         {
             Model = "claude-sonnet-4.5",
-            OnPermissionRequest = GitHub.Copilot.SDK.PermissionHandler.ApproveAll,
+            OnPermissionRequest = PermissionHandler.ApproveAll,
         });
 
-    using var _ = session.On(e =>
+    using var _ = session.On<SessionEvent>(e =>
     {
-        if (e is GitHub.Copilot.SDK.ToolExecutionStartEvent start)
+        if (e is ToolExecutionStartEvent start)
         {
             var argsJson = start.Data.Arguments is { } args
                 ? JsonSerializer.Serialize(args, new JsonSerializerOptions { WriteIndented = false })
@@ -148,7 +151,7 @@ try
             Console.WriteLine($"  🔧 Tool: {start.Data.ToolName}");
             Console.WriteLine($"     Args: {argsJson}");
         }
-        else if (e is GitHub.Copilot.SDK.ToolExecutionCompleteEvent complete)
+        else if (e is ToolExecutionCompleteEvent complete)
         {
             var resultJson = "(none)";
             try
@@ -173,7 +176,7 @@ try
     });
 
     var reply = await session.SendAndWaitAsync(
-        new GitHub.Copilot.SDK.MessageOptions
+        new MessageOptions
         {
             Prompt = query + " Use the web to find current information. Include source URLs.",
         });
@@ -200,7 +203,7 @@ Console.WriteLine();
 Console.WriteLine("Both approaches used the same Copilot subscription, same query,");
 Console.WriteLine("same model. The key differences:");
 Console.WriteLine();
-Console.WriteLine("Needlr Copilot (Approach 1):");
+Console.WriteLine("Foundry Copilot (Approach 1):");
 Console.WriteLine("  ✅ Syringe DI → IIterativeAgentLoop → CopilotChatClient");
 Console.WriteLine("  ✅ web_search exposed as AIFunction tool");
 Console.WriteLine("  ✅ Structured WebSearchResult with Citations, URLs, offsets");

@@ -6,7 +6,7 @@ A class decorated with `[AgentGroupChatMember]` also declares `[WorkflowRunTermi
 
 ## Rule Description
 
-`[WorkflowRunTerminationCondition]` is a Layer 2 (post-response) termination mechanism — it fires inside Needlr's event loop after a complete agent response has been emitted. For group chats, a Layer 1 mechanism is available: `[AgentTerminationCondition]` wires conditions into the group chat manager, which fires before the next agent is called. Layer 1 termination is strictly preferable for group chats because:
+`[WorkflowRunTerminationCondition]` is a Layer 2 (post-response) termination mechanism — it fires inside Foundry's event loop after a complete agent response has been emitted. For group chats, a Layer 1 mechanism is available: `[AgentTerminationCondition]` wires conditions into the group chat manager, which fires before the next agent is called. Layer 1 termination is strictly preferable for group chats because:
 
 - It stops the workflow before another round-trip to the model occurs
 - It provides cleaner separation between "this response completes the workflow" and "this response starts the next turn"

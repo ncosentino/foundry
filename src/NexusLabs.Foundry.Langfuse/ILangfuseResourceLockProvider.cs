@@ -7,7 +7,7 @@ namespace NexusLabs.Foundry.Langfuse;
 /// Score-config and custom-model creation do not provide a provider-side idempotency key. Hosted
 /// applications that initialize those resources from multiple processes should register a
 /// distributed implementation before calling
-/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{LangfuseOptions}?)"/>.
+/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{LangfuseOptions})"/>.
 /// Standalone applications can assign an implementation to
 /// <see cref="LangfuseOptions.ResourceLockProvider"/>.
 /// </remarks>

@@ -6,7 +6,7 @@ An `[AgentGraphEdge]` references a target type that is not decorated with `[Foun
 
 ## Rule Description
 
-Types used as targets in `[AgentGraphEdge]` must be decorated with `[FoundryAgent]` so Needlr can register and resolve them at runtime. Without the agent declaration, the target type will not be discovered by the source generator and the graph will fail to resolve the agent at runtime.
+Types used as targets in `[AgentGraphEdge]` must be decorated with `[FoundryAgent]` so Foundry can register and resolve them at runtime. Without the agent declaration, the target type will not be discovered by the source generator and the graph will fail to resolve the agent at runtime.
 
 ## How to Fix
 

@@ -1,5 +1,5 @@
 ---
-description: Run multi-step agentic workloads with O(n) token cost using Needlr's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation.
+description: Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation.
 ---
 
 # Iterative Agent Loop
@@ -52,7 +52,7 @@ Each iteration's input token count is bounded by the workspace size, not the con
 ```csharp
 using Microsoft.Extensions.AI;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
-using NexusLabs.Needlr.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 // 1. Create a workspace (files = agent memory)
 var workspace = new InMemoryWorkspace();

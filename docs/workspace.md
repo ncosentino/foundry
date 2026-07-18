@@ -1,6 +1,6 @@
 # Workspace
 
-`IWorkspace` is Needlr's file-storage abstraction for AI agent tools. It models a logical, rooted key/value store of files — agents read and write paths through this interface without caring whether the backing store is in-memory, on disk, or in cloud blob storage.
+`IWorkspace` is Foundry's file-storage abstraction for AI agent tools. It models a logical, rooted key/value store of files — agents read and write paths through this interface without caring whether the backing store is in-memory, on disk, or in cloud blob storage.
 
 ## When to use it
 
@@ -17,7 +17,7 @@ Use `IWorkspace` whenever an agent tool needs to read or write files as part of 
 
 `IWorkspace` is a logical key/value store. The same logical file can be addressed by many spelling variants — `kb/foo.md`, `./kb/foo.md`, `kb//foo.md`, `kb/./foo.md`, `/kb/foo.md`, `kb/foo.md/`, `kb\foo.md`, etc. Without canonicalization, each variant becomes a distinct dictionary key and downstream readers see "missing file" gaps.
 
-Every `IWorkspace` implementation **MUST** canonicalize incoming paths before keying or comparing, and **MUST** use the canonical path comparer for path equality. Needlr ships [`WorkspacePath`](#workspacepath-helpers) as the single source of truth for both.
+Every `IWorkspace` implementation **MUST** canonicalize incoming paths before keying or comparing, and **MUST** use the canonical path comparer for path equality. Foundry ships [`WorkspacePath`](#workspacepath-helpers) as the single source of truth for both.
 
 ### Canonical form
 

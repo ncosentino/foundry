@@ -4,7 +4,7 @@ description: Paved-path testing for [AgentFunction]-decorated tools. Use ToolInv
 
 # Testing Tool Integrations
 
-When you write a Needlr tool — a method decorated with `[AgentFunction]`, typically grouped under `[AgentFunctionGroup("name")]` — the source generator emits an `AIFunction` wrapper that translates `AIFunctionArguments` JSON into typed C# parameters and invokes your method. **That wrapper is what production agents go through, not your method directly.**
+When you write a Foundry tool — a method decorated with `[AgentFunction]`, typically grouped under `[AgentFunctionGroup("name")]` — the source generator emits an `AIFunction` wrapper that translates `AIFunctionArguments` JSON into typed C# parameters and invokes your method. **That wrapper is what production agents go through, not your method directly.**
 
 A test that calls `tool.DoIt(...)` directly never exercises the generated wrapper. Bugs in argument extraction (null handling, JSON kind coercion, DTO property mapping) won't surface until a real LLM sends a payload your test never simulated.
 
@@ -64,7 +64,7 @@ public sealed class GrepToolTests
 
 The runner:
 
-1. Built a fresh `IServiceProvider` with `GrepTool` registered as a singleton plus the Needlr accessors (`IAgentExecutionContextAccessor`, `IAgentDiagnosticsAccessor`, `IAgentDiagnosticsWriter`).
+1. Built a fresh `IServiceProvider` with `GrepTool` registered as a singleton plus the Foundry accessors (`IAgentExecutionContextAccessor`, `IAgentDiagnosticsAccessor`, `IAgentDiagnosticsWriter`).
 2. Created an in-memory workspace, ran your seed action, and attached it to the execution context.
 3. Resolved the source-generated `AIFunction` for `GrepTool.GrepFiles` via the `[ModuleInitializer]`-registered `IAIFunctionProvider`.
 4. Built `AIFunctionArguments`, established a `BeginScope` for the duration of the call, invoked, and captured the result.
@@ -97,7 +97,7 @@ var sp = new ServiceCollection()
 var runner = new ToolInvocationRunner(sp);
 ```
 
-`AddAgentFrameworkAccessors()` is the new public extension that registers the small set of Needlr accessor singletons without dragging in the rest of the Agent Framework wiring.
+`AddAgentFrameworkAccessors()` is the new public extension that registers the small set of Foundry accessor singletons without dragging in the rest of the Agent Framework wiring.
 
 ### Immutability and lifetime
 
@@ -153,7 +153,7 @@ var args = new AIFunctionArguments
 await fn.InvokeAsync(args, TestContext.Current.CancellationToken);
 ```
 
-This is the path Needlr uses internally to test wrapper behavior — see `NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests/AIFunctionWrapperEndToEndTests.cs`.
+This is the path Foundry uses internally to test wrapper behavior — see `NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests/AIFunctionWrapperEndToEndTests.cs`.
 
 ### Per-test source-gen scoping
 
@@ -173,7 +173,7 @@ var fn = runner.GetFunction<GrepTool>(nameof(GrepTool.GrepFiles));
 
 ## Reflection fallback (advanced, not AOT)
 
-If you're testing a tool in a project that does **not** have the Needlr Agent Framework source generator wired up, the default `GetFunction` throws with a clear error message pointing you at the fix. If you actually want to exercise the reflection-based discovery path on purpose, use the explicitly-named, AOT-incompatible variant:
+If you're testing a tool in a project that does **not** have the Foundry Agent Framework source generator wired up, the default `GetFunction` throws with a clear error message pointing you at the fix. If you actually want to exercise the reflection-based discovery path on purpose, use the explicitly-named, AOT-incompatible variant:
 
 ```csharp
 [RequiresUnreferencedCode("...")]   // applies because we crossed into the reflection branch
@@ -215,7 +215,7 @@ var result = await runner.RunAsync(myScenario);
 
 A reusable, fluent `ScriptedChatClient` that handles multi-turn dialogues (turn 1: tool call, turn 2: text response) and call recording is a planned follow-up for the Testing package — see [ADR-0002](adr/adr-0002-build-scriptedchatclient-locally.md).
 
-Until then, agent-loop tests roll their own `IChatClient` fakes. The cleanest existing example in the Needlr codebase is `RecordingChatClient` in `NexusLabs.Foundry.Evaluation.Tests` — it's a callback-based client with `CallCount`/`StreamingCallCount` recording that you can copy-paste into your own test project as a stop-gap.
+Until then, agent-loop tests roll their own `IChatClient` fakes. `RecordingChatClient` in `NexusLabs.Foundry.Evaluation.Tests` is a callback-based example with `CallCount` and `StreamingCallCount` recording.
 
 ---
 
@@ -224,4 +224,4 @@ Until then, agent-loop tests roll their own `IChatClient` fakes. The cleanest ex
 - **Calling `tool.DoIt(...)` directly in tests.** This bypasses the source-generated wrapper entirely. Bugs in argument extraction won't surface until production.
 - **Hand-rolling `new ServiceCollection()` and registering only `IAgentExecutionContextAccessor` manually.** The implementation type is `internal` — use `AddAgentFrameworkAccessors()` instead.
 - **Sharing a mutable `ToolInvocationRunner` across tests with shared state in `WithExecutionContext`.** The runner is immutable by design — every `With*` returns a new instance. If you find yourself reaching for a `Reset()` method, you're holding it wrong.
-- **Asserting `IsGeneratedProviderAvailable == false` to verify the source generator didn't run.** The Needlr Agent Framework's own `[ModuleInitializer]` always registers a (possibly empty) provider when the assembly loads — so `IsGeneratedProviderAvailable` is `true` in any consumer process. Use `runner.GetFunction<TTool>(name)` instead and check whether *your specific tool* is resolvable.
+- **Asserting `IsGeneratedProviderAvailable == false` to verify the source generator didn't run.** Foundry's Agent Framework `[ModuleInitializer]` always registers a (possibly empty) provider when the assembly loads — so `IsGeneratedProviderAvailable` is `true` in any consumer process. Use `runner.GetFunction<TTool>(name)` instead and check whether *your specific tool* is resolvable.

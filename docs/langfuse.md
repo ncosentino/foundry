@@ -1,10 +1,10 @@
 # Langfuse
 
-Send Needlr agent telemetry and `Microsoft.Extensions.AI.Evaluation` scores to
+Send Foundry agent telemetry and `Microsoft.Extensions.AI.Evaluation` scores to
 [Langfuse](https://langfuse.com) so agent runs and evals show up on the Langfuse
 dashboard — with a single call.
 
-Needlr already emits OpenTelemetry traces and metrics using the GenAI semantic
+Foundry already emits OpenTelemetry traces and metrics using the GenAI semantic
 conventions (`gen_ai.*`), which Langfuse understands natively. The
 `NexusLabs.Foundry.Langfuse` package adds the missing piece: an OTLP
 exporter pointed at Langfuse, per-scenario trace grouping, and a bridge that turns
@@ -119,7 +119,7 @@ Two runnable examples live under `src/Examples/AgentFramework/`:
 
 ## What appears in Langfuse
 
-| Needlr telemetry | Langfuse |
+| Foundry telemetry | Langfuse |
 |---|---|
 | `agent.chat` / `agent.chat.stream` spans | Generations with model + token usage |
 | `agent.tool {name}` spans | Tool-call observations |
@@ -184,7 +184,7 @@ await scenario.RecordEvaluationAsync(
 ```
 
 Langfuse uses the request-body `id` together with the score name and its server-assigned UTC date.
-There is no `Idempotency-Key` header. Needlr automatically retries score requests only when `Id`
+There is no `Idempotency-Key` header. Foundry automatically retries score requests only when `Id`
 is present, always resending the complete unchanged payload. A retry that crosses a Langfuse UTC
 date boundary can still create another score, so callers should treat a stable id as bounded to
 one publication window rather than as a permanent global upsert key.
@@ -250,7 +250,7 @@ depend on implicit inference:
 
 - `langfuse.observation.type` = `generation` on `agent.chat` / `agent.chat.stream`
   spans and `span` on `agent.tool` spans.
-- `langfuse.observation.usage_details` (JSON) projected from Needlr's `gen_ai.usage.*`
+- `langfuse.observation.usage_details` (JSON) projected from Foundry's `gen_ai.usage.*`
   tags, so `input`, `output`, `cache_read_input_tokens`, and `reasoning_tokens` land
   reliably. When a span *also* carries MEAI's `gen_ai.usage.*` attributes, the explicit
   `langfuse.observation.usage_details` **cleanly replaces** them — Langfuse does not sum
@@ -260,7 +260,7 @@ depend on implicit inference:
   so `costDetails` stays empty until you add a custom model definition.)
 
 !!! note "Trace context is propagated through an allowlist"
-    Needlr propagates the scenario name, tags, metadata, version, session id, and user id to
+    Foundry propagates the scenario name, tags, metadata, version, session id, and user id to
     in-process child spans so Langfuse can filter and aggregate observations reliably. Scenario
     context is not stored in W3C baggage, and arbitrary inherited OpenTelemetry baggage is **not**
     copied into exported span attributes. This prevents unrelated, sensitive, or high-cardinality
@@ -378,8 +378,7 @@ For lower-level reads, `ILangfuseDatasetClient` also exposes validated `ListData
 `ILangfuseExperimentRun`. One scenario trace is created when a statistical trial enters its scope.
 Every operational retry and the item evaluator reactivate that same trace, while the hosted
 dataset-run-item link is attempted at most once. The same run instance retains authoritative
-dataset-run identity and is reused by the result sink in
-[#53](https://github.com/ncosentino/needlr/issues/53).
+dataset-run identity and is reused by the result sink.
 
 When a task or item evaluator needs direct scenario APIs, resolve the exact feature:
 
@@ -691,7 +690,7 @@ no description or page 1 of 50), or the full set of required arguments plus an e
 no token-only, description-only, or custom-page-without-a-token overloads.
 
 Langfuse does not enforce score-config name uniqueness and does not accept a caller-supplied config
-id. Needlr therefore acquires `LangfuseOptions.ResourceLockProvider`, re-lists every page inside
+id. Foundry therefore acquires `LangfuseOptions.ResourceLockProvider`, re-lists every page inside
 the lock, and compares the complete schema before creating. The default
 `LangfuseInProcessResourceLockProvider` prevents duplicates within one process. Applications with
 multiple workers or hosts must provide a distributed `ILangfuseResourceLockProvider` (for example,
@@ -755,7 +754,7 @@ await langfuse.Models.EnsureModelPriceAsync(new LangfuseModelPrice
 ```
 
 Langfuse model creation also lacks a reliable caller idempotency key and duplicate-name failures
-can surface as different HTTP statuses. Needlr uses the same resource-lock contract, compares the
+can surface as different HTTP statuses. Foundry uses the same resource-lock contract, compares the
 complete existing definition, and reconciles ambiguous transport/5xx failures by re-listing before
 retrying. Use a distributed lock provider for multi-process initialization. Register prices
 **before** the generations are ingested so Langfuse computes cost at ingestion time.
@@ -764,7 +763,7 @@ retrying. Use a distributed lock provider for multi-process initialization. Regi
 
 Link the generations in a scenario to a versioned prompt managed in Langfuse, so you can
 analyze scores **by prompt version** (prompt-regression tracking). Call `SetPrompt` before
-running the agent — Needlr stamps `langfuse.observation.prompt.name` / `version` on the
+running the agent — Foundry stamps `langfuse.observation.prompt.name` / `version` on the
 chat-completion (generation) spans; tool spans are unaffected:
 
 ```csharp
@@ -833,10 +832,10 @@ thrown.
 
 ## Composing with MEAI OpenTelemetry
 
-Needlr's diagnostics middleware and MEAI's `OpenTelemetryChatClient` /
+Foundry's diagnostics middleware and MEAI's `OpenTelemetryChatClient` /
 `UseOpenTelemetry()` can both create spans for the same chat call. To get the
 richest `gen_ai` spans without duplicates, enable MEAI's OpenTelemetry and set
-Needlr's chat-completion activity mode to enrich the parent span:
+Foundry's chat-completion activity mode to enrich the parent span:
 
 ```csharp
 .UsingAgentFramework(af => af
@@ -844,7 +843,7 @@ Needlr's chat-completion activity mode to enrich the parent span:
     .UsingDiagnostics())
 ```
 
-See [GenAI Token Metrics](gen-ai-token-metrics.md) for how Needlr and MEAI share
+See [GenAI Token Metrics](gen-ai-token-metrics.md) for how Foundry and MEAI share
 the `gen_ai.client.token.usage` histogram.
 
 ## Configuration
@@ -858,10 +857,10 @@ the `gen_ai.client.token.usage` histogram.
 | `Host` | _(unset)_ | Base URL (e.g. `http://localhost:3000`). One of `Host` or `Region` is **required**. |
 | `Region` | _(unset)_ | Langfuse Cloud region: `Eu`, `Us`, `Jp`, `Hipaa`. Setting it is an explicit opt-in to cloud export. |
 | `Enabled` | `true` | Set `false` to force a no-op even with credentials. |
-| `ServiceName` | `needlr-agent` | OpenTelemetry `service.name` resource attribute. |
+| `ServiceName` | `foundry-agent` | OpenTelemetry `service.name` resource attribute. |
 | `Environment` | _(unset)_ | Deployment environment (e.g. `ci`, `production`), emitted as `langfuse.environment` on every span so Langfuse partitions the data. |
 | `Release` | _(unset)_ | Release identifier (e.g. a git SHA), emitted as `langfuse.release` for cross-release comparison. |
-| `IncludeMetrics` | `false` | Export Needlr's `gen_ai` metrics. Off by default — see note below. |
+| `IncludeMetrics` | `false` | Export Foundry's `gen_ai` metrics. Off by default — see note below. |
 | `ScoreFailureMode` | `NonFatal` | `NonFatal` records a failed score upload in publication health and invokes the callback without throwing; `Strict` throws. |
 | `ScoreErrorCallback` | _(none)_ | Invoked with a `LangfuseScoreError` when a score upload fails under `NonFatal`. |
 | `NormalizeScoreNames` | `false` | When `true`, score names are normalised to `snake_case` for consistent dashboard filtering. |
@@ -869,7 +868,7 @@ the `gen_ai.client.token.usage` histogram.
 | `SamplingRatio` | `1.0` | Head-based trace sampling ratio (eval workloads want `1.0`). |
 | `ShutdownTimeout` | `5 seconds` | Total trace + metric timeout budget used by standalone-session disposal. |
 | `ResourceLockProvider` | in-process | Coordinates score-config and model creation. Use a distributed implementation when multiple processes initialize one project. |
-| `AgentActivitySourceName` | `NexusLabs.Foundry.MicrosoftAgentFramework` | Needlr agent span source to export. |
+| `AgentActivitySourceName` | `NexusLabs.Foundry.MicrosoftAgentFramework` | Foundry agent span source to export. |
 | `GenAiMeterName` | `Experimental.Microsoft.Extensions.AI` | Meter owning `gen_ai.client.token.usage`. |
 | `AdditionalActivitySources` / `AdditionalMeters` | _(empty)_ | Extra sources/meters to export. |
 
@@ -884,7 +883,7 @@ the `gen_ai.client.token.usage` histogram.
 | `InitialRetryDelay` | `200 ms` | Initial exponential delay. |
 | `MaxRetryDelay` | `5 seconds` | Maximum exponential or `Retry-After` delay. |
 
-Needlr honors `Retry-After` for HTTP 429 and retries transport failures plus HTTP
+Foundry honors `Retry-After` for HTTP 429 and retries transport failures plus HTTP
 500/502/503/504 only when the operation is provider-idempotent. Delays and request timeout are
 caller-cancelable, and caller cancellation propagates with the caller's token.
 
@@ -916,7 +915,7 @@ feed `PublicationHealth`; the counters do not claim durable backend ingestion.
     on the generation spans (see below), so you lose nothing. Enable it only when pointing
     the exporter at a backend that ingests OTLP metrics.
 
-If you customised Needlr's telemetry source names via `ConfigureMetrics(...)`, set
+If you customised Foundry's telemetry source names via `ConfigureMetrics(...)`, set
 the matching `AgentActivitySourceName` / `AgentMeterName` / `GenAiMeterName` so those
 streams are exported.
 
@@ -926,14 +925,14 @@ For applications that already call `AddOpenTelemetry()`, register Langfuse expor
 the host pipeline instead of starting a standalone session:
 
 ```csharp
-builder.Services.AddNeedlrLangfuse(options =>
+builder.Services.AddFoundryLangfuse(options =>
 {
     options.ServiceName = "my-agent-service";
 });
 ```
 
 The built-in hosted REST clients use a named `IHttpClientFactory` pipeline. Configure it before
-`AddNeedlrLangfuse` when the application needs a proxy, custom certificates, handlers, or connection
+`AddFoundryLangfuse` when the application needs a proxy, custom certificates, handlers, or connection
 policy:
 
 ```csharp
@@ -941,7 +940,7 @@ builder.Services
     .AddHttpClient(LangfuseServiceCollectionExtensions.HttpClientName)
     .ConfigurePrimaryHttpMessageHandler(() => CreateLangfuseHandler());
 
-builder.Services.AddNeedlrLangfuse();
+builder.Services.AddFoundryLangfuse();
 ```
 
 This wires the OTLP exporter into the host's tracer and meter providers so they
@@ -1015,11 +1014,11 @@ no-ops, so host code does not branch on credentials.
 
 !!! note "DI override ownership"
     A custom unkeyed `ILangfuseClient` must be registered as a singleton **instance** before
-    `AddNeedlrLangfuse`; its specialized clients are then exposed as externally owned instance
+    `AddFoundryLangfuse`; its specialized clients are then exposed as externally owned instance
     aliases. Alternatively, individual specialized interfaces may be overridden as singletons
-    and are composed into Needlr's facade. Scoped and transient overrides are rejected because a
+    and are composed into Foundry's facade. Scoped and transient overrides are rejected because a
     singleton facade cannot safely capture them. Keyed registrations are independent and remain
-    untouched. The built-in `PublicationHealth` snapshot covers Needlr-owned exporters and REST
+    untouched. The built-in `PublicationHealth` snapshot covers Foundry-owned exporters and REST
     clients; a custom specialized client owns the observability of its own publication path.
 
 Run the no-server ownership check:

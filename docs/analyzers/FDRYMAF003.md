@@ -6,7 +6,7 @@ A class bearing `[AgentHandoffsTo]` is not itself decorated with `[FoundryAgent]
 
 ## Rule Description
 
-A handoff relationship is only meaningful when the source of the handoff is itself a Needlr agent. If the class owning `[AgentHandoffsTo]` is not registered with `[FoundryAgent]`, it will not appear in the generated agent registry, and the handoff declaration has no effect at runtime.
+A handoff relationship is only meaningful when the source of the handoff is itself a Foundry agent. If the class owning `[AgentHandoffsTo]` is not registered with `[FoundryAgent]`, it will not appear in the generated agent registry, and the handoff declaration has no effect at runtime.
 
 ## How to Fix
 

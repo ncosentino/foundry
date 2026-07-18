@@ -6,7 +6,7 @@ A class has `[AgentGraphEntry]` but is not itself decorated with `[FoundryAgent]
 
 ## Rule Description
 
-The class that carries `[AgentGraphEntry]` is the starting node of the graph workflow and must be registered with Needlr via `[FoundryAgent]`. Without the agent declaration, the entry point class will not be discovered by the source generator and the graph workflow cannot be created.
+The class that carries `[AgentGraphEntry]` is the starting node of the graph workflow and must be registered with Foundry via `[FoundryAgent]`. Without the agent declaration, the entry point class will not be discovered by the source generator and the graph workflow cannot be created.
 
 ## How to Fix
 

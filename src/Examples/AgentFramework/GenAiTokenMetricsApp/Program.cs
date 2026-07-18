@@ -1,7 +1,7 @@
 // =============================================================================
 // GenAI Token Metrics Example
 // =============================================================================
-// Demonstrates Needlr's IGenAiTokenMetrics co-emitting cache_read and reasoning
+// Demonstrates Foundry's IGenAiTokenMetrics co-emitting cache_read and reasoning
 // measurements on the OpenTelemetry gen_ai.client.token.usage histogram —
 // alongside MEAI's OpenTelemetryChatClient which emits input and output on the
 // same histogram. End result: a single histogram series carrying all four
@@ -23,8 +23,11 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
+
+using GenAiTokenMetricsApp;
 
 Console.WriteLine("=== GenAI Token Metrics Example ===");
 Console.WriteLine();
@@ -32,7 +35,7 @@ Console.WriteLine();
 const string SharedMeterName = "Example.GenAI";
 
 Console.WriteLine($"[SETUP] Shared meter: '{SharedMeterName}'");
-Console.WriteLine("[SETUP] MEAI's OpenTelemetryChatClient and Needlr's GenAiTokenMetrics");
+Console.WriteLine("[SETUP] MEAI's OpenTelemetryChatClient and Foundry's GenAiTokenMetrics");
 Console.WriteLine("[SETUP] both write to the same meter so the resulting histogram series");
 Console.WriteLine("[SETUP] carries all four gen_ai.token.type values per LLM call.");
 Console.WriteLine();
@@ -156,7 +159,7 @@ var outputCount = byType.SingleOrDefault(g => g.Key == "output")?.Count() ?? 0;
 if (inputCount == 1 && outputCount == 1)
 {
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("  [ok] input and output each appear exactly once (no Needlr/MEAI double-counting)");
+    Console.WriteLine("  [ok] input and output each appear exactly once (no Foundry/MEAI double-counting)");
     Console.ResetColor();
 }
 else
@@ -171,7 +174,7 @@ Console.WriteLine();
 if (passed)
 {
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("All checks passed. Needlr + MEAI cohabit on the gen_ai.client.token.usage histogram.");
+    Console.WriteLine("All checks passed. Foundry + MEAI cohabit on the gen_ai.client.token.usage histogram.");
     Console.ResetColor();
     return 0;
 }
@@ -180,50 +183,3 @@ Console.ForegroundColor = ConsoleColor.Red;
 Console.WriteLine("CHECKS FAILED — see above.");
 Console.ResetColor();
 return 1;
-
-internal sealed record HistogramSample(int Value, Dictionary<string, object?> Tags);
-
-internal sealed class MockChatClientWithFullUsage : IChatClient
-{
-    private readonly ChatClientMetadata _metadata = new(
-        providerName: "mock-provider",
-        providerUri: new Uri("https://api.example.com:443"),
-        defaultModelId: "mock-model");
-
-    public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var response = new ChatResponse(
-            [new ChatMessage(ChatRole.Assistant, "Mock summary response.")])
-        {
-            ModelId = "mock-model",
-            Usage = new UsageDetails
-            {
-                InputTokenCount = 5000,
-                OutputTokenCount = 250,
-                TotalTokenCount = 5250,
-                CachedInputTokenCount = 3000,
-                ReasoningTokenCount = 150,
-            },
-        };
-        return Task.FromResult(response);
-    }
-
-    public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException("Streaming not used in this example.");
-
-    public void Dispose() { }
-
-    public object? GetService(Type serviceType, object? serviceKey = null)
-    {
-        ArgumentNullException.ThrowIfNull(serviceType);
-        if (serviceType == typeof(ChatClientMetadata))
-            return _metadata;
-        return null;
-    }
-}

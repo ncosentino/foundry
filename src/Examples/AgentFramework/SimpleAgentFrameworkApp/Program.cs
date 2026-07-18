@@ -16,6 +16,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Budget;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Middleware;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 using NexusLabs.Needlr.Injection.SourceGen;

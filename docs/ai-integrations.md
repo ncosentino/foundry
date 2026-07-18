@@ -1,10 +1,10 @@
 ---
-description: Integrate AI agent frameworks with Needlr in .NET -- automatic function discovery, DI wiring, and lifecycle management for Semantic Kernel and Microsoft Agent Framework.
+description: Build AI agent systems with Foundry in .NET using generated discovery, workflow orchestration, and optional Needlr integration.
 ---
 
 # AI Integrations
 
-Needlr provides first-class integrations for AI agent frameworks, taking care of function discovery, DI wiring, and factory lifecycle so that you focus on writing agent logic rather than plumbing.
+Foundry provides first-class integrations for AI agent frameworks, taking care of function discovery, workflow wiring, and factory lifecycle so that you focus on writing agent logic rather than plumbing.
 
 Three integrations are supported:
 
@@ -12,21 +12,21 @@ Three integrations are supported:
 - **Semantic Kernel** (`NexusLabs.Foundry.Needlr.SemanticKernel`) — for `[KernelFunction]`-annotated plugin classes wired into a `Kernel` via `Microsoft.SemanticKernel`
 - **GitHub Copilot** (`NexusLabs.Foundry.Copilot`) — an `IChatClient` backed by the GitHub Copilot API, plus a web search `AIFunction`. See the [Copilot integration page](copilot.md) for details.
 
-Both integrations follow the same two-layer architecture that is explained below.
+The Microsoft Agent Framework and Semantic Kernel integrations follow the same two-layer architecture explained below.
 
 ---
 
 ## The Two-Layer Model
 
-Understanding what Needlr owns vs. what the upstream framework owns is the key to understanding which parts are AOT-compatible and which are not.
+Understanding what Foundry owns versus what the upstream framework owns is the key to understanding which parts are AOT-compatible and which are not.
 
-### Layer 1 — Discovery (Needlr)
+### Layer 1 — Discovery (Foundry)
 
 **What**: Identifying which types in an assembly contain annotated methods.
 
 For MAF this means finding classes with `[AgentFunction]` methods. For SK this means finding classes with `[KernelFunction]` methods. This is purely a type-collection step — no instances are created, no schemas are built.
 
-Needlr provides two paths for this layer:
+Foundry provides two paths for this layer:
 
 | Path | How | AOT safe? |
 |---|---|---|
@@ -41,17 +41,17 @@ The reflection overloads (`AddAgentFunctionsFromAssemblies()`, `AddSemanticKerne
 
 For MAF this is `AIFunctionFactory.Create(MethodInfo, target)` from `Microsoft.Extensions.AI`. For SK this is `KernelPlugin.CreateFromObject(instance)` from `Microsoft.SemanticKernel`. Both use reflection internally to build JSON schemas from method signatures.
 
-**This layer is not controlled by Needlr.** Both MAF and SK use reflection here regardless of which Needlr discovery path you choose. Neither `Microsoft.Extensions.AI` nor `Microsoft.SemanticKernel` are fully AOT-safe for tool/plugin schema generation at this time.
+**This layer is not controlled by Foundry.** Both MAF and SK use reflection here regardless of which Foundry discovery path you choose. Neither `Microsoft.Extensions.AI` nor `Microsoft.SemanticKernel` are fully AOT-safe for tool/plugin schema generation at this time.
 
 ### What this means in practice
 
-If you use the source gen path, you eliminate reflection from Layer 1 (Needlr's responsibility). You do not eliminate reflection from Layer 2 (the upstream framework's responsibility). The practical effect is:
+If you use the source generation path, you eliminate reflection from Layer 1 (Foundry's responsibility). You do not eliminate reflection from Layer 2 (the upstream framework's responsibility). The practical effect is:
 
-- No `[RequiresUnreferencedCode]` warnings from Needlr's own code
+- No `[RequiresUnreferencedCode]` warnings from Foundry's own discovery code
 - Faster startup (no runtime assembly scanning)
 - The upstream framework may still emit its own reflection-related warnings
 
-If full AOT support is important to you, watch the upstream framework's own AOT roadmap — Needlr will update its Layer 1 surface to match as those paths become available.
+If full AOT support is important to you, watch the upstream framework's own AOT roadmap — Foundry will update its Layer 1 surface as those paths become available.
 
 ---
 
@@ -241,7 +241,7 @@ Pass this to `AddSemanticKernelPluginsFromGenerated`:
 
 ## Multi-Agent Orchestration
 
-Needlr extends the IoC principle from the tool layer upward to the agent and topology layers. Agents are declared as plain C# classes with attributes; Needlr discovers them, builds the workflow graph, and emits source-generated factory methods. Adding a new agent role means adding a class, not editing orchestration wiring.
+Foundry extends the IoC principle from the tool layer upward to the agent and topology layers. Agents are declared as plain C# classes with attributes; Foundry discovers them, builds the workflow graph, and emits source-generated factory methods. Adding a new agent role means adding a class, not editing orchestration wiring.
 
 ### Packages
 
@@ -282,7 +282,7 @@ public class TravelWriterAgent { }
 public class TriageAgent { }
 ```
 
-Needle discovers all `[FoundryAgent]` classes in the compilation and emits a static agent registry at build time.
+Foundry discovers all `[FoundryAgent]` classes in the compilation and emits a static agent registry at build time.
 
 ### Function groups
 
@@ -313,7 +313,7 @@ Scoping rules:
 
 ### Topology types
 
-Needlr supports four topology patterns. Each is declared with attributes; the source generator emits a corresponding typed factory method on `IWorkflowFactory`.
+Foundry supports four topology patterns. Each is declared with attributes; the source generator emits a corresponding typed factory method on `IWorkflowFactory`.
 
 #### Handoff
 
@@ -396,7 +396,7 @@ Runtime: Use `RunGraphAsync` for execution — it auto-selects the optimal execu
 ```csharp
 // RunGraphAsync handles both WaitAll and WaitAny graphs automatically:
 // - WaitAll-only graphs → MAF's native BSP executor
-// - Graphs with WaitAny nodes → Needlr's own executor using Task.WhenAny
+// - Graphs with WaitAny nodes → Foundry's executor using Task.WhenAny
 var results = await factory.RunGraphAsync("research", question);
 ```
 
@@ -481,7 +481,7 @@ public class ReviewerAgent { }
 ```
 
 **Layer 2 — workflow-level (fires after a response is fully emitted):**
-`[WorkflowRunTerminationCondition]` on any agent. The condition is evaluated in Needlr's `RunAsync` event loop after the agent's complete response is received. Works for all topology types; for group chat, prefer Layer 1 ([FDRYMAF011](analyzers/FDRYMAF011.md)).
+`[WorkflowRunTerminationCondition]` on any agent. The condition is evaluated in Foundry's `RunAsync` event loop after the agent's complete response is received. Works for all topology types; for group chat, prefer Layer 1 ([FDRYMAF011](analyzers/FDRYMAF011.md)).
 
 ```csharp
 [AgentSequenceMember("content-pipeline", Order = 1)]
@@ -500,26 +500,26 @@ Built-in conditions: `KeywordTerminationCondition`, `RegexTerminationCondition`.
 
 ### Topology graph diagnostic
 
-Set `NeedlrDiagnostics=true` in the agent class library's project properties to emit a Mermaid diagram of the agent topology at build time:
+Set `FoundryDiagnostics=true` in the agent class library's project properties to emit a Mermaid diagram of the agent topology at build time:
 
 ```xml
 <PropertyGroup>
-  <NeedlrDiagnostics>true</NeedlrDiagnostics>
+  <FoundryDiagnostics>true</FoundryDiagnostics>
 </PropertyGroup>
 ```
 
-The diagram is written to `bin/{Configuration}/{TFM}/NeedlrDiagnostics/AgentTopologyGraph.md` and visualises all declared handoff, group chat, and sequential topologies in the compilation.
+The diagram is written to `bin/{Configuration}/{TFM}/FoundryDiagnostics/AgentTopologyGraph.md` and visualises all declared handoff, group chat, and sequential topologies in the compilation.
 
 ---
 
 ## Philosophy: IoC for AI Components
 
-Needlr applies the same inversion-of-control principle to AI components that a DI container applies to services. Rather than manually creating tool objects and passing them to an agent, you declare what a method is (`[AgentFunction]` / `[KernelFunction]`) and Needlr assembles the tools automatically. The component declares itself; the framework wires it.
+Foundry applies the same inversion-of-control principle to AI components that a DI container applies to services. Rather than manually creating tool objects and passing them to an agent, you declare what a method is (`[AgentFunction]` / `[KernelFunction]`) and Foundry assembles the tools automatically. The component declares itself; the framework wires it.
 
 This principle now applies at three layers:
 
 - **Tool layer**: methods are discovered, schema-built, and injected into the right agent or kernel instance
 - **Agent layer**: agent definitions (instructions, tool groups, name) are declared as types, auto-discovered, and instantiated from the registry — the same pattern `[AgentFunction]` establishes, one level up
-- **Topology layer**: relationships between agents are declared as attributes; Needlr builds the orchestration graph and emits typed factory methods automatically
+- **Topology layer**: relationships between agents are declared as attributes; Foundry builds the orchestration graph and emits typed factory methods automatically
 
-Adding a new agent role to a system means adding a class. Adding it to a topology means adding an attribute. The orchestration wiring is owned by the framework, not the application — the same promise Needlr delivers for services.
+Adding a new agent role to a system means adding a class. Adding it to a topology means adding an attribute. The orchestration wiring is owned by the framework, not the application — the same promise dependency-injection containers deliver for services.

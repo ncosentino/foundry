@@ -8,7 +8,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers;
 public static class MafDiagnosticDescriptors
 {
     private const string Category = "NexusLabs.Foundry.MicrosoftAgentFramework";
-    private const string HelpLinkBase = "https://github.com/nexus-labs/needlr/blob/main/docs/analyzers/";
+    private const string HelpLinkBase = "https://github.com/ncosentino/foundry/blob/main/docs/analyzers/";
 
     /// <summary>
     /// FDRYMAF001: <c>[AgentHandoffsTo(typeof(X))]</c> target type X is not decorated with <c>[FoundryAgent]</c>.

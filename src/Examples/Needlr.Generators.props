@@ -1,0 +1,10 @@
+<Project>
+  <ItemGroup>
+    <PackageReference Include="NexusLabs.Needlr" />
+    <PackageReference Include="NexusLabs.Needlr.Build" PrivateAssets="all" />
+    <PackageReference Include="NexusLabs.Needlr.Generators"
+                      PrivateAssets="all"
+                      GeneratePathProperty="true" />
+    <PackageReference Include="NexusLabs.Needlr.Generators.Attributes" />
+  </ItemGroup>
+</Project>

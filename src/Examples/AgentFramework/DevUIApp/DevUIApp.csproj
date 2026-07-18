@@ -3,6 +3,7 @@
   <PropertyGroup>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>obj\Generated</CompilerGeneratedFilesOutputPath>
+    <FoundryDiagnostics>true</FoundryDiagnostics>
     <NeedlrDiagnostics>true</NeedlrDiagnostics>
     <NoWarn>$(NoWarn);MAAIW001</NoWarn>
     <!-- DevUI and Hosting packages are preview — suppress NuGet audit for this example -->
@@ -14,10 +15,8 @@
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.DevUI\NexusLabs.Foundry.MicrosoftAgentFramework.DevUI.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.Copilot\NexusLabs.Foundry.Copilot.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Injection.Reflection\NexusLabs.Needlr.Injection.Reflection.csproj" />
+    <PackageReference Include="NexusLabs.Needlr.Injection.Reflection" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Generators\NexusLabs.Needlr.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Generators.Attributes\NexusLabs.Needlr.Generators.Attributes.csproj" />
     <PackageReference Include="Microsoft.Agents.AI.Hosting" />
     <PackageReference Include="Microsoft.Agents.AI.Hosting.OpenAI" />
     <PackageReference Include="Microsoft.Agents.AI.DevUI" />
@@ -25,12 +24,17 @@
 
   <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.props" />
   <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.targets" />
-  <Import Project="..\..\..\NexusLabs.Needlr.Generators\build\NexusLabs.Needlr.Generators.targets" />
 
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\Needlr.Generators.props" />
 
 </Project>

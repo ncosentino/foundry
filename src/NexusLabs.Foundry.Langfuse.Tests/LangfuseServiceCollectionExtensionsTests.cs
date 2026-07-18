@@ -7,6 +7,27 @@ namespace NexusLabs.Foundry.Langfuse.Tests;
 public sealed class LangfuseServiceCollectionExtensionsTests
 {
     [Fact]
+    public void AddFoundryLangfuse_WithoutConfigurationCallback_RegistersFacade()
+    {
+        var services = new ServiceCollection();
+
+        services.AddFoundryLangfuse();
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetService<ILangfuseClient>());
+    }
+
+    [Fact]
+    public void AddFoundryLangfuse_NullConfigurationCallback_Throws()
+    {
+        var services = new ServiceCollection();
+
+        Assert.Throws<ArgumentNullException>(() =>
+            services.AddFoundryLangfuse(null!));
+    }
+
+    [Fact]
     public void AddFoundryLangfuse_Configured_RegistersEnabledScoreClientAndTracerProvider()
     {
         var services = new ServiceCollection();

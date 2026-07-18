@@ -1,5 +1,5 @@
 ---
-description: Use GitHub Copilot as an IChatClient provider in Needlr -- zero-cost local AI for agent development with web search tool support.
+description: Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support.
 ---
 
 # GitHub Copilot Integration
@@ -40,9 +40,9 @@ var response = await client.GetResponseAsync(
 Console.WriteLine(response.Messages.Last());
 ```
 
-### With Needlr Agent Framework
+### With Foundry and Needlr
 
-Plug the Copilot client into any Needlr agent setup via the existing `UsingChatClient()` hook — no special extensions needed:
+Plug the Copilot client into Foundry's Needlr integration via the existing `UsingChatClient()` hook:
 
 ```csharp
 var services = new Syringe()
@@ -207,11 +207,11 @@ catch (CopilotRateLimitException ex)
 
 ---
 
-## Needlr Copilot vs GitHub Copilot SDK
+## Foundry Copilot vs GitHub Copilot SDK
 
-The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHub.Copilot.SDK` on NuGet) provides a superset of what `NexusLabs.Foundry.Copilot` offers. Before choosing Needlr Copilot, understand the overlap:
+The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHub.Copilot.SDK` on NuGet) provides a superset of what `NexusLabs.Foundry.Copilot` offers. Before choosing Foundry Copilot, understand the overlap:
 
-| Capability | Needlr Copilot | GitHub Copilot SDK |
+| Capability | Foundry Copilot | GitHub Copilot SDK |
 |---|---|---|
 | `IChatClient` for Copilot models | ✅ `CopilotChatClient` (direct HTTP) | ✅ `CopilotClient` → `AsAIAgent()` (via CLI process) |
 | Token discovery (apps.json, env vars) | ✅ Manual implementation | ✅ Built-in, plus OAuth App and BYOK |
@@ -221,16 +221,16 @@ The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHu
 | Full agent loop (file edits, code search, bash) | ❌ | ✅ Full CLI tool set |
 | Multi-agent orchestration (MAF) | ❌ | ✅ `AsAIAgent()` with sequential/concurrent orchestrators |
 | Session persistence & resume | ❌ | ✅ Built-in |
-| Custom agents & skills | Via Needlr Agent Framework | ✅ Built-in |
+| Custom agents & skills | Via Foundry Agent Framework | ✅ Built-in |
 | Binary size | ~0 (HTTP-only, no CLI bundled) | ~100MB+ (bundles the Copilot CLI) |
 | Rate limits | Same (20 MCP req/min, premium request quota) | Same |
 
-### When to use Needlr Copilot
+### When to use Foundry Copilot
 
 - **You need structured web search results.** `WebSearchResult.Citations` gives your application code programmatic access to source URLs, titles, and character offsets — the SDK's agent loop consumes this data internally and only returns the agent's final text.
 - **You need a tiered provider fallback.** `CopilotRateLimitException` and `CopilotAuthException` integrate with `ITieredProviderSelector` so rate-limited or auth-rejected queries fall through to alternative search providers (DuckDuckGo, Bing API) without parsing English error prose. The SDK doesn't expose typed exceptions for provider-level routing.
 - **You want a lightweight `IChatClient`.** `CopilotChatClient` is a pure HTTP client (~0 binary overhead). The SDK bundles the entire Copilot CLI binary.
-- **You're already using Needlr's agent framework.** `CopilotToolSet` produces `AIFunction` instances that plug directly into `IterativeLoopOptions.AdditionalTools`.
+- **You're already using Foundry's agent framework.** `CopilotToolSet` produces `AIFunction` instances that plug directly into `IterativeLoopOptions.AdditionalTools`.
 
 ### When to use the GitHub Copilot SDK instead
 
@@ -241,7 +241,7 @@ The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHu
 - **You don't need programmatic access to search citations.** If the agent just needs to produce grounded research text, the SDK's built-in `web_search` tool gives the model the same citation data — you just can't inspect it from your code.
 
 !!! info "Both use the same backend"
-    Whether you call `web_search` via Needlr Copilot or the SDK, you're hitting the same GitHub Copilot MCP endpoint. The LLM decides whether to perform a Bing search — see the next section.
+    Whether you call `web_search` via Foundry Copilot or the SDK, you're hitting the same GitHub Copilot MCP endpoint. The LLM decides whether to perform a Bing search — see the next section.
 
 ---
 
@@ -273,4 +273,3 @@ The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHu
 If your use case requires **guaranteed web search with verifiable sources**, use a real search API (Bing Web Search API, DuckDuckGo, Google Custom Search) as your primary provider. Copilot's `web_search` is better suited as a synthesis/fallback provider that sometimes includes grounded citations.
 
 `WebSearchResult.Citations.Count == 0` does not mean the search failed — it means the LLM answered from training data. The `Text` may still be accurate; it's just not verifiable from a source URL.
-

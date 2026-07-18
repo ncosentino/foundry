@@ -26,28 +26,52 @@ public static class LangfuseServiceCollectionExtensions
     /// Gets the named <see cref="HttpClient"/> used by the built-in hosted Langfuse REST clients.
     /// </summary>
     /// <remarks>
-    /// Register or configure this named client before calling <see cref="AddFoundryLangfuse"/> to
+    /// Register or configure this named client before calling
+    /// <see cref="AddFoundryLangfuse(IServiceCollection)"/> to
     /// customize handlers, proxies, certificates, connection pooling, or other transport behavior.
     /// </remarks>
     public const string HttpClientName = "NexusLabs.Foundry.Langfuse";
 
     /// <summary>
-    /// Adds Langfuse OTLP/HTTP export to the host's OpenTelemetry pipeline and registers the
+    /// Adds Langfuse OTLP/HTTP export using environment-derived options and registers the
     /// non-owning <see cref="ILangfuseClient"/> facade plus all specialized client interfaces.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
-    /// <param name="configure">
-    /// Optional callback to customise the <see cref="LangfuseOptions"/>. When <see langword="null"/>,
-    /// options are read from the environment via <see cref="LangfuseOptions.FromEnvironment"/>.
-    /// </param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="services"/> is <see langword="null"/>.</exception>
     public static IServiceCollection AddFoundryLangfuse(
-        this IServiceCollection services,
-        Action<LangfuseOptions>? configure = null)
+        this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
+        return AddFoundryLangfuseCore(services, configure: null);
+    }
 
+    /// <summary>
+    /// Adds Langfuse OTLP/HTTP export to the host's OpenTelemetry pipeline, applies the supplied
+    /// configuration, and registers the non-owning <see cref="ILangfuseClient"/> facade plus all
+    /// specialized client interfaces.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configure">
+    /// Callback that customizes options initialized from
+    /// <see cref="LangfuseOptions.FromEnvironment"/>.
+    /// </param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="services"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <see langword="null"/>.</exception>
+    public static IServiceCollection AddFoundryLangfuse(
+        this IServiceCollection services,
+        Action<LangfuseOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+        return AddFoundryLangfuseCore(services, configure);
+    }
+
+    private static IServiceCollection AddFoundryLangfuseCore(
+        IServiceCollection services,
+        Action<LangfuseOptions>? configure)
+    {
         var options = LangfuseOptions.FromEnvironment();
         configure?.Invoke(options);
 

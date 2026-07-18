@@ -83,9 +83,9 @@ public sealed record LangfuseOptions
     /// <summary>
     /// Gets or sets the OpenTelemetry <c>service.name</c> resource attribute applied to exported
     /// telemetry. Surfaces in Langfuse as the originating service. Defaults to
-    /// <c>"needlr-agent"</c>.
+    /// <c>"foundry-agent"</c>.
     /// </summary>
-    public string ServiceName { get; set; } = "needlr-agent";
+    public string ServiceName { get; set; } = "foundry-agent";
 
     /// <summary>
     /// Gets or sets the optional OpenTelemetry <c>service.version</c> resource attribute.

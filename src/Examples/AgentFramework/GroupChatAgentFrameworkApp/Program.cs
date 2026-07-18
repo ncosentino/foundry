@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -51,7 +52,7 @@ var workflowFactory = serviceProvider.GetRequiredService<IWorkflowFactory>();
 // Adding a new reviewer agent requires only adding the attribute — this line never changes.
 var workflow = workflowFactory.CreateCodeReviewGroupChatWorkflow(maxIterations: 2);
 
-Console.WriteLine("=== Needlr + MAF: Round-Robin Group Chat Code Review ===");
+Console.WriteLine("=== Foundry + Needlr: Round-Robin Group Chat Code Review ===");
 Console.WriteLine("  Group membership declared via [AgentGroupChatMember] on each reviewer.");
 Console.WriteLine("  ReviewOrchestratorAgent carries [AgentTerminationCondition] — the workflow");
 Console.WriteLine("  stops as soon as it outputs CONSENSUS: APPROVED or CONSENSUS: CHANGES REQUIRED.");

@@ -37,7 +37,7 @@ public class GeographyFunctions
 
 ## When to Suppress
 
-Only suppress if the function group class is defined in a separate assembly that Needlr's analyzer cannot see in this compilation unit.
+Only suppress if the function group class is defined in a separate assembly that Foundry's analyzer cannot see in this compilation unit.
 
 ```csharp
 #pragma warning disable FDRYMAF005

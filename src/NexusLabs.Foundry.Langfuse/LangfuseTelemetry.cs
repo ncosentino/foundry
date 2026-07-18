@@ -19,7 +19,7 @@ namespace NexusLabs.Foundry.Langfuse;
 /// </para>
 /// <para>
 /// For ASP.NET Core / generic-host applications that already call <c>AddOpenTelemetry()</c>, use
-/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{LangfuseOptions}?)"/>
+/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{LangfuseOptions})"/>
 /// instead so the providers participate in the host lifecycle.
 /// </para>
 /// <example>

@@ -4,9 +4,9 @@
     <!-- Write generated files to disk so the [ModuleInitializer] bootstrap is visible -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>obj\Generated</CompilerGeneratedFilesOutputPath>
-    <NeedlrDiagnostics>true</NeedlrDiagnostics>
+    <FoundryDiagnostics>true</FoundryDiagnostics>
     <!-- Output diagnostics to the exe entry point's bin folder, not this library's bin -->
-    <NeedlrDiagnosticsPath>$(MSBuildProjectDirectory)\..\DagRoutingApp\bin\$(Configuration)\$(TargetFramework)\NeedlrDiagnostics</NeedlrDiagnosticsPath>
+    <FoundryDiagnosticsPath>$(MSBuildProjectDirectory)\..\DagRoutingApp\bin\$(Configuration)\$(TargetFramework)\FoundryDiagnostics</FoundryDiagnosticsPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,5 +23,7 @@
 
   <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.props" />
   <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.targets" />
+
+  <Import Project="..\..\Needlr.Generators.props" />
 
 </Project>

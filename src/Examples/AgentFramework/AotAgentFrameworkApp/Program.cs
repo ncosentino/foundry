@@ -3,8 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.SourceGen;
+
+using AotAgentFrameworkApp;
 
 // Generated extension methods from SimpleAgentFrameworkApp.Agents: IAgentFactory.CreateTriageAgent(),
 // IWorkflowFactory.CreateTriageHandoffWorkflow(), IWorkflowFactory.CreateContentPipelineSequentialWorkflow(),
@@ -60,28 +63,3 @@ var publisherRan = earlyResponses.Keys.Any(k =>
 Console.WriteLine(publisherRan
     ? "  (publisher ran — STATUS: EDIT_COMPLETE keyword not found)"
     : "  Terminated early — PublisherSeqAgent skipped.");
-
-/// <summary>
-/// Minimal IChatClient for NativeAOT demonstration purposes.
-/// Not AOT-blocked — proves that Needlr MAF wiring is IL3050-free.
-/// </summary>
-sealed class NoOpChatClient : IChatClient
-{
-    public ChatClientMetadata Metadata { get; } = new("no-op");
-
-    public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> chatMessages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-        => Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "No-op response")));
-
-    public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> chatMessages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-        => throw new NotSupportedException("Streaming not supported in no-op client.");
-
-    public void Dispose() { }
-
-    public object? GetService(Type serviceType, object? key = null) => null;
-}
