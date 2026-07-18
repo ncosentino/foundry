@@ -7,7 +7,7 @@ shared concurrency, run evaluators, and deterministic or statistical quality pol
 [Experiment Runner](experiment-runner.md).
 
 MEAI Reporting response caching, `ScenarioRun` persistence, and official report generation remain
-opt-in through the dedicated `NexusLabs.Needlr.AgentFramework.Evaluation.Reporting` package; see the
+opt-in through the dedicated `NexusLabs.Foundry.Evaluation.Reporting` package; see the
 [MEAI Reporting adapter](experiment-runner.md#meai-reporting-adapter).
 
 ## Overview
@@ -55,7 +55,7 @@ EvaluationResult result = await evaluator.EvaluateAsync(
 Tool-call trajectories are extracted from `IterationRecord.ToolCalls` via an extension method:
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Iterative;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 
 IEnumerable<AIContent> trajectory = iterationRecord.ToToolCallTrajectory();
 ```
@@ -176,7 +176,7 @@ Tokens are an LLM-reported abstraction; character counts are a direct measure of
 - **`ToolCallDiagnostics.ArgumentsCharCount`** — length of the `System.Text.Json` serialization of the captured `Arguments` dictionary.
 - **`ToolCallDiagnostics.ResultCharCount`** — length of the `System.Text.Json` serialization of the captured `Result`.
 
-Populated automatically by `DiagnosticsChatClientMiddleware` and `DiagnosticsFunctionCallingMiddleware` on both success and failure paths. `DiagnosticsCharCounter` (in `NexusLabs.Needlr.AgentFramework.Diagnostics`) exposes the same helpers for callers who want to compute counts outside the middlewares. All helpers are null-safe and exception-tolerant — a counter failure never destabilizes the live path; it just yields `0`.
+Populated automatically by `DiagnosticsChatClientMiddleware` and `DiagnosticsFunctionCallingMiddleware` on both success and failure paths. `DiagnosticsCharCounter` (in `NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics`) exposes the same helpers for callers who want to compute counts outside the middlewares. All helpers are null-safe and exception-tolerant — a counter failure never destabilizes the live path; it just yields `0`.
 
 ### OpenTelemetry interop
 
@@ -204,7 +204,7 @@ Metrics (counters, histograms) and in-process diagnostics recording are unaffect
 `IAgentRunDiagnostics` exposes `ChatCompletions` and `ToolCalls` as separate collections, each with its own `Sequence`. When you need to see what actually happened in execution order, call the `GetOrderedTimeline()` extension method:
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 
 var timeline = diag.GetOrderedTimeline();
 foreach (var entry in timeline)
@@ -226,7 +226,7 @@ Partial responses are still captured when a streaming run fails mid-stream — `
 
 ## Native agent-run evaluators
 
-`NexusLabs.Needlr.AgentFramework.Evaluation` ships three deterministic evaluators that operate directly on `IAgentRunDiagnostics`. They are pure computations over captured diagnostics — no LLM judge is invoked, so they run offline and are cheap enough to assert in unit tests.
+`NexusLabs.Foundry.Evaluation` ships three deterministic evaluators that operate directly on `IAgentRunDiagnostics`. They are pure computations over captured diagnostics — no LLM judge is invoked, so they run offline and are cheap enough to assert in unit tests.
 
 All three evaluators consume the same bridge type:
 
@@ -380,7 +380,7 @@ an inconclusive decision rather than hiding malformed evidence.
 For snapshot tests, review artifacts, and CI log attachments, render an entire agent run as deterministic Markdown with `ToTranscriptMarkdown()`:
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 
 string transcript = diag.ToTranscriptMarkdown();
 File.WriteAllText("run.md", transcript);
@@ -401,7 +401,7 @@ The renderer is a read-side projection over `IAgentRunDiagnostics` — calling i
 Evaluation suites and CI harnesses benefit from deterministic, repeatable chat responses: the first run against a real model captures the response; subsequent runs replay it without hitting the network. `EvaluationCaptureChatClient` is a transparent `IChatClient` decorator that implements this pattern.
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Evaluation;
+using NexusLabs.Foundry.Evaluation;
 
 IChatClient cached = realChatClient.WithEvaluationCapture("./cache/evaluation");
 

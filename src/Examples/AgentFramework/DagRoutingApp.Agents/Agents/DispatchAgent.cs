@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -8,7 +8,7 @@ namespace DagRoutingApp.Agents;
 /// <see cref="ResultAgent"/> downstream uses <see cref="GraphJoinMode.WaitAny"/>
 /// to proceed as soon as the first worker finishes.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Dispatches work to competing parallel workers.",
     Instructions = """
         You are a dispatch coordinator. Forward the request to parallel

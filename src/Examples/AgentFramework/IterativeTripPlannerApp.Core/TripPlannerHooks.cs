@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework.Iterative;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 
 namespace IterativeTripPlannerApp.Core;
 

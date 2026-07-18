@@ -29,12 +29,12 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Progress;
-using NexusLabs.Needlr.AgentFramework.Workflows;
-using NexusLabs.Needlr.AgentFramework.Workflows.Diagnostics;
-using NexusLabs.Needlr.Copilot;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
+using NexusLabs.Foundry.Copilot;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.SourceGen;
 
@@ -62,7 +62,7 @@ var copilotOptions = new CopilotChatClientOptions
 IChatClient chatClient = new CopilotChatClient(copilotOptions);
 
 // The [ModuleInitializer] emitted by the source generator in GraphWorkflowApp.Agents
-// fires on assembly load and registers all [NeedlrAiAgent] types and their
+// fires on assembly load and registers all [FoundryAgent] types and their
 // [AgentGraphEntry]/[AgentGraphEdge] topology with AgentFrameworkGeneratedBootstrap.
 var serviceProvider = new Syringe()
     .UsingSourceGen()

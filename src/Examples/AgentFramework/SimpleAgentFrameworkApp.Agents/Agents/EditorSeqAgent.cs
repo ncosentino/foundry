@@ -1,5 +1,5 @@
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
 
 namespace SimpleAgentFrameworkApp.Agents;
 
@@ -7,7 +7,7 @@ namespace SimpleAgentFrameworkApp.Agents;
 /// Second stage in the "content-pipeline" sequential workflow.
 /// Refines and improves the draft produced by <see cref="WriterSeqAgent"/>.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Edits and improves a content draft for clarity and style.",
     Instructions = """
         You are a content editor. Improve the draft you receive: fix grammar, tighten sentences,

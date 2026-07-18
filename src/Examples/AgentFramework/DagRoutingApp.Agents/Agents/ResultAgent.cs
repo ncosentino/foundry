@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -7,7 +7,7 @@ namespace DagRoutingApp.Agents;
 /// so it executes as soon as the first upstream worker completes, demonstrating
 /// race-condition semantics.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Collects the first available result from competing workers.",
     Instructions = """
         You received the result from the fastest worker. Summarize what

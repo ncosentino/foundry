@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework.Providers;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Providers;
 
 namespace SimpleAgentFrameworkApp.Agents;
 

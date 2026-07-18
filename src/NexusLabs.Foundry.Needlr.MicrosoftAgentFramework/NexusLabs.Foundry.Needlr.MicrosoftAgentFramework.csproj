@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Needlr source-generation and dependency-injection integration for Foundry's Microsoft Agent Framework runtime.</PackageDescription>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NexusLabs.Needlr" />
+    <PackageReference Include="NexusLabs.Needlr.Injection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -22,7 +22,7 @@ namespace DagRoutingApp.Agents;
 /// pick one route via structured selection.
 /// </para>
 /// </remarks>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Classifies requests into exactly one category.",
     Instructions = """
         You are a request classifier. Determine whether the request is

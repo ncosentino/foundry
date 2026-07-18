@@ -1,5 +1,5 @@
 using NexusLabs.Needlr;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Experiments;
+using NexusLabs.Foundry.Evaluation.Experiments;
 
 namespace ExperimentRunnerApp;
 

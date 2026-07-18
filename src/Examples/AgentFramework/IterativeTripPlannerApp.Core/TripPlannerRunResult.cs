@@ -1,6 +1,6 @@
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Iterative;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 namespace IterativeTripPlannerApp.Core;
 

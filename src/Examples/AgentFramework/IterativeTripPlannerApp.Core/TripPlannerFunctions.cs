@@ -1,16 +1,16 @@
 using System.ComponentModel;
 using System.Text.Json;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Context;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 namespace IterativeTripPlannerApp.Core;
 
 /// <summary>
 /// DI-resolved tool functions for the iterative trip planner.
 /// Each method accesses the workspace via <see cref="IAgentExecutionContextAccessor"/>
-/// — the same pattern ExampleProduct and other real consumers use.
+/// — the same pattern production consumers use.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -20,7 +20,7 @@ namespace IterativeTripPlannerApp.Core;
 /// </para>
 /// <para>
 /// The <see cref="IAgentExecutionContextAccessor"/> is populated by
-/// <see cref="NexusLabs.Needlr.AgentFramework.Iterative.IIterativeAgentLoop"/>
+/// <see cref="NexusLabs.Foundry.MicrosoftAgentFramework.Iterative.IIterativeAgentLoop"/>
 /// automatically when it has access to the accessor via DI. Tools never
 /// need to know about <c>IterativeContext</c> or captured closures.
 /// </para>

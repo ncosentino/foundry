@@ -23,9 +23,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RfcPipelineApp.Core\RfcPipelineApp.Core.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Copilot\NexusLabs.Needlr.Copilot.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.Copilot\NexusLabs.Foundry.Copilot.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Needlr.Injection.Reflection\NexusLabs.Needlr.Injection.Reflection.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.AgentFramework.Workflows\NexusLabs.Needlr.AgentFramework.Workflows.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
   </ItemGroup>
 
 </Project>

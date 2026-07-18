@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.SemanticKernel;
+using NexusLabs.Foundry.Needlr.SemanticKernel;
 /// <summary>
 /// This isn't necessary, but it illustrates that you can manually
 /// register services with the kernel builder if you want to if

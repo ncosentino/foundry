@@ -1,0 +1,32 @@
+using NexusLabs.Foundry.Evaluation.Experiments;
+
+namespace NexusLabs.Foundry.Evaluation.Tests.Experiments;
+
+/// <summary>
+/// Provides callback-driven item-scope lifecycle behavior for runner boundary tests.
+/// </summary>
+internal sealed class CallbackExperimentItemScope<TCase, TOutput>(
+    IReadOnlyDictionary<Type, object> features,
+    Func<IDisposable?> activate,
+    Func<
+        ExperimentItemResult<TCase, TOutput>,
+        CancellationToken,
+        ValueTask<ExperimentItemPublicationOperationResult>> completeAsync,
+    Func<CancellationToken, ValueTask> abortAsync,
+    Func<ValueTask> disposeAsync) :
+    IExperimentItemScope<TCase, TOutput>
+{
+    public IReadOnlyDictionary<Type, object> Features => features;
+
+    public IDisposable? Activate() => activate();
+
+    public ValueTask<ExperimentItemPublicationOperationResult> CompleteAsync(
+        ExperimentItemResult<TCase, TOutput> result,
+        CancellationToken cancellationToken) =>
+        completeAsync(result, cancellationToken);
+
+    public ValueTask AbortAsync(CancellationToken cancellationToken) =>
+        abortAsync(cancellationToken);
+
+    public ValueTask DisposeAsync() => disposeAsync();
+}

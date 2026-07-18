@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -6,7 +6,7 @@ namespace DagRoutingApp.Agents;
 /// Handles urgent requests in the "priority-routing" graph. Only executes
 /// when the <see cref="TriageAgent.IsUrgent"/> condition matches first.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Handles urgent, high-priority requests.",
     Instructions = """
         You are an urgent request handler. The request has been flagged as

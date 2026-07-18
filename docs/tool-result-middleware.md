@@ -4,7 +4,7 @@ description: How Needlr's ToolResultFunctionMiddleware translates tool exception
 
 # Tool Result Middleware
 
-`ToolResultFunctionMiddleware` (in `NexusLabs.Needlr.AgentFramework.Workflows`) is the safety net for tool invocations. When enabled via `.UsingToolResultMiddleware()` on an `AgentFrameworkSyringe`, it catches unhandled exceptions inside `[AgentFunction]` tool bodies and translates them into structured `{ error: … }` results the LLM can understand and recover from — instead of letting the exception bubble all the way to `FunctionInvokingChatClient` and fail the entire agent turn.
+`ToolResultFunctionMiddleware` (in `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows`) is the safety net for tool invocations. When enabled via `.UsingToolResultMiddleware()` on an `AgentFrameworkBuilder`, it catches unhandled exceptions inside `[AgentFunction]` tool bodies and translates them into structured `{ error: … }` results the LLM can understand and recover from — instead of letting the exception bubble all the way to `FunctionInvokingChatClient` and fail the entire agent turn.
 
 This page explains exactly what the middleware does, the trade-offs of enabling it, and when you should turn it on.
 
@@ -66,7 +66,7 @@ syringe
 
 The middleware is opt-in for two reasons:
 
-1. The middleware lives in `NexusLabs.Needlr.AgentFramework.Workflows`, which is a separate package from the core `NexusLabs.Needlr.AgentFramework`. Some applications use only the core (e.g. running tools through their own custom orchestration) and don't need the workflow extensions.
+1. The middleware lives in `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows`, which is a separate package from the core `NexusLabs.Foundry.MicrosoftAgentFramework`. Some applications use only the core (e.g. running tools through their own custom orchestration) and don't need the workflow extensions.
 2. Some test harnesses prefer exception bubbling so failures surface as immediate test failures rather than `{ error: … }` results that test code has to inspect.
 
 For everything else, opt in.
@@ -127,4 +127,4 @@ The middleware itself doesn't expose a hook for the default formatter — to use
 
 - [AI Integrations — Microsoft Agent Framework](ai-integrations.md#microsoft-agent-framework)
 - [Iterative Agent Loop](iterative-agent-loop.md)
-- [NDLRMAF030 — JSON-string parameter hint](analyzers/NDLRMAF030.md) — sibling reliability rule for tool argument shapes
+- [FDRYMAF030 — JSON-string parameter hint](analyzers/FDRYMAF030.md) — sibling reliability rule for tool argument shapes

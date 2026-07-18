@@ -46,14 +46,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 using OpenTelemetry.Trace;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Evaluation;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Experiments;
-using NexusLabs.Needlr.AgentFramework.Iterative;
-using NexusLabs.Needlr.AgentFramework.Langfuse;
-using NexusLabs.Needlr.AgentFramework.Workflows.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.Evaluation;
+using NexusLabs.Foundry.Evaluation.Experiments;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
+using NexusLabs.Foundry.Langfuse;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 

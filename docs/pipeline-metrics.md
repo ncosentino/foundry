@@ -46,7 +46,7 @@ When `ConfigurePipelineMetrics` is **not** called, the runner uses `NoOpPipeline
 
 ## The 7 instruments
 
-All instruments emit on the configured `Meter` (defaults to `"NexusLabs.Needlr.AgentFramework.Pipelines"`).
+All instruments emit on the configured `Meter` (defaults to `"NexusLabs.Foundry.MicrosoftAgentFramework.Pipelines"`).
 
 ### Pipeline-level (3)
 
@@ -117,7 +117,7 @@ Activities are created via `ActivitySource.StartActivity(...)`. When no `Activit
 
 ### `ConfigurePipelineMetrics`
 
-The fluent extension on `AgentFrameworkSyringe`:
+The fluent extension on `AgentFrameworkBuilder`:
 
 ```csharp
 .UsingAgentFramework(af => af
@@ -131,7 +131,7 @@ Subsequent calls mutate the same options instance via the record-with rebind —
 
 | Property | Type | Default | Purpose |
 |---|---|---|---|
-| `MeterName` | `string` | `"NexusLabs.Needlr.AgentFramework.Pipelines"` | The `Meter` name. Set to your dashboard's keyed name (e.g. `"MyApp.Pipelines"`) so your existing OTel views and Prometheus aggregations pick it up without configuration. |
+| `MeterName` | `string` | `"NexusLabs.Foundry.MicrosoftAgentFramework.Pipelines"` | The `Meter` name. Set to your dashboard's keyed name (e.g. `"MyApp.Pipelines"`) so your existing OTel views and Prometheus aggregations pick it up without configuration. |
 | `ActivitySourceName` | `string?` | `null` (falls back to `MeterName`) | The `ActivitySource` name for `pipeline.run` and `pipeline.stage` spans. Set independently if your tracing pipeline filters by source name. |
 
 Why a separate options class from `AgentFrameworkMetricsOptions`? Most consumers want pipeline metrics under a separate meter (e.g. `"MyApp.Pipelines"`) so OTel views and Prometheus aggregation can target each scope independently. Coupling them would force one meter for both scopes.

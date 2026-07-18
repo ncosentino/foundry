@@ -24,9 +24,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DagRoutingApp.Agents\DagRoutingApp.Agents.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.AgentFramework\NexusLabs.Needlr.AgentFramework.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.AgentFramework.Workflows\NexusLabs.Needlr.AgentFramework.Workflows.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Copilot\NexusLabs.Needlr.Copilot.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.Copilot\NexusLabs.Foundry.Copilot.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Needlr.Injection.SourceGen\NexusLabs.Needlr.Injection.SourceGen.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Needlr.Generators\NexusLabs.Needlr.Generators.csproj"
       OutputItemType="Analyzer"

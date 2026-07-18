@@ -1,0 +1,24 @@
+<Project>
+  <Target Name="PrepareNeedlrGenerator"
+          BeforeTargets="CoreCompile"
+          Condition="'$(PkgNexusLabs_Needlr_Generators)' != ''">
+    <PropertyGroup>
+      <_FoundryNeedlrAnalyzerDirectory>$(IntermediateOutputPath)foundry-needlr-analyzers\</_FoundryNeedlrAnalyzerDirectory>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_FoundryNeedlrAnalyzerDirectory)" />
+
+    <Copy SourceFiles="$(PkgNexusLabs_Needlr_Generators)\analyzers\dotnet\cs\NexusLabs.Needlr.Generators.dll"
+          DestinationFolder="$(_FoundryNeedlrAnalyzerDirectory)"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(PkgNexusLabs_Needlr_Generators)\lib\netstandard2.0\NexusLabs.Needlr.Generators.Attributes.dll"
+          DestinationFolder="$(_FoundryNeedlrAnalyzerDirectory)"
+          SkipUnchangedFiles="true" />
+
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)"
+                Condition="'%(Filename)' == 'NexusLabs.Needlr.Generators'" />
+      <Analyzer Include="$(_FoundryNeedlrAnalyzerDirectory)NexusLabs.Needlr.Generators.dll" />
+    </ItemGroup>
+  </Target>
+</Project>

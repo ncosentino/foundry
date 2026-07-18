@@ -2,7 +2,7 @@ namespace RfcPipelineApp.Core;
 
 /// <summary>
 /// Typed mutable state shared across all stages in an RFC pipeline run.
-/// Mirrors the pattern of ExampleProduct's ArticlePipelineRunAccessor but
+/// Mirrors the pattern of a production pipeline run accessor but
 /// without AsyncLocal — the runner passes it via StageExecutionContext.
 /// </summary>
 public sealed class RfcPipelineState

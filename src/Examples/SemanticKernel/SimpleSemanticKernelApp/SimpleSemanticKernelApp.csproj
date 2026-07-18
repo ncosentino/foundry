@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>exe</OutputType>
@@ -23,7 +23,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\NexusLabs.Needlr.Injection.Reflection\NexusLabs.Needlr.Injection.Reflection.csproj" />
-		<ProjectReference Include="..\..\..\NexusLabs.Needlr.SemanticKernel\NexusLabs.Needlr.SemanticKernel.csproj" />
+		<ProjectReference Include="..\..\..\NexusLabs.Foundry.Needlr.SemanticKernel\NexusLabs.Foundry.Needlr.SemanticKernel.csproj" />
 	</ItemGroup>
 
 </Project>

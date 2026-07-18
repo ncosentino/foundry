@@ -98,11 +98,11 @@ framework. Key integration points:
 
 | Project | MEAI Usage |
 |---------|------------|
-| `NexusLabs.Needlr.AgentFramework` | `IChatClient` is the core LLM abstraction — `AgentFactory` builds `IChatClient` pipelines with middleware for diagnostics, resilience, and function invocation |
-| `NexusLabs.Needlr.AgentFramework.Workflows` | `ToolResultFunctionMiddleware` customizes how tool results are serialized back to the model; `AgentResiliencePlugin` adds Polly-based retry middleware |
-| `NexusLabs.Needlr.AgentFramework.Evaluation` | Built on `Microsoft.Extensions.AI.Evaluation` — implements `IEvaluator` for agent-specific metrics |
-| `NexusLabs.Needlr.Copilot` | `CopilotChatClient` — an `IChatClient` implementation that targets the GitHub Copilot API |
-| `NexusLabs.Needlr.AgentFramework.Generators` | Source-generates `[AgentFunctionGroup]`-decorated static classes into `AIFunction` registrations |
+| `NexusLabs.Foundry.MicrosoftAgentFramework` | `IChatClient` is the core LLM abstraction — `AgentFactory` builds `IChatClient` pipelines with middleware for diagnostics, resilience, and function invocation |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` | `ToolResultFunctionMiddleware` customizes how tool results are serialized back to the model; `AgentResiliencePlugin` adds Polly-based retry middleware |
+| `NexusLabs.Foundry.Evaluation` | Built on `Microsoft.Extensions.AI.Evaluation` — implements `IEvaluator` for agent-specific metrics |
+| `NexusLabs.Foundry.Copilot` | `CopilotChatClient` — an `IChatClient` implementation that targets the GitHub Copilot API |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` | Source-generates `[AgentFunctionGroup]`-decorated static classes into `AIFunction` registrations |
 
 ### Key Patterns in This Codebase
 

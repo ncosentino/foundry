@@ -64,7 +64,7 @@ This separation lets callers distinguish "I passed a bad path" (a programming er
 ## `WorkspacePath` helpers
 
 ```csharp
-namespace NexusLabs.Needlr.AgentFramework.Workspace;
+namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 public static class WorkspacePath
 {

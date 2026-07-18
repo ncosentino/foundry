@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace SimpleAgentFrameworkApp.Agents;
 
@@ -6,7 +6,7 @@ namespace SimpleAgentFrameworkApp.Agents;
 /// Third stage in the "content-pipeline" sequential workflow.
 /// Formats the edited content for publication.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Formats content for publication, adding structure and polish.",
     Instructions = """
         You are a content publisher. Take the edited text you receive and format it for

@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -21,7 +21,7 @@ namespace DagRoutingApp.Agents;
 /// <see cref="GraphRoutingMode.LlmChoice"/> instead of condition predicates.
 /// </para>
 /// </remarks>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Triages incoming requests by urgency level.",
     Instructions = """
         You are a triage coordinator. Analyze the incoming request and

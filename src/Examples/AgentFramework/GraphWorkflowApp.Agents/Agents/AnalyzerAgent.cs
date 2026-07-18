@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace GraphWorkflowApp.Agents;
 
@@ -10,7 +10,7 @@ namespace GraphWorkflowApp.Agents;
 /// The database branch is optional — the graph succeeds even if it fails,
 /// demonstrating <see cref="AgentGraphEdgeAttribute.IsRequired"/>.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Analyzes research requests and delegates to specialists.",
     Instructions = """
         You are a research coordinator. When given a question:

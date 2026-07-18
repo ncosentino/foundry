@@ -1,8 +1,8 @@
 using System.ComponentModel;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Context;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 namespace SimpleAgentFrameworkApp.Agents;
 

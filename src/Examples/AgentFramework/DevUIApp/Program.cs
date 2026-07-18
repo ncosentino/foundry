@@ -1,7 +1,7 @@
 // DevUIApp — Demonstrates Needlr agents appearing in MAF DevUI
 //
 // Run this app and navigate to http://localhost:5250/devui to see the
-// [NeedlrAiAgent]-declared agents (DataAssistant, SummaryAgent) listed
+// [FoundryAgent]-declared agents (DataAssistant, SummaryAgent) listed
 // in the DevUI web interface and chat with them via Copilot.
 //
 // Requirements:
@@ -11,9 +11,9 @@
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Extensions.AI;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.DevUI;
-using NexusLabs.Needlr.Copilot;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.DevUI;
+using NexusLabs.Foundry.Copilot;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 

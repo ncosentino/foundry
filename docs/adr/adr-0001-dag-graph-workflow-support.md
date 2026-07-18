@@ -172,7 +172,7 @@ or suitability for a particular workload. Those remain operational concerns.
 
 - [`docs/ai-integrations.md`](../ai-integrations.md) documents the public graph attributes,
   execution modes, diagnostics, and runnable example that implement this decision.
-- [`IGraphWorkflowRunner` at the confirmation snapshot](https://github.com/ncosentino/needlr/blob/78b27a1c5eddd5b8fa3e0c07dce629159b39e436/src/NexusLabs.Needlr.AgentFramework/IGraphWorkflowRunner.cs)
+- [`IGraphWorkflowRunner` at the confirmation snapshot](https://github.com/ncosentino/needlr/blob/78b27a1c5eddd5b8fa3e0c07dce629159b39e436/src/NexusLabs.Foundry.MicrosoftAgentFramework/IGraphWorkflowRunner.cs)
   is the stable public execution boundary selected by this decision.
 - [Microsoft Agent Framework workflows](https://learn.microsoft.com/en-us/agent-framework/workflows/)
   describe the underlying framework capability that Needlr adapts rather than exposes as

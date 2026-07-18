@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Evaluation support for NexusLabs.Foundry.MicrosoftAgentFramework. Maps captured diagnostics to Microsoft.Extensions.AI.Evaluation inputs and provides provider-neutral experiment scheduling, retries, run evaluation, structured quality policies, final result sinks, publication outcomes, and schema-versioned JSON artifacts.</PackageDescription>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NexusLabs.Foundry.Evaluation.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+  </ItemGroup>
+
+</Project>

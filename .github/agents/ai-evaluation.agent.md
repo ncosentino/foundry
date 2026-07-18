@@ -154,9 +154,9 @@ agnostic, you should be aware of the existing evaluation infrastructure:
 
 | Project | Role |
 |---------|------|
-| `NexusLabs.Needlr.AgentFramework.Evaluation` | Deterministic evaluators for agent runs — implements `IEvaluator` from MEAI Evaluation |
-| `NexusLabs.Needlr.AgentFramework.Evaluation.Tests` | Test suite for the evaluators |
-| `NexusLabs.Needlr.AgentFramework.Diagnostics` | Diagnostics capture infrastructure — `IAgentRunDiagnostics`, `AgentRunDiagnosticsBuilder`, chat completion and tool call diagnostics |
+| `NexusLabs.Foundry.Evaluation` | Deterministic evaluators for agent runs — implements `IEvaluator` from MEAI Evaluation |
+| `NexusLabs.Foundry.Evaluation.Tests` | Test suite for the evaluators |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics` | Diagnostics capture infrastructure — `IAgentRunDiagnostics`, `AgentRunDiagnosticsBuilder`, chat completion and tool call diagnostics |
 | `src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation/` | Example evaluation harness for the trip planner agent |
 
 ### Existing Evaluators

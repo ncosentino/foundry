@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace SimpleAgentFrameworkApp.Agents;
 
@@ -9,7 +9,7 @@ namespace SimpleAgentFrameworkApp.Agents;
 /// a strongly-typed <c>CreateContentPipelineSequentialWorkflow()</c> extension on
 /// <see cref="IWorkflowFactory"/>.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Drafts raw content for a given topic.",
     Instructions = """
         You are a content writer. Given a topic, produce a short draft (2-3 sentences).

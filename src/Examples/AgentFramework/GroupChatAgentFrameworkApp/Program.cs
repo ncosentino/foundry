@@ -5,8 +5,8 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -32,7 +32,7 @@ IChatClient chatClient = new AzureOpenAIClient(
     .AsIChatClient();
 
 // The [ModuleInitializer] emitted by the source generator in GroupChatAgentFrameworkApp.Agents
-// fires on assembly load and registers all [NeedlrAiAgent] types and their [AgentGroupChatMember]
+// fires on assembly load and registers all [FoundryAgent] types and their [AgentGroupChatMember]
 // group memberships with AgentFrameworkGeneratedBootstrap. No explicit Add* calls needed.
 var serviceProvider = new Syringe()
     .UsingReflection()

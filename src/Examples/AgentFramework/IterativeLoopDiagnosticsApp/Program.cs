@@ -14,11 +14,11 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Iterative;
-using NexusLabs.Needlr.AgentFramework.Workflows.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 

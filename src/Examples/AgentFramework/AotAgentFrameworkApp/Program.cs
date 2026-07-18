@@ -1,8 +1,8 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.SourceGen;
 

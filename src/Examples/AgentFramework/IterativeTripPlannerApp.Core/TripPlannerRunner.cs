@@ -5,11 +5,11 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Context;
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Iterative;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -293,7 +293,7 @@ public sealed class TripPlannerRunner
     internal static void AutoPersistWebSearch(IWorkspace workspace, ToolCallResult toolCallResult)
     {
         var name = toolCallResult.FunctionName;
-        var resultStr = NexusLabs.Needlr.AgentFramework.ToolResultSerializer.Serialize(toolCallResult.Result);
+        var resultStr = NexusLabs.Foundry.MicrosoftAgentFramework.ToolResultSerializer.Serialize(toolCallResult.Result);
 
         if (name != "web_search" || resultStr.Length <= 0)
         {

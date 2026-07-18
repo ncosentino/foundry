@@ -8,9 +8,9 @@ Needlr provides first-class integrations for AI agent frameworks, taking care of
 
 Three integrations are supported:
 
-- **Microsoft Agent Framework** (`NexusLabs.Needlr.AgentFramework`) — for `[AgentFunction]`-annotated tools wired into `AIAgent` instances via `Microsoft.Extensions.AI`
-- **Semantic Kernel** (`NexusLabs.Needlr.SemanticKernel`) — for `[KernelFunction]`-annotated plugin classes wired into a `Kernel` via `Microsoft.SemanticKernel`
-- **GitHub Copilot** (`NexusLabs.Needlr.Copilot`) — an `IChatClient` backed by the GitHub Copilot API, plus a web search `AIFunction`. See the [Copilot integration page](copilot.md) for details.
+- **Microsoft Agent Framework** (`NexusLabs.Foundry.MicrosoftAgentFramework`) — for `[AgentFunction]`-annotated tools wired into `AIAgent` instances via `Microsoft.Extensions.AI`
+- **Semantic Kernel** (`NexusLabs.Foundry.Needlr.SemanticKernel`) — for `[KernelFunction]`-annotated plugin classes wired into a `Kernel` via `Microsoft.SemanticKernel`
+- **GitHub Copilot** (`NexusLabs.Foundry.Copilot`) — an `IChatClient` backed by the GitHub Copilot API, plus a web search `AIFunction`. See the [Copilot integration page](copilot.md) for details.
 
 Both integrations follow the same two-layer architecture that is explained below.
 
@@ -61,10 +61,10 @@ If full AOT support is important to you, watch the upstream framework's own AOT 
 
 ```xml
 <!-- Runtime -->
-<PackageReference Include="NexusLabs.Needlr.AgentFramework" />
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework" />
 
 <!-- Source generator (add as analyzer — no runtime dep) -->
-<PackageReference Include="NexusLabs.Needlr.AgentFramework.Generators"
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```
@@ -72,7 +72,7 @@ If full AOT support is important to you, watch the upstream framework's own AOT 
 ### Quick start
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -100,7 +100,7 @@ var agent = agentFactory.CreateAgent(opts =>
 
 ### Source gen path (recommended)
 
-When `NexusLabs.Needlr.AgentFramework.Generators` is referenced as an analyzer, it runs at compile time and emits a class in your assembly's namespace:
+When `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` is referenced as an analyzer, it runs at compile time and emits a class in your assembly's namespace:
 
 ```csharp
 // Generated: AgentFrameworkFunctionRegistry.g.cs
@@ -154,7 +154,7 @@ var generalAgent = agentFactory.CreateAgent();
 
 ### Recommended: surviving tool-call failures
 
-Tool bodies throw — sometimes from the user's logic (NRE, validation), sometimes from infrastructure (DB timeout, transient HTTP). By default the exception bubbles all the way to `FunctionInvokingChatClient` and fails the entire agent turn. Call `.UsingToolResultMiddleware()` on the `AgentFrameworkSyringe` to catch these exceptions and translate them into structured `{ error: … }` results the LLM can recover from:
+Tool bodies throw — sometimes from the user's logic (NRE, validation), sometimes from infrastructure (DB timeout, transient HTTP). By default the exception bubbles all the way to `FunctionInvokingChatClient` and fails the entire agent turn. Call `.UsingToolResultMiddleware()` on the `AgentFrameworkBuilder` to catch these exceptions and translate them into structured `{ error: … }` results the LLM can recover from:
 
 ```csharp
 serviceProvider.UsingAgentFramework()
@@ -174,10 +174,10 @@ See [Tool Result Middleware](tool-result-middleware.md) for the full behavior br
 
 ```xml
 <!-- Runtime -->
-<PackageReference Include="NexusLabs.Needlr.SemanticKernel" />
+<PackageReference Include="NexusLabs.Foundry.Needlr.SemanticKernel" />
 
 <!-- Source generator (add as analyzer — no runtime dep) -->
-<PackageReference Include="NexusLabs.Needlr.SemanticKernel.Generators"
+<PackageReference Include="NexusLabs.Foundry.Needlr.SemanticKernel.Generators"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```
@@ -187,7 +187,7 @@ See [Tool Result Middleware](tool-result-middleware.md) for the full behavior br
 ```csharp
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
-using NexusLabs.Needlr.SemanticKernel;
+using NexusLabs.Foundry.Needlr.SemanticKernel;
 
 internal sealed class WeatherPlugin
 {
@@ -212,7 +212,7 @@ var result = await kernel.InvokePromptAsync("What is the weather today?");
 
 ### Source gen path (recommended)
 
-When `NexusLabs.Needlr.SemanticKernel.Generators` is referenced as an analyzer, it emits a compile-time registry:
+When `NexusLabs.Foundry.Needlr.SemanticKernel.Generators` is referenced as an analyzer, it emits a compile-time registry:
 
 ```csharp
 // Generated: SemanticKernelPlugins.g.cs
@@ -247,46 +247,46 @@ Needlr extends the IoC principle from the tool layer upward to the agent and top
 
 ```xml
 <!-- Runtime: agents, workflows, termination conditions -->
-<PackageReference Include="NexusLabs.Needlr.AgentFramework" />
-<PackageReference Include="NexusLabs.Needlr.AgentFramework.Workflows" />
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework" />
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
 
 <!-- Source generator (analyzer — no runtime dep) -->
-<PackageReference Include="NexusLabs.Needlr.AgentFramework.Generators"
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 
 <!-- Roslyn analyzers (optional but recommended) -->
-<PackageReference Include="NexusLabs.Needlr.AgentFramework.Analyzers"
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```
 
 ### Declaring agents
 
-The `[NeedlrAiAgent]` attribute marks a class as a registered agent. It accepts `Instructions`, `Description`, `FunctionTypes`, and `FunctionGroups` to configure the agent's identity and tool access.
+The `[FoundryAgent]` attribute marks a class as a registered agent. It accepts `Instructions`, `Description`, `FunctionTypes`, and `FunctionGroups` to configure the agent's identity and tool access.
 
 ```csharp
-[NeedlrAiAgent(
+[FoundryAgent(
     Instructions = "You are a geography expert. Answer questions about countries and cities.",
     Description  = "Handles geographic queries")]
 public class GeographyAgent { }
 
-[NeedlrAiAgent(
+[FoundryAgent(
     Instructions = "You are a travel writer. Produce engaging summaries.",
     FunctionGroups = ["travel"])]           // scoped to the "travel" function group
 public class TravelWriterAgent { }
 
-[NeedlrAiAgent(
+[FoundryAgent(
     Instructions = "You triage requests and route them.",
     FunctionTypes = [])]                    // empty array → no tools (pure routing)
 public class TriageAgent { }
 ```
 
-Needle discovers all `[NeedlrAiAgent]` classes in the compilation and emits a static agent registry at build time.
+Needle discovers all `[FoundryAgent]` classes in the compilation and emits a static agent registry at build time.
 
 ### Function groups
 
-`[AgentFunctionGroup]` buckets related tool methods under a named group. Agents reference groups by name via `FunctionGroups`, keeping tool scoping declarative and typo-detectable ([NDLRMAF005](analyzers/NDLRMAF005.md)).
+`[AgentFunctionGroup]` buckets related tool methods under a named group. Agents reference groups by name via `FunctionGroups`, keeping tool scoping declarative and typo-detectable ([FDRYMAF005](analyzers/FDRYMAF005.md)).
 
 ```csharp
 [AgentFunctionGroup("geography")]
@@ -320,7 +320,7 @@ Needlr supports four topology patterns. Each is declared with attributes; the so
 One agent handles a request and optionally routes it to another agent when a condition is met. The routing decision is made by the LLM at runtime; the `When` parameter describes the condition as a natural language hint for the model.
 
 ```csharp
-[NeedlrAiAgent(Instructions = "Triage the request and hand off.")]
+[FoundryAgent(Instructions = "Triage the request and hand off.")]
 [AgentHandoffsTo(typeof(GeographyAgent), When = "The question is about geography")]
 [AgentHandoffsTo(typeof(TravelWriterAgent), When = "The question is about travel writing")]
 public class TriageAgent { }
@@ -333,33 +333,33 @@ Generator emits: `factory.CreateTriageAgentHandoffWorkflow()`
 Multiple agents collaborate in a shared round-robin conversation. All participants are peers; the workflow runs for up to `maxIterations` turns unless a termination condition triggers earlier.
 
 ```csharp
-[NeedlrAiAgent(Instructions = "Review code for correctness.")]
+[FoundryAgent(Instructions = "Review code for correctness.")]
 [AgentGroupChatMember("code-review")]
 public class ReviewerAgent { }
 
-[NeedlrAiAgent(Instructions = "Author code changes based on review feedback.")]
+[FoundryAgent(Instructions = "Author code changes based on review feedback.")]
 [AgentGroupChatMember("code-review")]
 public class AuthorAgent { }
 ```
 
 Generator emits: `factory.CreateCodeReviewGroupChatWorkflow()`
 
-A group chat requires at least two members ([NDLRMAF002](analyzers/NDLRMAF002.md)).
+A group chat requires at least two members ([FDRYMAF002](analyzers/FDRYMAF002.md)).
 
 #### Sequential pipeline
 
 Agents run in a fixed order, each receiving the prior agent's output. Use `Order` to control the sequence.
 
 ```csharp
-[NeedlrAiAgent(Instructions = "Extract key facts from the source material.")]
+[FoundryAgent(Instructions = "Extract key facts from the source material.")]
 [AgentSequenceMember("content-pipeline", Order = 1)]
 public class ContentExtractorAgent { }
 
-[NeedlrAiAgent(Instructions = "Enrich the extracted facts with examples.")]
+[FoundryAgent(Instructions = "Enrich the extracted facts with examples.")]
 [AgentSequenceMember("content-pipeline", Order = 2)]
 public class ContentEnricherAgent { }
 
-[NeedlrAiAgent(Instructions = "Publish the enriched content.")]
+[FoundryAgent(Instructions = "Publish the enriched content.")]
 [AgentSequenceMember("content-pipeline", Order = 3)]
 public class ContentPublisherAgent { }
 ```
@@ -371,22 +371,22 @@ Generator emits: `factory.CreateContentPipelineSequentialWorkflow()`
 Agents form a directed acyclic graph with conditional routing, fan-out, and fan-in convergence. Edges are declared on source agents; the graph name groups them.
 
 ```csharp
-[NeedlrAiAgent(Instructions = "Analyze the request and route to research paths.")]
+[FoundryAgent(Instructions = "Analyze the request and route to research paths.")]
 [AgentGraphEntry("research", RoutingMode = GraphRoutingMode.AllMatching)]
 [AgentGraphEdge("research", typeof(WebResearchAgent), Condition = "NeedsWebData")]
 [AgentGraphEdge("research", typeof(DatabaseAgent), Condition = "NeedsDbLookup")]
 [AgentGraphEdge("research", typeof(SummarizerAgent))]
 public class AnalyzerAgent { }
 
-[NeedlrAiAgent(Instructions = "Search the web for data.")]
+[FoundryAgent(Instructions = "Search the web for data.")]
 [AgentGraphEdge("research", typeof(SummarizerAgent))]
 public class WebResearchAgent { }
 
-[NeedlrAiAgent(Instructions = "Query internal databases.")]
+[FoundryAgent(Instructions = "Query internal databases.")]
 [AgentGraphEdge("research", typeof(SummarizerAgent))]
 public class DatabaseAgent { }
 
-[NeedlrAiAgent(Instructions = "Synthesize findings into a report.")]
+[FoundryAgent(Instructions = "Synthesize findings into a report.")]
 [AgentGraphNode("research", JoinMode = GraphJoinMode.WaitAll)]
 public class SummarizerAgent { }
 ```
@@ -400,7 +400,7 @@ Runtime: Use `RunGraphAsync` for execution — it auto-selects the optimal execu
 var results = await factory.RunGraphAsync("research", question);
 ```
 
-Alternatively, `factory.CreateGraphWorkflow("research")` returns the raw MAF `Workflow` object for direct integration with MAF tooling — but this only supports `WaitAll`. If you use `CreateGraphWorkflow` on a graph with `WaitAny` nodes, analyzer [NDLRMAF025](analyzers/NDLRMAF025.md) reports a compile-time error directing you to `RunGraphAsync`.
+Alternatively, `factory.CreateGraphWorkflow("research")` returns the raw MAF `Workflow` object for direct integration with MAF tooling — but this only supports `WaitAll`. If you use `CreateGraphWorkflow` on a graph with `WaitAny` nodes, analyzer [FDRYMAF025](analyzers/FDRYMAF025.md) reports a compile-time error directing you to `RunGraphAsync`.
 
 A runnable end-to-end example lives in `src/Examples/AgentFramework/GraphWorkflowApp/`. It uses `CopilotChatClient` (no Azure credentials required) to run a four-agent research pipeline DAG with fan-out from an analyzer to parallel web/database research branches that converge at a summarizer.
 
@@ -465,7 +465,7 @@ var responses = await workflow.RunAsync("Which countries has Nick visited?");
 // responses: IReadOnlyDictionary<string, string> (agentId → text)
 ```
 
-`RunAsync` is an extension method from `NexusLabs.Needlr.AgentFramework.Workflows` that wraps the underlying MAF streaming execution.
+`RunAsync` is an extension method from `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` that wraps the underlying MAF streaming execution.
 
 ### Termination conditions
 
@@ -481,7 +481,7 @@ public class ReviewerAgent { }
 ```
 
 **Layer 2 — workflow-level (fires after a response is fully emitted):**
-`[WorkflowRunTerminationCondition]` on any agent. The condition is evaluated in Needlr's `RunAsync` event loop after the agent's complete response is received. Works for all topology types; for group chat, prefer Layer 1 ([NDLRMAF011](analyzers/NDLRMAF011.md)).
+`[WorkflowRunTerminationCondition]` on any agent. The condition is evaluated in Needlr's `RunAsync` event loop after the agent's complete response is received. Works for all topology types; for group chat, prefer Layer 1 ([FDRYMAF011](analyzers/FDRYMAF011.md)).
 
 ```csharp
 [AgentSequenceMember("content-pipeline", Order = 1)]

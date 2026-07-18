@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -6,7 +6,7 @@ namespace DagRoutingApp.Agents;
 /// Handles creative requests in the "exclusive-routing" graph. Only
 /// executes when <see cref="ClassifierAgent.IsCreative"/> matches exclusively.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Handles creative, design-oriented requests.",
     Instructions = """
         You are a creative specialist. The request has been classified as

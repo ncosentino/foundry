@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);MAAIW001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Testing\NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />
+    <PackageReference Include="NexusLabs.Needlr.Injection.Reflection" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

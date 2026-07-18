@@ -10,7 +10,7 @@ superseded_by: ""
 
 ## Context and scope
 
-`NexusLabs.Needlr.AgentFramework.Testing` provides runners for deterministic agent and
+`NexusLabs.Foundry.MicrosoftAgentFramework.Testing` provides runners for deterministic agent and
 pipeline scenarios, but callers must supply an `IChatClient`. Needlr's tests and examples
 therefore contain multiple one-off chat-client implementations for scripted responses,
 multi-turn tool calls, failure injection, and call recording. Consumers face the same
@@ -38,7 +38,7 @@ timing, or every possible `IChatClient` implementation detail.
 ## Decision
 
 Needlr will build a first-party `ScriptedChatClient` in
-`NexusLabs.Needlr.AgentFramework.Testing`, with a small `ChatScriptBuilder` for readable
+`NexusLabs.Foundry.MicrosoftAgentFramework.Testing`, with a small `ChatScriptBuilder` for readable
 multi-turn scripts.
 
 The client will:
@@ -127,7 +127,7 @@ must be reconsidered rather than implemented by default.
 
 - [`docs/testing-tools.md`](../testing-tools.md) explains why full agent scenarios require
   a deterministic `IChatClient` and records the current absence of the shared client.
-- [`AgentScenarioRunner` at the confirmation snapshot](https://github.com/ncosentino/needlr/blob/78b27a1c5eddd5b8fa3e0c07dce629159b39e436/src/NexusLabs.Needlr.AgentFramework.Testing/AgentScenarioRunner.cs)
+- [`AgentScenarioRunner` at the confirmation snapshot](https://github.com/ncosentino/needlr/blob/78b27a1c5eddd5b8fa3e0c07dce629159b39e436/src/NexusLabs.Foundry.MicrosoftAgentFramework.Testing/AgentScenarioRunner.cs)
   is the public test harness that needs the scripted boundary.
 - [dotnet/extensions `TestChatClient` at an immutable commit](https://github.com/dotnet/extensions/blob/c221abef4b4f1bf3fcf0bda27490e8b26bb479f4/test/Libraries/Microsoft.Extensions.AI.Abstractions.Tests/TestChatClient.cs)
   demonstrates that Microsoft used a test-assembly helper but did not expose it as a

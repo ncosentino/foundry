@@ -7,15 +7,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Budget;
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Progress;
-using NexusLabs.Needlr.AgentFramework.Workspace;
-using NexusLabs.Needlr.AgentFramework.Workflows.Budget;
-using NexusLabs.Needlr.AgentFramework.Workflows.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Workflows.Sequential;
-using NexusLabs.Needlr.Copilot;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Budget;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Budget;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Sequential;
+using NexusLabs.Foundry.Copilot;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 

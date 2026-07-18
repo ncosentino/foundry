@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -6,7 +6,7 @@ namespace DagRoutingApp.Agents;
 /// Handles technical requests in the "exclusive-routing" graph. Only
 /// executes when <see cref="ClassifierAgent.IsTechnical"/> matches exclusively.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Handles technical, engineering-oriented requests.",
     Instructions = """
         You are a technical specialist. The request has been classified as

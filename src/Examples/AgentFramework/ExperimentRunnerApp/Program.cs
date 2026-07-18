@@ -1,7 +1,7 @@
 using Microsoft.Extensions.AI.Evaluation;
 
-using NexusLabs.Needlr.AgentFramework.Evaluation;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Experiments;
+using NexusLabs.Foundry.Evaluation;
+using NexusLabs.Foundry.Evaluation.Experiments;
 
 using ExperimentRunnerApp;
 
