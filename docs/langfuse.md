@@ -6,7 +6,7 @@ dashboard — with a single call.
 
 Needlr already emits OpenTelemetry traces and metrics using the GenAI semantic
 conventions (`gen_ai.*`), which Langfuse understands natively. The
-`NexusLabs.Needlr.AgentFramework.Langfuse` package adds the missing piece: an OTLP
+`NexusLabs.Foundry.Langfuse` package adds the missing piece: an OTLP
 exporter pointed at Langfuse, per-scenario trace grouping, and a bridge that turns
 evaluator metrics into Langfuse scores. It supports both exporter-owning standalone
 sessions and a complete non-owning facade for dependency-injection-based hosts.
@@ -23,8 +23,8 @@ export LANGFUSE_HOST="http://localhost:3000"
 ```
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Evaluation;
-using NexusLabs.Needlr.AgentFramework.Langfuse;
+using NexusLabs.Foundry.Evaluation;
+using NexusLabs.Foundry.Langfuse;
 
 // 1. Start export (no-ops cleanly when credentials are absent).
 using var langfuse = LangfuseTelemetry.Start(LangfuseOptions.FromEnvironment());
@@ -280,8 +280,8 @@ at query time, or set it to reproduce the item state at an explicit Langfuse dat
 ```csharp
 using System.Text.Json;
 
-using NexusLabs.Needlr.AgentFramework.Evaluation.Experiments;
-using NexusLabs.Needlr.AgentFramework.Langfuse;
+using NexusLabs.Foundry.Evaluation.Experiments;
+using NexusLabs.Foundry.Langfuse;
 
 public sealed record TripPlannerCase(
     JsonElement? Input,
@@ -869,7 +869,7 @@ the `gen_ai.client.token.usage` histogram.
 | `SamplingRatio` | `1.0` | Head-based trace sampling ratio (eval workloads want `1.0`). |
 | `ShutdownTimeout` | `5 seconds` | Total trace + metric timeout budget used by standalone-session disposal. |
 | `ResourceLockProvider` | in-process | Coordinates score-config and model creation. Use a distributed implementation when multiple processes initialize one project. |
-| `AgentActivitySourceName` | `NexusLabs.Needlr.AgentFramework` | Needlr agent span source to export. |
+| `AgentActivitySourceName` | `NexusLabs.Foundry.MicrosoftAgentFramework` | Needlr agent span source to export. |
 | `GenAiMeterName` | `Experimental.Microsoft.Extensions.AI` | Meter owning `gen_ai.client.token.usage`. |
 | `AdditionalActivitySources` / `AdditionalMeters` | _(empty)_ | Extra sources/meters to export. |
 

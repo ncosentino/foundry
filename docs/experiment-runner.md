@@ -5,14 +5,14 @@ per-trial provider scopes, run-level measurement, structured quality policies, a
 JSON—without coupling the experiment to a specific agent loop, test framework, dataset host, or
 observability provider.
 
-The runner lives in `NexusLabs.Needlr.AgentFramework.Evaluation.Experiments`.
+The runner lives in `NexusLabs.Foundry.Evaluation.Experiments`.
 
 ## Quick Start
 
 ```csharp
 using Microsoft.Extensions.AI.Evaluation;
-using NexusLabs.Needlr.AgentFramework.Evaluation;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Experiments;
+using NexusLabs.Foundry.Evaluation;
+using NexusLabs.Foundry.Evaluation.Experiments;
 
 var thresholds = new EvaluationThresholdEvaluator()
     .RequireNumericMin("completion_rate", 0.95);
@@ -288,7 +288,7 @@ cancellation cleanup and terminal disposal; it defaults to 30 seconds.
 
 ## MEAI Reporting Adapter
 
-Install `NexusLabs.Needlr.AgentFramework.Evaluation.Reporting` when an experiment should use MEAI
+Install `NexusLabs.Foundry.Evaluation.Reporting` when an experiment should use MEAI
 Reporting response caching, `ScenarioRun` persistence, and the official report writers. The
 provider-neutral Evaluation package does not reference Reporting.
 
@@ -297,7 +297,7 @@ with `WithMeaiReporting(...)`:
 
 ```csharp
 using Microsoft.Extensions.AI.Evaluation.Reporting.Storage;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Reporting;
+using NexusLabs.Foundry.Evaluation.Reporting;
 
 const string runId = "commit-abc123";
 var reportingConfiguration = DiskBasedReportingConfiguration.Create(

@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RfcPipelineApp.Core\RfcPipelineApp.Core.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.AgentFramework.Testing\NexusLabs.Needlr.AgentFramework.Testing.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Testing\NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
   </ItemGroup>
 
 </Project>

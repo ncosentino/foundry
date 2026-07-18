@@ -2,8 +2,8 @@ using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Workflows.Sequential;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Sequential;
 
 using RfcPipelineApp.Core.Prompts;
 using RfcPipelineApp.Core.Validators;

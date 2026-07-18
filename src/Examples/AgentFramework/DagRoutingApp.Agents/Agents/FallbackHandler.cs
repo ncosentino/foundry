@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -7,7 +7,7 @@ namespace DagRoutingApp.Agents;
 /// other condition matches (unconditional edge, evaluated last due to
 /// <see cref="GraphRoutingMode.FirstMatching"/>).
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Default fallback handler for unclassified requests.",
     Instructions = """
         You are a general-purpose handler. The request did not match any

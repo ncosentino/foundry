@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace GraphWorkflowApp.Agents;
 
@@ -6,7 +6,7 @@ namespace GraphWorkflowApp.Agents;
 /// Simulates web research by synthesizing information about the topic.
 /// Feeds results into <see cref="SummarizerAgent"/> for final synthesis.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Searches the web for relevant information.",
     Instructions = """
         You are a web research specialist. Given an analysis of a research question:

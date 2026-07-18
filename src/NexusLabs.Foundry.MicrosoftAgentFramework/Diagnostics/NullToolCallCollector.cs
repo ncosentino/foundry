@@ -1,0 +1,11 @@
+namespace NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+
+/// <summary>
+/// No-op <see cref="IToolCallCollector"/> used when diagnostics are not configured.
+/// </summary>
+internal sealed class NullToolCallCollector : IToolCallCollector
+{
+    internal static readonly NullToolCallCollector Instance = new();
+
+    public IReadOnlyList<ToolCallDiagnostics> DrainToolCalls() => [];
+}

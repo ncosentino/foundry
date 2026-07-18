@@ -1,5 +1,5 @@
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
 
 namespace GroupChatAgentFrameworkApp.Agents;
 
@@ -13,7 +13,7 @@ namespace GroupChatAgentFrameworkApp.Agents;
 /// at workflow-creation time. When this agent's response contains "CONSENSUS: APPROVED",
 /// the group chat stops before the next iteration begins — no extra code in Program.cs required.
 /// </remarks>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Synthesises reviewer feedback and delivers a final consensus verdict.",
     Instructions = """
         You are the code-review coordinator. The other reviewers have already given their

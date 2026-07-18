@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <NeedlrAutoGenerateAttribute>false</NeedlrAutoGenerateAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NexusLabs.Needlr" />
+    <PackageReference Include="NexusLabs.Needlr.Build" PrivateAssets="all" />
+    <PackageReference Include="NexusLabs.Needlr.Injection" />
+    <PackageReference Include="NexusLabs.Needlr.Generators.Attributes" />
+    <PackageReference Include="NexusLabs.Needlr.Generators"
+                      PrivateAssets="all"
+                      GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <!-- Include SemanticKernel generators in the NuGet package -->
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.Needlr.SemanticKernel.Generators\NexusLabs.Foundry.Needlr.SemanticKernel.Generators.csproj"
+                      PrivateAssets="all"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="Analyzer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\NexusLabs.Foundry.Needlr.SemanticKernel.Generators\bin\$(Configuration)\netstandard2.0\NexusLabs.Foundry.Needlr.SemanticKernel.Generators.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+    <None Include="build\*.targets" Pack="true" PackagePath="build/" />
+  </ItemGroup>
+
+</Project>

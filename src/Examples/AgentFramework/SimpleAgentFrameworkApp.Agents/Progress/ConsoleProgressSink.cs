@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework.Progress;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace SimpleAgentFrameworkApp.Agents;
 

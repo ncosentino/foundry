@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -7,7 +7,7 @@ namespace DagRoutingApp.Agents;
 /// requesting detailed analysis, so the LLM takes more time than
 /// <see cref="FastWorker"/>.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Thorough worker that provides detailed analysis.",
     Instructions = """
         You are a thorough analyst. Provide a detailed, multi-paragraph

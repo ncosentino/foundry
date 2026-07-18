@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DagRoutingApp.Agents;
 
@@ -6,7 +6,7 @@ namespace DagRoutingApp.Agents;
 /// Handles routine requests in the "priority-routing" graph. Only executes
 /// when the <see cref="TriageAgent.IsRoutine"/> condition matches first.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Handles routine, standard-priority requests.",
     Instructions = """
         You are a routine request handler. The request has been flagged as

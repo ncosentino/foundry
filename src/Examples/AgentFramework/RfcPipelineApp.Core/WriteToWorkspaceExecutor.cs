@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework.Workflows.Sequential;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Sequential;
 
 namespace RfcPipelineApp.Core;
 

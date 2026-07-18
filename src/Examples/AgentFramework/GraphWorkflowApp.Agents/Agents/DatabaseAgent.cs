@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace GraphWorkflowApp.Agents;
 
@@ -6,7 +6,7 @@ namespace GraphWorkflowApp.Agents;
 /// Simulates internal database lookups for structured data.
 /// Feeds results into <see cref="SummarizerAgent"/> for final synthesis.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Queries internal databases for structured data.",
     Instructions = """
         You are a database research specialist. Given an analysis of a research question:

@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: 10.0.x
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build-test-pack:
+    # PitCrew default. Set CI_RUNNER=ubuntu-latest for the manual cloud fallback.
+    # Untrusted fork pull requests always use GitHub-hosted infrastructure.
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore src/NexusLabs.Foundry.slnx
+
+      - name: Build
+        run: dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore
+
+      - name: Test
+        shell: bash
+        run: |
+          failed=0
+          while IFS= read -r project; do
+            echo "::group::Testing $(basename "$project")"
+            dotnet test "$project" \
+              --configuration Release \
+              --no-build \
+              --verbosity normal \
+              --blame-hang \
+              --blame-hang-dump-type none \
+              --blame-hang-timeout 5m \
+              --filter "Category!=Integration" || failed=1
+            echo "::endgroup::"
+          done < <(find src -name '*.Tests.csproj' | sort)
+          exit $failed
+
+      - name: Pack
+        shell: bash
+        run: |
+          mkdir -p artifacts/packages
+          while IFS= read -r project; do
+            dotnet pack "$project" \
+              --configuration Release \
+              --no-build \
+              --output artifacts/packages
+          done < <(find src -name 'NexusLabs.Foundry*.csproj' \
+            ! -name '*.Tests.csproj' | sort)
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-packages
+          path: artifacts/packages/*

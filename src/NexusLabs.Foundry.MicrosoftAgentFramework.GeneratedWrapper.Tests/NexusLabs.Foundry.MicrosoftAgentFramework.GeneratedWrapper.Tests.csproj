@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);MAAIW001</NoWarn>
+    <NeedlrAutoGenerateAttribute>false</NeedlrAutoGenerateAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Testing\NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
+    <PackageReference Include="NexusLabs.Needlr.Injection.Reflection" />
+    <PackageReference Include="NexusLabs.Needlr.Build" PrivateAssets="all" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="NexusLabs.Needlr.Generators"
+                      PrivateAssets="all"
+                      GeneratePathProperty="true" />
+    <PackageReference Include="NexusLabs.Needlr.Generators.Attributes" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <Import Project="..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.props" />
+  <Import Project="..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.targets" />
+
+</Project>

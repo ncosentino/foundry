@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace GraphWorkflowApp.Agents;
 
@@ -7,7 +7,7 @@ namespace GraphWorkflowApp.Agents;
 /// <see cref="WebResearchAgent"/> and <see cref="DatabaseAgent"/> branches.
 /// Uses <see cref="GraphJoinMode.WaitAll"/> to ensure both branches complete.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Synthesizes research findings into a final report.",
     Instructions = """
         You are a research synthesizer. You receive findings from multiple research branches

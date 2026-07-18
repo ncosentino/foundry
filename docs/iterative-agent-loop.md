@@ -51,7 +51,7 @@ Each iteration's input token count is bounded by the workspace size, not the con
 
 ```csharp
 using Microsoft.Extensions.AI;
-using NexusLabs.Needlr.AgentFramework.Iterative;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Needlr.Workflows;
 
 // 1. Create a workspace (files = agent memory)
@@ -143,7 +143,7 @@ var allTools = agentFactory.ResolveTools();
 This resolves tool classes through DI, so constructor-injected services (like `IAgentExecutionContextAccessor`) are available inside tool methods.
 
 !!! note "Source generator vs. reflection"
-    The source generator (`NexusLabs.Needlr.AgentFramework.Generators`) emits a `[ModuleInitializer]` that auto-registers `[AgentFunctionGroup]` types with `AgentFrameworkGeneratedBootstrap`. Add the generator as an analyzer reference in your `.csproj` to enable this. For projects that cannot use source generation, call `AddAgentFunctionGroupsFromAssemblies()` as a reflection-based fallback.
+    The source generator (`NexusLabs.Foundry.MicrosoftAgentFramework.Generators`) emits a `[ModuleInitializer]` that auto-registers `[AgentFunctionGroup]` types with `AgentFrameworkGeneratedBootstrap`. Add the generator as an analyzer reference in your `.csproj` to enable this. For projects that cannot use source generation, call `AddAgentFunctionGroupsFromAssemblies()` as a reflection-based fallback.
 
 ---
 

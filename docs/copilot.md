@@ -4,7 +4,7 @@ description: Use GitHub Copilot as an IChatClient provider in Needlr -- zero-cos
 
 # GitHub Copilot Integration
 
-`NexusLabs.Needlr.Copilot` provides two capabilities:
+`NexusLabs.Foundry.Copilot` provides two capabilities:
 
 1. **`CopilotChatClient`** — an `IChatClient` backed by the GitHub Copilot API (no CLI process, direct HTTP)
 2. **`CopilotWebSearchFunction`** — an `AIFunction` wrapping Copilot's MCP `web_search` tool
@@ -16,7 +16,7 @@ Because Copilot is free for many developers, this is an excellent local-developm
 ## Installation
 
 ```xml
-<PackageReference Include="NexusLabs.Needlr.Copilot" />
+<PackageReference Include="NexusLabs.Foundry.Copilot" />
 ```
 
 ---
@@ -27,7 +27,7 @@ Because Copilot is free for many developers, this is an excellent local-developm
 
 ```csharp
 using Microsoft.Extensions.AI;
-using NexusLabs.Needlr.Copilot;
+using NexusLabs.Foundry.Copilot;
 
 // Automatically discovers your GitHub token from the Copilot CLI's apps.json
 using var client = new CopilotChatClient(new CopilotChatClientOptions());
@@ -95,7 +95,7 @@ var options = new CopilotChatClientOptions
 `CopilotToolSet` creates `AIFunction` instances backed by Copilot's MCP endpoint. Currently the only available tool is `web_search`:
 
 ```csharp
-using NexusLabs.Needlr.Copilot;
+using NexusLabs.Foundry.Copilot;
 
 var chatOptions = new CopilotChatClientOptions();
 var tools = CopilotToolSet.Create(
@@ -209,7 +209,7 @@ catch (CopilotRateLimitException ex)
 
 ## Needlr Copilot vs GitHub Copilot SDK
 
-The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHub.Copilot.SDK` on NuGet) provides a superset of what `NexusLabs.Needlr.Copilot` offers. Before choosing Needlr Copilot, understand the overlap:
+The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHub.Copilot.SDK` on NuGet) provides a superset of what `NexusLabs.Foundry.Copilot` offers. Before choosing Needlr Copilot, understand the overlap:
 
 | Capability | Needlr Copilot | GitHub Copilot SDK |
 |---|---|---|

@@ -1,0 +1,77 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="FoundryWriteMafTopologyFile"
+          AfterTargets="Build"
+          Condition="'$(FoundryDiagnostics)' == 'true'">
+
+    <PropertyGroup>
+      <_FoundryMafGeneratedPath Condition="'$(CompilerGeneratedFilesOutputPath)' != ''">$(CompilerGeneratedFilesOutputPath)</_FoundryMafGeneratedPath>
+      <_FoundryMafGeneratedPath Condition="'$(_FoundryMafGeneratedPath)' == ''">$(IntermediateOutputPath)generated</_FoundryMafGeneratedPath>
+      <_FoundryMafSourceFile>$(_FoundryMafGeneratedPath)\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.AgentFrameworkFunctionRegistryGenerator\AgentTopologyGraph.g.cs</_FoundryMafSourceFile>
+      <_FoundryMafOutputPath Condition="'$(FoundryDiagnosticsPath)' != ''">$(FoundryDiagnosticsPath)</_FoundryMafOutputPath>
+      <_FoundryMafOutputPath Condition="'$(_FoundryMafOutputPath)' == ''">$(OutputPath)FoundryDiagnostics</_FoundryMafOutputPath>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_FoundryMafOutputPath)" Condition="!Exists('$(_FoundryMafOutputPath)')" />
+
+    <FoundryExtractMafTopology
+        SourceFile="$(_FoundryMafSourceFile)"
+        OutputDirectory="$(_FoundryMafOutputPath)"
+        Condition="Exists('$(_FoundryMafSourceFile)')" />
+
+    <Message Importance="high"
+             Text="Foundry MAF topology graph written to $(_FoundryMafOutputPath)"
+             Condition="Exists('$(_FoundryMafOutputPath)')" />
+  </Target>
+
+  <UsingTask TaskName="FoundryExtractMafTopology" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <SourceFile ParameterType="System.String" Required="true" />
+      <OutputDirectory ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text.RegularExpressions" />
+      <Code Type="Fragment" Language="cs">
+<![CDATA[
+try
+{
+    if (!File.Exists(SourceFile))
+    {
+        Log.LogMessage(MessageImportance.Normal, "AgentTopologyGraph.g.cs not found: " + SourceFile);
+        return true;
+    }
+
+    var sourceContent = File.ReadAllText(SourceFile);
+
+    Directory.CreateDirectory(OutputDirectory);
+
+    var pattern = @"public\s+const\s+string\s+AgentTopologyGraph\s*=\s*@""([^""]*(?:""""[^""]*)*)"";";
+    var match = Regex.Match(sourceContent, pattern, RegexOptions.Singleline);
+
+    if (match.Success)
+    {
+        var content = match.Groups[1].Value.Replace("\"\"", "\"");
+        var filePath = Path.Combine(OutputDirectory, "AgentTopologyGraph.md");
+        File.WriteAllText(filePath, content);
+        Log.LogMessage(MessageImportance.Normal, "Wrote " + filePath);
+    }
+    else
+    {
+        Log.LogMessage(MessageImportance.Low, "AgentTopologyGraph field not found in source file.");
+    }
+
+    return true;
+}
+catch (Exception ex)
+{
+    Log.LogWarning("Foundry MAF topology extraction failed: " + ex.Message);
+    return true;
+}
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+</Project>

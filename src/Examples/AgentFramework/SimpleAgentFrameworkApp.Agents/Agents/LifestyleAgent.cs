@@ -1,12 +1,12 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace SimpleAgentFrameworkApp.Agents;
 
 /// <summary>
 /// Answers questions about Nick's hobbies, food preferences, and daily life.
-/// Wired to the <c>lifestyle</c> function group via <see cref="NeedlrAiAgentAttribute"/>.
+/// Wired to the <c>lifestyle</c> function group via <see cref="FoundryAgentAttribute"/>.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Answers questions about Nick's hobbies, food, and lifestyle.",
     Instructions = """
         You are Nick's lifestyle expert. Use your tools to look up his hobbies and food preferences,

@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Foundry runtime support for Microsoft Agent Framework. Provides agent construction, workflows, diagnostics, progress, tooling, and generated topology declarations.</PackageDescription>
+    <!-- MAF 1.1.0 marked handoff/workflow builder APIs as experimental (MAAIW001).
+         Foundry intentionally wraps these in WorkflowFactory. Monitor MAF releases
+         for stable replacements. -->
+    <NoWarn>$(NoWarn);MAAIW001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI" />
+    <PackageReference Include="Microsoft.Agents.AI.Workflows" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Tests" />
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
+  </ItemGroup>
+
+  <!-- Include AgentFramework generators in the NuGet package -->
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj"
+                      PrivateAssets="all"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="Analyzer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers\bin\$(Configuration)\netstandard2.0\NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+    <!-- Run our own analyzers on the AF project during source-mode development -->
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers\NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers.csproj"
+                      PrivateAssets="all"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="Analyzer" />
+    <None Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\bin\$(Configuration)\netstandard2.0\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
+
+</Project>

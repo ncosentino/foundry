@@ -1,16 +1,16 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace SimpleAgentFrameworkApp.Agents;
 
 /// <summary>
 /// Routes customer questions to the appropriate specialist agent.
-/// Declared with <see cref="NeedlrAiAgentAttribute"/> so the source generator registers it
+/// Declared with <see cref="FoundryAgentAttribute"/> so the source generator registers it
 /// automatically — no startup code required.
 /// The <see cref="AgentHandoffsToAttribute"/> declarations are read by the generator to emit
 /// a strongly-typed <c>CreateTriageHandoffWorkflow()</c> extension method on
 /// <see cref="IWorkflowFactory"/>.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Routes questions about Nick to the appropriate specialist.",
     Instructions = """
         You are a triage assistant for questions about Nick. Route each question to exactly one specialist:

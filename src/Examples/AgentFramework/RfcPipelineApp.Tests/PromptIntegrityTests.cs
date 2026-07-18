@@ -1,9 +1,9 @@
 using Moq;
 
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Testing;
-using NexusLabs.Needlr.AgentFramework.Workflows.Sequential;
-using NexusLabs.Needlr.AgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Testing;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Sequential;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 using RfcPipelineApp.Core;
 using RfcPipelineApp.Core.Prompts;

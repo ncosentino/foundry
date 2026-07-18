@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json;
 
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace SimpleAgentFrameworkApp.Agents;
 
@@ -56,7 +56,7 @@ internal sealed class BatchFunctions
 
     /// <summary>
     /// Demonstrates the <see cref="JsonElement"/> parameter pattern — the analyzer-recommended
-    /// alternative (NDLRMAF030) when a tool wants direct, typed access to arbitrary JSON the
+    /// alternative (FDRYMAF030) when a tool wants direct, typed access to arbitrary JSON the
     /// model produces. Compare to a hypothetical <c>string payloadJson</c> shape: with
     /// <see cref="JsonElement"/> the tool body inspects <see cref="JsonElement.ValueKind"/>
     /// directly without re-parsing canonical text.

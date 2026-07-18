@@ -53,7 +53,7 @@ idempotency, or test-framework fixtures.
 ## Decision
 
 Needlr will own a provider-neutral experiment runner in
-`NexusLabs.Needlr.AgentFramework.Evaluation.Experiments`.
+`NexusLabs.Foundry.Evaluation.Experiments`.
 
 The core runner owns:
 
@@ -115,8 +115,8 @@ sample, attempt, and exclusion counts so excluded or unknown evidence cannot dis
 from the reported accounting.
 
 Langfuse-specific sources, trial scopes, and score sinks remain in
-`NexusLabs.Needlr.AgentFramework.Langfuse`. MEAI Reporting-specific scenario caching and
-persistence remain in `NexusLabs.Needlr.AgentFramework.Evaluation.Reporting`. Neither
+`NexusLabs.Foundry.Langfuse`. MEAI Reporting-specific scenario caching and
+persistence remain in `NexusLabs.Foundry.Evaluation.Reporting`. Neither
 provider's types become the canonical experiment model.
 
 The runner requires explicit local concurrency and may accept a caller-owned shared
@@ -196,9 +196,9 @@ The repository confirms the decision through these stable boundaries:
 - Experiment-runner tests cover bounded scheduling, retries, cancellation, failure
   isolation, run evaluation, policy, scope lifecycle, sink fan-out, and deterministic
   artifacts.
-- `NexusLabs.Needlr.AgentFramework.Langfuse` implements hosted source, trial lifecycle,
+- `NexusLabs.Foundry.Langfuse` implements hosted source, trial lifecycle,
   and result-sink adapters without owning the scheduler.
-- `NexusLabs.Needlr.AgentFramework.Evaluation.Reporting` implements one MEAI
+- `NexusLabs.Foundry.Evaluation.Reporting` implements one MEAI
   `ScenarioRun` per trial without introducing a second scheduler or canonical result.
 - Credential-free examples exercise the core runner and Reporting adapter; the Langfuse
   conformance example exercises disabled, local, and hosted provider shapes.

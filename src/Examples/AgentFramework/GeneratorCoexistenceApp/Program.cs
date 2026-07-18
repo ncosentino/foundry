@@ -6,7 +6,7 @@
 //          generator collision, this project's build will break.
 //
 // WHAT'S HERE:
-//   - Needlr generators: [NeedlrAiAgent], [AgentFunctionGroup], [AgentFunction]
+//   - Needlr generators: [FoundryAgent], [AgentFunctionGroup], [AgentFunction]
 //   - MAF generators:    [MessageHandler] on an Executor class
 //   - Both generators run at compile time in the same project
 
@@ -22,7 +22,7 @@ Console.WriteLine();
 Console.WriteLine("── Needlr Source Generator Output ──");
 
 var agentType = typeof(DataAssistant);
-Console.WriteLine($"  [NeedlrAiAgent] DataAssistant registered: {agentType.FullName}");
+Console.WriteLine($"  [FoundryAgent] DataAssistant registered: {agentType.FullName}");
 
 var functionType = typeof(DataFunctions);
 Console.WriteLine($"  [AgentFunctionGroup] DataFunctions registered: {functionType.FullName}");

@@ -6,9 +6,9 @@ using Microsoft.Extensions.AI.Evaluation.Reporting.Storage;
 
 using MeaiReportingExperimentApp;
 
-using NexusLabs.Needlr.AgentFramework.Evaluation;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Experiments;
-using NexusLabs.Needlr.AgentFramework.Evaluation.Reporting;
+using NexusLabs.Foundry.Evaluation;
+using NexusLabs.Foundry.Evaluation.Experiments;
+using NexusLabs.Foundry.Evaluation.Reporting;
 
 Console.WriteLine("=== Needlr Experiment Runner + MEAI Reporting ===");
 Console.WriteLine();

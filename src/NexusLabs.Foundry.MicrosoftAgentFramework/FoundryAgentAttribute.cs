@@ -1,0 +1,54 @@
+namespace NexusLabs.Foundry.MicrosoftAgentFramework;
+
+/// <summary>
+/// Marks a class as a declared agent type for Foundry's Agent Framework integration.
+/// Apply this attribute to a class to enable compile-time registration via the source generator
+/// and <see cref="IAgentFactory.CreateAgent{TAgent}()"/> lookup.
+/// </summary>
+/// <remarks>
+/// When the <c>NexusLabs.Foundry.MicrosoftAgentFramework.Generators</c> package is referenced,
+/// a <c>[ModuleInitializer]</c> is emitted that automatically registers the agent type
+/// with <see cref="AgentFrameworkGeneratedBootstrap"/>. <c>UsingAgentFramework()</c>
+/// then discovers and registers these types without any explicit <c>Add*FromGenerated()</c> calls.
+/// </remarks>
+/// <example>
+/// <code>
+/// [FoundryAgent(
+///     Instructions = "You are a helpful customer support agent. Answer questions about orders.",
+///     Description = "Customer support agent for order inquiries")]
+/// [AgentHandoffsTo(typeof(BillingAgent), "Escalate billing or payment questions to the billing agent")]
+/// public class CustomerSupportAgent
+/// {
+/// }
+///
+/// // In your composition root:
+/// var agentFactory = syringe.BuildAgentFactory();
+/// var agent = agentFactory.CreateAgent&lt;CustomerSupportAgent&gt;();
+/// </code>
+/// </example>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public sealed class FoundryAgentAttribute : Attribute
+{
+    /// <summary>
+    /// Gets or sets the system prompt instructions for this agent.
+    /// </summary>
+    public string? Instructions { get; set; }
+
+    /// <summary>
+    /// Gets or sets a human-readable description of this agent's purpose.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets the function types whose <see cref="AgentFunctionAttribute"/>-tagged methods
+    /// are wired as tools for this agent. When null and <see cref="FunctionGroups"/> is also null,
+    /// all registered function types are used.
+    /// </summary>
+    public Type[]? FunctionTypes { get; set; }
+
+    /// <summary>
+    /// Gets or sets named function groups (registered via <see cref="AgentFunctionGroupAttribute"/>)
+    /// whose types are wired as tools for this agent.
+    /// </summary>
+    public string[]? FunctionGroups { get; set; }
+}

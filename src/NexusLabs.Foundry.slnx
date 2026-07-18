@@ -1,0 +1,25 @@
+<Solution>
+  <Project Path="NexusLabs.Foundry.Copilot.Tests/NexusLabs.Foundry.Copilot.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.Copilot/NexusLabs.Foundry.Copilot.csproj" />
+  <Project Path="NexusLabs.Foundry.Evaluation.Reporting.Tests/NexusLabs.Foundry.Evaluation.Reporting.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.Evaluation.Reporting/NexusLabs.Foundry.Evaluation.Reporting.csproj" />
+  <Project Path="NexusLabs.Foundry.Evaluation.Tests/NexusLabs.Foundry.Evaluation.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.Evaluation/NexusLabs.Foundry.Evaluation.csproj" />
+  <Project Path="NexusLabs.Foundry.Langfuse.Tests/NexusLabs.Foundry.Langfuse.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.Langfuse/NexusLabs.Foundry.Langfuse.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers/NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.DevUI/NexusLabs.Foundry.MicrosoftAgentFramework.DevUI.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Generators.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Generators.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Generators/NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Testing/NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows/NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework/NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+  <Project Path="NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.Tests/NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.Needlr.MicrosoftAgentFramework/NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />
+  <Project Path="NexusLabs.Foundry.Needlr.SemanticKernel.Generators/NexusLabs.Foundry.Needlr.SemanticKernel.Generators.csproj" />
+  <Project Path="NexusLabs.Foundry.Needlr.SemanticKernel.Tests/NexusLabs.Foundry.Needlr.SemanticKernel.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.Needlr.SemanticKernel/NexusLabs.Foundry.Needlr.SemanticKernel.csproj" />
+</Solution>

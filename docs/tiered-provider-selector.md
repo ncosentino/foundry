@@ -31,7 +31,7 @@ Migrate a Copilot WebSearch provider that throws `CopilotAuthException` on bad c
 The recommended path is to use the `AddTieredProviderSelector` DI extension (covered in detail in [DI registration](#di-registration) below). The `IServiceProvider`-aware overload lets the policy callbacks resolve other services (loggers, options monitors, telemetry sinks) from the container:
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Providers;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Providers;
 
 services.AddTieredProviderSelector<string, SearchResult>((sp, opts) =>
 {
@@ -245,7 +245,7 @@ If you genuinely want to treat cancellation as a skip-eligible failure, you cann
 
 ## DI registration
 
-The recommended path for production hosts is the `AddTieredProviderSelector<TQuery, TResult>` extension method in `NexusLabs.Needlr.AgentFramework.Providers`. It wraps the boilerplate of resolving providers, the quota gate, the execution-context accessor, and `TimeProvider` from the container.
+The recommended path for production hosts is the `AddTieredProviderSelector<TQuery, TResult>` extension method in `NexusLabs.Foundry.MicrosoftAgentFramework.Providers`. It wraps the boilerplate of resolving providers, the quota gate, the execution-context accessor, and `TimeProvider` from the container.
 
 ### Three overloads
 

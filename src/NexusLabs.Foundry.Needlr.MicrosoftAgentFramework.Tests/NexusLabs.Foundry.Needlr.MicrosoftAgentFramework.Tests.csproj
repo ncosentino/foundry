@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <NeedlrAutoGenerateAttribute>false</NeedlrAutoGenerateAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NexusLabs.Needlr" />
+    <PackageReference Include="NexusLabs.Needlr.Build" PrivateAssets="all" />
+    <PackageReference Include="NexusLabs.Needlr.Injection" />
+    <PackageReference Include="NexusLabs.Needlr.Injection.SourceGen" />
+    <PackageReference Include="NexusLabs.Needlr.Generators.Attributes" />
+    <PackageReference Include="NexusLabs.Needlr.Generators"
+                      PrivateAssets="all"
+                      GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

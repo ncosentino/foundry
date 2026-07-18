@@ -5,17 +5,17 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NexusLabs.Needlr.AgentFramework;
-using NexusLabs.Needlr.AgentFramework.Budget;
-using NexusLabs.Needlr.AgentFramework.Context;
-using NexusLabs.Needlr.AgentFramework.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Progress;
-using NexusLabs.Needlr.AgentFramework.Providers;
-using NexusLabs.Needlr.AgentFramework.Workflows;
-using NexusLabs.Needlr.AgentFramework.Workspace;
-using NexusLabs.Needlr.AgentFramework.Workflows.Budget;
-using NexusLabs.Needlr.AgentFramework.Workflows.Diagnostics;
-using NexusLabs.Needlr.AgentFramework.Workflows.Middleware;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Budget;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Providers;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Budget;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Middleware;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 using NexusLabs.Needlr.Injection.SourceGen;
@@ -24,7 +24,7 @@ using SimpleAgentFrameworkApp.Agents;
 
 // Generated extension methods emitted by the source generator in SimpleAgentFrameworkApp.Agents.
 // Includes: IWorkflowFactory extensions, IAgentFactory extensions, named constants,
-// and AgentFrameworkSyringe group registration extensions.
+// and AgentFrameworkBuilder group registration extensions.
 using SimpleAgentFrameworkApp.Agents.Generated;
 
 var configuration = new ConfigurationBuilder()
@@ -44,7 +44,7 @@ IChatClient chatClient = new AzureOpenAIClient(
     .AsIChatClient();
 
 // The [ModuleInitializer] emitted by the source generator in SimpleAgentFrameworkApp.Agents
-// fires on assembly load and registers all [NeedlrAiAgent] types, [AgentFunction] types,
+// fires on assembly load and registers all [FoundryAgent] types, [AgentFunction] types,
 // [AgentFunctionGroup] groups, [AgentHandoffsTo] topology, and [AgentSequenceMember] pipelines
 // with AgentFrameworkGeneratedBootstrap. UsingAgentFramework() detects these and auto-populates.
 //
@@ -78,7 +78,7 @@ var diagnosticsAccessor = serviceProvider.GetRequiredService<IAgentDiagnosticsAc
 var progressFactory = serviceProvider.GetRequiredService<IProgressReporterFactory>();
 var progressAccessor = serviceProvider.GetRequiredService<IProgressReporterAccessor>();
 
-// Strongly-typed agent creation — generated from [NeedlrAiAgent] declarations.
+// Strongly-typed agent creation — generated from [FoundryAgent] declarations.
 // No magic strings; renaming the class regenerates these methods automatically.
 var triageAgent = agentFactory.CreateTriageAgent();
 Console.WriteLine($"Created: {AgentNames.TriageAgent} (ID: {triageAgent.Id})");

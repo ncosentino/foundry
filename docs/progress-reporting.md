@@ -113,7 +113,7 @@ Use `[DoNotAutoRegister]` when:
 The `[ProgressSinks]` attribute lets you declare at compile time which sinks an agent should use. The source generator emits a helper method that creates a properly scoped reporter:
 
 ```csharp
-[NeedlrAiAgent(Instructions = "Write blog articles.")]
+[FoundryAgent(Instructions = "Write blog articles.")]
 [ProgressSinks(typeof(CostTrackingSink), typeof(AuditSink))]
 public partial class WriterAgent { }
 

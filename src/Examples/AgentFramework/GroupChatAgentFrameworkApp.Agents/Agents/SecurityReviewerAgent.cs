@@ -1,4 +1,4 @@
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace GroupChatAgentFrameworkApp.Agents;
 
@@ -7,7 +7,7 @@ namespace GroupChatAgentFrameworkApp.Agents;
 /// Declared as a member of the <c>code-review</c> group so the source generator includes it in
 /// the generated <c>CreateCodeReviewGroupChatWorkflow()</c> extension method.
 /// </summary>
-[NeedlrAiAgent(
+[FoundryAgent(
     Description = "Reviews code for security issues.",
     Instructions = """
         You are a security code reviewer. Analyse the submitted code for:

@@ -102,11 +102,11 @@ of the Microsoft Agent Framework. Key projects and patterns:
 
 | Project | Role |
 |---------|------|
-| `NexusLabs.Needlr.AgentFramework` | Core agent abstractions — `AgentFactory`, `IterativeAgentLoop`, execution context, budget tracking, diagnostics, tools, workspace, progress reporting |
-| `NexusLabs.Needlr.AgentFramework.Workflows` | Workflow extensions — middleware (`ToolResultFunctionMiddleware`, `AgentResiliencePlugin`), termination conditions (`KeywordTerminationCondition`, `RegexTerminationCondition`, `ToolCallTerminationCondition`), streaming |
-| `NexusLabs.Needlr.AgentFramework.Generators` | Source generator for `[AgentFunctionGroup]`, `[NeedlrAiAgent]`, and related attributes |
-| `NexusLabs.Needlr.AgentFramework.Testing` | `AgentScenarioRunner` and `IAgentScenario` for integration testing agents |
-| `NexusLabs.Needlr.AgentFramework.Evaluation` | Evaluators (`ToolCallTrajectoryEvaluator`, `IterationCoherenceEvaluator`, `TerminationAppropriatenessEvaluator`) built on `Microsoft.Extensions.AI.Evaluation` |
+| `NexusLabs.Foundry.MicrosoftAgentFramework` | Core agent abstractions — `AgentFactory`, `IterativeAgentLoop`, execution context, budget tracking, diagnostics, tools, workspace, progress reporting |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` | Workflow extensions — middleware (`ToolResultFunctionMiddleware`, `AgentResiliencePlugin`), termination conditions (`KeywordTerminationCondition`, `RegexTerminationCondition`, `ToolCallTerminationCondition`), streaming |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` | Source generator for `[AgentFunctionGroup]`, `[FoundryAgent]`, and related attributes |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Testing` | `AgentScenarioRunner` and `IAgentScenario` for integration testing agents |
+| `NexusLabs.Foundry.Evaluation` | Evaluators (`ToolCallTrajectoryEvaluator`, `IterationCoherenceEvaluator`, `TerminationAppropriatenessEvaluator`) built on `Microsoft.Extensions.AI.Evaluation` |
 | `src/Examples/AgentFramework/` | Example apps demonstrating iterative loops, group chat, diagnostics, AOT, progress reporting |
 
 ### Key Abstractions in This Codebase
@@ -143,7 +143,7 @@ releases when advising on API usage.
   should follow these conventions.
 - **Distinguish Microsoft APIs from Needlr APIs.** Be clear about which layer
   a type belongs to — upstream `Microsoft.Agents.AI` vs this repo's
-  `NexusLabs.Needlr.AgentFramework`.
+  `NexusLabs.Foundry.MicrosoftAgentFramework`.
 - **Keep middleware ordering in mind.** The order in which middleware is
   registered affects behavior. Diagnostics middleware should wrap resilience
   middleware, which wraps the inner client.

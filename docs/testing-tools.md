@@ -26,7 +26,7 @@ For the "fake LLM" question specifically — see the [follow-up note](#scripted-
 
 ## `ToolInvocationRunner`
 
-`ToolInvocationRunner` lives in **`NexusLabs.Needlr.AgentFramework.Testing`**. It removes the boilerplate consumers used to write by hand:
+`ToolInvocationRunner` lives in **`NexusLabs.Foundry.MicrosoftAgentFramework.Testing`**. It removes the boilerplate consumers used to write by hand:
 
 - Build a service provider with the right registrations.
 - Look up the source-generated `IAIFunctionProvider`.
@@ -37,7 +37,7 @@ For the "fake LLM" question specifically — see the [follow-up note](#scripted-
 ### Minimal example
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework.Testing;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Testing;
 
 public sealed class GrepToolTests
 {
@@ -86,7 +86,7 @@ var runner = new ToolInvocationRunner(sp)
 Or build a minimal `IServiceCollection` yourself:
 
 ```csharp
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 var sp = new ServiceCollection()
     .AddAgentFrameworkAccessors()
@@ -153,7 +153,7 @@ var args = new AIFunctionArguments
 await fn.InvokeAsync(args, TestContext.Current.CancellationToken);
 ```
 
-This is the path Needlr uses internally to test wrapper behavior — see `NexusLabs.Needlr.AgentFramework.GeneratedWrapper.Tests/AIFunctionWrapperEndToEndTests.cs`.
+This is the path Needlr uses internally to test wrapper behavior — see `NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests/AIFunctionWrapperEndToEndTests.cs`.
 
 ### Per-test source-gen scoping
 
@@ -193,7 +193,7 @@ public void ReflectionFallbackPath()
 
 ## Full agent scenarios
 
-For end-to-end tests of an agent's behavior — including system prompt, multi-turn LLM dialogue, tool calls, termination — use [`AgentScenarioRunner`](agent-functions.md) with a fake `IChatClient` wired through `AgentFrameworkSyringeExtensions.UsingChatClient(...)`:
+For end-to-end tests of an agent's behavior — including system prompt, multi-turn LLM dialogue, tool calls, termination — use [`AgentScenarioRunner`](agent-functions.md) with a fake `IChatClient` wired through `AgentFrameworkBuilderExtensions.UsingChatClient(...)`:
 
 ```csharp
 var sp = new Syringe()
@@ -215,7 +215,7 @@ var result = await runner.RunAsync(myScenario);
 
 A reusable, fluent `ScriptedChatClient` that handles multi-turn dialogues (turn 1: tool call, turn 2: text response) and call recording is a planned follow-up for the Testing package — see [ADR-0002](adr/adr-0002-build-scriptedchatclient-locally.md).
 
-Until then, agent-loop tests roll their own `IChatClient` fakes. The cleanest existing example in the Needlr codebase is `RecordingChatClient` in `NexusLabs.Needlr.AgentFramework.Evaluation.Tests` — it's a callback-based client with `CallCount`/`StreamingCallCount` recording that you can copy-paste into your own test project as a stop-gap.
+Until then, agent-loop tests roll their own `IChatClient` fakes. The cleanest existing example in the Needlr codebase is `RecordingChatClient` in `NexusLabs.Foundry.Evaluation.Tests` — it's a callback-based client with `CallCount`/`StreamingCallCount` recording that you can copy-paste into your own test project as a stop-gap.
 
 ---
 

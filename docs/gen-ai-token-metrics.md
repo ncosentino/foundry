@@ -156,7 +156,7 @@ The instrument itself (`gen_ai.client.token.usage`, type, unit, description, buc
 // Auto-registered:
 services.TryAddSingleton<IGenAiTokenMetrics>(sp =>
 {
-    var syringe = sp.GetService<BuiltAgentFrameworkSyringe>();
+    var syringe = sp.GetService<BuiltAgentFrameworkBuilder>();
     var options = syringe?.Value.MetricsOptions ?? new AgentFrameworkMetricsOptions();
     return new GenAiTokenMetrics(options);
 });

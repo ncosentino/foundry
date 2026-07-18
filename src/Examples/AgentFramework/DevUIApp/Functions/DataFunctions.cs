@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-using NexusLabs.Needlr.AgentFramework;
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace DevUIApp;
 
