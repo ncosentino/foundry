@@ -50,7 +50,7 @@ internal sealed class MafGeneratorTestRunner
         if (_enableDiagnostics)
         {
             var optionsProvider = new TestAnalyzerConfigOptionsProvider(
-                new Dictionary<string, string> { ["build_property.NeedlrDiagnostics"] = "true" });
+                new Dictionary<string, string> { ["build_property.FoundryDiagnostics"] = "true" });
             driver = CSharpGeneratorDriver.Create(
                 generators: [generator.AsSourceGenerator()],
                 optionsProvider: optionsProvider);
@@ -296,7 +296,7 @@ internal sealed record GeneratedFile(string FilePath, string Content);
 
 /// <summary>
 /// Provides build property values for tests that need analyzer config options
-/// (e.g. <c>NeedlrDiagnostics=true</c>).
+/// (e.g. <c>FoundryDiagnostics=true</c>).
 /// </summary>
 internal sealed class TestAnalyzerConfigOptionsProvider : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider
 {

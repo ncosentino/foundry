@@ -18,7 +18,7 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
     public void Generator_AlwaysEmits_ModuleInitializer_Bootstrap()
     {
         var output = MafGeneratorTestRunner.Create()
-            .GetFile("NeedlrAgentFrameworkBootstrap.g.cs");
+            .GetFile("FoundryAgentFrameworkBootstrap.g.cs");
 
         Assert.Contains("ModuleInitializer", output);
         Assert.Contains("AgentFrameworkGeneratedBootstrap.Register", output);
@@ -28,7 +28,7 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
     public void Generator_Bootstrap_PassesAllSixRegistries()
     {
         var output = MafGeneratorTestRunner.Create()
-            .GetFile("NeedlrAgentFrameworkBootstrap.g.cs");
+            .GetFile("FoundryAgentFrameworkBootstrap.g.cs");
 
         Assert.Contains("AgentFrameworkFunctionRegistry.AllFunctionTypes", output);
         Assert.Contains("AgentFrameworkFunctionGroupRegistry.AllGroups", output);
@@ -652,7 +652,7 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
         Assert.Contains("AgentHandoffTopologyRegistry.g.cs", fileNames);
         Assert.Contains("AgentGroupChatRegistry.g.cs", fileNames);
         Assert.Contains("AgentSequentialTopologyRegistry.g.cs", fileNames);
-        Assert.Contains("NeedlrAgentFrameworkBootstrap.g.cs", fileNames);
+        Assert.Contains("FoundryAgentFrameworkBootstrap.g.cs", fileNames);
         Assert.Contains("WorkflowFactoryExtensions.g.cs", fileNames);
     }
 
@@ -1320,7 +1320,7 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
     public void Bootstrap_RegistersAIFunctionProvider()
     {
         var output = MafGeneratorTestRunner.Create()
-            .GetFile("NeedlrAgentFrameworkBootstrap.g.cs");
+            .GetFile("FoundryAgentFrameworkBootstrap.g.cs");
 
         Assert.Contains("RegisterAIFunctionProvider", output);
         Assert.Contains("new global::", output);
@@ -2220,7 +2220,7 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
     public void PipelineI_Bootstrap_IncludesRegisterGraphTopologyCall()
     {
         var output = MafGeneratorTestRunner.Create()
-            .GetFile("NeedlrAgentFrameworkBootstrap.g.cs");
+            .GetFile("FoundryAgentFrameworkBootstrap.g.cs");
 
         Assert.Contains("RegisterGraphTopology", output);
         Assert.Contains("AgentGraphTopologyRegistry.AllGraphs", output);
