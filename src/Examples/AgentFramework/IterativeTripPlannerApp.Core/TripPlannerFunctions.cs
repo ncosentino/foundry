@@ -10,7 +10,7 @@ namespace IterativeTripPlannerApp.Core;
 /// <summary>
 /// DI-resolved tool functions for the iterative trip planner.
 /// Each method accesses the workspace via <see cref="IAgentExecutionContextAccessor"/>
-/// — the same pattern ExampleProduct and other real consumers use.
+/// — the same pattern production consumers use.
 /// </summary>
 /// <remarks>
 /// <para>

@@ -465,7 +465,7 @@ Console.WriteLine($"Total tokens: {diag?.AggregateTokenUsage.TotalTokens}");
 
 ## Example: Trip Planner
 
-The `IterativeTripPlannerApp` example in `src/Examples/AgentFramework/` demonstrates the full pattern — matching the architecture of production consumers like ExampleProduct:
+The `IterativeTripPlannerApp` example in `src/Examples/AgentFramework/` demonstrates the full pattern used by production consumers:
 
 ```
 dotnet run --project src/Examples/AgentFramework/IterativeTripPlannerApp

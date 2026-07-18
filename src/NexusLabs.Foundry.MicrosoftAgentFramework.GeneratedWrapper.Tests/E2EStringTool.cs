@@ -18,7 +18,7 @@ public sealed class E2EStringTool
     }
 
     [AgentFunction]
-    [Description("Records findings (mirrors the ExampleProduct production crash shape).")]
+    [Description("Records findings using a representative production crash shape.")]
     public string Record(
         [Description("JSON array of findings.")] string findingsJson)
     {

@@ -247,15 +247,15 @@ public sealed class ChatCompletionDeduplicationTests
         Assert.Single(result.Diagnostics!.ChatCompletions);
     }
 
-    // B10: Replicates ExampleProduct's exact pattern — UsingDiagnostics() wraps factory
+    // B10: Replicates a production pattern where UsingDiagnostics() wraps the factory
     // client, then per-loop ChatClientFactory wraps via ChatClientBuilder (e.g.
     // UseChatReducer). GetService must still find DiagnosticsRecordingChatClient
     // through the builder output chain, preventing duplication.
     [Fact]
     public async Task RunAsync_WithChatClientBuilder_WrappingDiagnosticsClient_NoDuplication()
     {
-        var mockChat = CreateToolCallThenDoneChat("ExampleProductTool", inputTokens: 150, outputTokens: 30);
-        var tool = CreateTool("ExampleProductTool", () => "search result");
+        var mockChat = CreateToolCallThenDoneChat("SearchTool", inputTokens: 150, outputTokens: 30);
+        var tool = CreateTool("SearchTool", () => "search result");
 
         // Simulate UsingDiagnostics: wrap mock with DiagnosticsRecordingChatClient
         var middleware = new DiagnosticsChatClientMiddleware();
@@ -264,7 +264,7 @@ public sealed class ChatCompletionDeduplicationTests
         var loop = CreateLoop(diagnosticsClient);
 
         var options = CreateOptions([tool]);
-        // Simulate ExampleProduct's BuildEffectiveChatClientFactory: uses ChatClientBuilder
+        // Simulate a production chat-client factory that uses ChatClientBuilder
         // to add middleware on top of the diagnostics-wrapped client
         options.ChatClientFactory = inner =>
         {
