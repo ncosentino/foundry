@@ -1,4 +1,4 @@
-// DevUIApp — Demonstrates Needlr agents appearing in MAF DevUI
+// DevUIApp — Demonstrates Foundry agents appearing in MAF DevUI
 //
 // Run this app and navigate to http://localhost:5250/devui to see the
 // [FoundryAgent]-declared agents (DataAssistant, SummaryAgent) listed
@@ -14,6 +14,7 @@ using Microsoft.Extensions.AI;
 using NexusLabs.Foundry.MicrosoftAgentFramework;
 using NexusLabs.Foundry.MicrosoftAgentFramework.DevUI;
 using NexusLabs.Foundry.Copilot;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -27,7 +28,7 @@ var copilotOptions = new CopilotChatClientOptions
 };
 IChatClient chatClient = new CopilotChatClient(copilotOptions);
 
-// Full Needlr setup with agent framework — provides IAgentFactory with tools
+// Needlr container setup with Foundry Agent Framework integration
 var needlrServices = new Syringe()
     .UsingReflection()
     .UsingAgentFramework(af => af.UsingChatClient(chatClient))
@@ -39,8 +40,8 @@ var agentFactory = needlrServices.GetRequiredService<IAgentFactory>();
 builder.Services.AddSingleton(agentFactory);
 builder.Services.AddSingleton(chatClient);
 
-// Bridge Needlr agents → DevUI (uses IAgentFactory for full tool wiring + OTel)
-builder.Services.AddNeedlrDevUI();
+// Bridge Foundry agents to DevUI using IAgentFactory for tool wiring and telemetry.
+builder.Services.AddFoundryDevUI();
 
 // MAF OpenAI hosting + DevUI infrastructure
 builder.AddOpenAIResponses();
@@ -60,7 +61,7 @@ app.MapGet("/", () =>
     return Results.Content("""
         <!DOCTYPE html>
         <html><body>
-        <h1>Needlr DevUI Example</h1>
+        <h1>Foundry DevUI Example</h1>
         <ul>
           <li><a href="/devui">/devui</a> — MAF DevUI web interface</li>
           <li><a href="/v1/entities">/v1/entities</a> — Agent discovery API (JSON)</li>
@@ -70,7 +71,7 @@ app.MapGet("/", () =>
 });
 
 Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
-Console.WriteLine("║  Needlr DevUI Example                                       ║");
+Console.WriteLine("║  Foundry DevUI Example                                      ║");
 Console.WriteLine($"║  LLM: Copilot ({copilotOptions.DefaultModel})                               ║");
 Console.WriteLine("║  Open http://localhost:5250/devui in your browser            ║");
 Console.WriteLine("╚══════════════════════════════════════════════════════════════╝");

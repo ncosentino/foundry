@@ -344,8 +344,8 @@ evaluation producer.
 
 | Response reuse mode | Configuration and behavior |
 |---|---|
-| `CaseAndTrialReplay` | Requires a response cache. Matching request, model, scenario, and trial cache keys can replay across separate Needlr runs. |
-| `FreshPerRun` | Requires a response cache and adds the Needlr run ID to the scenario cache keys. Retries still replay within the same run. |
+| `CaseAndTrialReplay` | Requires a response cache. Matching request, model, scenario, and trial cache keys can replay across separate Foundry runs. |
+| `FreshPerRun` | Requires a response cache and adds the Foundry run ID to the scenario cache keys. Retries still replay within the same run. |
 | `Disabled` | Requires a configuration with no response-cache provider. Every attempt reaches the underlying chat client. |
 
 The task must use `MeaiReportingExperimentItem.ChatConfiguration.ChatClient` for primary model
@@ -361,7 +361,7 @@ persisting them. MEAI does not accept a cancellation token on `ScenarioRun.Dispo
 runner's cleanup timeout can therefore report a disposal failure while a provider store operation
 finishes later.
 
-Needlr does not render MEAI reports or fabricate aggregate `ScenarioRun` entries. Read the configured
+Foundry does not render MEAI reports or fabricate aggregate `ScenarioRun` entries. Read the configured
 `IEvaluationResultStore` and use MEAI's `HtmlReportWriter`, `JsonReportWriter`, or `dotnet aieval`
 tooling.
 
@@ -405,7 +405,7 @@ Caller-token cancellation propagates exactly, skips later sinks, and produces no
 The aggregate includes both `Result.Items[*].Publications` and final `SinkResults`.
 `outcome.PublicationStatus` never changes `outcome.Result.Decision`.
 
-Needlr-owned collections are read-only snapshots. Caller-owned case/output values and mutable MEAI
+Foundry-owned collections are read-only snapshots. Caller-owned case/output values and mutable MEAI
 evaluation objects cannot be deeply frozen; sinks must treat the entire result as read-only.
 
 ## Cancellation and Timeouts
@@ -438,7 +438,7 @@ Evaluator failure:
 - never replays execution.
 
 The mutable MEAI `EvaluationResult` remains available on the item but is excluded from canonical
-JSON. Needlr immediately freezes its metrics, diagnostics, interpretations, and metadata into
+JSON. Foundry immediately freezes its metrics, diagnostics, interpretations, and metadata into
 ordered `ExperimentMetricSnapshot` values.
 
 ## Run Evaluators
@@ -545,7 +545,7 @@ passing decision.
 
 ## JSON Artifact
 
-`ExperimentJsonArtifactWriter` writes a schema-version-4 outcome envelope with fixed Needlr-owned
+`ExperimentJsonArtifactWriter` writes a schema-version-4 outcome envelope with fixed Foundry-owned
 property ordering:
 
 - the unchanged schema-version-3 canonical quality result;
@@ -589,20 +589,19 @@ await new ExperimentJsonArtifactWriter().WriteAsync(
 
 The `JsonTypeInfo<TCase>` / `JsonTypeInfo<TOutput>` overload is the dependable trimmed and Native
 AOT path. Caller-owned payload schemas remain caller responsibility. Determinism applies to the
-Needlr envelope; it does not claim RFC 8785 cryptographic canonicalization.
+Foundry envelope; it does not claim RFC 8785 cryptographic canonicalization.
 
 ## Provider Convergence
 
-The planned ADR-0003 workstream is complete:
+The ADR-0003 workstream is complete:
 
-- [#51](https://github.com/ncosentino/needlr/issues/51) provides validated paginated Langfuse
-  dataset reads and `LangfuseDatasetCaseSource<TCase>` for latest or timestamped hosted sources.
-- [#52](https://github.com/ncosentino/needlr/issues/52) creates one reactivatable Langfuse trace and
-  at most one hosted dataset-run-item link per statistical trial.
-- [#53](https://github.com/ncosentino/needlr/issues/53) projects canonical item/run measurements and
-  the optional canonical decision through the final Langfuse result sink.
-- [#54](https://github.com/ncosentino/needlr/issues/54) adds the isolated MEAI Reporting adapter as
-  the second-provider proof.
+- `LangfuseDatasetCaseSource<TCase>` provides validated paginated dataset reads
+  for latest or timestamped hosted sources.
+- The item-scope adapter creates one reactivatable Langfuse trace and at most
+  one hosted dataset-run-item link per statistical trial.
+- The result sink projects canonical item and run measurements plus the
+  optional canonical decision.
+- The isolated MEAI Reporting adapter provides the second-provider proof.
 
 Further scheduler, retry, evaluator, statistical-policy, or provider expansion requires a separate
 design and issue rather than extending this workstream implicitly.

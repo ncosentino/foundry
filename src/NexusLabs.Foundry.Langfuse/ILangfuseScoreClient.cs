@@ -4,7 +4,7 @@ namespace NexusLabs.Foundry.Langfuse;
 
 /// <summary>
 /// Records Langfuse scores against a known trace id. Registered in dependency injection by
-/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse"/> for ASP.NET Core and
+/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection)"/> for ASP.NET Core and
 /// generic-host applications that score their own request traces.
 /// </summary>
 /// <remarks>

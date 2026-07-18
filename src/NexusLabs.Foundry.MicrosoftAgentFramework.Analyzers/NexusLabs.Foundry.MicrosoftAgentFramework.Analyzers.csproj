@@ -6,8 +6,12 @@
     <LangVersion>latest</LangVersion>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <IncludeSymbols>false</IncludeSymbols>
     <Description>Roslyn analyzers for Foundry's Microsoft Agent Framework integration. Catches topology mistakes at compile time: missing [FoundryAgent] on handoff targets, under-populated group chats, and cyclic handoff chains.</Description>
-    <PackageDescription>Roslyn analyzers for NexusLabs.Foundry Agent Framework integrations. Provides compile-time topology validation diagnostics (FDRYMAF001-008) and code fixes.</PackageDescription>
+    <PackageDescription>Roslyn analyzers for NexusLabs.Foundry Agent Framework integrations. Provides compile-time FDRYMAF topology and tool validation diagnostics.</PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>

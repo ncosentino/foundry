@@ -4,9 +4,9 @@ description: Pipeline-shape OpenTelemetry metrics and distributed-tracing spans 
 
 # Pipeline Metrics
 
-Needlr's `SequentialPipelineRunner` emits pipeline-shape OpenTelemetry metrics and distributed-tracing spans automatically. Pipeline-level dashboard questions like "which stage takes longest at p95?" or "where in the pipeline are tokens being spent?" can be answered without per-consumer telemetry plumbing.
+Foundry's `SequentialPipelineRunner` emits pipeline-shape OpenTelemetry metrics and distributed-tracing spans automatically. Pipeline-level dashboard questions like "which stage takes longest at p95?" or "where in the pipeline are tokens being spent?" can be answered without per-consumer telemetry plumbing.
 
-This is opt-in by default (zero overhead when not configured). When you call `ConfigurePipelineMetrics(...)` on the agent-framework syringe, Needlr swaps in the real `PipelineMetrics` implementation and the runner starts emitting against your configured meter and activity-source name.
+This is opt-in by default (zero overhead when not configured). When you call `ConfigurePipelineMetrics(...)` on the agent-framework syringe, Foundry swaps in the real `PipelineMetrics` implementation and the runner starts emitting against your configured meter and activity-source name.
 
 ---
 
@@ -224,7 +224,7 @@ If the bespoke metrics class implemented bucketing for a stringly-typed terminat
 
 The runner constructor takes a 4th parameter `IPipelineMetrics`:
 
-- **DI-resolved consumers see no break** — Needlr's `RegisterAgentFrameworkInfrastructure` registers `IPipelineMetrics` automatically. Without `ConfigurePipelineMetrics`, the registration resolves to `NoOpPipelineMetrics` (zero overhead).
+- **DI-resolved consumers see no break** — Foundry's `RegisterAgentFrameworkInfrastructure` registers `IPipelineMetrics` automatically. Without `ConfigurePipelineMetrics`, the registration resolves to `NoOpPipelineMetrics` (zero overhead).
 - **Manual constructions** (test fixtures, examples) need to pass `IPipelineMetrics` explicitly:
 
 ```csharp

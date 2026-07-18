@@ -6,7 +6,7 @@ namespace GeneratorCoexistenceApp;
 
 /// <summary>
 /// Needlr-side: <see cref="AgentFunctionGroupAttribute"/> declares this class
-/// as a tool group. Needlr's source generator emits <c>AIFunction</c> registrations
+/// as a tool group. Foundry's source generator emits <c>AIFunction</c> registrations
 /// and a <c>GeneratedAIFunctionProvider</c> for DI resolution.
 /// </summary>
 [AgentFunctionGroup("data-tools")]

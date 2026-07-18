@@ -6,7 +6,7 @@ A class has `[AgentGraphEdge]` but is not itself decorated with `[FoundryAgent]`
 
 ## Rule Description
 
-The class that carries `[AgentGraphEdge]` is a node in the agent graph and must be registered with Needlr via `[FoundryAgent]`. Without the agent declaration, the source class will not be part of any generated workflow and the edge declaration is meaningless.
+The class that carries `[AgentGraphEdge]` is a node in the agent graph and must be registered with Foundry via `[FoundryAgent]`. Without the agent declaration, the source class will not be part of any generated workflow and the edge declaration is meaningless.
 
 ## How to Fix
 

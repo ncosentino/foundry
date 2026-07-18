@@ -1,0 +1,105 @@
+site_name: Foundry
+site_description: AI and agentic application framework for .NET
+repo_url: https://github.com/ncosentino/foundry
+repo_name: ncosentino/foundry
+strict: true
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Agent Framework:
+      - Integrations and Workflows: ai-integrations.md
+      - Agent Functions: agent-functions.md
+      - Iterative Agent Loop: iterative-agent-loop.md
+      - Workspace: workspace.md
+      - Progress Reporting: progress-reporting.md
+      - Pipeline Metrics: pipeline-metrics.md
+      - GenAI Token Metrics: gen-ai-token-metrics.md
+      - Stage Termination: stage-termination.md
+      - Tool Result Middleware: tool-result-middleware.md
+      - Tiered Provider Selection: tiered-provider-selector.md
+  - Evaluation:
+      - Evaluation: evaluation.md
+      - Experiment Runner: experiment-runner.md
+      - Langfuse: langfuse.md
+  - Providers:
+      - GitHub Copilot: copilot.md
+  - Testing:
+      - Testing Tools: testing-tools.md
+  - Analyzers:
+      - Overview: analyzers/index.md
+      - FDRYMAF001: analyzers/FDRYMAF001.md
+      - FDRYMAF002: analyzers/FDRYMAF002.md
+      - FDRYMAF003: analyzers/FDRYMAF003.md
+      - FDRYMAF004: analyzers/FDRYMAF004.md
+      - FDRYMAF005: analyzers/FDRYMAF005.md
+      - FDRYMAF006: analyzers/FDRYMAF006.md
+      - FDRYMAF007: analyzers/FDRYMAF007.md
+      - FDRYMAF008: analyzers/FDRYMAF008.md
+      - FDRYMAF009: analyzers/FDRYMAF009.md
+      - FDRYMAF010: analyzers/FDRYMAF010.md
+      - FDRYMAF011: analyzers/FDRYMAF011.md
+      - FDRYMAF012: analyzers/FDRYMAF012.md
+      - FDRYMAF013: analyzers/FDRYMAF013.md
+      - FDRYMAF014: analyzers/FDRYMAF014.md
+      - FDRYMAF015: analyzers/FDRYMAF015.md
+      - FDRYMAF016: analyzers/FDRYMAF016.md
+      - FDRYMAF017: analyzers/FDRYMAF017.md
+      - FDRYMAF018: analyzers/FDRYMAF018.md
+      - FDRYMAF019: analyzers/FDRYMAF019.md
+      - FDRYMAF020: analyzers/FDRYMAF020.md
+      - FDRYMAF021: analyzers/FDRYMAF021.md
+      - FDRYMAF022: analyzers/FDRYMAF022.md
+      - FDRYMAF024: analyzers/FDRYMAF024.md
+      - FDRYMAF025: analyzers/FDRYMAF025.md
+      - FDRYMAF027: analyzers/FDRYMAF027.md
+      - FDRYMAF028: analyzers/FDRYMAF028.md
+      - FDRYMAF029: analyzers/FDRYMAF029.md
+      - FDRYMAF030: analyzers/FDRYMAF030.md
+  - Operations:
+      - Local CI Runners: local-runners.md
+      - Releasing: releasing.md
+  - Architecture Decisions:
+      - ADR-0001 DAG Graph Workflow Support: adr/adr-0001-dag-graph-workflow-support.md
+      - ADR-0002 Build ScriptedChatClient Locally: adr/adr-0002-build-scriptedchatclient-locally.md
+      - ADR-0003 Provider-Neutral Experiment Runner: adr/adr-0003-provider-neutral-experiment-runner.md
+      - ADR-0004 Extract AI Platform from Needlr: adr/adr-0004-extract-ai-platform-from-needlr.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+
+docs_dir: docs

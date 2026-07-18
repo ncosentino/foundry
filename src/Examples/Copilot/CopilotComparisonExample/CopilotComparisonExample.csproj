@@ -5,20 +5,15 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!--
-      Excluded from CI validation (test-packages.ps1) because
-      GitHub.Copilot.SDK bundles the Copilot CLI binary (~100MB+)
-      and this example is for manual side-by-side comparison only.
-    -->
-    <NeedlrExcludeFromValidation>true</NeedlrExcludeFromValidation>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.Copilot\NexusLabs.Foundry.Copilot.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr\NexusLabs.Needlr.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Injection\NexusLabs.Needlr.Injection.csproj" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Injection.Reflection\NexusLabs.Needlr.Injection.Reflection.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />
+    <PackageReference Include="NexusLabs.Needlr" />
+    <PackageReference Include="NexusLabs.Needlr.Injection" />
+    <PackageReference Include="NexusLabs.Needlr.Injection.Reflection" />
     <PackageReference Include="GitHub.Copilot.SDK" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />

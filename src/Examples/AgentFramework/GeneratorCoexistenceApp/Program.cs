@@ -1,25 +1,23 @@
 // GeneratorCoexistenceApp
 //
-// PURPOSE: Proves that Needlr's source generators and MAF's Workflows.Generators
-//          coexist in the same compilation without conflict. This project serves as
-//          living documentation — if a future MAF or Needlr release introduces a
-//          generator collision, this project's build will break.
+// PURPOSE: Proves that Foundry's and Needlr's source generators coexist with
+//          MAF's Workflows.Generators in the same compilation without conflict.
 //
 // WHAT'S HERE:
-//   - Needlr generators: [FoundryAgent], [AgentFunctionGroup], [AgentFunction]
-//   - MAF generators:    [MessageHandler] on an Executor class
-//   - Both generators run at compile time in the same project
+//   - Foundry generator: [FoundryAgent], [AgentFunctionGroup], [AgentFunction]
+//   - Needlr generator:  DI type registry
+//   - MAF generator:     [MessageHandler] on an Executor class
 
 using GeneratorCoexistenceApp;
 
 Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
 Console.WriteLine("║  Generator Coexistence Example                              ║");
-Console.WriteLine("║  Needlr generators + MAF Workflows.Generators in one build  ║");
+Console.WriteLine("║  Foundry + Needlr + MAF generators in one build             ║");
 Console.WriteLine("╚══════════════════════════════════════════════════════════════╝");
 Console.WriteLine();
 
-// ── Needlr generator output verification ──
-Console.WriteLine("── Needlr Source Generator Output ──");
+// ── Foundry generator output verification ──
+Console.WriteLine("── Foundry Source Generator Output ──");
 
 var agentType = typeof(DataAssistant);
 Console.WriteLine($"  [FoundryAgent] DataAssistant registered: {agentType.FullName}");
@@ -39,8 +37,8 @@ Console.WriteLine($"  AgentFrameworkFunctionRegistry emitted: {registryType is n
 
 // Verify the source-generated bootstrap exists
 var bootstrapType = agentType.Assembly.GetTypes()
-    .FirstOrDefault(t => t.Name == "NeedlrAgentFrameworkBootstrap");
-Console.WriteLine($"  NeedlrAgentFrameworkBootstrap emitted: {bootstrapType is not null}");
+    .FirstOrDefault(t => t.Name == "FoundryAgentFrameworkModuleInitializer");
+Console.WriteLine($"  FoundryAgentFrameworkModuleInitializer emitted: {bootstrapType is not null}");
 
 Console.WriteLine();
 
@@ -50,18 +48,18 @@ Console.WriteLine("── MAF Workflows.Generators Output ──");
 var executorType = typeof(GeneratorCoexistenceApp.Executors.EchoExecutor);
 Console.WriteLine($"  [MessageHandler] EchoExecutor registered: {executorType.FullName}");
 
-// MAF's generator emits a ConfigureRoutes method on the partial class
-var configureRoutes = executorType.GetMethod(
-    "ConfigureRoutes",
+// MAF's generator overrides ConfigureProtocol on the partial executor.
+var configureProtocol = executorType.GetMethod(
+    "ConfigureProtocol",
     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-Console.WriteLine($"  ConfigureRoutes generated: {configureRoutes is not null}");
+Console.WriteLine($"  ConfigureProtocol generated: {configureProtocol is not null}");
 
 Console.WriteLine();
 
 // ── Generated file inventory ──
 Console.WriteLine("── Generated Files (check obj/Generated/) ──");
-Console.WriteLine("  Needlr emits:");
-Console.WriteLine("    - NeedlrAgentFrameworkBootstrap.g.cs");
+Console.WriteLine("  Foundry emits:");
+Console.WriteLine("    - FoundryAgentFrameworkBootstrap.g.cs");
 Console.WriteLine("    - AgentFrameworkFunctions.g.cs");
 Console.WriteLine("    - GeneratedAIFunctionProvider.g.cs");
 Console.WriteLine("    - AgentRegistry.g.cs");
@@ -70,5 +68,15 @@ Console.WriteLine("  MAF emits:");
 Console.WriteLine("    - EchoExecutor route configuration (in obj/Generated/)");
 
 Console.WriteLine();
-Console.WriteLine("✅ Both generators compiled successfully in the same project.");
+if (providerType is null ||
+    registryType is null ||
+    bootstrapType is null ||
+    configureProtocol is null)
+{
+    Console.Error.WriteLine("Generator coexistence validation failed.");
+    return 1;
+}
+
+Console.WriteLine("✅ All generators compiled successfully in the same project.");
 Console.WriteLine("   No file name collisions, no attribute conflicts, no DI conflicts.");
+return 0;

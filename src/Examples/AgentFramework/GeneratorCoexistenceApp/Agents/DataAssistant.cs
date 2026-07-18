@@ -4,7 +4,7 @@ namespace GeneratorCoexistenceApp;
 
 /// <summary>
 /// Needlr-side: <see cref="FoundryAgentAttribute"/> declares this agent.
-/// Needlr's source generator emits it into the <c>AgentRegistry</c>, generates
+/// Foundry's source generator emits it into the <c>AgentRegistry</c>, generates
 /// a partial companion with topology metadata, and wires function groups.
 /// </summary>
 [FoundryAgent(

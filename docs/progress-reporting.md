@@ -1,10 +1,10 @@
 ---
-description: Track agent and workflow execution in real-time with Needlr's progress reporting system -- auto-discovered sinks, per-orchestration isolation, and ambient async context.
+description: Track agent and workflow execution in real-time with Foundry's progress reporting system -- optional Needlr discovery, per-orchestration isolation, and ambient async context.
 ---
 
 # Progress Reporting
 
-Needlr's Agent Framework emits structured progress events during agent and workflow execution — LLM calls, tool invocations, budget updates, workflow start/completion, and failures. Your code receives these events through **sinks** (`IProgressSink`) and uses them to build SSE streams, console displays, cost dashboards, trace diagrams, or any other real-time reporting surface.
+Foundry's Agent Framework emits structured progress events during agent and workflow execution — LLM calls, tool invocations, budget updates, workflow start/completion, and failures. Your code receives these events through **sinks** (`IProgressSink`) and uses them to build SSE streams, console displays, cost dashboards, trace diagrams, or any other real-time reporting surface.
 
 ---
 
@@ -27,7 +27,7 @@ public sealed class ConsoleSink : IProgressSink
 
 ### 2. Run a workflow
 
-If you're using Needlr's source generation or reflection-based scanning, the sink above is **auto-discovered** and registered in DI as a default. No explicit registration is needed.
+If you're using Foundry's Needlr integration with source generation or reflection-based scanning, the sink above is **auto-discovered** and registered in DI as a default. Other DI containers should register the sink explicitly.
 
 ```csharp
 var progressFactory = sp.GetRequiredService<IProgressReporterFactory>();
@@ -55,7 +55,7 @@ That's it for simple applications. Read on for multi-workflow and multi-tenant s
 
 Uses all `IProgressSink` instances registered in DI as defaults. This includes:
 
-- Sinks **auto-discovered** by Needlr (any class implementing `IProgressSink` that isn't decorated with `[DoNotAutoRegister]`)
+- Sinks **auto-discovered** by the Needlr integration (any class implementing `IProgressSink` that isn't decorated with `[DoNotAutoRegister]`)
 - Sinks **manually registered** via `services.AddSingleton<IProgressSink, MySink>()`
 
 Best for: **simple applications** with a single agentic workflow where all events go to the same place.
@@ -80,7 +80,7 @@ var reporter = progressFactory.Create($"tenant-{tenantId}-run-{runId}", [tenantS
 
 ## Auto-Discovery
 
-When Needlr's source generator or reflection scanning is active, any class implementing `IProgressSink` is automatically registered in DI as a singleton. This is the "zero-config" path — define the class, and it works.
+When the Needlr integration's source generator or reflection scanning is active, any class implementing `IProgressSink` is automatically registered in DI as a singleton. This is the zero-config path for Needlr consumers.
 
 Auto-discovery requires that Needlr is scanning the assembly containing the sink. This happens automatically when you use `UsingSourceGen()` or `UsingReflection()` on the `Syringe`.
 

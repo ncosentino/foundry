@@ -10,7 +10,7 @@ Code calls `CreateGraphWorkflow("graphName")` on a graph that declares `[AgentGr
 
 Calling `CreateGraphWorkflow` on a graph with WaitAny nodes will throw `NotSupportedException` at runtime. This analyzer catches the problem at compile time.
 
-Use `RunGraphAsync` instead — it auto-detects WaitAny nodes and uses Needlr's own graph executor with `Task.WhenAny` for fan-in points.
+Use `RunGraphAsync` instead — it auto-detects WaitAny nodes and uses Foundry's own graph executor with `Task.WhenAny` for fan-in points.
 
 ## How to Fix
 
@@ -27,7 +27,7 @@ var results = await workflow.RunAsync(question);
 ### After
 
 ```csharp
-// CORRECT — auto-selects MAF BSP for WaitAll, Needlr executor for WaitAny
+// CORRECT — auto-selects MAF BSP for WaitAll, Foundry executor for WaitAny
 var results = await factory.RunGraphAsync("my-graph", question);
 ```
 

@@ -10,6 +10,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 

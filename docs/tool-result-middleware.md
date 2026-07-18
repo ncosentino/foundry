@@ -1,5 +1,5 @@
 ---
-description: How Needlr's ToolResultFunctionMiddleware translates tool exceptions and IToolResult returns into LLM-safe responses, and the trade-offs of enabling it.
+description: How Foundry's ToolResultFunctionMiddleware translates tool exceptions and IToolResult returns into LLM-safe responses, and the trade-offs of enabling it.
 ---
 
 # Tool Result Middleware

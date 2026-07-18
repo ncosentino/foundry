@@ -6,8 +6,9 @@
     <!-- Write generated files to disk so both generators' output is visible -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>obj\Generated</CompilerGeneratedFilesOutputPath>
+    <FoundryDiagnostics>true</FoundryDiagnostics>
     <NeedlrDiagnostics>true</NeedlrDiagnostics>
-    <!-- Suppress MAF experimental workflow warnings (used by Needlr's WorkflowFactory) -->
+    <!-- Suppress MAF experimental workflow warnings used by Foundry's WorkflowFactory. -->
     <NoWarn>$(NoWarn);MAAIW001</NoWarn>
     <!-- OpenTelemetry.Api 1.15.0 (transitive via MAF) has a known advisory; we don't
          control the version. The same dep exists in other AgentFramework example apps. -->
@@ -15,12 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Needlr AgentFramework + generators (project references for dev) -->
+    <!-- Foundry Agent Framework and generators -->
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Generators\NexusLabs.Needlr.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\NexusLabs.Needlr.Generators.Attributes\NexusLabs.Needlr.Generators.Attributes.csproj" />
 
     <!-- MAF Workflows.Generators — the whole point: BOTH generators in one project -->
     <PackageReference Include="Microsoft.Agents.AI.Workflows.Generators" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
@@ -28,6 +27,7 @@
 
   <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.props" />
   <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.targets" />
-  <Import Project="..\..\..\NexusLabs.Needlr.Generators\build\NexusLabs.Needlr.Generators.targets" />
+
+  <Import Project="..\..\Needlr.Generators.props" />
 
 </Project>

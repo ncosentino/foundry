@@ -30,7 +30,7 @@
 //
 //     dotnet run --project src/Examples/AgentFramework/LangfuseConformanceApp -- resiliency
 //
-// Run with `dependency-injection` to prove that AddNeedlrLangfuse registers a
+// Run with `dependency-injection` to prove that AddFoundryLangfuse registers a
 // complete non-owning facade backed by one host-owned OpenTelemetry pipeline.
 // =============================================================================
 
@@ -54,12 +54,13 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.Langfuse;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
 using LangfuseConformanceApp;
 
-Console.WriteLine("=== Needlr → Langfuse Conformance Check ===");
+Console.WriteLine("=== Foundry → Langfuse Conformance Check ===");
 Console.WriteLine();
 
 // Selected modes:
@@ -136,7 +137,7 @@ if (string.IsNullOrWhiteSpace(publicKey) || string.IsNullOrWhiteSpace(secretKey)
 Console.WriteLine($"[setup] Langfuse host: {host}");
 Console.WriteLine();
 
-// ── Build a Needlr agent with diagnostics + a credential-free mock LLM ───────
+// ── Build a Foundry agent with diagnostics + a credential-free mock LLM ──────
 var configuration = new ConfigurationBuilder().Build();
 
 var serviceProvider = new Syringe()
@@ -501,7 +502,7 @@ static int RunDependencyInjectionCheck()
     Console.WriteLine();
 
     var services = new ServiceCollection();
-    services.AddNeedlrLangfuse(options =>
+    services.AddFoundryLangfuse(options =>
     {
         options.PublicKey = "pk-lf-di-conformance";
         options.SecretKey = "sk-lf-di-conformance";
@@ -1794,56 +1795,4 @@ static async Task<HashSet<string>> GetScoreNamesAsync(HttpClient http, string tr
     }
 
     return names;
-}
-
-internal sealed class MockChatClient : IChatClient
-{
-    private readonly string _modelId;
-    private readonly ChatClientMetadata _metadata;
-
-    public MockChatClient(string modelId = "mock-model")
-    {
-        _modelId = modelId;
-        _metadata = new ChatClientMetadata(
-            providerName: "mock-provider",
-            providerUri: new Uri("https://api.example.com:443"),
-            defaultModelId: modelId);
-    }
-
-    public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var response = new ChatResponse(
-            [new ChatMessage(ChatRole.Assistant, "Mock summary of the cached prompt content.")])
-        {
-            ModelId = _modelId,
-            Usage = new UsageDetails
-            {
-                InputTokenCount = 4000,
-                OutputTokenCount = 180,
-                TotalTokenCount = 4180,
-                CachedInputTokenCount = 2500,
-                ReasoningTokenCount = 90,
-            },
-        };
-        return Task.FromResult(response);
-    }
-
-    public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException("Streaming is not used in this example.");
-
-    public void Dispose()
-    {
-    }
-
-    public object? GetService(Type serviceType, object? serviceKey = null)
-    {
-        ArgumentNullException.ThrowIfNull(serviceType);
-        return serviceType == typeof(ChatClientMetadata) ? _metadata : null;
-    }
 }

@@ -6,7 +6,7 @@ A type referenced in `[AgentHandoffsTo(typeof(X))]` is not decorated with `[Foun
 
 ## Rule Description
 
-Every type listed as a handoff target must be a registered Needlr agent. If the target type does not carry `[FoundryAgent]`, the source generator cannot include it in the generated agent registry, and `IWorkflowFactory` will not be able to resolve it at runtime — causing the workflow to fail.
+Every type listed as a handoff target must be a registered Foundry agent. If the target type does not carry `[FoundryAgent]`, the source generator cannot include it in the generated agent registry, and `IWorkflowFactory` will not be able to resolve it at runtime — causing the workflow to fail.
 
 ## How to Fix
 
@@ -35,7 +35,7 @@ public class SummaryAgent { }   // ← registered
 
 ## When to Suppress
 
-Only suppress if you are intentionally referencing a type that is managed outside of Needlr's agent registry (for example, a programmatically created agent that does not participate in source generation).
+Only suppress if you are intentionally referencing a type that is managed outside of Foundry's agent registry (for example, a programmatically created agent that does not participate in source generation).
 
 ```csharp
 #pragma warning disable FDRYMAF001

@@ -1,10 +1,10 @@
 ---
-description: Parameter optionality, default-value resolution, and DTO null-handling semantics for [AgentFunction]-decorated tools in Needlr's source-generated AIFunction wrappers.
+description: Parameter optionality, default-value resolution, and DTO null-handling semantics for [AgentFunction]-decorated tools in Foundry's source-generated AIFunction wrappers.
 ---
 
 # Agent Functions
 
-Methods decorated with `[AgentFunction]` (typically grouped under an `[AgentFunctionGroup("name")]` class) are discovered by the Needlr source generator and wrapped as `Microsoft.Extensions.AI.AIFunction` instances at compile time. The generator emits a JSON schema describing each parameter and an `InvokeCoreAsync` method that decodes `AIFunctionArguments` payloads into typed parameter values.
+Methods decorated with `[AgentFunction]` (typically grouped under an `[AgentFunctionGroup("name")]` class) are discovered by the Foundry source generator and wrapped as `Microsoft.Extensions.AI.AIFunction` instances at compile time. The generator emits a JSON schema describing each parameter and an `InvokeCoreAsync` method that decodes `AIFunctionArguments` payloads into typed parameter values.
 
 This page documents the **parameter optionality** and **default-value resolution** semantics — how the framework decides what value to pass when the model omits an argument, sends `null`, or sends an explicit value.
 

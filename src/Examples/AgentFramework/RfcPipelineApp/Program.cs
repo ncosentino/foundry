@@ -16,9 +16,11 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Budget;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Sequential;
 using NexusLabs.Foundry.Copilot;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
+using RfcPipelineApp;
 using RfcPipelineApp.Core;
 
 // ============================================================================
@@ -339,20 +341,4 @@ static IReadOnlyList<string> WordWrap(string text, int maxWidth)
     }
 
     return lines;
-}
-
-/// <summary>
-/// Custom <see cref="IStageTermination"/> implementation outside the framework's
-/// closed <see cref="StageTermination"/> hierarchy. Demonstrates the third-party
-/// extension contract: implement the interface directly (the framework's
-/// abstract record is closed for external derivation by an internal constructor),
-/// supply a <see cref="ToTagValue"/> for the OTel <c>termination_cause</c> tag,
-/// and register the type with <see cref="JsonSerializerOptions"/> via a
-/// <see cref="DefaultJsonTypeInfoResolver"/> modifier for JSON round-tripping.
-/// </summary>
-internal sealed record RfcReviewerConsensus(
-    int ApprovingReviewers,
-    int RequestedChanges) : IStageTermination
-{
-    public string ToTagValue() => "RfcReviewerConsensus";
 }

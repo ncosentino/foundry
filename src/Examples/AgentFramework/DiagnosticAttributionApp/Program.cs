@@ -15,8 +15,11 @@ using Microsoft.Extensions.DependencyInjection;
 using NexusLabs.Foundry.MicrosoftAgentFramework;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
+
+using DiagnosticAttributionApp;
 
 Console.WriteLine("=== Diagnostic Attribution Example ===");
 Console.WriteLine();
@@ -189,32 +192,3 @@ else
 Console.WriteLine();
 Console.WriteLine("All checks passed.");
 return 0;
-
-// =============================================================================
-// Mock chat client — no LLM required
-// =============================================================================
-
-internal sealed class MockChatClient : IChatClient
-{
-    public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var response = new ChatResponse([new ChatMessage(ChatRole.Assistant, "Mock response")])
-        {
-            ModelId = "mock-model"
-        };
-        return Task.FromResult(response);
-    }
-
-    public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException();
-
-    public void Dispose() { }
-
-    public object? GetService(Type serviceType, object? serviceKey = null) => null;
-}

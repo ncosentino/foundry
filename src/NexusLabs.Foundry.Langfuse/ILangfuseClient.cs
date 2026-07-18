@@ -7,7 +7,7 @@ namespace NexusLabs.Foundry.Langfuse;
 /// <remarks>
 /// <para>
 /// Resolve this interface from dependency injection after calling
-/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{LangfuseOptions}?)"/>.
+/// <see cref="LangfuseServiceCollectionExtensions.AddFoundryLangfuse(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action{LangfuseOptions})"/>.
 /// The facade does not own the host's OpenTelemetry providers or HTTP transport and does not
 /// implement <see cref="IDisposable"/>.
 /// </para>

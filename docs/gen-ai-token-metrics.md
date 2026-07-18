@@ -4,9 +4,9 @@ description: Emit cache_read and reasoning measurements on the OpenTelemetry gen
 
 # GenAI Token Metrics
 
-Needlr's `DiagnosticsChatClientMiddleware` emits `cache_read` and `reasoning` measurements on the OpenTelemetry **`gen_ai.client.token.usage`** histogram — the same histogram MEAI's [`OpenTelemetryChatClient`](https://learn.microsoft.com/dotnet/api/microsoft.extensions.ai.opentelemetrychatclient) emits `input` and `output` measurements on. The two writers cohabit cleanly so a single Prometheus / OTel-backed dashboard can slice token spend across all four `gen_ai.token.type` values per LLM call.
+Foundry's `DiagnosticsChatClientMiddleware` emits `cache_read` and `reasoning` measurements on the OpenTelemetry **`gen_ai.client.token.usage`** histogram — the same histogram MEAI's [`OpenTelemetryChatClient`](https://learn.microsoft.com/dotnet/api/microsoft.extensions.ai.opentelemetrychatclient) emits `input` and `output` measurements on. The two writers cohabit cleanly so a single Prometheus / OTel-backed dashboard can slice token spend across all four `gen_ai.token.type` values per LLM call.
 
-This is on by default whenever Needlr's diagnostics middleware is wired (via `UsingDiagnostics()`, `IIterativeAgentLoop`, or any custom path that constructs `DiagnosticsChatClientMiddleware` with the DI-provided `IGenAiTokenMetrics`).
+This is on by default whenever Foundry's diagnostics middleware is wired (via `UsingDiagnostics()`, `IIterativeAgentLoop`, or any custom path that constructs `DiagnosticsChatClientMiddleware` with the DI-provided `IGenAiTokenMetrics`).
 
 ---
 
@@ -19,7 +19,7 @@ But [`UsageDetails`](https://learn.microsoft.com/dotnet/api/microsoft.extensions
 - `UsageDetails.CachedInputTokenCount` — for providers that bill cached input tokens at a different rate (Anthropic prompt cache, Azure OpenAI cached input).
 - `UsageDetails.ReasoningTokenCount` — for models that produce internal reasoning tokens billed separately from final output (o-series, Claude extended-thinking).
 
-Operationally these are the two largest cost levers for those providers. Needlr surfaces them on the same histogram MEAI writes to so existing OTel pipelines pick them up without any additional plumbing.
+Operationally these are the two largest cost levers for those providers. Foundry surfaces them on the same histogram MEAI writes to so existing OTel pipelines pick them up without any additional plumbing.
 
 ---
 
@@ -39,7 +39,7 @@ Then in your OpenTelemetry setup, ensure the meter is registered:
 ```csharp
 services.AddOpenTelemetry()
     .WithMetrics(b => b
-        .AddMeter("Experimental.Microsoft.Extensions.AI") // captures BOTH MEAI and Needlr writes
+        .AddMeter("Experimental.Microsoft.Extensions.AI") // captures BOTH MEAI and Foundry writes
         .AddPrometheusExporter());
 ```
 
@@ -58,7 +58,7 @@ Per successful LLM call (or per failed streaming call where partial usage was ob
 
 **Skip-zero rule:** zero or negative counts emit nothing. The middleware short-circuits before resolving any tag metadata when both counts are zero (the common path), so the no-cache / no-reasoning case has near-zero overhead even when an OTel listener is attached.
 
-**Anti-regression rule:** Needlr **never** emits `input` or `output` — those are MEAI's responsibility. Duplicate emission would silently double the recorded values.
+**Anti-regression rule:** Foundry **never** emits `input` or `output` — those are MEAI's responsibility. Duplicate emission would silently double the recorded values.
 
 ---
 
@@ -78,13 +78,13 @@ Each emitted sample carries the tags MEAI's [`AddMetricTags`](https://github.com
 
 Tags whose source value is null are omitted from the recorded measurement, **with one exception**: `gen_ai.provider.name` is added unconditionally (with a null value when no provider metadata is available) because MEAI's `AddMetricTags` does the same — and label-set parity between the two writers is what allows Prometheus / the OpenTelemetry SDK to aggregate both into one series. `server.port` is always recorded whenever `server.address` is recorded — no scheme-default special-casing — again matching MEAI exactly.
 
-`error.type` is **deliberately not** attached to Needlr's samples on the failure path, because MEAI also does not attach `error.type` to the token-usage histogram (only to the operation-duration histogram). Label-set parity between the two writers is what allows Prometheus to aggregate both into one series.
+`error.type` is **deliberately not** attached to Foundry's samples on the failure path, because MEAI also does not attach `error.type` to the token-usage histogram (only to the operation-duration histogram). Label-set parity between the two writers is what allows Prometheus to aggregate both into one series.
 
 ---
 
 ## Configuring the meter name
 
-`AgentFrameworkMetricsOptions.GenAiMeterName` controls the meter Needlr uses. The default `"Experimental.Microsoft.Extensions.AI"` matches MEAI 10.5.0's `OpenTelemetryConsts.DefaultSourceName`, which is what `OpenTelemetryChatClient` uses when constructed without an explicit `sourceName`. If your composition root passes a custom `sourceName` to MEAI, set the same value here:
+`AgentFrameworkMetricsOptions.GenAiMeterName` controls the meter Foundry uses. The default `"Experimental.Microsoft.Extensions.AI"` matches MEAI 10.5.0's `OpenTelemetryConsts.DefaultSourceName`, which is what `OpenTelemetryChatClient` uses when constructed without an explicit `sourceName`. If your composition root passes a custom `sourceName` to MEAI, set the same value here:
 
 ```csharp
 .UsingAgentFramework(af => af
@@ -98,7 +98,7 @@ services.AddSingleton<IChatClient>(sp => new OpenTelemetryChatClient(
     sourceName: "MyApp.GenAI"));
 ```
 
-For the OpenTelemetry SDK to combine Needlr's `cache_read` / `reasoning` measurements with MEAI's `input` / `output` measurements into a single metric stream, both writers must declare instruments with identical **stream identity**: meter name, instrument name, instrument type, unit, description, and bucket boundaries. Needlr's `GenAiTokenMetrics` matches MEAI exactly on every one of these — name `gen_ai.client.token.usage`, type `Histogram<int>`, unit `{token}`, description `"Measures number of input and output tokens used"`, explicit bucket boundaries `[1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864]`. Runtime semantics differ deliberately (Needlr only emits `cache_read`/`reasoning`, skips zero counts, and clamps `long` token counts to `int.MaxValue`); instrument identity does not.
+For the OpenTelemetry SDK to combine Foundry's `cache_read` / `reasoning` measurements with MEAI's `input` / `output` measurements into a single metric stream, both writers must declare instruments with identical **stream identity**: meter name, instrument name, instrument type, unit, description, and bucket boundaries. Foundry's `GenAiTokenMetrics` matches MEAI exactly on every one of these — name `gen_ai.client.token.usage`, type `Histogram<int>`, unit `{token}`, description `"Measures number of input and output tokens used"`, explicit bucket boundaries `[1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864]`. Runtime semantics differ deliberately (Foundry only emits `cache_read`/`reasoning`, skips zero counts, and clamps `long` token counts to `int.MaxValue`); instrument identity does not.
 
 Setting only the meter name is sufficient — the rest is handled.
 
@@ -129,14 +129,14 @@ sum(rate(gen_ai_client_token_usage_sum{gen_ai_token_type="output"}[5m]))
 
 ## Failure-path behaviour
 
-For **non-streaming** failures (the inner `IChatClient.GetResponseAsync` throws before any response is returned), there is no usage data to record — neither MEAI nor Needlr emits anything on the token-usage histogram. The skip-zero rule in Needlr's middleware ensures this case emits nothing.
+For **non-streaming** failures (the inner `IChatClient.GetResponseAsync` throws before any response is returned), there is no usage data to record — neither MEAI nor Foundry emits anything on the token-usage histogram. The skip-zero rule in Foundry's middleware ensures this case emits nothing.
 
 For **streaming** failures where `UsageContent` chunks arrived before the failure, `aggregated = buffered.ToChatResponse()` carries the partial usage data. In this case:
 
-- MEAI's `OpenTelemetryChatClient` may emit `input` / `output` samples (its `TraceResponse` path inspects `response?.Usage` regardless of whether an error occurred) — though both the `input`/`output` measurements and Needlr's `cache_read`/`reasoning` measurements omit `error.type` on the token-usage histogram.
-- Needlr's middleware emits `cache_read` / `reasoning` samples for whatever was observed before the failure, with the same skip-zero rule as the success path.
+- MEAI's `OpenTelemetryChatClient` may emit `input` / `output` samples (its `TraceResponse` path inspects `response?.Usage` regardless of whether an error occurred) — though both the `input`/`output` measurements and Foundry's `cache_read`/`reasoning` measurements omit `error.type` on the token-usage histogram.
+- Foundry's middleware emits `cache_read` / `reasoning` samples for whatever was observed before the failure, with the same skip-zero rule as the success path.
 
-The result is that streaming partial-usage failures produce token-usage samples from **both** writers with consistent label sets, just as the success path does. Dashboard authors who filter by `error.type` on the operation-duration histogram (`gen_ai.client.operation.duration`) won't see token-usage samples from this path, since Needlr deliberately omits `error.type` to maintain label-set parity with the success path; if you need to attribute partial-usage failures, correlate the operation-duration `error.type` series with the token-usage series via `gen_ai.response.model` or a request-id label your application adds upstream.
+The result is that streaming partial-usage failures produce token-usage samples from **both** writers with consistent label sets, just as the success path does. Dashboard authors who filter by `error.type` on the operation-duration histogram (`gen_ai.client.operation.duration`) won't see token-usage samples from this path, since Foundry deliberately omits `error.type` to maintain label-set parity with the success path; if you need to attribute partial-usage failures, correlate the operation-duration `error.type` series with the token-usage series via `gen_ai.response.model` or a request-id label your application adds upstream.
 
 ---
 

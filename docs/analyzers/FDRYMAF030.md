@@ -11,7 +11,7 @@ An `[AgentFunction]` parameter is typed as `string` and EITHER:
 
 The Microsoft Extensions AI `IChatClient` you use determines how tool argument values reach your code. GitHub Copilot's `IChatClient` pre-stringifies values, so a JSON array sent by the model arrives as a `JsonElement` of kind `String`. Most other clients (e.g. `AzureOpenAIClient.AsIChatClient()`) parse the model's tool-call JSON literally — the array stays an `Array`-kind `JsonElement`.
 
-The Needlr source generator emits a kind-tolerant extractor that handles both shapes by calling `JsonElement.GetRawText()` for non-string kinds, so a `string findingsJson` parameter still receives valid JSON text regardless of the underlying client.
+The Foundry source generator emits a kind-tolerant extractor that handles both shapes by calling `JsonElement.GetRawText()` for non-string kinds, so a `string findingsJson` parameter still receives valid JSON text regardless of the underlying client.
 
 This works, but it's a round-trip: the model produced structured JSON, the chat client parsed it, the generator serializes it back to text, and your tool body deserializes it. Typing the parameter as `System.Text.Json.JsonElement` skips the round-trip and gives the tool body direct, typed access to the parsed shape.
 

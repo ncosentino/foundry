@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation" />
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
   </ItemGroup>
 
@@ -24,6 +25,7 @@
     <ProjectReference Include="..\IterativeTripPlannerApp.Core\IterativeTripPlannerApp.Core.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.Evaluation\NexusLabs.Foundry.Evaluation.csproj" />
     <ProjectReference Include="..\..\..\NexusLabs.Foundry.Copilot\NexusLabs.Foundry.Copilot.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework\NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />
   </ItemGroup>
 
 </Project>

@@ -18,7 +18,8 @@
                       GeneratePathProperty="true" />
   </ItemGroup>
 
-  <!-- Include SemanticKernel generators in the NuGet package -->
+  <!-- Run the Semantic Kernel generator during source-mode development.
+       Consumers reference the standalone generator package explicitly. -->
   <ItemGroup>
     <ProjectReference Include="..\NexusLabs.Foundry.Needlr.SemanticKernel.Generators\NexusLabs.Foundry.Needlr.SemanticKernel.Generators.csproj"
                       PrivateAssets="all"
@@ -27,10 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\NexusLabs.Foundry.Needlr.SemanticKernel.Generators\bin\$(Configuration)\netstandard2.0\NexusLabs.Foundry.Needlr.SemanticKernel.Generators.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs"
-          Visible="false" />
     <None Include="build\*.targets" Pack="true" PackagePath="build/" />
   </ItemGroup>
 

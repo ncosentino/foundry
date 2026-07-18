@@ -11,6 +11,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.Evaluation;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.Copilot;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 
@@ -44,7 +45,7 @@ using NexusLabs.Needlr.Injection.Reflection;
 //   - GitHub Copilot CLI must be authenticated (run `gh auth login` first)
 // =============================================================================
 
-PrintHeader("Needlr Agent Framework — Evaluation Demo");
+PrintHeader("Foundry Agent Framework — Evaluation Demo");
 
 // ── Configuration + DI ─────────────────────────────────────────────────
 var configuration = new ConfigurationBuilder()

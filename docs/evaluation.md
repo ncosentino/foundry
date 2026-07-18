@@ -1,6 +1,6 @@
 # Evaluation
 
-Needlr's agent framework plugs directly into [`Microsoft.Extensions.AI.Evaluation`](https://learn.microsoft.com/en-us/dotnet/ai/evaluation/libraries) without adapters or flattening.
+Foundry's agent framework plugs directly into [`Microsoft.Extensions.AI.Evaluation`](https://learn.microsoft.com/en-us/dotnet/ai/evaluation/libraries) without adapters or flattening.
 
 For collection-level orchestration across finite cases and repeated trials—including retries,
 shared concurrency, run evaluators, and deterministic or statistical quality policies—see the
@@ -12,7 +12,7 @@ opt-in through the dedicated `NexusLabs.Foundry.Evaluation.Reporting` package; s
 
 ## Overview
 
-`Microsoft.Extensions.AI.Evaluation` (MEAI.Evaluation) evaluates LLM interactions by consuming native MEAI primitives: `ChatMessage`, `ChatResponse`, and `UsageDetails`. Needlr exposes these same shapes on its result surfaces, so evaluators slot in directly — no string flattening, no re-hydration step.
+`Microsoft.Extensions.AI.Evaluation` (MEAI.Evaluation) evaluates LLM interactions by consuming native MEAI primitives: `ChatMessage`, `ChatResponse`, and `UsageDetails`. Foundry exposes these same shapes on its result surfaces, so evaluators slot in directly — no string flattening, no re-hydration step.
 
 ## Live-path result types
 
@@ -64,7 +64,7 @@ The returned sequence alternates `FunctionCallContent` (the call) and `FunctionR
 
 ## Example
 
-See [`src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation`](https://github.com/ncosentino/needlr/tree/main/src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation) for an end-to-end evaluation demo. It runs a real trip-planner agent via `IterativeTripPlannerApp.Core`, extracts diagnostics, converts them to `EvaluationInputs` via `ToEvaluationInputs()`, and scores the run with both Needlr-native deterministic evaluators and MS MEAI quality evaluators using `CopilotChatClient` as the judge.
+See [`src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation`](https://github.com/ncosentino/foundry/tree/main/src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation) for an end-to-end evaluation demo. It runs a real trip-planner agent via `IterativeTripPlannerApp.Core`, extracts diagnostics, converts them to `EvaluationInputs` via `ToEvaluationInputs()`, and scores the run with both Foundry-native deterministic evaluators and MS MEAI quality evaluators using `CopilotChatClient` as the judge.
 
 Run it:
 
@@ -169,7 +169,7 @@ Mid-stream failures record the partial output-message count observed so far and 
 
 ### Character counts
 
-Tokens are an LLM-reported abstraction; character counts are a direct measure of the payload Needlr actually shipped and received. Both are captured on every completion.
+Tokens are an LLM-reported abstraction; character counts are a direct measure of the payload Foundry actually shipped and received. Both are captured on every completion.
 
 - **`ChatCompletionDiagnostics.RequestCharCount`** — sum of `TextContent.Text?.Length` across all `RequestMessages`.
 - **`ChatCompletionDiagnostics.ResponseCharCount`** — sum of text length across the aggregated `Response`.
@@ -180,7 +180,7 @@ Populated automatically by `DiagnosticsChatClientMiddleware` and `DiagnosticsFun
 
 ### OpenTelemetry interop
 
-When MEAI's `UseOpenTelemetry()` or MAF's `WithOpenTelemetry()` is also active, both the upstream middleware and Needlr's `DiagnosticsChatClientMiddleware` create `Activity` spans for the same chat completion call. To avoid duplicate spans, set `ChatCompletionActivityMode` to `EnrichParent`:
+When MEAI's `UseOpenTelemetry()` or MAF's `WithOpenTelemetry()` is also active, both the upstream middleware and Foundry's `DiagnosticsChatClientMiddleware` create `Activity` spans for the same chat completion call. To avoid duplicate spans, set `ChatCompletionActivityMode` to `EnrichParent`:
 
 ```csharp
 .UsingAgentFramework(af => af
@@ -188,14 +188,14 @@ When MEAI's `UseOpenTelemetry()` or MAF's `WithOpenTelemetry()` is also active, 
         o.ChatCompletionActivityMode = ChatCompletionActivityMode.EnrichParent))
 ```
 
-In `EnrichParent` mode, when a parent `gen_ai.*` activity exists (from MEAI or MAF), Needlr skips creating its own activity and instead adds Needlr-specific tags (sequence number, char counts, agent name) to the existing parent span. When no parent exists, Needlr creates its own activity as normal.
+In `EnrichParent` mode, when a parent `gen_ai.*` activity exists (from MEAI or MAF), Foundry skips creating its own activity and instead adds Foundry-specific tags (sequence number, char counts, agent name) to the existing parent span. When no parent exists, Foundry creates its own activity as normal.
 
-Tool call activities (`agent.tool`) are not affected — neither MEAI nor MAF produces per-tool-call spans, so Needlr's tool tracing is always the sole source.
+Tool call activities (`agent.tool`) are not affected — neither MEAI nor MAF produces per-tool-call spans, so Foundry's tool tracing is always the sole source.
 
 | Mode | When to use |
 |------|-------------|
-| `Always` (default) | Needlr is the only OTel instrumentation layer |
-| `EnrichParent` | Both Needlr and upstream (MEAI/MAF) OTel middleware are active |
+| `Always` (default) | Foundry is the only OTel instrumentation layer |
+| `EnrichParent` | Both Foundry and upstream (MEAI/MAF) OTel middleware are active |
 
 Metrics (counters, histograms) and in-process diagnostics recording are unaffected by this setting — only `Activity` span creation is suppressed.
 
@@ -234,7 +234,7 @@ All three evaluators consume the same bridge type:
 
 `AgentRunDiagnosticsContext : EvaluationContext` wraps an `IAgentRunDiagnostics` instance and exposes it through an `EvaluationContext` so native evaluators (and MEAI-provided evaluators that accept supplemental context) can read diagnostics without a custom adapter.
 
-- **`ContextName = "Needlr Agent Run Diagnostics"`** — stable constant used as the context identifier.
+- **`ContextName = "Foundry Agent Run Diagnostics"`** — stable constant used as the context identifier.
 - **`Diagnostics`** — the wrapped `IAgentRunDiagnostics`.
 - `BuildContents()` emits a single `TextContent` summary of the run (agent name, execution mode, outcome, chat-completion count, tool-call count, duration) so MEAI judge-based evaluators that round-trip context through a prompt still see a readable summary.
 

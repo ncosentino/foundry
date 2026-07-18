@@ -1,4 +1,41 @@
 <Solution>
+  <Folder Name="/Examples/" />
+  <Folder Name="/Examples/AgentFramework/">
+    <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
+    <Project Path="Examples/AgentFramework/CodeReviewPipelineApp/CodeReviewPipelineApp.csproj" />
+    <Project Path="Examples/AgentFramework/DagRoutingApp.Agents/DagRoutingApp.Agents.csproj" />
+    <Project Path="Examples/AgentFramework/DagRoutingApp/DagRoutingApp.csproj" />
+    <Project Path="Examples/AgentFramework/DevUIApp/DevUIApp.csproj" />
+    <Project Path="Examples/AgentFramework/DiagnosticAttributionApp/DiagnosticAttributionApp.csproj" />
+    <Project Path="Examples/AgentFramework/EarlyCompletionApp/EarlyCompletionApp.csproj" />
+    <Project Path="Examples/AgentFramework/ExperimentRunnerApp/ExperimentRunnerApp.csproj" />
+    <Project Path="Examples/AgentFramework/GenAiTokenMetricsApp/GenAiTokenMetricsApp.csproj" />
+    <Project Path="Examples/AgentFramework/GeneratorCoexistenceApp/GeneratorCoexistenceApp.csproj" />
+    <Project Path="Examples/AgentFramework/GraphWorkflowApp.Agents/GraphWorkflowApp.Agents.csproj" />
+    <Project Path="Examples/AgentFramework/GraphWorkflowApp/GraphWorkflowApp.csproj" />
+    <Project Path="Examples/AgentFramework/GroupChatAgentFrameworkApp.Agents/GroupChatAgentFrameworkApp.Agents.csproj" />
+    <Project Path="Examples/AgentFramework/GroupChatAgentFrameworkApp/GroupChatAgentFrameworkApp.csproj" />
+    <Project Path="Examples/AgentFramework/IterativeLoopDiagnosticsApp/IterativeLoopDiagnosticsApp.csproj" />
+    <Project Path="Examples/AgentFramework/IterativeTripPlannerApp.Core/IterativeTripPlannerApp.Core.csproj" />
+    <Project Path="Examples/AgentFramework/IterativeTripPlannerApp.Evaluation/IterativeTripPlannerApp.Evaluation.csproj" />
+    <Project Path="Examples/AgentFramework/IterativeTripPlannerApp/IterativeTripPlannerApp.csproj" />
+    <Project Path="Examples/AgentFramework/LangfuseConformanceApp/LangfuseConformanceApp.csproj" />
+    <Project Path="Examples/AgentFramework/LangfuseEvaluationApp/LangfuseEvaluationApp.csproj" />
+    <Project Path="Examples/AgentFramework/MeaiReportingExperimentApp/MeaiReportingExperimentApp.csproj" />
+    <Project Path="Examples/AgentFramework/RfcPipelineApp.Core/RfcPipelineApp.Core.csproj" />
+    <Project Path="Examples/AgentFramework/RfcPipelineApp.Tests/RfcPipelineApp.Tests.csproj" />
+    <Project Path="Examples/AgentFramework/RfcPipelineApp/RfcPipelineApp.csproj" />
+    <Project Path="Examples/AgentFramework/SimpleAgentFrameworkApp.Agents/SimpleAgentFrameworkApp.Agents.csproj" />
+    <Project Path="Examples/AgentFramework/SimpleAgentFrameworkApp/SimpleAgentFrameworkApp.csproj" />
+    <Project Path="Examples/AgentFramework/SpectreProgressApp/SpectreProgressApp.csproj" />
+    <Project Path="Examples/AgentFramework/SupportTriagePipelineApp/SupportTriagePipelineApp.csproj" />
+  </Folder>
+  <Folder Name="/Examples/Copilot/">
+    <Project Path="Examples/Copilot/CopilotComparisonExample/CopilotComparisonExample.csproj" />
+  </Folder>
+  <Folder Name="/Examples/SemanticKernel/">
+    <Project Path="Examples/SemanticKernel/SimpleSemanticKernelApp/SimpleSemanticKernelApp.csproj" />
+  </Folder>
   <Project Path="NexusLabs.Foundry.Copilot.Tests/NexusLabs.Foundry.Copilot.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.Copilot/NexusLabs.Foundry.Copilot.csproj" />
   <Project Path="NexusLabs.Foundry.Evaluation.Reporting.Tests/NexusLabs.Foundry.Evaluation.Reporting.Tests.csproj" />

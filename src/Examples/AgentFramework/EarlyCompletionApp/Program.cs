@@ -28,6 +28,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 using NexusLabs.Foundry.Copilot;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
 

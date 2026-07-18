@@ -19,8 +19,11 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Iterative;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.Reflection;
+
+using IterativeLoopDiagnosticsApp;
 
 Console.WriteLine("=== Iterative Loop Diagnostics Example ===");
 Console.WriteLine();
@@ -191,68 +194,4 @@ else
     Console.WriteLine("CHECKS FAILED — duplication bug may have regressed.");
     Console.ResetColor();
     return 1;
-}
-
-// =============================================================================
-// Mock chat client — returns a tool call on first request, text on second
-// =============================================================================
-
-internal sealed class ToolCallingMockChatClient : IChatClient
-{
-    private int _callCount;
-
-    public Task<ChatResponse> GetResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var n = Interlocked.Increment(ref _callCount);
-
-        if (n == 1)
-        {
-            // First call: return a tool call
-            var response = new ChatResponse(
-            [
-                new ChatMessage(ChatRole.Assistant,
-                [
-                    new FunctionCallContent("call-1", "SearchArticles",
-                        new Dictionary<string, object?> { ["query"] = "diagnostics" })
-                ])
-            ])
-            {
-                ModelId = "mock-model",
-                Usage = new UsageDetails
-                {
-                    InputTokenCount = 150,
-                    OutputTokenCount = 30,
-                    TotalTokenCount = 180,
-                },
-            };
-            return Task.FromResult(response);
-        }
-
-        // Second+ call: return text (iteration complete)
-        var textResponse = new ChatResponse(
-            [new ChatMessage(ChatRole.Assistant, "Here are the results from the search.")])
-        {
-            ModelId = "mock-model",
-            Usage = new UsageDetails
-            {
-                InputTokenCount = 200,
-                OutputTokenCount = 80,
-                TotalTokenCount = 280,
-            },
-        };
-        return Task.FromResult(textResponse);
-    }
-
-    public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException("Streaming not used by IterativeAgentLoop");
-
-    public void Dispose() { }
-
-    public object? GetService(Type serviceType, object? serviceKey = null) => null;
 }

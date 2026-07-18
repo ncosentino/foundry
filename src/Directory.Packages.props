@@ -6,7 +6,6 @@
   <ItemGroup>
     <!-- Optional Needlr integration packages -->
     <PackageVersion Include="NexusLabs.Needlr" Version="0.0.2" />
-    <PackageVersion Include="NexusLabs.Needlr.AspNet" Version="0.0.2" />
     <PackageVersion Include="NexusLabs.Needlr.Build" Version="0.0.2" />
     <PackageVersion Include="NexusLabs.Needlr.Generators" Version="0.0.2" />
     <PackageVersion Include="NexusLabs.Needlr.Generators.Attributes" Version="0.0.2" />
@@ -16,28 +15,19 @@
 
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Memory" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.1.0" />
-    <!-- .NET MAUI (used by NexusLabs.Needlr.Maui; the net10.0 ref assemblies compile without the MAUI workload) -->
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.20" />
     <!-- Microsoft Agent Framework (stable) -->
     <PackageVersion Include="Microsoft.Agents.AI" Version="1.3.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Abstractions" Version="1.3.0" />
     <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.3.0" />
     <PackageVersion Include="Microsoft.Agents.AI.Workflows.Generators" Version="1.3.0" />
-    <!-- DevUI and Hosting (preview — isolated in NexusLabs.Needlr.AgentFramework.DevUI) -->
+    <!-- DevUI and Hosting (preview — isolated in NexusLabs.Foundry.MicrosoftAgentFramework.DevUI) -->
     <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.3.0-preview.260423.1" />
     <PackageVersion Include="Microsoft.Agents.AI.Hosting" Version="1.3.0-preview.260423.1" />
     <PackageVersion Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.3.0-alpha.260423.1" />
@@ -52,21 +42,10 @@
     <PackageVersion Include="Azure.AI.OpenAI" Version="2.7.0-beta.2" />
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.72.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.72.0" />
-    <!-- Serilog packages -->
-    <PackageVersion Include="Serilog" Version="4.3.1" />
-    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageVersion Include="Scrutor" Version="6.1.0" />
-    <PackageVersion Include="Carter" Version="9.0.0" />
-    <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.7.115" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <!-- ASP.NET packages -->
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.0" />
     <PackageVersion Include="OpenTelemetry" Version="1.15.3" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.15.3" />
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.15.3" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
@@ -77,7 +56,6 @@
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.10.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="TUnit" Version="1.37.35" />
     <!-- Source generator packages -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
@@ -87,14 +65,7 @@
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.4" />
     <!-- UI packages -->
     <PackageVersion Include="Spectre.Console" Version="0.55.0" />
-    <!-- Avalonia (for AvaloniaDemoApp example) -->
-    <PackageVersion Include="Avalonia" Version="11.3.0" />
-    <PackageVersion Include="Avalonia.Desktop" Version="11.3.0" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.0" />
-    <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.0" />
-    <!-- Benchmarking packages -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
-    <!-- GitHub Copilot SDK (used only by CopilotComparisonExample, excluded from CI) -->
-    <PackageVersion Include="GitHub.Copilot.SDK" Version="0.2.2" />
+    <!-- GitHub Copilot SDK (used only by CopilotComparisonExample) -->
+    <PackageVersion Include="GitHub.Copilot.SDK" Version="1.0.7" />
   </ItemGroup>
 </Project>

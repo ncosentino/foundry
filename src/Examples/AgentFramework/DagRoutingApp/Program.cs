@@ -48,6 +48,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Diagnostics;
 using NexusLabs.Foundry.Copilot;
+using NexusLabs.Foundry.Needlr.MicrosoftAgentFramework;
 using NexusLabs.Needlr.Injection;
 using NexusLabs.Needlr.Injection.SourceGen;
 

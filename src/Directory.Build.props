@@ -51,10 +51,6 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g94r-2vxg-569j" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(IsPackable)' == 'true' and Exists('$(RootReadmePath)')">
     <None Include="$(RootReadmePath)"
           Pack="true"
