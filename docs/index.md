@@ -20,9 +20,14 @@ runtime, evaluation, or provider packages.
   experiment publication.
 - `NexusLabs.Foundry.Copilot` provides GitHub Copilot chat integration.
 - `NexusLabs.Foundry.Needlr.*` packages provide optional Needlr integration.
+- `NexusLabs.Foundry.Needlr.SemanticKernel.Generators` provides compile-time
+  Semantic Kernel plugin registration for Needlr consumers.
 
 ## Start here
 
+- [Getting started](getting-started.md)
+- [Configuration](configuration.md)
+- [Building from source](building.md)
 - [Agent Framework integrations and workflows](ai-integrations.md)
 - [Provider-neutral experiment runner](experiment-runner.md)
 - [Langfuse integration](langfuse.md)
