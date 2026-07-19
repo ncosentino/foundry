@@ -1,0 +1,65 @@
+name: Documentation Deployment
+
+on:
+  workflow_run:
+    workflows:
+      - Documentation
+      - Release
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: foundry-docs-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >-
+      vars.DOCS_DEPLOY_ENABLED == 'true' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event != 'pull_request'
+        )
+      )
+    runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    environment:
+      name: documentation
+      url: https://www.devleader.ca/projects/foundry/
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: source
+
+      - name: Checkout merged documentation
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: gh-pages-mirror
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Trim Cloudflare mirror
+        run: python source/scripts/trim-cloudflare-mirror.py gh-pages-mirror --keep 20
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Deploy merged documentation to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy gh-pages-mirror --project-name=nexuslabs-foundry --branch=main --commit-dirty=true

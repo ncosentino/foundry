@@ -183,3 +183,75 @@ jobs:
           files: |
             artifacts/packages/*.nupkg
             artifacts/packages/*.snupkg
+
+  documentation:
+    needs: publish
+    runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install documentation dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: Restore
+        run: dotnet restore src/NexusLabs.Foundry.slnx
+
+      - name: Build release assemblies
+        env:
+          GITHUB_ENV: /tmp/discard-release-docs-build-env
+          GITHUB_OUTPUT: /tmp/discard-release-docs-build-output
+        run: dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore -p:PublicRelease=true
+
+      - name: Restore documentation tools
+        run: dotnet tool restore
+
+      - name: Generate versioned API documentation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ./scripts/generate-versioned-api-docs.sh "$VERSION"
+
+      - name: Generate development API documentation
+        run: ./scripts/generate-api-docs.sh docs/api/dev --update-index
+
+      - name: Build documentation
+        run: python -m mkdocs build --strict
+
+      - name: Restrict artifact to release-owned paths
+        run: |
+          rm -rf site/api/dev
+          echo "Removed development API documentation slice."
+
+      - name: Build sitemap index
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/build-sitemap-index.py site
+
+      - name: Merge release documentation into gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ./scripts/publish-docs-merge.sh site release "$VERSION"
