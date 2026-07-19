@@ -36,7 +36,7 @@ composition model.
 Install the core Microsoft Agent Framework runtime:
 
 ```powershell
-dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha.1
+dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha-0001
 ```
 
 Add the workflow, generator, analyzer, provider, or Needlr integration packages

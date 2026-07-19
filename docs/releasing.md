@@ -32,6 +32,10 @@ for a short-lived NuGet API key immediately before package publication.
 4. Update `version.json` so its version matches the release version.
 5. Create an annotated tag using the same version with a `v` prefix.
 
+Nerdbank.GitVersioning normalizes numeric prerelease identifiers for NuGet. For
+example, tag `v0.1.0-alpha.1` publishes package version
+`0.1.0-alpha-0001`.
+
 ## Release validation
 
 The release workflow:

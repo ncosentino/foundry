@@ -4,9 +4,8 @@ description: Build Foundry, choose the packages for your scenario, register the 
 
 # Getting Started
 
-Foundry 0.1.0-alpha.1 is available as a prerelease package family on
-NuGet.org. Package IDs, namespaces, and APIs may change before the first stable
-release.
+Foundry 0.1.0-alpha.1 is published as NuGet version `0.1.0-alpha-0001`.
+Package IDs, namespaces, and APIs may change before the first stable release.
 
 ## 1. Install Foundry
 
@@ -15,14 +14,14 @@ agent application:
 
 ```xml
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework"
-                  Version="0.1.0-alpha.1" />
+                  Version="0.1.0-alpha-0001" />
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows"
-                  Version="0.1.0-alpha.1" />
+                  Version="0.1.0-alpha-0001" />
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
-                  Version="0.1.0-alpha.1"
+                  Version="0.1.0-alpha-0001"
                   PrivateAssets="all" />
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers"
-                  Version="0.1.0-alpha.1"
+                  Version="0.1.0-alpha-0001"
                   PrivateAssets="all" />
 ```
 

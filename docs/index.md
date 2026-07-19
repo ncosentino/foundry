@@ -26,8 +26,9 @@ when you want source-generated discovery and Needlr's plugin-oriented
 composition model.
 
 !!! warning "Alpha release"
-    Foundry 0.1.0-alpha.1 is prerelease software. Package IDs, namespaces, and
-    APIs may change before the first stable release.
+    Foundry 0.1.0-alpha.1 is published as NuGet version
+    `0.1.0-alpha-0001`. Package IDs, namespaces, and APIs may change before the
+    first stable release.
 
 ## Why Foundry?
 
@@ -61,7 +62,7 @@ Install the runtime package, then add the workflow, generator, analyzer,
 provider, or Needlr integration packages required by your application:
 
 ```powershell
-dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha.1
+dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha-0001
 ```
 
 See [Getting Started](getting-started.md) for the recommended package

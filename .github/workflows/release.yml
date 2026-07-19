@@ -55,8 +55,8 @@ jobs:
           fi
 
           VERSION="${TAG#v}"
-          NBGV_SEMVER="$(nbgv get-version --public-release=true -v SemVer2)"
-          NUGET_VERSION="$(nbgv get-version --public-release=true -v NuGetPackageVersion)"
+          NBGV_SEMVER="$(nbgv get-version -v SemVer2)"
+          NUGET_VERSION="$(nbgv get-version -v NuGetPackageVersion)"
           if [[ "${NBGV_SEMVER}" != "${VERSION}" ]]; then
             echo "::error::Tag version '${VERSION}' does not match NBGV semantic version '${NBGV_SEMVER}'."
             exit 1
