@@ -9,6 +9,7 @@ namespace NexusLabs.Foundry.Copilot.Tests;
 /// containing the auth-failure prose as its Text. Mirrors the rate-limit
 /// detection contract exposed via <see cref="CopilotRateLimitException"/>.
 /// </summary>
+[Collection(CopilotEnvironmentVariableCollection.Name)]
 public sealed class CopilotAuthExceptionTests
 {
     private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
