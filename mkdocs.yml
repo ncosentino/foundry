@@ -1,33 +1,56 @@
 site_name: Foundry
-site_description: AI and agentic application framework for .NET
+site_url: https://www.devleader.ca/projects/foundry/
+site_description: Build reliable, observable, and testable AI agent systems in .NET
+site_author: Nick Cosentino
 repo_url: https://github.com/ncosentino/foundry
 repo_name: ncosentino/foundry
 strict: true
 
+copyright: >
+  &copy; Nick Cosentino
+  <br>
+  <a href="https://www.devleader.ca">Dev Leader: software engineering articles and C# tutorials</a>
+  <br>
+  <a href="https://links.devleader.ca">Dev Leader links, videos, newsletter, and social channels</a>
+  <br>
+  <a href="https://www.brandghost.ai">BrandGhost: AI-assisted social media management</a>
+
 theme:
   name: material
+  custom_dir: docs/overrides
+  logo: assets/foundry.webp
+  favicon: assets/foundry.webp
   features:
+    - navigation.tabs
     - navigation.sections
+    - navigation.expand
     - navigation.top
     - content.code.copy
+    - content.code.annotate
     - search.highlight
     - search.suggest
+    - toc.integrate
   palette:
     - scheme: default
-      primary: deep purple
-      accent: purple
+      primary: blue grey
+      accent: cyan
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: deep purple
-      accent: purple
+      primary: blue grey
+      accent: cyan
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
+  - Configuration: configuration.md
+  - Building from Source: building.md
+  - Guides:
+      - Overview: guides/index.md
   - Agent Framework:
       - Integrations and Workflows: ai-integrations.md
       - Agent Functions: agent-functions.md
@@ -79,6 +102,7 @@ nav:
       - FDRYMAF030: analyzers/FDRYMAF030.md
   - Operations:
       - Local CI Runners: local-runners.md
+      - Documentation Publishing: publishing.md
       - Releasing: releasing.md
   - Architecture Decisions:
       - ADR-0001 DAG Graph Workflow Support: adr/adr-0001-dag-graph-workflow-support.md
@@ -88,6 +112,10 @@ nav:
 
 plugins:
   - search
+
+hooks:
+  - docs/hooks/schema.py
+  - docs/hooks/llms_txt.py
 
 markdown_extensions:
   - admonition
@@ -101,5 +129,18 @@ markdown_extensions:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.superfences
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      name: Foundry on GitHub
+      link: https://github.com/ncosentino/foundry
+    - icon: material/web
+      name: Dev Leader
+      link: https://www.devleader.ca
+    - icon: material/ghost
+      name: BrandGhost
+      link: https://www.brandghost.ai
 
 docs_dir: docs
