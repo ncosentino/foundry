@@ -100,6 +100,10 @@ nav:
       - FDRYMAF028: analyzers/FDRYMAF028.md
       - FDRYMAF029: analyzers/FDRYMAF029.md
       - FDRYMAF030: analyzers/FDRYMAF030.md
+  - API Reference:
+      - Overview: api/index.md
+      - Development: api/dev/index.md
+      - Stable: api/stable/index.md
   - Operations:
       - Local CI Runners: local-runners.md
       - Documentation Publishing: publishing.md
@@ -116,6 +120,9 @@ plugins:
 hooks:
   - docs/hooks/schema.py
   - docs/hooks/llms_txt.py
+
+extra_javascript:
+  - javascripts/api-version-switcher.js
 
 markdown_extensions:
   - admonition

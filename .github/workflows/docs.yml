@@ -13,6 +13,12 @@ on:
         default: false
         type: boolean
 
+env:
+  DOTNET_VERSION: 10.0.x
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
 concurrency:
   group: docs-${{ github.ref }}
   cancel-in-progress: false
@@ -26,6 +32,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            ${{ env.DOTNET_VERSION }}
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -37,8 +52,38 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
+      - name: Restore
+        run: dotnet restore src/NexusLabs.Foundry.slnx
+
+      - name: Build release assemblies
+        env:
+          GITHUB_ENV: /tmp/discard-docs-build-env
+          GITHUB_OUTPUT: /tmp/discard-docs-build-output
+        run: dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore
+
+      - name: Restore documentation tools
+        run: dotnet tool restore
+
+      - name: Generate development API documentation
+        run: ./scripts/generate-api-docs.sh docs/api/dev --update-index
+
+      - name: Generate API version catalog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/generate-api-catalog.py
+
       - name: Build documentation
         run: python -m mkdocs build --strict
+
+      - name: Restrict artifact to development-owned paths
+        run: |
+          rm -rf site/api/stable site/api/v*
+          echo "Removed release-owned API documentation slices."
+
+      - name: Build sitemap index
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/build-sitemap-index.py site
 
       - name: Upload documentation artifact
         uses: actions/upload-artifact@v4
@@ -49,27 +94,18 @@ jobs:
   deploy:
     needs: docs
     if: >-
-      vars.DOCS_DEPLOY_ENABLED == 'true' &&
       github.ref == 'refs/heads/main' &&
       (
         github.event_name == 'push' ||
         (github.event_name == 'workflow_dispatch' && inputs.deploy)
       )
     runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
-    concurrency:
-      group: foundry-docs-production
-      cancel-in-progress: false
-    environment:
-      name: documentation
-      url: https://www.devleader.ca/projects/foundry/
     permissions:
-      contents: read
+      contents: write
 
     steps:
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+      - name: Checkout source
+        uses: actions/checkout@v6
 
       - name: Download documentation artifact
         uses: actions/download-artifact@v5
@@ -77,9 +113,12 @@ jobs:
           name: foundry-site
           path: site
 
-      - name: Deploy documentation to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v4
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=nexuslabs-foundry --branch=main --commit-dirty=true
+          python-version: '3.x'
+
+      - name: Merge development documentation into gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/publish-docs-merge.sh site main
