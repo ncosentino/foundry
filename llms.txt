@@ -4,7 +4,7 @@
 
 Author: Nick Cosentino (https://www.devleader.ca).
 
-- [Home](https://www.devleader.ca/projects/foundry/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Home](https://www.devleader.ca/projects/foundry/) -- Build reliable .NET AI agents with generated discovery, workflows, observability, evaluation, and deterministic testing.
 - [Getting Started](https://www.devleader.ca/projects/foundry/getting-started/) -- Build Foundry, choose the packages for your scenario, register the runtime, and create your first generated agent.
 - [Configuration](https://www.devleader.ca/projects/foundry/configuration/) -- Understand Foundry's configuration surfaces for agents, workflows, diagnostics, evaluation, providers, and optional Needlr integration.
 - [Building from Source](https://www.devleader.ca/projects/foundry/building/) -- Build, test, pack, and validate the Foundry repository from source.
