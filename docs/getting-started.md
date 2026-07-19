@@ -10,8 +10,8 @@ first stable release.
 
 ## 1. Install Foundry
 
-After the release workflow completes, install the runtime, workflows, source
-generator, and analyzers for a generated agent application:
+Install the runtime, workflows, source generator, and analyzers for a generated
+agent application:
 
 ```xml
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework"
