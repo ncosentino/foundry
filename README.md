@@ -110,6 +110,7 @@ NativeAOT.
 - [Provider-neutral experiment runner](docs/experiment-runner.md)
 - [Langfuse integration](docs/langfuse.md)
 - [Testing tools](docs/testing-tools.md)
+- [Versioned API reference](docs/api/index.md)
 - [Architecture decisions](docs/adr/adr-0004-extract-ai-platform-from-needlr.md)
 
 The public documentation target is

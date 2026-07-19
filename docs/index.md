@@ -32,4 +32,5 @@ runtime, evaluation, or provider packages.
 - [Provider-neutral experiment runner](experiment-runner.md)
 - [Langfuse integration](langfuse.md)
 - [Testing tools](testing-tools.md)
+- [Versioned API reference](api/index.md)
 - [Architecture decisions](adr/adr-0004-extract-ai-platform-from-needlr.md)
