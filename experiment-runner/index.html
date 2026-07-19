@@ -1,0 +1,3795 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Build reliable, observable, and testable AI agent systems in .NET">
+      
+      
+        <meta name="author" content="Nick Cosentino">
+      
+      
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/experiment-runner/">
+      
+      
+        <link rel="prev" href="../evaluation/">
+      
+      
+        <link rel="next" href="../langfuse/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/foundry.webp">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Experiment Runner - Foundry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Experiment Runner – Foundry" />
+  <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
+  <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/experiment-runner/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Experiment Runner – Foundry" />
+  <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
+  <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
+  
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Foundry",
+        "item": "https://www.devleader.ca/projects/foundry/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Evaluation",
+        "item": "https://www.devleader.ca/projects/foundry/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Experiment Runner",
+        "item": "https://www.devleader.ca/projects/foundry/experiment-runner/"
+      }
+    ]
+  }
+  </script>
+  
+  
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#experiment-runner" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Foundry" class="md-header__button md-logo" aria-label="Foundry" data-md-component="logo">
+      
+  <img src="../assets/foundry.webp" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Foundry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Experiment Runner
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ncosentino/foundry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ncosentino/foundry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../configuration/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Building from Source
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../guides/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ai-integrations/" class="md-tabs__link">
+          
+  
+  
+  Agent Framework
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../evaluation/" class="md-tabs__link">
+          
+  
+  
+  Evaluation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../copilot/" class="md-tabs__link">
+          
+  
+  
+  Providers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../testing-tools/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../analyzers/" class="md-tabs__link">
+          
+  
+  
+  Analyzers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../local-runners/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adr/adr-0001-dag-graph-workflow-support/" class="md-tabs__link">
+          
+  
+  
+  Architecture Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Foundry" class="md-nav__button md-logo" aria-label="Foundry" data-md-component="logo">
+      
+  <img src="../assets/foundry.webp" alt="logo">
+
+    </a>
+    Foundry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ncosentino/foundry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ncosentino/foundry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from Source
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Framework
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agent Framework
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations and Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../iterative-agent-loop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Iterative Agent Loop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workspace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workspace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../progress-reporting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Progress Reporting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gen-ai-token-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GenAI Token Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stage-termination/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stage Termination
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tool-result-middleware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tool Result Middleware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tiered-provider-selector/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tiered Provider Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment Runner
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cases-trials-and-attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cases, Trials, and Attempts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-before-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Before Execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ready-and-delayed-scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready and Delayed Scheduling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explicit-retries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explicit Retries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shared-concurrency-limiter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared Concurrency Limiter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-trial-item-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Trial Item Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#meai-reporting-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MEAI Reporting Adapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-result-sinks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Result Sinks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cancellation-and-timeouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cancellation and Timeouts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#item-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Item Evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-evaluators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Evaluators
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deterministic-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deterministic Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#binary-statistical-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binary Statistical Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overall-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overall Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluationqualitygate-reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EvaluationQualityGate Reuse
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json-artifact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Artifact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-convergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Convergence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runnable-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runnable Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../langfuse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Langfuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copilot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Copilot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyzers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analyzers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF001/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF001
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF002/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF002
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF003/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF003
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF004/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF004
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF005/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF005
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF006/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF006
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF007/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF007
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF008/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF008
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF009/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF009
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF010/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF010
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF011/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF011
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF012/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF012
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF013/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF013
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF014/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF014
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF015/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF015
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF016/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF016
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF017/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF017
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF018/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF018
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF019/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF019
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF020/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF020
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF021/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF021
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF022/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF022
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF024/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF024
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF025/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF025
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF027/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF027
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF028/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF028
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF029/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF029
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF030/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF030
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/dev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/stable/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stable
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local CI Runners
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../publishing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Publishing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0001-dag-graph-workflow-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0001 DAG Graph Workflow Support
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0002-build-scriptedchatclient-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0002 Build ScriptedChatClient Locally
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0003-provider-neutral-experiment-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0003 Provider-Neutral Experiment Runner
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0004-extract-ai-platform-from-needlr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0004 Extract AI Platform from Needlr
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="experiment-runner">Experiment Runner<a class="headerlink" href="#experiment-runner" title="Permanent link">&para;</a></h1>
+<p>Run finite evaluation cases and repeated trials with bounded concurrency, delayed retries,
+per-trial provider scopes, run-level measurement, structured quality policies, and deterministic
+JSON—without coupling the experiment to a specific agent loop, test framework, dataset host, or
+observability provider.</p>
+<p>The runner lives in <code>NexusLabs.Foundry.Evaluation.Experiments</code>.</p>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">Microsoft.Extensions.AI.Evaluation</span><span class="p">;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Evaluation</span><span class="p">;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Evaluation.Experiments</span><span class="p">;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kt">var</span><span class="w"> </span><span class="n">thresholds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EvaluationThresholdEvaluator</span><span class="p">()</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">.</span><span class="n">RequireNumericMin</span><span class="p">(</span><span class="s">&quot;completion_rate&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.95</span><span class="p">);</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kt">var</span><span class="w"> </span><span class="n">definition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentDefinition</span><span class="o">&lt;</span><span class="n">MyCase</span><span class="p">,</span><span class="w"> </span><span class="n">MyOutput</span><span class="o">&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">{</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="n">Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;support-regression&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">CaseSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LocalExperimentCaseSource</span><span class="o">&lt;</span><span class="n">MyCase</span><span class="o">&gt;</span><span class="p">(</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="s">&quot;local-cases&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="na">[</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="na">            new ExperimentCase&lt;MyCase&gt;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="na">            {</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="na">                Id = &quot;refund&quot;,</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="na">                Value = new MyCase(&quot;Refund an eligible order&quot;),</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="na">                TrialCount = 30,</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="na">                Tags = [&quot;billing&quot;]</span><span class="p">,</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">        </span><span class="p">]),</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nf">RunAgentAsync</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">Case</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">),</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="n">ItemEvaluator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">            </span><span class="n">context</span><span class="p">.</span><span class="n">Case</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">            </span><span class="n">context</span><span class="p">.</span><span class="n">Output</span><span class="p">,</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">            </span><span class="n">cancellationToken</span><span class="p">),</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span><span class="n">RunEvaluators</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="na">[</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="na">        new ExperimentRunEvaluator&lt;MyCase, MyOutput&gt;(</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="na">            &quot;aggregate&quot;,</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="na">            (context, _) =&gt;</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="na">            {</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="na">                var completionRate =</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="na">                    (double)context.Items.Count(x =&gt; x.Status == ExperimentItemStatus.Succeeded)</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="na">                    / context.Items.Count;</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="na">                return ValueTask.FromResult(new EvaluationResult(</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="na">                    new NumericMetric(&quot;completion_rate&quot;, completionRate)));</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="na">            }),</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="na">    ]</span><span class="p">,</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="n">Policies</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">    </span><span class="na">[</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="na">        new ExperimentRunEvaluationThresholdPolicy&lt;MyCase, MyOutput&gt;(</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="na">            &quot;completion&quot;,</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="na">            &quot;aggregate&quot;,</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="na">            thresholds),</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="na">        new ExperimentBinarySuccessPolicy&lt;MyCase, MyOutput&gt;(</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="na">            &quot;binary-success&quot;,</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="na">            &quot;passed&quot;,</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="na">            requiredSuccessRate: 0.9,</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="na">            minimumSampleCount: 30,</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="na">            confidenceLevel: 0.95),</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="na">    ]</span><span class="p">,</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="p">};</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a><span class="k">await</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="nn">var</span><span class="w"> </span><span class="n">sharedLimiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentConcurrencyLimiter</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a><span class="n">ExperimentRunOutcome</span><span class="o">&lt;</span><span class="n">MyCase</span><span class="p">,</span><span class="w"> </span><span class="n">MyOutput</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outcome</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">ExperimentRunner</span><span class="p">().</span><span class="n">RunAsync</span><span class="p">(</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a><span class="w">        </span><span class="n">definition</span><span class="p">,</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentRunOptions</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a><span class="w">            </span><span class="n">RunId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;commit-abc123&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a><span class="w">            </span><span class="n">MaxConcurrency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a><span class="w">            </span><span class="n">AttemptTimeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromMinutes</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a><span class="w">            </span><span class="n">RetryPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentRetryPolicy</span><span class="p">(</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a><span class="w">                </span><span class="n">maxAttempts</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a><span class="w">                </span><span class="n">retryOn</span><span class="p">:</span><span class="w"> </span><span class="n">ExperimentRetryableOutcome</span><span class="p">.</span><span class="n">ExecutionFailure</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a><span class="w">                    </span><span class="o">|</span><span class="w"> </span><span class="n">ExperimentRetryableOutcome</span><span class="p">.</span><span class="n">Timeout</span><span class="p">,</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a><span class="w">                </span><span class="n">delay</span><span class="p">:</span><span class="w"> </span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromSeconds</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a><span class="w">            </span><span class="n">SharedLimiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sharedLimiter</span><span class="p">,</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a><span class="w">        </span><span class="n">cancellationToken</span><span class="p">);</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a><span class="n">ExperimentRunResult</span><span class="o">&lt;</span><span class="n">MyCase</span><span class="p">,</span><span class="w"> </span><span class="n">MyOutput</span><span class="o">&gt;</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">outcome</span><span class="p">.</span><span class="n">Result</span><span class="p">;</span>
+</code></pre></div>
+<p>Every case is materialized and validated before execution. Cases expand in source order, then by
+ascending one-based trial index. Items return in that stable order regardless of completion or retry
+order.</p>
+<p>The provider-neutral execution APIs use explicit overloads rather than optional parameters:</p>
+<ul>
+<li><code>IExperimentCaseSource&lt;TCase&gt;.LoadAsync()</code> delegates to
+  <code>LoadAsync(CancellationToken.None)</code>;</li>
+<li><code>IExperimentRunner.RunAsync(definition, options)</code> delegates to the overload that accepts
+  <code>CancellationToken</code>;</li>
+<li><code>ExperimentRunner()</code> uses <code>TimeProvider.System</code>, while
+  <code>ExperimentRunner(TimeProvider?)</code> also falls back to <code>TimeProvider.System</code> for an explicit
+  null value.</li>
+</ul>
+<p>The built-in policies also use explicit constructor matrices. Neither policy exposes optional
+parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Explicit constructor suffix</th>
+<th>Resulting configuration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ExperimentBinarySuccessPolicy&lt;TCase,TOutput&gt;</code></td>
+<td>Statistical arguments only</td>
+<td>Required; unknown samples are inconclusive.</td>
+</tr>
+<tr>
+<td><code>ExperimentBinarySuccessPolicy&lt;TCase,TOutput&gt;</code></td>
+<td><code>bool isRequired, ExperimentUnknownSampleTreatment</code></td>
+<td>Both values specified explicitly.</td>
+</tr>
+<tr>
+<td><code>ExperimentRunEvaluationThresholdPolicy&lt;TCase,TOutput&gt;</code></td>
+<td>Threshold arguments only</td>
+<td>Required; missing metrics are inconclusive.</td>
+</tr>
+<tr>
+<td><code>ExperimentRunEvaluationThresholdPolicy&lt;TCase,TOutput&gt;</code></td>
+<td><code>bool isRequired, EvaluationMissingMetricBehavior</code></td>
+<td>Both values specified explicitly.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cases-trials-and-attempts">Cases, Trials, and Attempts<a class="headerlink" href="#cases-trials-and-attempts" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Case</td>
+<td>One logical caller-owned input with a required unique ID.</td>
+</tr>
+<tr>
+<td>Trial</td>
+<td>One statistically independent scheduled execution of a case.</td>
+</tr>
+<tr>
+<td>Item</td>
+<td>The runner's work unit for one case and one trial index.</td>
+</tr>
+<tr>
+<td>Attempt</td>
+<td>One operational execution try for an item. Retries add attempts, never trials.</td>
+</tr>
+</tbody>
+</table>
+<p><code>ExperimentCase&lt;TCase&gt;.TrialCount</code> controls statistical replication. <code>TCase</code> remains caller-owned,
+so expected outputs, metadata, and provider references can live in one domain-specific value.</p>
+<p><code>ExperimentTaskContext&lt;TCase&gt;</code> supplies the run ID, stable sequence, materialized case, one-based
+trial index, one-based attempt number, and exact-type adapter features exposed by item scopes.</p>
+<h2 id="validation-before-execution">Validation Before Execution<a class="headerlink" href="#validation-before-execution" title="Permanent link">&para;</a></h2>
+<p>The runner rejects invalid static configuration before starting any item:</p>
+<ul>
+<li>blank experiment, run, source, case, run-evaluator, policy, or item-scope names;</li>
+<li>duplicate case IDs, run-evaluator names, policy names, or item-scope names using ordinal
+  comparison;</li>
+<li>non-positive trial counts or <code>MaxConcurrency</code>;</li>
+<li>non-positive retry-policy attempt limits;</li>
+<li>invalid attempt or item-scope cleanup timeouts;</li>
+<li>an expanded item count that cannot be represented safely.</li>
+</ul>
+<p>Source-loading and validation failures throw to the caller. Per-item execution, item-evaluation,
+run-evaluation, and policy failures are represented structurally after execution begins.</p>
+<h2 id="ready-and-delayed-scheduling">Ready and Delayed Scheduling<a class="headerlink" href="#ready-and-delayed-scheduling" title="Permanent link">&para;</a></h2>
+<p>The runner uses:</p>
+<ul>
+<li>one bounded ready channel containing item state;</li>
+<li><code>min(MaxConcurrency, itemCount)</code> long-lived worker tasks;</li>
+<li>one timed priority queue for delayed retries;</li>
+<li>one dispatcher that promotes due retries back into the ready channel;</li>
+<li>one indexed result slot per statistical trial.</li>
+</ul>
+<p>Pending work remains data rather than one task per item. A delayed retry is not attached to a
+sleeping worker: its item state sits in the timed queue until its ready time. This lets workers run
+other ready items while retries are parked.</p>
+<p><code>ExperimentRunResult.WorkerCount</code> reports the local worker count. <code>MaxConcurrency</code> bounds active
+execution attempts, not delayed retries, item evaluation, or total queued work.</p>
+<h2 id="explicit-retries">Explicit Retries<a class="headerlink" href="#explicit-retries" title="Permanent link">&para;</a></h2>
+<p>No retry policy means exactly one attempt, preserving the default behavior.</p>
+<p><code>ExperimentRetryPolicy</code> requires:</p>
+<ul>
+<li>a maximum total attempt count, including the initial attempt;</li>
+<li>explicit eligible outcomes;</li>
+<li>either a fixed delay or a caller-supplied delay function.</li>
+</ul>
+<p>Eligible outcomes are execution failure, timeout, and task-originated cancellation. Caller
+cancellation is never offered to the retry policy. Item evaluation, run evaluation, and quality
+policy failures never replay task execution.</p>
+<p>Each <code>ExperimentAttemptResult</code> records:</p>
+<ul>
+<li>attempt number, status, start time, and duration;</li>
+<li>the structured execution failure, when present;</li>
+<li><code>DelayBeforeNextAttempt</code> when another attempt was scheduled.</li>
+</ul>
+<p><code>DelayBeforeNextAttempt = TimeSpan.Zero</code> means an immediate re-enqueue. <code>null</code> means no attempt
+followed. A failure selected for retry has <code>IsRetryable = true</code>; an exhausted or unselected terminal
+failure does not claim another retry.</p>
+<p>Custom <code>IExperimentRetryPolicy</code> implementations remain bounded by <code>MaxAttempts</code>. Invalid decisions
+or policy exceptions become an item-level <code>RetryPolicyFailed</code> failure rather than disappearing or
+failing unrelated items. Hidden random jitter is not added. A jittered delay function must use
+caller-controlled deterministic state when reproducibility matters.</p>
+<h2 id="shared-concurrency-limiter">Shared Concurrency Limiter<a class="headerlink" href="#shared-concurrency-limiter" title="Permanent link">&para;</a></h2>
+<p><code>MaxConcurrency</code> is local to one run. Set <code>ExperimentRunOptions.SharedLimiter</code> when simultaneous
+runs must share a second admission boundary:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">await</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="nn">var</span><span class="w"> </span><span class="n">limiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentConcurrencyLimiter</span><span class="p">(</span><span class="mi">12</span><span class="p">);</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">runner</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">firstDefinition</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentRunOptions</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="n">RunId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;first&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="n">MaxConcurrency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="n">SharedLimiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">limiter</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">);</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="kt">var</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">runner</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="n">secondDefinition</span><span class="p">,</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentRunOptions</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="n">RunId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;second&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">        </span><span class="n">MaxConcurrency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="n">SharedLimiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">limiter</span><span class="p">,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">);</span>
+</code></pre></div>
+<p>The runner:</p>
+<ul>
+<li>acquires one <code>IExperimentConcurrencyLimiter</code> lease before first-attempt scope entry and reuses
+  that lease for the attempt;</li>
+<li>acquires one lease around each later attempt;</li>
+<li>awaits acquisition with the caller token;</li>
+<li>disposes the lease when scope entry or the attempt completes;</li>
+<li>releases the lease before computing or waiting through a retry delay;</li>
+<li>never disposes the caller-owned limiter.</li>
+</ul>
+<p>The built-in <code>ExperimentConcurrencyLimiter</code> is semaphore-backed and suitable for DI registration.
+Alternate implementations can adapt provider quotas or resource-aware admission logic.</p>
+<h2 id="per-trial-item-scopes">Per-Trial Item Scopes<a class="headerlink" href="#per-trial-item-scopes" title="Permanent link">&para;</a></h2>
+<p><code>ExperimentDefinition&lt;TCase,TOutput&gt;.ItemScopes</code> adds provider lifecycle without giving providers
+ownership of scheduling, retries, evaluation, or quality policy.</p>
+<p>For every statistical trial, the runner:</p>
+<ol>
+<li>enters each <code>IExperimentItemScopeProvider&lt;TCase,TOutput&gt;</code> once in registration order;</li>
+<li>snapshots exact-type scope features into <code>ExperimentItemFeatureCollection</code>;</li>
+<li>activates entered scopes in registration order around every task attempt;</li>
+<li>deactivates them in reverse order before a retry delay;</li>
+<li>reactivates them around the single item evaluator after terminal execution success;</li>
+<li>sends every terminal quality status to <code>CompleteAsync</code> in registration order;</li>
+<li>disposes scopes in reverse order and records completion or disposal failure structurally.</li>
+</ol>
+<p><code>CompleteAsync</code> returns an <code>ExperimentItemPublicationOperationResult</code>, not the canonical
+provider result. Implementations select <code>Succeeded(correlations)</code>, <code>NotAttempted(correlations)</code>, or
+<code>Failed(correlations, failure)</code> and do not return provider identity. The factories snapshot the
+correlation list. The runner validates and snapshots correlation/failure content, then stamps the
+registered provider <code>Name</code> and <code>IsRequired</code> into the unchanged canonical
+<code>ExperimentItemPublicationResult</code>.</p>
+<p>The scope object remains alive across delayed retries, but no activation handle, worker slot, or
+shared-limiter lease remains held during the delay. <code>EnterAsync</code> receives only the caller token and
+runs outside <code>AttemptTimeout</code>; it executes after shared admission so provider setup participates in
+the caller-owned concurrency boundary.</p>
+<p>Tasks and evaluators retrieve adapter features by exact registered type:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">MyProviderFeature</span><span class="w"> </span><span class="n">feature</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="n">Features</span><span class="p">.</span><span class="n">GetRequired</span><span class="o">&lt;</span><span class="n">MyProviderFeature</span><span class="o">&gt;</span><span class="p">();</span>
+</code></pre></div>
+<p>A feature object must remain valid across repeated activation/deactivation cycles. Scope
+implementations snapshot their feature dictionary during entry, so later mutation does not change
+the trial context. Registering the same exact feature type from a later scope fails that later
+scope deterministically; the first registration remains available.</p>
+<p><code>ExperimentItemScopeFailureMode.BestEffort</code> records entry or activation failure as
+<code>ExperimentPublicationOperationStatus.Failed</code> while quality processing continues.
+<code>ExecutionPrerequisite</code> stops the next task attempt and produces <code>PrerequisiteFailed</code> with no
+fabricated attempt. Prerequisite failures are unknown statistical samples by default; the binary
+policy excludes them unless <code>ExperimentUnknownSampleTreatment.CountAsFailure</code> is selected.</p>
+<p><code>IsRequired</code> does not change item quality. The runner copies it from the registered provider onto
+each canonical <code>ExperimentItemPublicationResult</code> for aggregate publication health in the
+result-sink phase. Provider correlations use structured namespace/name/value triples and are copied
+into both the provider result and the item aggregate. Malformed correlations or publication
+failures are rejected during normalization and become structured scope publication failures.</p>
+<p>Normal scope teardown is <code>CompleteAsync</code> then <code>DisposeAsync</code>. Caller cancellation invokes
+<code>AbortAsync</code> then <code>DisposeAsync</code> in reverse scope order for every entered scope whose completion has
+not started. Once <code>CompleteAsync</code> begins, that method owns cancellation-safe termination and the
+runner does not also invoke <code>AbortAsync</code>. Completion, abort, and disposal run without ambient
+activation and must use scope-owned state. <code>ExperimentRunOptions.ItemScopeCleanupTimeout</code> bounds
+cancellation cleanup and terminal disposal; it defaults to 30 seconds.</p>
+<h2 id="meai-reporting-adapter">MEAI Reporting Adapter<a class="headerlink" href="#meai-reporting-adapter" title="Permanent link">&para;</a></h2>
+<p>Install <code>NexusLabs.Foundry.Evaluation.Reporting</code> when an experiment should use MEAI
+Reporting response caching, <code>ScenarioRun</code> persistence, and the official report writers. The
+provider-neutral Evaluation package does not reference Reporting.</p>
+<p>Create a run-specific <code>ReportingConfiguration</code>, then attach the coordinated scope/evaluator pair
+with <code>WithMeaiReporting(...)</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">Microsoft.Extensions.AI.Evaluation.Reporting.Storage</span><span class="p">;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Evaluation.Reporting</span><span class="p">;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">runId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;commit-abc123&quot;</span><span class="p">;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="kt">var</span><span class="w"> </span><span class="n">reportingConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DiskBasedReportingConfiguration</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="n">storageRootPath</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="n">evaluators</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="nf">ChatConfiguration</span><span class="p">(</span><span class="n">chatClient</span><span class="p">),</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="n">enableResponseCaching</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="n">executionName</span><span class="p">:</span><span class="w"> </span><span class="n">runId</span><span class="p">);</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="kt">var</span><span class="w"> </span><span class="n">definition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExperimentDefinition</span><span class="o">&lt;</span><span class="n">MyCase</span><span class="p">,</span><span class="w"> </span><span class="n">MyOutput</span><span class="o">&gt;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p">{</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="n">Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;support-regression&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="n">CaseSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">caseSource</span><span class="p">,</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">        </span><span class="kt">var</span><span class="w"> </span><span class="n">reporting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="n">Features</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">            </span><span class="p">.</span><span class="n">GetRequired</span><span class="o">&lt;</span><span class="n">MeaiReportingExperimentItem</span><span class="o">&gt;</span><span class="p">();</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="n">ChatResponse</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">reporting</span><span class="p">.</span><span class="n">ChatConfiguration</span><span class="o">!</span><span class="p">.</span><span class="n">ChatClient</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">            </span><span class="p">.</span><span class="n">GetResponseAsync</span><span class="p">(</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">                </span><span class="n">context</span><span class="p">.</span><span class="n">Case</span><span class="p">.</span><span class="n">Value</span><span class="p">.</span><span class="n">Messages</span><span class="p">,</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">                </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">MyOutput</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">Case</span><span class="p">.</span><span class="n">Value</span><span class="p">.</span><span class="n">Messages</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">);</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="p">}.</span><span class="n">WithMeaiReporting</span><span class="p">(</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">    </span><span class="n">reportingConfiguration</span><span class="p">,</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">    </span><span class="n">context</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EvaluationInputs</span><span class="p">(</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">Output</span><span class="p">.</span><span class="n">Messages</span><span class="p">,</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">Output</span><span class="p">.</span><span class="n">Response</span><span class="p">),</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">MeaiReportingExperimentOptions</span><span class="o">&lt;</span><span class="n">MyCase</span><span class="p">,</span><span class="w"> </span><span class="n">MyOutput</span><span class="o">&gt;</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="w">        </span><span class="n">ResponseReuseMode</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a><span class="w">            </span><span class="n">MeaiReportingResponseReuseMode</span><span class="p">.</span><span class="n">CaseAndTrialReplay</span><span class="p">,</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a><span class="w">        </span><span class="n">IsRequired</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="w">    </span><span class="p">});</span>
+</code></pre></div>
+<p>The configuration's <code>ExecutionName</code> must equal <code>ExperimentRunOptions.RunId</code>. The adapter maps
+<code>ExperimentCase.Id</code> to <code>ScenarioName</code> and the one-based trial index to <code>IterationName</code>. When using
+the disk result store, those values must also be valid path segments.</p>
+<p><code>WithMeaiReporting(...)</code> rejects a definition that already has an item evaluator. Configure every
+MEAI evaluator on <code>ReportingConfiguration</code>; MEAI's <code>CompositeEvaluator</code> remains the single
+evaluation producer.</p>
+<table>
+<thead>
+<tr>
+<th>Response reuse mode</th>
+<th>Configuration and behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CaseAndTrialReplay</code></td>
+<td>Requires a response cache. Matching request, model, scenario, and trial cache keys can replay across separate Foundry runs.</td>
+</tr>
+<tr>
+<td><code>FreshPerRun</code></td>
+<td>Requires a response cache and adds the Foundry run ID to the scenario cache keys. Retries still replay within the same run.</td>
+</tr>
+<tr>
+<td><code>Disabled</code></td>
+<td>Requires a configuration with no response-cache provider. Every attempt reaches the underlying chat client.</td>
+</tr>
+</tbody>
+</table>
+<p>The task must use <code>MeaiReportingExperimentItem.ChatConfiguration.ChatClient</code> for primary model
+responses to participate in MEAI caching. A cache hit still requires the complete MEAI key to match;
+case and trial identity alone do not override changed messages, options, model metadata, or streaming
+mode.</p>
+<p>One <code>ScenarioRun</code> remains alive across all operational retries. The paired item evaluator calls
+<code>ScenarioRun.EvaluateAsync(...)</code> once after terminal execution success, and normal scope disposal
+persists the completed result. Store exceptions become <code>ItemScopeFailed</code> publication failures and do
+not replay execution or alter item quality. Caller cancellation aborts incomplete scenarios without
+persisting them. MEAI does not accept a cancellation token on <code>ScenarioRun.DisposeAsync</code>; the
+runner's cleanup timeout can therefore report a disposal failure while a provider store operation
+finishes later.</p>
+<p>Foundry does not render MEAI reports or fabricate aggregate <code>ScenarioRun</code> entries. Read the configured
+<code>IEvaluationResultStore</code> and use MEAI's <code>HtmlReportWriter</code>, <code>JsonReportWriter</code>, or <code>dotnet aieval</code>
+tooling.</p>
+<p>MEAI Reporting and Langfuse can compose on the same definition. Add the Langfuse item scope and
+result sink, then call <code>WithMeaiReporting(...)</code>; Reporting produces the canonical item
+<code>EvaluationResult</code>, and the Langfuse sink projects those same metrics without re-evaluating. A
+consumer-defined sink can receive the same canonical run and publish domain artifacts independently.
+If execution fails before evaluation, the canonical item retains the failure, the Langfuse trial
+scope can still retain its trace and dataset link, and Reporting remains <code>NotAttempted</code> because no
+completed <code>ScenarioRun</code> exists to persist.</p>
+<h2 id="final-result-sinks">Final Result Sinks<a class="headerlink" href="#final-result-sinks" title="Permanent link">&para;</a></h2>
+<p><code>ExperimentDefinition&lt;TCase,TOutput&gt;.Sinks</code> publishes the completed canonical quality result without
+giving providers ownership of execution or quality policy.</p>
+<p>Each named <code>IExperimentResultSink&lt;TCase,TOutput&gt;</code>:</p>
+<ul>
+<li>receives the same <code>ExperimentRunResult&lt;TCase,TOutput&gt;</code> reference after run evaluation and policy
+  reduction finish;</li>
+<li>runs sequentially in registration order;</li>
+<li>declares whether publication is required;</li>
+<li>returns <code>ExperimentSinkPublicationOperationResult.Succeeded()</code>, <code>NotAttempted()</code>, or
+  <code>Failed(failure)</code> without repeating its identity;</li>
+<li>owns provider retry only when its operation is provably idempotent.</li>
+</ul>
+<p>The runner validates the operation result and stamps the registered sink <code>Name</code> and <code>IsRequired</code>
+onto the unchanged canonical <code>ExperimentSinkResult</code>. A thrown exception, <code>null</code>, or malformed sink
+operation becomes a structured <code>ResultSinkFailed</code> result and does not suppress later sinks.
+Caller-token cancellation propagates exactly, skips later sinks, and produces no outcome.</p>
+<p><code>IExperimentRunner.RunAsync</code> returns <code>ExperimentRunOutcome&lt;TCase,TOutput&gt;</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Publication status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NotRequested</code></td>
+<td>No item scope or final sink attempted publication.</td>
+</tr>
+<tr>
+<td><code>Succeeded</code></td>
+<td>Every attempted publication succeeded.</td>
+</tr>
+<tr>
+<td><code>PartiallyFailed</code></td>
+<td>At least one optional publication failed and no required publication failed.</td>
+</tr>
+<tr>
+<td><code>Failed</code></td>
+<td>At least one required publication failed.</td>
+</tr>
+</tbody>
+</table>
+<p>The aggregate includes both <code>Result.Items[*].Publications</code> and final <code>SinkResults</code>.
+<code>outcome.PublicationStatus</code> never changes <code>outcome.Result.Decision</code>.</p>
+<p>Foundry-owned collections are read-only snapshots. Caller-owned case/output values and mutable MEAI
+evaluation objects cannot be deeply frozen; sinks must treat the entire result as read-only.</p>
+<h2 id="cancellation-and-timeouts">Cancellation and Timeouts<a class="headerlink" href="#cancellation-and-timeouts" title="Permanent link">&para;</a></h2>
+<p>Caller cancellation:</p>
+<ul>
+<li>stops ready-channel admission, limiter waits, active tasks, retry delays, item evaluation, run
+  evaluation, policies, and final result sinks;</li>
+<li>wins over simultaneous timeout or execution failure;</li>
+<li>is rethrown from <code>RunAsync</code> with the original caller token;</li>
+<li>aborts every entered incomplete item scope and disposes scopes in reverse order within the
+  configured cleanup timeout;</li>
+<li>produces no completed run outcome.</li>
+</ul>
+<p><code>AttemptTimeout</code> is cooperative and restarts for every attempt. The task receives a linked
+caller/deadline token. If a task ignores deadline cancellation, the runner continues awaiting it so
+worker and shared-limiter accounting remain truthful. An output returned after deadline expiration
+is discarded and classified <code>TimedOut</code>.</p>
+<h2 id="item-evaluation">Item Evaluation<a class="headerlink" href="#item-evaluation" title="Permanent link">&para;</a></h2>
+<p>The optional <code>ExperimentItemEvaluator&lt;TCase,TOutput&gt;</code> runs once after terminal execution success.
+It receives the successful output and complete attempt history.</p>
+<p>Evaluator failure:</p>
+<ul>
+<li>preserves the successful task output;</li>
+<li>marks the item <code>EvaluationFailed</code>;</li>
+<li>does not invoke the retry policy;</li>
+<li>never replays execution.</li>
+</ul>
+<p>The mutable MEAI <code>EvaluationResult</code> remains available on the item but is excluded from canonical
+JSON. Foundry immediately freezes its metrics, diagnostics, interpretations, and metadata into
+ordered <code>ExperimentMetricSnapshot</code> values.</p>
+<h2 id="run-evaluators">Run Evaluators<a class="headerlink" href="#run-evaluators" title="Permanent link">&para;</a></h2>
+<p>Run evaluators measure; policies decide.</p>
+<p>Each named <code>IExperimentRunEvaluator&lt;TCase,TOutput&gt;</code> receives every item in stable sequence order,
+including execution failures, timeouts, task-originated cancellations, and evaluation failures.
+Evaluators run sequentially in registration order.</p>
+<p>A successful evaluator retains its MEAI <code>EvaluationResult</code> and frozen metrics. An exception or
+normalization failure produces <code>ExperimentRunEvaluationStatus.Failed</code> with a structured
+<code>RunEvaluationFailed</code> failure, then later evaluators still run.</p>
+<h2 id="deterministic-policies">Deterministic Policies<a class="headerlink" href="#deterministic-policies" title="Permanent link">&para;</a></h2>
+<p><code>ExperimentRunEvaluationThresholdPolicy&lt;TCase,TOutput&gt;</code> applies an
+<code>EvaluationThresholdEvaluator</code> to one named successful run evaluation.</p>
+<p>The threshold evaluator supports:</p>
+<ul>
+<li>required or optional numeric minima;</li>
+<li>required or optional numeric maxima;</li>
+<li>required or optional boolean equality;</li>
+<li>structured per-threshold outcomes;</li>
+<li>missing/invalid required evidence as <code>Inconclusive</code> by default;</li>
+<li>explicit pessimistic treatment as <code>Failed</code>.</li>
+</ul>
+<p>Optional thresholds permit a conditionally emitted metric to be absent. If an optional metric is
+present but invalid or violates its bound, it still affects the decision.</p>
+<h2 id="binary-statistical-policy">Binary Statistical Policy<a class="headerlink" href="#binary-statistical-policy" title="Permanent link">&para;</a></h2>
+<p><code>ExperimentBinarySuccessPolicy&lt;TCase,TOutput&gt;</code> evaluates a required boolean item metric with an
+uncorrected Wilson score interval.</p>
+<p>The caller explicitly supplies:</p>
+<ul>
+<li>required success rate;</li>
+<li>minimum effective sample count;</li>
+<li>one-sided confidence level;</li>
+<li>unknown-sample treatment.</li>
+</ul>
+<p>Default item treatment is:</p>
+<table>
+<thead>
+<tr>
+<th>Item outcome</th>
+<th>Treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Succeeded</code> with a valid boolean metric</td>
+<td>Denominator success or failure.</td>
+</tr>
+<tr>
+<td><code>ExecutionFailed</code></td>
+<td>Denominator failure.</td>
+</tr>
+<tr>
+<td><code>TimedOut</code></td>
+<td>Denominator failure.</td>
+</tr>
+<tr>
+<td>Task-originated <code>Canceled</code></td>
+<td>Denominator failure.</td>
+</tr>
+<tr>
+<td><code>EvaluationFailed</code>, <code>PrerequisiteFailed</code>, missing/invalid metric, or failed metric diagnostics</td>
+<td>Exclusion that forces <code>Inconclusive</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>ExperimentUnknownSampleTreatment.CountAsFailure</code> is the explicit pessimistic alternative.</p>
+<p>The decision rule is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Passed         one-sided lower Wilson bound &gt;= required success rate
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Failed         one-sided upper Wilson bound &lt; required success rate
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Inconclusive   otherwise, below minimum sample count, or unknown evidence remains
+</code></pre></div>
+<p>Evidence reports trial count, operational attempt count, effective sample count, successes,
+failures, execution failures, exclusions, status counts, estimate, bounds, confidence level,
+threshold, and interval method. Each bound uses the configured one-sided confidence level. Taken
+together, the lower and upper bounds have two-sided coverage <code>2 × confidenceLevel - 1</code>.</p>
+<p>Retries only increase <code>AttemptCount</code>; they never increase <code>TotalTrialCount</code> or the statistical
+denominator.</p>
+<h2 id="overall-decision">Overall Decision<a class="headerlink" href="#overall-decision" title="Permanent link">&para;</a></h2>
+<p>Required policies reduce deterministically:</p>
+<ol>
+<li>Any required <code>Failed</code> policy makes the run <code>Failed</code>.</li>
+<li>Otherwise, any required <code>Inconclusive</code> policy makes the run <code>Inconclusive</code>.</li>
+<li>Otherwise, every required policy passed and the run is <code>Passed</code>.</li>
+<li>No required policies produces <code>NotEvaluated</code>.</li>
+</ol>
+<p>Optional policies remain in <code>PolicyResults</code> but do not affect the run decision. A policy exception
+is represented as <code>Inconclusive</code> with a structured <code>PolicyFailed</code> failure; it is not fabricated into
+a quality failure.</p>
+<h2 id="evaluationqualitygate-reuse">EvaluationQualityGate Reuse<a class="headerlink" href="#evaluationqualitygate-reuse" title="Permanent link">&para;</a></h2>
+<p><code>EvaluationQualityGate</code> and experiment threshold policies share
+<code>EvaluationThresholdEvaluator</code>. Use <code>Evaluate(...)</code> for structured non-throwing decisions and
+<code>Assert(...)</code> as the CI-oriented throwing adapter.</p>
+<p>Required missing or invalid metrics no longer pass silently:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">gate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EvaluationQualityGate</span><span class="p">()</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="p">.</span><span class="n">RequireBoolean</span><span class="p">(</span><span class="s">&quot;required_metric&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="p">.</span><span class="n">OptionalBoolean</span><span class="p">(</span><span class="s">&quot;conditional_metric&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">);</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">EvaluationThresholdResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gate</span><span class="p">.</span><span class="n">Evaluate</span><span class="p">(</span><span class="n">evaluation</span><span class="p">);</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">gate</span><span class="p">.</span><span class="n">Assert</span><span class="p">(</span><span class="n">evaluation</span><span class="p">);</span>
+</code></pre></div>
+<p><code>Assert(...)</code> throws for <code>Failed</code> or <code>Inconclusive</code>; an optional missing metric does not block a
+passing decision.</p>
+<h2 id="json-artifact">JSON Artifact<a class="headerlink" href="#json-artifact" title="Permanent link">&para;</a></h2>
+<p><code>ExperimentJsonArtifactWriter</code> writes a schema-version-4 outcome envelope with fixed Foundry-owned
+property ordering:</p>
+<ul>
+<li>the unchanged schema-version-3 canonical quality result;</li>
+<li>source/trial item order;</li>
+<li>complete attempt history and delay-before-next-attempt values;</li>
+<li>normalized item metrics;</li>
+<li>namespaced item correlations and ordered item-scope publication results;</li>
+<li>ordered run-evaluation results;</li>
+<li>ordered policy results and structured evidence;</li>
+<li>the overall run decision;</li>
+<li>aggregate publication status and ordered final sink results;</li>
+<li>structured failures without raw exceptions or stack traces.</li>
+</ul>
+<p>Publication operation results are normalization inputs only and are not serialized. Equivalent
+canonical outcomes retain the existing schema-version-3 result and schema-version-4 envelope
+property names, ordering, and JSON bytes.</p>
+<p>Constructors and write operations also use explicit overloads. Reflection-based serialization
+offers tokenless, cancellable, default-options, and explicit-<code>JsonSerializerOptions</code> forms. The AOT
+stream path offers tokenless and cancellable <code>JsonTypeInfo&lt;T&gt;</code> forms. Tokenless overloads use
+<code>CancellationToken.None</code>; all overloads route through one implementation per serialization family
+so identical inputs produce identical JSON bytes.</p>
+<p>For Native AOT, pass caller-generated metadata:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">System.Text.Json.Serialization</span><span class="p">;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="na">[JsonSerializable(typeof(MyCase))]</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="na">[JsonSerializable(typeof(MyOutput))]</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">internal</span><span class="w"> </span><span class="k">partial</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">MyJsonContext</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">JsonSerializerContext</span><span class="p">;</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">await</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="nn">var</span><span class="w"> </span><span class="n">stream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">File</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">ExperimentJsonArtifactWriter</span><span class="p">().</span><span class="n">WriteAsync</span><span class="p">(</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="n">stream</span><span class="p">,</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span><span class="n">outcome</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="n">MyJsonContext</span><span class="p">.</span><span class="n">Default</span><span class="p">.</span><span class="n">MyCase</span><span class="p">,</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="n">MyJsonContext</span><span class="p">.</span><span class="n">Default</span><span class="p">.</span><span class="n">MyOutput</span><span class="p">,</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">);</span>
+</code></pre></div>
+<p>The <code>JsonTypeInfo&lt;TCase&gt;</code> / <code>JsonTypeInfo&lt;TOutput&gt;</code> overload is the dependable trimmed and Native
+AOT path. Caller-owned payload schemas remain caller responsibility. Determinism applies to the
+Foundry envelope; it does not claim RFC 8785 cryptographic canonicalization.</p>
+<h2 id="provider-convergence">Provider Convergence<a class="headerlink" href="#provider-convergence" title="Permanent link">&para;</a></h2>
+<p>The ADR-0003 workstream is complete:</p>
+<ul>
+<li><code>LangfuseDatasetCaseSource&lt;TCase&gt;</code> provides validated paginated dataset reads
+  for latest or timestamped hosted sources.</li>
+<li>The item-scope adapter creates one reactivatable Langfuse trace and at most
+  one hosted dataset-run-item link per statistical trial.</li>
+<li>The result sink projects canonical item and run measurements plus the
+  optional canonical decision.</li>
+<li>The isolated MEAI Reporting adapter provides the second-provider proof.</li>
+</ul>
+<p>Further scheduler, retry, evaluator, statistical-policy, or provider expansion requires a separate
+design and issue rather than extending this workstream implicitly.</p>
+<h2 id="runnable-example">Runnable Example<a class="headerlink" href="#runnable-example" title="Permanent link">&para;</a></h2>
+<p>Run the credential-free Phase 3B example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/ExperimentRunnerApp
+</code></pre></div>
+<p>It uses seeded stochastic trials, a scripted retry, mixed terminal outcomes, a shared limiter, run
+evaluation, deterministic and Wilson-bound policies, a credential-free final sink, and an AOT-safe
+schema-v4 outcome artifact under the system temporary directory.</p>
+<p>Run the credential-free MEAI Reporting adapter example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/MeaiReportingExperimentApp
+</code></pre></div>
+<p>It uses the scenario-wrapped chat client to demonstrate case/trial replay across runs,
+fresh-per-run cache isolation, one persisted <code>ScenarioRun</code> per trial, and an official MEAI JSON
+report under the system temporary directory.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Nick Cosentino <br> <a href="https://www.devleader.ca">Dev Leader: software engineering articles and C# tutorials</a> <br> <a href="https://links.devleader.ca">Dev Leader links, videos, newsletter, and social channels</a> <br> <a href="https://www.brandghost.ai">BrandGhost: AI-assisted social media management</a>
+
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/ncosentino/foundry" target="_blank" rel="noopener" title="Foundry on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.devleader.ca" target="_blank" rel="noopener" title="Dev Leader" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2m-5.15 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56M14.34 14H9.66c-.1-.66-.16-1.32-.16-2s.06-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2M12 19.96c-.83-1.2-1.5-2.53-1.91-3.96h3.82c-.41 1.43-1.08 2.76-1.91 3.96M8 8H5.08A7.92 7.92 0 0 1 9.4 4.44C8.8 5.55 8.35 6.75 8 8m-2.92 8H8c.35 1.25.8 2.45 1.4 3.56A8 8 0 0 1 5.08 16m-.82-2C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2M12 4.03c.83 1.2 1.5 2.54 1.91 3.97h-3.82c.41-1.43 1.08-2.77 1.91-3.97M18.92 8h-2.95a15.7 15.7 0 0 0-1.38-3.56c1.84.63 3.37 1.9 4.33 3.56M12 2C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.brandghost.ai" target="_blank" rel="noopener" title="BrandGhost" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9v11l3-3 3 3 3-3 3 3 3-3 3 3V11a9 9 0 0 0-9-9M9 8a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m6 0a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.highlight", "search.suggest", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/api-version-switcher.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,92 @@
+# Foundry
+
+> Build reliable, observable, and testable AI agent systems in .NET
+
+Author: Nick Cosentino (https://www.devleader.ca).
+
+- [Home](https://www.devleader.ca/projects/foundry/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Getting Started](https://www.devleader.ca/projects/foundry/getting-started/) -- Build Foundry, choose the packages for your scenario, register the runtime, and create your first generated agent.
+- [Configuration](https://www.devleader.ca/projects/foundry/configuration/) -- Understand Foundry's configuration surfaces for agents, workflows, diagnostics, evaluation, providers, and optional Needlr integration.
+- [Building from Source](https://www.devleader.ca/projects/foundry/building/) -- Build, test, pack, and validate the Foundry repository from source.
+
+## Guides
+
+- [Overview](https://www.devleader.ca/projects/foundry/guides/) -- Choose a Foundry guide for orchestration, observability, evaluation, testing, or provider integration.
+
+## Agent Framework
+
+- [Integrations and Workflows](https://www.devleader.ca/projects/foundry/ai-integrations/) -- Build AI agent systems with Foundry in .NET using generated discovery, workflow orchestration, and optional Needlr integration.
+- [Agent Functions](https://www.devleader.ca/projects/foundry/agent-functions/) -- Parameter optionality, default-value resolution, and DTO null-handling semantics for [AgentFunction]-decorated tools in Foundry's source-generated AIFunction wrappers.
+- [Iterative Agent Loop](https://www.devleader.ca/projects/foundry/iterative-agent-loop/) -- Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation.
+- [Workspace](https://www.devleader.ca/projects/foundry/workspace/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Progress Reporting](https://www.devleader.ca/projects/foundry/progress-reporting/) -- Track agent and workflow execution in real-time with Foundry's progress reporting system -- optional Needlr discovery, per-orchestration isolation, and ambient async context.
+- [Pipeline Metrics](https://www.devleader.ca/projects/foundry/pipeline-metrics/) -- Pipeline-shape OpenTelemetry metrics and distributed-tracing spans emitted automatically by SequentialPipelineRunner — per-pipeline outcome, per-stage duration / tokens / tool-failures, parent + child activity spans.
+- [GenAI Token Metrics](https://www.devleader.ca/projects/foundry/gen-ai-token-metrics/) -- Emit cache_read and reasoning measurements on the OpenTelemetry gen_ai.client.token.usage histogram so dashboards can answer "what's my prompt-cache hit ratio?" and "how many tokens went to reasoning vs final completion?" per LLM call.
+- [Stage Termination](https://www.devleader.ca/projects/foundry/stage-termination/) -- Typed-case StageTermination hierarchy describes why a pipeline stage stopped — pattern-match in C#, low-cardinality OTel tags via ToTagValue, polymorphic JSON wire format.
+- [Tool Result Middleware](https://www.devleader.ca/projects/foundry/tool-result-middleware/) -- How Foundry's ToolResultFunctionMiddleware translates tool exceptions and IToolResult returns into LLM-safe responses, and the trade-offs of enabling it.
+- [Tiered Provider Selection](https://www.devleader.ca/projects/foundry/tiered-provider-selector/) -- Configure how TieredProviderSelector reacts to provider exceptions — match exception kinds, skip failing providers for a duration, run a callback on hit. Replaces the hardcoded ProviderUnavailableException catch with declarative, per-instance policies.
+
+## Evaluation
+
+- [Evaluation](https://www.devleader.ca/projects/foundry/evaluation/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Experiment Runner](https://www.devleader.ca/projects/foundry/experiment-runner/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Langfuse](https://www.devleader.ca/projects/foundry/langfuse/) -- Build reliable, observable, and testable AI agent systems in .NET
+
+## Providers
+
+- [GitHub Copilot](https://www.devleader.ca/projects/foundry/copilot/) -- Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support.
+
+## Testing
+
+- [Testing Tools](https://www.devleader.ca/projects/foundry/testing-tools/) -- Paved-path testing for [AgentFunction]-decorated tools. Use ToolInvocationRunner to exercise the source-generated AIFunction wrapper with seeded workspace state, zero hand-rolled DI, and the same code path FunctionInvokingChatClient takes in production.
+
+## Analyzers
+
+- [Overview](https://www.devleader.ca/projects/foundry/analyzers/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF001](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF001/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF002](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF002/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF003](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF003/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF004](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF004/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF005](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF005/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF006](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF006/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF007](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF007/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF008](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF008/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF009](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF009/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF010](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF010/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF011](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF011/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF012](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF012/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF013](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF013/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF014](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF014/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF015](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF015/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF016](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF016/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF017](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF017/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF018](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF018/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF019](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF019/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF020](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF020/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF021](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF021/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF022](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF022/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF024](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF024/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF025](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF025/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF027](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF027/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF028](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF028/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF029](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF029/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF030](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF030/) -- Build reliable, observable, and testable AI agent systems in .NET
+
+## API Reference
+
+- [Overview](https://www.devleader.ca/projects/foundry/api/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Development](https://www.devleader.ca/projects/foundry/api/dev/) -- Browse API documentation generated from the latest Foundry main branch.
+- [Stable](https://www.devleader.ca/projects/foundry/api/stable/) -- Browse API documentation for the latest published Foundry release.
+
+## Operations
+
+- [Local CI Runners](https://www.devleader.ca/projects/foundry/local-runners/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Documentation Publishing](https://www.devleader.ca/projects/foundry/publishing/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Releasing](https://www.devleader.ca/projects/foundry/releasing/) -- Build reliable, observable, and testable AI agent systems in .NET
+
+## Architecture Decisions
+
+- [ADR-0001 DAG Graph Workflow Support](https://www.devleader.ca/projects/foundry/adr/adr-0001-dag-graph-workflow-support/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0002 Build ScriptedChatClient Locally](https://www.devleader.ca/projects/foundry/adr/adr-0002-build-scriptedchatclient-locally/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0003 Provider-Neutral Experiment Runner](https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0004 Extract AI Platform from Needlr](https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/) -- Build reliable, observable, and testable AI agent systems in .NET

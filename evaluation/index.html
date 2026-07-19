@@ -1,0 +1,3790 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Build reliable, observable, and testable AI agent systems in .NET">
+      
+      
+        <meta name="author" content="Nick Cosentino">
+      
+      
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/evaluation/">
+      
+      
+        <link rel="prev" href="../tiered-provider-selector/">
+      
+      
+        <link rel="next" href="../experiment-runner/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/foundry.webp">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Evaluation - Foundry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Evaluation – Foundry" />
+  <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
+  <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/evaluation/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Evaluation – Foundry" />
+  <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
+  <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
+  
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Foundry",
+        "item": "https://www.devleader.ca/projects/foundry/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Evaluation",
+        "item": "https://www.devleader.ca/projects/foundry/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Evaluation",
+        "item": "https://www.devleader.ca/projects/foundry/evaluation/"
+      }
+    ]
+  }
+  </script>
+  
+  
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#evaluation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Foundry" class="md-header__button md-logo" aria-label="Foundry" data-md-component="logo">
+      
+  <img src="../assets/foundry.webp" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Foundry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Evaluation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue-grey" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ncosentino/foundry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ncosentino/foundry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../configuration/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Building from Source
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../guides/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ai-integrations/" class="md-tabs__link">
+          
+  
+  
+  Agent Framework
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Evaluation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../copilot/" class="md-tabs__link">
+          
+  
+  
+  Providers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../testing-tools/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../analyzers/" class="md-tabs__link">
+          
+  
+  
+  Analyzers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../local-runners/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adr/adr-0001-dag-graph-workflow-support/" class="md-tabs__link">
+          
+  
+  
+  Architecture Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Foundry" class="md-nav__button md-logo" aria-label="Foundry" data-md-component="logo">
+      
+  <img src="../assets/foundry.webp" alt="logo">
+
+    </a>
+    Foundry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ncosentino/foundry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ncosentino/foundry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from Source
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Framework
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agent Framework
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations and Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../iterative-agent-loop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Iterative Agent Loop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workspace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workspace
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../progress-reporting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Progress Reporting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gen-ai-token-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GenAI Token Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stage-termination/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stage Termination
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tool-result-middleware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tool Result Middleware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tiered-provider-selector/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tiered Provider Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-path-result-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live-path result types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wiring-an-evaluator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wiring an evaluator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trajectory-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trajectory adapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-hoc-replay-from-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-hoc replay from diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-flight-access-from-inside-a-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-flight access from inside a tool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="In-flight access from inside a tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mid-flight-semantics-on-the-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mid-flight semantics on the snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#snapshot-isolation-and-sub-agent-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Snapshot, isolation, and sub-agent guarantees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-seam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test seam
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-fidelity-transcripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full-fidelity transcripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Full-fidelity transcripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#streaming-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Streaming capture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#streaming-agent-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Streaming agent runs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#character-counts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Character counts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#opentelemetry-interop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenTelemetry interop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordered-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordered timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-run-boundary-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent-run boundary capture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#native-agent-run-evaluators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native agent-run evaluators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Native agent-run evaluators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agentrundiagnosticscontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AgentRunDiagnosticsContext
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#efficiencyevaluator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EfficiencyEvaluator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#taskcompletionevaluator-llm-judged" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TaskCompletionEvaluator (LLM-judged)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toolcalltrajectoryevaluator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ToolCallTrajectoryEvaluator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterationcoherenceevaluator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IterationCoherenceEvaluator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminationappropriatenessevaluator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TerminationAppropriatenessEvaluator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wiring-native-evaluators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wiring native evaluators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-gate-for-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality gate for CI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transcript-markdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transcript markdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capture-chat-client-middleware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capture-chat-client middleware
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Capture-chat-client middleware">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cache-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cache key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#store-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Store contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-not-to-use-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When not to use it
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiment-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../langfuse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Langfuse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copilot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Copilot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyzers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analyzers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF001/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF001
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF002/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF002
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF003/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF003
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF004/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF004
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF005/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF005
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF006/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF006
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF007/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF007
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF008/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF008
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF009/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF009
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF010/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF010
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF011/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF011
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF012/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF012
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF013/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF013
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF014/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF014
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF015/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF015
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF016/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF016
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF017/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF017
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF018/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF018
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF019/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF019
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF020/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF020
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF021/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF021
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF022/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF022
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF024/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF024
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF025/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF025
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF027/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF027
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF028/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF028
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF029/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF029
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF030/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF030
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/dev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/stable/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stable
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local CI Runners
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../publishing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Publishing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0001-dag-graph-workflow-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0001 DAG Graph Workflow Support
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0002-build-scriptedchatclient-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0002 Build ScriptedChatClient Locally
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0003-provider-neutral-experiment-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0003 Provider-Neutral Experiment Runner
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0004-extract-ai-platform-from-needlr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0004 Extract AI Platform from Needlr
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="evaluation">Evaluation<a class="headerlink" href="#evaluation" title="Permanent link">&para;</a></h1>
+<p>Foundry's agent framework plugs directly into <a href="https://learn.microsoft.com/en-us/dotnet/ai/evaluation/libraries"><code>Microsoft.Extensions.AI.Evaluation</code></a> without adapters or flattening.</p>
+<p>For collection-level orchestration across finite cases and repeated trials—including retries,
+shared concurrency, run evaluators, and deterministic or statistical quality policies—see the
+<a href="../experiment-runner/">Experiment Runner</a>.</p>
+<p>MEAI Reporting response caching, <code>ScenarioRun</code> persistence, and official report generation remain
+opt-in through the dedicated <code>NexusLabs.Foundry.Evaluation.Reporting</code> package; see the
+<a href="../experiment-runner/#meai-reporting-adapter">MEAI Reporting adapter</a>.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p><code>Microsoft.Extensions.AI.Evaluation</code> (MEAI.Evaluation) evaluates LLM interactions by consuming native MEAI primitives: <code>ChatMessage</code>, <code>ChatResponse</code>, and <code>UsageDetails</code>. Foundry exposes these same shapes on its result surfaces, so evaluators slot in directly — no string flattening, no re-hydration step.</p>
+<h2 id="live-path-result-types">Live-path result types<a class="headerlink" href="#live-path-result-types" title="Permanent link">&para;</a></h2>
+<p>The surfaces an agent run returns expose full MEAI types rather than flattened strings, so the output of a run is feedable to an evaluator as-is.</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IterativeLoopResult.FinalResponse</code></td>
+<td><code>ChatResponse?</code></td>
+</tr>
+<tr>
+<td><code>IterationRecord.FinalResponse</code></td>
+<td><code>ChatResponse?</code></td>
+</tr>
+<tr>
+<td><code>TerminationContext.LastMessage</code></td>
+<td><code>ChatMessage?</code></td>
+</tr>
+<tr>
+<td><code>TerminationContext.Usage</code></td>
+<td><code>UsageDetails?</code></td>
+</tr>
+<tr>
+<td><code>IAgentStageResult.FinalResponse</code></td>
+<td><code>ChatResponse?</code></td>
+</tr>
+<tr>
+<td><code>AgentStageResult</code></td>
+<td>positional <code>ChatResponse?</code></td>
+</tr>
+<tr>
+<td><code>IPipelineRunResult.FinalResponses</code></td>
+<td><code>IReadOnlyDictionary&lt;string, ChatResponse?&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>response.Text</code> when a string projection is needed.</p>
+<h2 id="wiring-an-evaluator">Wiring an evaluator<a class="headerlink" href="#wiring-an-evaluator" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">Microsoft.Extensions.AI</span><span class="p">;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">using</span><span class="w"> </span><span class="nn">Microsoft.Extensions.AI.Evaluation</span><span class="p">;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">using</span><span class="w"> </span><span class="nn">Microsoft.Extensions.AI.Evaluation.Quality</span><span class="p">;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1">// loopResult is an IterativeLoopResult returned by IterativeAgentLoop.</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">ChatResponse</span><span class="o">?</span><span class="w"> </span><span class="n">finalResponse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loopResult</span><span class="p">.</span><span class="n">FinalResponse</span><span class="p">;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kt">var</span><span class="w"> </span><span class="n">chatConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatConfiguration</span><span class="p">(</span><span class="n">judgeChatClient</span><span class="p">);</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">evaluator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RelevanceEvaluator</span><span class="p">();</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kt">var</span><span class="w"> </span><span class="n">userPrompt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatMessage</span><span class="p">(</span><span class="n">ChatRole</span><span class="p">.</span><span class="n">User</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Original user question here.&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">EvaluationResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">evaluator</span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="na">[userPrompt]</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="n">finalResponse</span><span class="o">!</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="n">chatConfiguration</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="trajectory-adapter">Trajectory adapter<a class="headerlink" href="#trajectory-adapter" title="Permanent link">&para;</a></h2>
+<p>Tool-call trajectories are extracted from <code>IterationRecord.ToolCalls</code> via an extension method:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.MicrosoftAgentFramework.Iterative</span><span class="p">;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">IEnumerable</span><span class="o">&lt;</span><span class="n">AIContent</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trajectory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iterationRecord</span><span class="p">.</span><span class="n">ToToolCallTrajectory</span><span class="p">();</span>
+</code></pre></div>
+<p>The returned sequence alternates <code>FunctionCallContent</code> (the call) and <code>FunctionResultContent</code> (the result) in call order — the exact shape MEAI.Evaluation tool-call evaluators consume.</p>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<p>See <a href="https://github.com/ncosentino/foundry/tree/main/src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation"><code>src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation</code></a> for an end-to-end evaluation demo. It runs a real trip-planner agent via <code>IterativeTripPlannerApp.Core</code>, extracts diagnostics, converts them to <code>EvaluationInputs</code> via <code>ToEvaluationInputs()</code>, and scores the run with both Foundry-native deterministic evaluators and MS MEAI quality evaluators using <code>CopilotChatClient</code> as the judge.</p>
+<p>Run it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation
+</code></pre></div>
+<h2 id="post-hoc-replay-from-diagnostics">Post-hoc replay from diagnostics<a class="headerlink" href="#post-hoc-replay-from-diagnostics" title="Permanent link">&para;</a></h2>
+<p>A serialized <code>AgentRunDiagnostics</code> is sufficient for offline replay and evaluation — no need to re-invoke the agent or the underlying model.</p>
+<table>
+<thead>
+<tr>
+<th>Diagnostic</th>
+<th>Property</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ChatCompletionDiagnostics</code></td>
+<td><code>RequestMessages : IReadOnlyList&lt;ChatMessage&gt;?</code></td>
+<td>The exact messages sent to the chat client on that call.</td>
+</tr>
+<tr>
+<td><code>ChatCompletionDiagnostics</code></td>
+<td><code>Response : ChatResponse?</code></td>
+<td>The full response returned by the chat client (null on failure).</td>
+</tr>
+<tr>
+<td><code>ToolCallDiagnostics</code></td>
+<td><code>Arguments : IReadOnlyDictionary&lt;string, object?&gt;?</code></td>
+<td>Snapshot of the arguments the tool was invoked with.</td>
+</tr>
+<tr>
+<td><code>ToolCallDiagnostics</code></td>
+<td><code>Result : object?</code></td>
+<td>The value returned by the tool invocation (null on failure).</td>
+</tr>
+</tbody>
+</table>
+<p>All four properties are init-only, default to <code>null</code>, and are populated automatically by <code>DiagnosticsChatClientMiddleware</code> and <code>DiagnosticsFunctionCallingMiddleware</code>. Capture is always on.</p>
+<p>With these in hand you can rehydrate a MEAI <code>ChatResponse</code> + trajectory from a persisted diagnostics document and feed it into any <code>IEvaluator</code> offline.</p>
+<h2 id="in-flight-access-from-inside-a-tool">In-flight access from inside a tool<a class="headerlink" href="#in-flight-access-from-inside-a-tool" title="Permanent link">&para;</a></h2>
+<p>The post-hoc accessor (<code>IAgentDiagnosticsAccessor.LastRunDiagnostics</code>) is only populated after the agent run completes, which is too late for cross-tool verification within the same run. The companion <code>IInFlightAgentDiagnosticsAccessor.Current</code> exposes a snapshot of the diagnostics being accumulated <strong>while the run is still executing</strong>, scoped to the calling async flow.</p>
+<p>Inject it like any other accessor and read <code>Current</code> from inside a tool. The snapshot type is the same <code>IAgentRunDiagnostics</code> you get post-run, so the same code reads cleanly in both contexts.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nf">RecordFixDecisionTool</span><span class="p">(</span><span class="n">IInFlightAgentDiagnosticsAccessor</span><span class="w"> </span><span class="n">diag</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="na">[AgentFunction]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">RecordFixDecisionResult</span><span class="w"> </span><span class="nf">Record</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">issueId</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">action</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">reason</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;Applied&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">Current</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">snap</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">            </span><span class="c1">// Find the most recent prior FindReplaceWithCount call. Its</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">            </span><span class="c1">// structured Result is captured losslessly by the diagnostics</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">            </span><span class="c1">// middleware — no shadow store required.</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">            </span><span class="kt">var</span><span class="w"> </span><span class="n">lastWrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snap</span><span class="p">.</span><span class="n">ToolCalls</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">                </span><span class="p">.</span><span class="n">Where</span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">ToolName</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;FindReplaceWithCount&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">                </span><span class="p">.</span><span class="n">LastOrDefault</span><span class="p">();</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastWrite</span><span class="o">?.</span><span class="n">Result</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">FindReplaceWithCountResult</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Success</span><span class="p">:</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">r</span><span class="p">)</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">            </span><span class="p">{</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">                </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Rejected&quot;</span><span class="p">;</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">                </span><span class="n">reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">$&quot;[auto-corrected: prior write returned Success=false: {r.Error}] {reason}&quot;</span><span class="p">;</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">        </span><span class="c1">// ...</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="mid-flight-semantics-on-the-snapshot">Mid-flight semantics on the snapshot<a class="headerlink" href="#mid-flight-semantics-on-the-snapshot" title="Permanent link">&para;</a></h3>
+<p>The fields that aren't yet meaningful at snapshot time degrade safely rather than throw:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Mid-flight meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ToolCalls</code></td>
+<td>Every tool call that has <strong>completed</strong> on this async flow so far, ordered by reserved sequence number. The currently-executing tool (whose body called <code>Current</code>) is <strong>not</strong> present — the diagnostics middleware appends only after the tool returns.</td>
+</tr>
+<tr>
+<td><code>ChatCompletions</code></td>
+<td>Every chat completion that has finished so far. The in-progress completion that triggered the current tool call is not yet present.</td>
+</tr>
+<tr>
+<td><code>AggregateTokenUsage</code></td>
+<td>Reflects only completed completions; grows as the run continues.</td>
+</tr>
+<tr>
+<td><code>TotalDuration</code></td>
+<td>Elapsed-so-far, measured from <code>StartedAt</code> to the snapshot time.</td>
+</tr>
+<tr>
+<td><code>CompletedAt</code></td>
+<td>Snapshot time, not a true run-end time.</td>
+</tr>
+<tr>
+<td><code>Succeeded</code> / <code>ErrorMessage</code></td>
+<td><code>true</code> / <code>null</code> unless the run has explicitly recorded a failure.</td>
+</tr>
+<tr>
+<td><code>OutputResponse</code></td>
+<td>Typically <code>null</code> mid-run (recorded at run end).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="snapshot-isolation-and-sub-agent-guarantees">Snapshot, isolation, and sub-agent guarantees<a class="headerlink" href="#snapshot-isolation-and-sub-agent-guarantees" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Snapshot</strong> — each call to <code>Current</code> returns a freshly materialized snapshot with ordered arrays. Subsequent tool calls or completions added to the underlying builder do <strong>not</strong> mutate previously-returned snapshots.</li>
+<li><strong>Per-run AsyncLocal isolation</strong> — concurrent agent runs on parallel async flows each see only their own data. Standard AsyncLocal flow propagation means <code>ConfigureAwait(false)</code> doesn't break it.</li>
+<li><strong>Sub-agent innermost-wins</strong> — if a sub-agent is currently executing (its own <code>AgentRunDiagnosticsBuilder</code> was pushed onto the AsyncLocal stack), <code>Current</code> reflects the sub-agent's run. When the sub-agent completes and its builder is disposed, the parent run's builder becomes current again.</li>
+<li><strong><code>null</code> outside a run</strong> — callers must handle <code>null</code>. This happens when no diagnostics builder is active on the flow (e.g., the consumer didn't wire <code>UsingDiagnostics()</code>, or the accessor is being exercised from a unit test that didn't start a builder).</li>
+</ul>
+<h3 id="test-seam">Test seam<a class="headerlink" href="#test-seam" title="Permanent link">&para;</a></h3>
+<p><code>InFlightAgentDiagnosticsAccessor</code> is <code>internal</code> but registered through DI, so test code typically substitutes its own <code>IInFlightAgentDiagnosticsAccessor</code> mock. For tests that want to drive the real accessor, just call <code>AgentRunDiagnosticsBuilder.StartNew("AgentName")</code> to push a builder onto the AsyncLocal stack — the accessor will pick it up.</p>
+<h2 id="full-fidelity-transcripts">Full-fidelity transcripts<a class="headerlink" href="#full-fidelity-transcripts" title="Permanent link">&para;</a></h2>
+<p>Evaluation and agent-assisted debugging both depend on <strong>replay-grade</strong> transcripts — every chat exchange, not just totals.</p>
+<h3 id="streaming-capture">Streaming capture<a class="headerlink" href="#streaming-capture" title="Permanent link">&para;</a></h3>
+<p><code>DiagnosticsChatClientMiddleware</code> instruments both paths:</p>
+<ul>
+<li><code>GetResponseAsync</code> — captured on completion.</li>
+<li><code>GetStreamingResponseAsync</code> — streaming updates are teed through to the caller in real time, then buffered via <code>ToChatResponse()</code> at stream completion. The synthesized <code>ChatResponse</code> is written to <code>ChatCompletionDiagnostics.Response</code> with identical shape to the non-streaming path.</li>
+</ul>
+<p>Errors mid-stream still populate <code>ChatCompletionDiagnostics.{Success=false, ErrorMessage, Response}</code> with the partial response built from updates observed before the failure. No data is silently dropped.</p>
+<h3 id="streaming-agent-runs">Streaming agent runs<a class="headerlink" href="#streaming-agent-runs" title="Permanent link">&para;</a></h3>
+<p><code>DiagnosticsAgentRunMiddleware</code> instruments both agent-run paths:</p>
+<ul>
+<li><code>HandleAsync</code> — captured on completion.</li>
+<li><code>HandleStreamingAsync</code> — <code>AgentResponseUpdate</code>s are teed through to the caller in real time while distinct non-null <code>MessageId</code>s accumulate into <code>AgentRunDiagnostics.TotalOutputMessages</code>. On stream completion the builder is finalized and written to the configured <code>IAgentDiagnosticsWriter</code> with identical shape to the non-streaming path.</li>
+</ul>
+<p>Mid-stream failures record the partial output-message count observed so far and call <code>AgentRunDiagnosticsBuilder.RecordFailure(...)</code> before rethrowing, so streaming agent runs surface in diagnostics the same way non-streaming runs do.</p>
+<h3 id="character-counts">Character counts<a class="headerlink" href="#character-counts" title="Permanent link">&para;</a></h3>
+<p>Tokens are an LLM-reported abstraction; character counts are a direct measure of the payload Foundry actually shipped and received. Both are captured on every completion.</p>
+<ul>
+<li><strong><code>ChatCompletionDiagnostics.RequestCharCount</code></strong> — sum of <code>TextContent.Text?.Length</code> across all <code>RequestMessages</code>.</li>
+<li><strong><code>ChatCompletionDiagnostics.ResponseCharCount</code></strong> — sum of text length across the aggregated <code>Response</code>.</li>
+<li><strong><code>ToolCallDiagnostics.ArgumentsCharCount</code></strong> — length of the <code>System.Text.Json</code> serialization of the captured <code>Arguments</code> dictionary.</li>
+<li><strong><code>ToolCallDiagnostics.ResultCharCount</code></strong> — length of the <code>System.Text.Json</code> serialization of the captured <code>Result</code>.</li>
+</ul>
+<p>Populated automatically by <code>DiagnosticsChatClientMiddleware</code> and <code>DiagnosticsFunctionCallingMiddleware</code> on both success and failure paths. <code>DiagnosticsCharCounter</code> (in <code>NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics</code>) exposes the same helpers for callers who want to compute counts outside the middlewares. All helpers are null-safe and exception-tolerant — a counter failure never destabilizes the live path; it just yields <code>0</code>.</p>
+<h3 id="opentelemetry-interop">OpenTelemetry interop<a class="headerlink" href="#opentelemetry-interop" title="Permanent link">&para;</a></h3>
+<p>When MEAI's <code>UseOpenTelemetry()</code> or MAF's <code>WithOpenTelemetry()</code> is also active, both the upstream middleware and Foundry's <code>DiagnosticsChatClientMiddleware</code> create <code>Activity</code> spans for the same chat completion call. To avoid duplicate spans, set <code>ChatCompletionActivityMode</code> to <code>EnrichParent</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">        </span><span class="n">o</span><span class="p">.</span><span class="n">ChatCompletionActivityMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChatCompletionActivityMode</span><span class="p">.</span><span class="n">EnrichParent</span><span class="p">))</span>
+</code></pre></div>
+<p>In <code>EnrichParent</code> mode, when a parent <code>gen_ai.*</code> activity exists (from MEAI or MAF), Foundry skips creating its own activity and instead adds Foundry-specific tags (sequence number, char counts, agent name) to the existing parent span. When no parent exists, Foundry creates its own activity as normal.</p>
+<p>Tool call activities (<code>agent.tool</code>) are not affected — neither MEAI nor MAF produces per-tool-call spans, so Foundry's tool tracing is always the sole source.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Always</code> (default)</td>
+<td>Foundry is the only OTel instrumentation layer</td>
+</tr>
+<tr>
+<td><code>EnrichParent</code></td>
+<td>Both Foundry and upstream (MEAI/MAF) OTel middleware are active</td>
+</tr>
+</tbody>
+</table>
+<p>Metrics (counters, histograms) and in-process diagnostics recording are unaffected by this setting — only <code>Activity</code> span creation is suppressed.</p>
+<h3 id="ordered-timeline">Ordered timeline<a class="headerlink" href="#ordered-timeline" title="Permanent link">&para;</a></h3>
+<p><code>IAgentRunDiagnostics</code> exposes <code>ChatCompletions</code> and <code>ToolCalls</code> as separate collections, each with its own <code>Sequence</code>. When you need to see what actually happened in execution order, call the <code>GetOrderedTimeline()</code> extension method:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics</span><span class="p">;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">timeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">GetOrderedTimeline</span><span class="p">();</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">timeline</span><span class="p">)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">{</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;[{entry.StartedAt:HH:mm:ss.fff}] {entry.Kind} #{entry.Sequence}&quot;</span><span class="p">);</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
+</code></pre></div>
+<p>The returned list merges both collections and sorts them by <code>StartedAt</code> (wall-clock). When two entries share the same <code>StartedAt</code>, <code>ChatCompletion</code> entries sort before <code>ToolCall</code> entries (a chat completion is what triggers a tool call, not the reverse); further ties resolve by <code>Sequence</code> within kind. Each <code>DiagnosticsTimelineEntry</code> carries the original <code>ChatCompletionDiagnostics</code> or <code>ToolCallDiagnostics</code> reference in the property matching its <code>Kind</code>, so no information is lost in the merge — the ordered view is purely additive.</p>
+<h3 id="agent-run-boundary-capture">Agent-run boundary capture<a class="headerlink" href="#agent-run-boundary-capture" title="Permanent link">&para;</a></h3>
+<p>Beyond the per-completion and per-tool-call records, <code>IAgentRunDiagnostics</code> captures the exact input and output at the run boundary:</p>
+<ul>
+<li><strong><code>InputMessages : IReadOnlyList&lt;ChatMessage&gt;</code></strong> — the full input list handed to the middleware at run start. Empty when no input was supplied.</li>
+<li><strong><code>OutputResponse : AgentResponse?</code></strong> — the full response assembled at run completion. For non-streaming runs this is the underlying <code>AgentResponse</code>; for streaming runs the middleware aggregates <code>AgentResponseUpdate</code> fragments by <code>MessageId</code> (updates without an id become discrete messages keyed by arrival ordinal).</li>
+</ul>
+<p>Partial responses are still captured when a streaming run fails mid-stream — <code>OutputResponse</code> carries whatever messages were assembled before the fault, alongside <code>Succeeded = false</code> and the <code>ErrorMessage</code>. This makes a serialized <code>AgentRunDiagnostics</code> replay-complete: an evaluator can consume <code>InputMessages</code> + <code>OutputResponse</code> directly, without reaching back to the caller for the original prompt or the streamed output.</p>
+<h2 id="native-agent-run-evaluators">Native agent-run evaluators<a class="headerlink" href="#native-agent-run-evaluators" title="Permanent link">&para;</a></h2>
+<p><code>NexusLabs.Foundry.Evaluation</code> ships three deterministic evaluators that operate directly on <code>IAgentRunDiagnostics</code>. They are pure computations over captured diagnostics — no LLM judge is invoked, so they run offline and are cheap enough to assert in unit tests.</p>
+<p>All three evaluators consume the same bridge type:</p>
+<h3 id="agentrundiagnosticscontext">AgentRunDiagnosticsContext<a class="headerlink" href="#agentrundiagnosticscontext" title="Permanent link">&para;</a></h3>
+<p><code>AgentRunDiagnosticsContext : EvaluationContext</code> wraps an <code>IAgentRunDiagnostics</code> instance and exposes it through an <code>EvaluationContext</code> so native evaluators (and MEAI-provided evaluators that accept supplemental context) can read diagnostics without a custom adapter.</p>
+<ul>
+<li><strong><code>ContextName = "Foundry Agent Run Diagnostics"</code></strong> — stable constant used as the context identifier.</li>
+<li><strong><code>Diagnostics</code></strong> — the wrapped <code>IAgentRunDiagnostics</code>.</li>
+<li><code>BuildContents()</code> emits a single <code>TextContent</code> summary of the run (agent name, execution mode, outcome, chat-completion count, tool-call count, duration) so MEAI judge-based evaluators that round-trip context through a prompt still see a readable summary.</li>
+</ul>
+<p>Evaluators downcast the context to <code>AgentRunDiagnosticsContext</code> to reach the full <code>Diagnostics</code> surface.</p>
+<h3 id="efficiencyevaluator">EfficiencyEvaluator<a class="headerlink" href="#efficiencyevaluator" title="Permanent link">&para;</a></h3>
+<p>Reports on token usage and cost efficiency.</p>
+<ul>
+<li><strong><code>Total Tokens</code></strong> — aggregate token count across all LLM calls.</li>
+<li><strong><code>Input Token Ratio</code></strong> — input tokens / total tokens. High values suggest verbose prompts; low values suggest verbose outputs.</li>
+<li><strong><code>Tokens Per Tool Call</code></strong> — total tokens / tool call count. Measures the token cost of each tool invocation. Zero when no tool calls occurred.</li>
+<li><strong><code>Cache Hit Ratio</code></strong> — cached input tokens / input tokens. Higher values mean more prompt-cache reuse.</li>
+<li><strong><code>Under Budget</code></strong> — boolean, only emitted when <code>tokenBudget</code> is provided to the constructor. True when total tokens is strictly below the budget.</li>
+</ul>
+<p>When no <code>AgentRunDiagnosticsContext</code> is present, the evaluator returns an empty result. The optional <code>tokenBudget</code> constructor parameter controls whether the budget metric is emitted.</p>
+<h3 id="taskcompletionevaluator-llm-judged">TaskCompletionEvaluator (LLM-judged)<a class="headerlink" href="#taskcompletionevaluator-llm-judged" title="Permanent link">&para;</a></h3>
+<p>Assesses whether the agent actually accomplished the task it was given. Unlike MEAI's <code>TaskAdherenceEvaluator</code> (which checks instruction following), this evaluator checks <em>task success</em>: did the agent produce output that satisfies the original request?</p>
+<ul>
+<li><strong><code>Task Completed</code></strong> — boolean. True when the judge determines the agent accomplished the requested task.</li>
+<li><strong><code>Task Completion Score</code></strong> — numeric (1–5). How completely and correctly the agent fulfilled the request. 5 = fully complete, 1 = not started or completely wrong. The completion threshold is 3.</li>
+<li><strong><code>Task Completion Reasoning</code></strong> — string. The judge's explanation for the score.</li>
+</ul>
+<p>This evaluator requires a <code>ChatConfiguration</code> with a judge <code>IChatClient</code>. When no judge is configured, the evaluator returns an empty result. When <code>AgentRunDiagnosticsContext</code> is provided, tool-call counts and success status are included in the judge prompt for richer assessment.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">taskCompletion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TaskCompletionEvaluator</span><span class="p">()</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="k">new</span><span class="w"> </span><span class="n">ChatMessage</span><span class="p">(</span><span class="n">ChatRole</span><span class="p">.</span><span class="n">User</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Plan a 7-day trip to Japan&quot;</span><span class="p">)],</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">        </span><span class="n">modelResponse</span><span class="p">:</span><span class="w"> </span><span class="n">agentResponse</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">        </span><span class="n">chatConfiguration</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatConfiguration</span><span class="p">(</span><span class="n">judgeChatClient</span><span class="p">),</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">        </span><span class="n">additionalContext</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="k">new</span><span class="w"> </span><span class="n">AgentRunDiagnosticsContext</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">)]);</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="kt">var</span><span class="w"> </span><span class="n">completed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">BooleanMetric</span><span class="p">)</span><span class="n">taskCompletion</span><span class="p">.</span><span class="n">Metrics</span><span class="p">[</span><span class="s">&quot;Task Completed&quot;</span><span class="p">]).</span><span class="n">Value</span><span class="p">;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">NumericMetric</span><span class="p">)</span><span class="n">taskCompletion</span><span class="p">.</span><span class="n">Metrics</span><span class="p">[</span><span class="s">&quot;Task Completion Score&quot;</span><span class="p">]).</span><span class="n">Value</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="toolcalltrajectoryevaluator">ToolCallTrajectoryEvaluator<a class="headerlink" href="#toolcalltrajectoryevaluator" title="Permanent link">&para;</a></h3>
+<p>Reports on the sequence of tool calls across a run.</p>
+<ul>
+<li><strong><code>Tool Calls Total</code></strong> — total tool-call records observed.</li>
+<li><strong><code>Tool Calls Failed</code></strong> — count of records where <code>Succeeded</code> is false.</li>
+<li><strong><code>Tool Call Sequence Gaps</code></strong> — number of positions where consecutive tool-call <code>SequenceNumber</code> values are not strictly increasing by one.</li>
+<li><strong><code>All Tool Calls Succeeded</code></strong> — boolean rollup, true when every tool call succeeded.</li>
+</ul>
+<p>When no <code>AgentRunDiagnosticsContext</code> is present in the evaluation's additional context, the evaluator returns an empty result ("not applicable"). This lets callers include it unconditionally in a pipeline of evaluators.</p>
+<h3 id="iterationcoherenceevaluator">IterationCoherenceEvaluator<a class="headerlink" href="#iterationcoherenceevaluator" title="Permanent link">&para;</a></h3>
+<p>Reports on iterative-loop structure.</p>
+<ul>
+<li><strong><code>Iteration Count</code></strong> — number of <code>IterationRecord</code> entries.</li>
+<li><strong><code>Iteration Empty Outputs</code></strong> — count of iterations whose <code>FinalResponse</code> has no text content.</li>
+<li><strong><code>Terminated Coherently</code></strong> — boolean, true when the run reports a terminated-coherently signal consistent with the captured iterations.</li>
+</ul>
+<p>Gated on execution mode: the evaluator only emits metrics when <code>Diagnostics.ExecutionMode == "IterativeLoop"</code> (available as the <code>IterativeLoopExecutionMode</code> const). Other execution modes produce an empty result.</p>
+<h3 id="terminationappropriatenessevaluator">TerminationAppropriatenessEvaluator<a class="headerlink" href="#terminationappropriatenessevaluator" title="Permanent link">&para;</a></h3>
+<p>Reports on whether the run's terminal state is internally consistent.</p>
+<ul>
+<li><strong><code>Run Succeeded</code></strong> — boolean mirror of <code>Diagnostics.Succeeded</code>.</li>
+<li><strong><code>Termination Consistent</code></strong> — boolean, true when <code>Succeeded</code> agrees with the presence/absence of <code>ErrorMessage</code> (success ⇔ no error message).</li>
+<li><strong><code>Execution Mode</code></strong> — string metric carrying the run's execution mode, or the <code>UnknownExecutionMode = "Unknown"</code> fallback when null.</li>
+</ul>
+<h3 id="wiring-native-evaluators">Wiring native evaluators<a class="headerlink" href="#wiring-native-evaluators" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AgentRunDiagnosticsContext</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">);</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">additionalContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="p">[]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1">// ChatConfiguration is required by the MEAI evaluator contract even for</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1">// deterministic evaluators. Pass a judge when you also run judge-based</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">// evaluators; deterministic evaluators ignore it.</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="kt">var</span><span class="w"> </span><span class="n">chatConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatConfiguration</span><span class="p">(</span><span class="n">judgeChatClient</span><span class="p">);</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">trajectory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ToolCallTrajectoryEvaluator</span><span class="p">()</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="n">Array</span><span class="p">.</span><span class="n">Empty</span><span class="o">&lt;</span><span class="n">ChatMessage</span><span class="o">&gt;</span><span class="p">(),</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">        </span><span class="n">modelResponse</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatResponse</span><span class="p">(),</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">        </span><span class="n">chatConfiguration</span><span class="p">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">        </span><span class="n">additionalContext</span><span class="p">:</span><span class="w"> </span><span class="n">additionalContext</span><span class="p">);</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="kt">var</span><span class="w"> </span><span class="n">efficiency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EfficiencyEvaluator</span><span class="p">(</span><span class="n">tokenBudget</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="n">_000</span><span class="p">)</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="n">Array</span><span class="p">.</span><span class="n">Empty</span><span class="o">&lt;</span><span class="n">ChatMessage</span><span class="o">&gt;</span><span class="p">(),</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">        </span><span class="n">modelResponse</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatResponse</span><span class="p">(),</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">        </span><span class="n">chatConfiguration</span><span class="p">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">        </span><span class="n">additionalContext</span><span class="p">:</span><span class="w"> </span><span class="n">additionalContext</span><span class="p">);</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="kt">var</span><span class="w"> </span><span class="n">coherence</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IterationCoherenceEvaluator</span><span class="p">()</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">    </span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="n">Array</span><span class="p">.</span><span class="n">Empty</span><span class="o">&lt;</span><span class="n">ChatMessage</span><span class="o">&gt;</span><span class="p">(),</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">        </span><span class="n">modelResponse</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatResponse</span><span class="p">(),</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">        </span><span class="n">chatConfiguration</span><span class="p">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">        </span><span class="n">additionalContext</span><span class="p">:</span><span class="w"> </span><span class="n">additionalContext</span><span class="p">);</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="kt">var</span><span class="w"> </span><span class="n">termination</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TerminationAppropriatenessEvaluator</span><span class="p">()</span>
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a><span class="w">    </span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="n">Array</span><span class="p">.</span><span class="n">Empty</span><span class="o">&lt;</span><span class="n">ChatMessage</span><span class="o">&gt;</span><span class="p">(),</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">        </span><span class="n">modelResponse</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatResponse</span><span class="p">(),</span>
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="w">        </span><span class="n">chatConfiguration</span><span class="p">:</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">        </span><span class="n">additionalContext</span><span class="p">:</span><span class="w"> </span><span class="n">additionalContext</span><span class="p">);</span>
+</code></pre></div>
+<p>Each <code>EvaluationResult</code> exposes metrics by name — use the <code>*MetricName</code> constants on each evaluator type to look them up without string literals at the call site.</p>
+<h3 id="quality-gate-for-ci">Quality gate for CI<a class="headerlink" href="#quality-gate-for-ci" title="Permanent link">&para;</a></h3>
+<p><code>EvaluationQualityGate</code> defines configurable thresholds that throw <code>QualityGateFailedException</code> when evaluation metrics regress. Use it in CI pipelines or xUnit tests to gate deployments on agent quality.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">gate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EvaluationQualityGate</span><span class="p">()</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="p">.</span><span class="n">RequireBoolean</span><span class="p">(</span><span class="n">ToolCallTrajectoryEvaluator</span><span class="p">.</span><span class="n">AllSucceededMetricName</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="p">.</span><span class="n">OptionalBoolean</span><span class="p">(</span><span class="n">IterationCoherenceEvaluator</span><span class="p">.</span><span class="n">TerminatedCoherentlyMetricName</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="p">.</span><span class="n">RequireNumericMax</span><span class="p">(</span><span class="n">EfficiencyEvaluator</span><span class="p">.</span><span class="n">TotalTokensMetricName</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="n">_000</span><span class="p">)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="p">.</span><span class="n">RequireBoolean</span><span class="p">(</span><span class="n">EfficiencyEvaluator</span><span class="p">.</span><span class="n">UnderBudgetMetricName</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="p">.</span><span class="n">OptionalNumericMin</span><span class="p">(</span><span class="n">IterationCoherenceEvaluator</span><span class="p">.</span><span class="n">EfficiencyRatioMetricName</span><span class="p">,</span><span class="w"> </span><span class="n">min</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">EvaluationThresholdResult</span><span class="w"> </span><span class="n">decision</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="n">gate</span><span class="p">.</span><span class="n">Evaluate</span><span class="p">(</span><span class="n">trajectoryResult</span><span class="p">,</span><span class="w"> </span><span class="n">coherenceResult</span><span class="p">,</span><span class="w"> </span><span class="n">efficiencyResult</span><span class="p">);</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="n">gate</span><span class="p">.</span><span class="n">Assert</span><span class="p">(</span><span class="n">trajectoryResult</span><span class="p">,</span><span class="w"> </span><span class="n">coherenceResult</span><span class="p">,</span><span class="w"> </span><span class="n">efficiencyResult</span><span class="p">);</span>
+</code></pre></div>
+<p>Threshold types:</p>
+<ul>
+<li><strong><code>RequireNumericMax(name, max)</code></strong> — metric value must be ≤ max.</li>
+<li><strong><code>RequireNumericMin(name, min)</code></strong> — metric value must be ≥ min.</li>
+<li><strong><code>RequireBoolean(name, expected)</code></strong> — metric value must equal expected.</li>
+<li><strong><code>OptionalNumericMax</code> / <code>OptionalNumericMin</code> / <code>OptionalBoolean</code></strong> — apply the
+  comparison when a conditionally emitted metric is present.</li>
+</ul>
+<p><code>Evaluate(...)</code> returns structured per-threshold outcomes. Missing or invalid required metrics are
+<code>Inconclusive</code> by default; <code>Assert(...)</code> throws for failed or inconclusive decisions. Optional
+missing metrics do not block a pass. An optional metric that is present but invalid still produces
+an inconclusive decision rather than hiding malformed evidence.</p>
+<h3 id="transcript-markdown">Transcript markdown<a class="headerlink" href="#transcript-markdown" title="Permanent link">&para;</a></h3>
+<p>For snapshot tests, review artifacts, and CI log attachments, render an entire agent run as deterministic Markdown with <code>ToTranscriptMarkdown()</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics</span><span class="p">;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="kt">string</span><span class="w"> </span><span class="n">transcript</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">ToTranscriptMarkdown</span><span class="p">();</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">File</span><span class="p">.</span><span class="n">WriteAllText</span><span class="p">(</span><span class="s">&quot;run.md&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">transcript</span><span class="p">);</span>
+</code></pre></div>
+<p>The output is byte-stable across locales — it uses <code>CultureInfo.InvariantCulture</code> for numeric formatting and <code>System.Text.Json</code> with <code>WriteIndented = true</code> for embedded tool arguments and results. Structure:</p>
+<ul>
+<li>H1 header — agent name, execution mode, success/failure, total duration (ms), aggregate token usage.</li>
+<li><code>## Input messages</code> — only emitted when <code>InputMessages</code> is non-empty.</li>
+<li><code>## Timeline</code> — the ordered view from <code>GetOrderedTimeline()</code>, with each entry prefixed by its offset from <code>StartedAt</code> in milliseconds. Tool-call entries embed <code>Arguments</code> and <code>Result</code> as pretty-printed JSON blocks.</li>
+<li><code>## Output response</code> — only emitted when <code>OutputResponse</code> is non-null and carries at least one message.</li>
+<li><code>## Error</code> — only emitted when <code>Succeeded</code> is false.</li>
+</ul>
+<p>The renderer is a read-side projection over <code>IAgentRunDiagnostics</code> — calling it has no effect on the live path.</p>
+<h2 id="capture-chat-client-middleware">Capture-chat-client middleware<a class="headerlink" href="#capture-chat-client-middleware" title="Permanent link">&para;</a></h2>
+<p>Evaluation suites and CI harnesses benefit from deterministic, repeatable chat responses: the first run against a real model captures the response; subsequent runs replay it without hitting the network. <code>EvaluationCaptureChatClient</code> is a transparent <code>IChatClient</code> decorator that implements this pattern.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Evaluation</span><span class="p">;</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="s">&quot;./cache/evaluation&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1">// First call: delegates to realChatClient and persists the response.</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1">// Second call with the same request: served from the store, real client untouched.</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">ChatResponse</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">cached</span><span class="p">.</span><span class="n">GetResponseAsync</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">,</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="cache-key">Cache key<a class="headerlink" href="#cache-key" title="Permanent link">&para;</a></h3>
+<p>The key is a SHA-256 lowercase hex digest (64 chars) computed over:</p>
+<ul>
+<li>Each <code>ChatMessage</code> formatted as <code>"{role}:{text}\n"</code> in order.</li>
+<li>A <code>---\n</code> separator.</li>
+<li>The tuple <code>model</code>, <code>temperature</code>, <code>top_p</code>, <code>max_tokens</code> from the supplied <code>ChatOptions</code> (missing values emit empty strings, floats are formatted with <code>"R"</code> + <code>InvariantCulture</code>).</li>
+</ul>
+<p>The key intentionally excludes tool definitions, response format, and custom options. Two requests that differ only in those fields collide on the same cache entry — if your suite needs them to vary, route them to separate stores.</p>
+<h3 id="store-contract">Store contract<a class="headerlink" href="#store-contract" title="Permanent link">&para;</a></h3>
+<p><code>IEvaluationCaptureStore</code> has two methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TryGetAsync(key, ct)</code></td>
+<td>Returns the captured <code>ChatResponse?</code> for the key, or <code>null</code> on miss.</td>
+</tr>
+<tr>
+<td><code>SaveAsync(key, response, ct)</code></td>
+<td>Persists the response under the key, overwriting any existing entry.</td>
+</tr>
+</tbody>
+</table>
+<p>Two implementations ship in-box:</p>
+<ul>
+<li><strong><code>FileEvaluationCaptureStore</code></strong> — one JSON file per key under a caller-supplied directory. Writes are atomic via write-then-rename. Directory is created on first save.</li>
+<li>Custom stores — implement <code>IEvaluationCaptureStore</code> for Redis, blob storage, in-memory dictionaries, or any other backing.</li>
+</ul>
+<p>Use the fluent extension to wrap a client with a file store:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="s">&quot;./cache/evaluation&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>Or inject any <code>IEvaluationCaptureStore</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="n">myStore</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="streaming">Streaming<a class="headerlink" href="#streaming" title="Permanent link">&para;</a></h3>
+<p><code>GetStreamingResponseAsync</code> aggregates updates via <code>ToChatResponse()</code>, saves the aggregated response under the same key used by the non-streaming path, then re-emits the captured response as a single <code>ChatResponseUpdate</code>. A cache hit yields one update; the caller sees the same <code>await foreach</code> surface either way. Mid-stream failures are not cached — only complete responses reach the store.</p>
+<h3 id="when-not-to-use-it">When not to use it<a class="headerlink" href="#when-not-to-use-it" title="Permanent link">&para;</a></h3>
+<p>Capture-replay is unsuitable for suites that rely on response variance (temperature sampling across runs), suites that depend on live model behavior changes, or suites where the cache key's intentional omissions (tools, response format) would cause false hits. For those, bypass the decorator and use the underlying client directly.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Nick Cosentino <br> <a href="https://www.devleader.ca">Dev Leader: software engineering articles and C# tutorials</a> <br> <a href="https://links.devleader.ca">Dev Leader links, videos, newsletter, and social channels</a> <br> <a href="https://www.brandghost.ai">BrandGhost: AI-assisted social media management</a>
+
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/ncosentino/foundry" target="_blank" rel="noopener" title="Foundry on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.devleader.ca" target="_blank" rel="noopener" title="Dev Leader" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2m-5.15 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56M14.34 14H9.66c-.1-.66-.16-1.32-.16-2s.06-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2M12 19.96c-.83-1.2-1.5-2.53-1.91-3.96h3.82c-.41 1.43-1.08 2.76-1.91 3.96M8 8H5.08A7.92 7.92 0 0 1 9.4 4.44C8.8 5.55 8.35 6.75 8 8m-2.92 8H8c.35 1.25.8 2.45 1.4 3.56A8 8 0 0 1 5.08 16m-.82-2C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2M12 4.03c.83 1.2 1.5 2.54 1.91 3.97h-3.82c.41-1.43 1.08-2.77 1.91-3.97M18.92 8h-2.95a15.7 15.7 0 0 0-1.38-3.56c1.84.63 3.37 1.9 4.33 3.56M12 2C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.brandghost.ai" target="_blank" rel="noopener" title="BrandGhost" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9v11l3-3 3 3 3-3 3 3 3-3 3 3V11a9 9 0 0 0-9-9M9 8a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m6 0a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.highlight", "search.suggest", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/api-version-switcher.js"></script>
+      
+    
+  </body>
+</html>
