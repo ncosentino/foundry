@@ -24,11 +24,10 @@ Foundry is dependency-injection neutral at its core. Use standard
 when you want source-generated discovery and Needlr's plugin-oriented
 composition model.
 
-!!! warning "Preparing for the first alpha release"
-    Foundry's packages are not available from NuGet.org yet. Package IDs,
-    namespaces, and APIs may change before the first stable release. You can
-    explore the complete framework today by building the repository and running
-    its 30 included examples.
+!!! warning "Alpha release"
+    Release `v0.1.0-alpha.1` maps to NuGet package version
+    `0.1.0-alpha-0001`. Package IDs, namespaces, and APIs may change before the
+    first stable release.
 
 ## Why Foundry?
 
@@ -56,19 +55,18 @@ prompt:
 
 ## Quick Start
 
-### Build Foundry
+### Install Foundry
 
-Clone the repository and build the complete solution:
+After the release workflow completes, install the runtime package, then add the
+workflow, generator, analyzer, provider, or Needlr integration packages
+required by your application:
 
 ```powershell
-git clone https://github.com/ncosentino/foundry.git
-Set-Location foundry
-dotnet build src\NexusLabs.Foundry.slnx
+dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha-0001
 ```
 
-The solution contains the production packages, tests, source generators,
-analyzers, and runnable examples. See [Getting Started](getting-started.md) for
-the intended package layout and a guided first-agent walkthrough.
+See [Getting Started](getting-started.md) for the recommended package
+combinations and a guided first-agent walkthrough.
 
 ### Create a generated agent
 

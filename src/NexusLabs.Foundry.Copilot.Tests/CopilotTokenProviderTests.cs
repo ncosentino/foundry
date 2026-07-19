@@ -1,5 +1,6 @@
 namespace NexusLabs.Foundry.Copilot.Tests;
 
+[Collection(CopilotEnvironmentVariableCollection.Name)]
 public class CopilotTokenProviderTests
 {
     [Fact]

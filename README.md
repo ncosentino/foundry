@@ -30,6 +30,20 @@ composition model.
 > Foundry is alpha software. Package IDs, namespaces, and APIs may change
 > before the first stable release.
 
+## Installation
+
+Release `v0.1.0-alpha.1` maps to NuGet package version
+`0.1.0-alpha-0001`. After the release workflow completes, install the core
+Microsoft Agent Framework runtime:
+
+```powershell
+dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha-0001
+```
+
+Add the workflow, generator, analyzer, provider, or Needlr integration packages
+that match your application. See [Getting Started](docs/getting-started.md) for
+the recommended package combinations.
+
 ## Why Foundry?
 
 AI prototypes are easy to start and difficult to operate. Foundry focuses on
