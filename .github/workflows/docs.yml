@@ -1,0 +1,80 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy the generated site to Cloudflare Pages
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install documentation dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: Build documentation
+        run: python -m mkdocs build --strict
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-site
+          path: site
+
+  deploy:
+    needs: docs
+    if: >-
+      vars.DOCS_DEPLOY_ENABLED == 'true' &&
+      github.ref == 'refs/heads/main' &&
+      (
+        github.event_name == 'push' ||
+        (github.event_name == 'workflow_dispatch' && inputs.deploy)
+      )
+    runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    concurrency:
+      group: foundry-docs-production
+      cancel-in-progress: false
+    environment:
+      name: documentation
+      url: https://www.devleader.ca/projects/foundry/
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download documentation artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: foundry-site
+          path: site
+
+      - name: Deploy documentation to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=nexuslabs-foundry --branch=main --commit-dirty=true
