@@ -1,9 +1,20 @@
 {
-  "current_stable": "",
+  "current_stable": "0.1.0-alpha.1",
   "entries": [
+    {
+      "label": "Stable (0.1.0-alpha.1)",
+      "path": "stable"
+    },
     {
       "label": "Development (main)",
       "path": "dev"
+    },
+    {
+      "separator": true
+    },
+    {
+      "label": "v0.1.0-alpha.1",
+      "path": "v0.1.0-alpha.1"
     }
   ]
 }
