@@ -33,11 +33,13 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Add .NET global tools to PATH
-        run: echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
-
       - name: Install NBGV CLI
-        run: dotnet tool install --global nbgv --version 3.7.115
+        run: |
+          dotnet tool install \
+            --tool-path "$RUNNER_TEMP/nbgv" \
+            nbgv \
+            --version 3.7.115
+          echo "$RUNNER_TEMP/nbgv" >> "$GITHUB_PATH"
 
       - name: Validate release version
         id: version
