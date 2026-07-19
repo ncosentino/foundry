@@ -50,3 +50,8 @@ The release workflow:
 
 The workflow fails before publication when the tag, version, changelog, or
 package validation does not match.
+
+Package publication is resumable rather than atomic. If a transient failure
+occurs after some packages reach NuGet.org, rerun the workflow for the same tag;
+`--skip-duplicate` preserves completed pushes and continues with the remaining
+packages.

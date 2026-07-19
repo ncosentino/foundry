@@ -37,7 +37,7 @@ jobs:
         run: echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
 
       - name: Install NBGV CLI
-        run: dotnet tool install --global nbgv
+        run: dotnet tool install --global nbgv --version 3.7.115
 
       - name: Validate release version
         id: version
@@ -166,6 +166,7 @@ jobs:
               if (found) exit
               if (index($0, "[" version "]")) found=1
             }
+            found && /^\[[^]]+\]: / { exit }
             found { print }
           ' CHANGELOG.md)"
 

@@ -11,7 +11,6 @@
 <p align="center">
   <a href="https://github.com/ncosentino/foundry/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ncosentino/foundry/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/ncosentino/foundry/actions/workflows/docs.yml"><img alt="Documentation" src="https://github.com/ncosentino/foundry/actions/workflows/docs.yml/badge.svg?branch=main"></a>
-  <a href="https://www.nuget.org/packages/NexusLabs.Foundry.MicrosoftAgentFramework"><img alt="NuGet prerelease" src="https://img.shields.io/nuget/vpre/NexusLabs.Foundry.MicrosoftAgentFramework.svg"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="https://dotnet.microsoft.com/"><img alt=".NET 10" src="https://img.shields.io/badge/.NET-10.0-512BD4"></a>
   <img alt="Status: Alpha" src="https://img.shields.io/badge/status-alpha-orange">
@@ -33,7 +32,9 @@ composition model.
 
 ## Installation
 
-Install the core Microsoft Agent Framework runtime:
+Release `v0.1.0-alpha.1` maps to NuGet package version
+`0.1.0-alpha-0001`. After the release workflow completes, install the core
+Microsoft Agent Framework runtime:
 
 ```powershell
 dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha-0001

@@ -4,13 +4,14 @@ description: Build Foundry, choose the packages for your scenario, register the 
 
 # Getting Started
 
-Foundry 0.1.0-alpha.1 is published as NuGet version `0.1.0-alpha-0001`.
-Package IDs, namespaces, and APIs may change before the first stable release.
+Release `v0.1.0-alpha.1` maps to NuGet package version
+`0.1.0-alpha-0001`. Package IDs, namespaces, and APIs may change before the
+first stable release.
 
 ## 1. Install Foundry
 
-Install the runtime, workflows, source generator, and analyzers for a generated
-agent application:
+After the release workflow completes, install the runtime, workflows, source
+generator, and analyzers for a generated agent application:
 
 ```xml
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework"
