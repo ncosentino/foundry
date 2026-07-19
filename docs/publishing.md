@@ -13,6 +13,28 @@ https://www.devleader.ca/projects/foundry/
 No Cloudflare custom domain is required for the Pages project. The Worker owns
 the public path on `www.devleader.ca`.
 
+## Versioned API documentation
+
+Foundry preserves the same API-documentation model as Needlr:
+
+- pushes to `main` regenerate `/api/dev/`;
+- releases generate immutable `/api/v<version>/` archives and refresh
+  `/api/stable/`;
+- `gh-pages` acts as the merge store so development and release workflows own
+  separate URL slices without overwriting each other;
+- the API version switcher reads `/api/versions.json`;
+- Cloudflare receives a trimmed mirror containing main, development, stable,
+  and the newest version archives.
+
+Historical archives remain in `gh-pages` history even after older versions are
+trimmed from the Cloudflare deployment.
+
+The Documentation and Release workflows only merge their owned slices into
+`gh-pages`. A separate `Documentation Deployment` workflow checks out the
+latest merged branch, trims old archives, and deploys that complete snapshot to
+Cloudflare. This latest-snapshot deployment prevents concurrent main and
+release builds from publishing partial or stale trees.
+
 ## Safe-by-default deployment
 
 The `Documentation` workflow always builds and uploads the generated site as a GitHub
