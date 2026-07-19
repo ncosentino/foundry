@@ -4,38 +4,36 @@ description: Build Foundry, choose the packages for your scenario, register the 
 
 # Getting Started
 
-Foundry is currently preparing for its first alpha package release. The
-package references below show the intended package layout but are not available
-from NuGet.org yet. You can explore the complete framework today by building
-the repository and running the included examples.
+Foundry 0.1.0-alpha.1 is available as a prerelease package family on
+NuGet.org. Package IDs, namespaces, and APIs may change before the first stable
+release.
 
-## 1. Build Foundry
+## 1. Install Foundry
 
-Clone the repository and build the complete solution:
+Install the runtime, workflows, source generator, and analyzers for a generated
+agent application:
 
-```powershell
-git clone https://github.com/ncosentino/foundry.git
-Set-Location foundry
-dotnet build src\NexusLabs.Foundry.slnx
+```xml
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework"
+                  Version="0.1.0-alpha.1" />
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows"
+                  Version="0.1.0-alpha.1" />
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
+                  Version="0.1.0-alpha.1"
+                  PrivateAssets="all" />
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers"
+                  Version="0.1.0-alpha.1"
+                  PrivateAssets="all" />
 ```
 
-The solution includes the production packages, tests, source generators,
-analyzers, and 30 example projects.
+All Foundry packages in a release use the same version.
 
 ## 2. Choose the package boundary
 
-Start with the smallest package set that owns the capability you need:
-
-```xml
-<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework" />
-<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
-<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
-                  OutputItemType="Analyzer"
-                  ReferenceOutputAssembly="false" />
-<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers"
-                  OutputItemType="Analyzer"
-                  ReferenceOutputAssembly="false" />
-```
+Start with the smallest package set that owns the capability you need. Add
+`NexusLabs.Foundry.Evaluation`, `NexusLabs.Foundry.Langfuse`,
+`NexusLabs.Foundry.Copilot`, or the testing and DevUI packages only when the
+application uses those capabilities.
 
 Add `NexusLabs.Foundry.Needlr.MicrosoftAgentFramework` only when the application
 uses Needlr as its composition system.

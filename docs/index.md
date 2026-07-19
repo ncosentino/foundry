@@ -10,6 +10,7 @@ description: Build reliable .NET AI agents with generated discovery, workflows, 
 
 [![CI](https://github.com/ncosentino/foundry/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ncosentino/foundry/actions/workflows/ci.yml)
 [![Documentation](https://github.com/ncosentino/foundry/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/ncosentino/foundry/actions/workflows/docs.yml)
+[![NuGet prerelease](https://img.shields.io/nuget/vpre/NexusLabs.Foundry.MicrosoftAgentFramework.svg)](https://www.nuget.org/packages/NexusLabs.Foundry.MicrosoftAgentFramework)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ncosentino/foundry/blob/main/LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 ![Status: Alpha](https://img.shields.io/badge/status-alpha-orange)
@@ -24,11 +25,9 @@ Foundry is dependency-injection neutral at its core. Use standard
 when you want source-generated discovery and Needlr's plugin-oriented
 composition model.
 
-!!! warning "Preparing for the first alpha release"
-    Foundry's packages are not available from NuGet.org yet. Package IDs,
-    namespaces, and APIs may change before the first stable release. You can
-    explore the complete framework today by building the repository and running
-    its 30 included examples.
+!!! warning "Alpha release"
+    Foundry 0.1.0-alpha.1 is prerelease software. Package IDs, namespaces, and
+    APIs may change before the first stable release.
 
 ## Why Foundry?
 
@@ -56,19 +55,17 @@ prompt:
 
 ## Quick Start
 
-### Build Foundry
+### Install Foundry
 
-Clone the repository and build the complete solution:
+Install the runtime package, then add the workflow, generator, analyzer,
+provider, or Needlr integration packages required by your application:
 
 ```powershell
-git clone https://github.com/ncosentino/foundry.git
-Set-Location foundry
-dotnet build src\NexusLabs.Foundry.slnx
+dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha.1
 ```
 
-The solution contains the production packages, tests, source generators,
-analyzers, and runnable examples. See [Getting Started](getting-started.md) for
-the intended package layout and a guided first-agent walkthrough.
+See [Getting Started](getting-started.md) for the recommended package
+combinations and a guided first-agent walkthrough.
 
 ### Create a generated agent
 

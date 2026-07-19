@@ -7,6 +7,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.1.0-alpha.1] - 2026-07-19
+
 ### Added
 
 - Independent Foundry package family for agent orchestration, evaluation,
@@ -19,6 +21,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   adapters.
 - GitHub Copilot `IChatClient` integration.
 - Source generators, analyzers, examples, and architecture decision records.
+- NativeAOT validation, 30 compile-validated examples, and deterministic testing
+  support for generated functions, agents, and workflows.
+- Versioned API documentation with development, stable, and immutable release
+  references.
 
 ### Changed
 
@@ -27,4 +33,5 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Needlr is an optional integration dependency rather than a dependency of
   Foundry's neutral runtime and provider packages.
 
-[Unreleased]: https://github.com/ncosentino/foundry/commits/main
+[Unreleased]: https://github.com/ncosentino/foundry/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/ncosentino/foundry/releases/tag/v0.1.0-alpha.1
