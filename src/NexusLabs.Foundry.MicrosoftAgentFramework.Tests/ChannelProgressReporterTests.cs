@@ -33,23 +33,39 @@ public class ChannelProgressReporterTests
     [Fact]
     public async Task Report_IsNonBlocking()
     {
+        var sinkStarted = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseSink = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
         var sink = new Mock<IProgressSink>();
         sink.Setup(s => s.OnEventAsync(It.IsAny<IProgressEvent>(), It.IsAny<CancellationToken>()))
             .Returns(async (IProgressEvent _, CancellationToken _) =>
             {
-                await Task.Delay(500); // slow sink
+                sinkStarted.TrySetResult(true);
+                await releaseSink.Task;
             });
 
         await using var reporter = new ChannelProgressReporter(
             "wf-1", [sink.Object], new ProgressSequenceProvider());
 
-        var before = DateTime.Now;
-        reporter.Report(new WorkflowStartedEvent(
-            DateTimeOffset.UtcNow, "wf-1", null, null, 0, 1));
-        var after = DateTime.Now;
+        try
+        {
+            var reportTask = Task.Run(() => reporter.Report(
+                new WorkflowStartedEvent(
+                    DateTimeOffset.UtcNow, "wf-1", null, null, 0, 1)),
+                TestContext.Current.CancellationToken);
 
-        // Report should return immediately — not wait for the slow sink
-        Assert.True((after - before).TotalMilliseconds < 50);
+            await reportTask.WaitAsync(
+                TimeSpan.FromSeconds(5),
+                TestContext.Current.CancellationToken);
+            await sinkStarted.Task.WaitAsync(
+                TimeSpan.FromSeconds(5),
+                TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            releaseSink.TrySetResult(true);
+        }
     }
 
     [Fact]
