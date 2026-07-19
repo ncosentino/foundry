@@ -28,12 +28,10 @@ This documentation is for version **$VERSION**.
 
 EOF
 
-for dir in "$ROOT_DIR/docs/api/v$VERSION"/NexusLabs.Foundry*/; do
-    if [ -f "$dir/index.md" ]; then
-        name=$(basename "$dir")
-        echo "- [$name]($name/index.md)" >> "$ROOT_DIR/docs/api/v$VERSION/index.md"
-    fi
-done
+python "$SCRIPT_DIR/api_package_index.py" \
+    "$ROOT_DIR/docs/api/v$VERSION/index.md" \
+    --packages-root "$ROOT_DIR/docs/api/v$VERSION" \
+    --package-prefix "NexusLabs.Foundry"
 
 # Copy to stable (latest release)
 echo "Copying to stable..."
@@ -52,12 +50,10 @@ For development (unreleased) documentation, see [dev](../dev/index.md).
 
 EOF
 
-for dir in "$ROOT_DIR/docs/api/stable"/NexusLabs.Foundry*/; do
-    if [ -f "$dir/index.md" ]; then
-        name=$(basename "$dir")
-        echo "- [$name]($name/index.md)" >> "$ROOT_DIR/docs/api/stable/index.md"
-    fi
-done
+python "$SCRIPT_DIR/api_package_index.py" \
+    "$ROOT_DIR/docs/api/stable/index.md" \
+    --packages-root "$ROOT_DIR/docs/api/stable" \
+    --package-prefix "NexusLabs.Foundry"
 
 # Update the shared API catalog and version-switcher data. The catalog helper
 # preserves released versions already present on gh-pages and always includes

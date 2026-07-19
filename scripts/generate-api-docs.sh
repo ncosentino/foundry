@@ -184,18 +184,18 @@ PY
 if [ "$UPDATE_INDEX" = "--update-index" ] && [ -f "$OUTPUT_DIR/index.md" ]; then
     echo "Updating index page..."
 
-    # Remove old package links and placeholder text
-    sed -i '/^- \[NexusLabs/d' "$OUTPUT_DIR/index.md"
-    sed -i '/^\* \[NexusLabs/d' "$OUTPUT_DIR/index.md"
-    sed -i '/No API documentation generated/d' "$OUTPUT_DIR/index.md"
-    sed -i '/API documentation will be generated/d' "$OUTPUT_DIR/index.md"
-
-    # Sort and add links to each generated package (only if it has index.md)
+    PACKAGE_ARGS=()
     for PROJECT_NAME in $(echo $GENERATED_PACKAGES | tr ' ' '\n' | sort); do
         if [ -f "$OUTPUT_DIR/$PROJECT_NAME/index.md" ]; then
-            echo "* [$PROJECT_NAME]($PROJECT_NAME/index.md)" >> "$OUTPUT_DIR/index.md"
+            PACKAGE_ARGS+=(--package "$PROJECT_NAME")
         fi
     done
+
+    python "$SCRIPT_DIR/api_package_index.py" \
+        "$OUTPUT_DIR/index.md" \
+        --packages-root "$OUTPUT_DIR" \
+        --package-prefix "NexusLabs.Foundry" \
+        "${PACKAGE_ARGS[@]}"
 fi
 
 if [ -n "$FAILED_PACKAGES" ]; then
