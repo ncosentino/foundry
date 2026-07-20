@@ -10,6 +10,7 @@ description: Build reliable .NET AI agents with generated discovery, workflows, 
 
 [![CI](https://github.com/ncosentino/foundry/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ncosentino/foundry/actions/workflows/ci.yml)
 [![Documentation](https://github.com/ncosentino/foundry/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/ncosentino/foundry/actions/workflows/docs.yml)
+[![NuGet prerelease](https://img.shields.io/nuget/vpre/NexusLabs.Foundry.MicrosoftAgentFramework.svg)](https://www.nuget.org/packages/NexusLabs.Foundry.MicrosoftAgentFramework)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ncosentino/foundry/blob/main/LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 ![Status: Alpha](https://img.shields.io/badge/status-alpha-orange)
@@ -57,9 +58,8 @@ prompt:
 
 ### Install Foundry
 
-After the release workflow completes, install the runtime package, then add the
-workflow, generator, analyzer, provider, or Needlr integration packages
-required by your application:
+Install the runtime package, then add the workflow, generator, analyzer,
+provider, or Needlr integration packages required by your application:
 
 ```powershell
 dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework --version 0.1.0-alpha-0001
