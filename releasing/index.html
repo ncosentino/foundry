@@ -2625,6 +2625,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#trusted-publishing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trusted publishing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#prepare-a-release" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2886,6 +2897,18 @@
 <h1 id="releasing-foundry">Releasing Foundry<a class="headerlink" href="#releasing-foundry" title="Permanent link">&para;</a></h1>
 <p>Foundry releases are tag-driven and publish all production
 <code>NexusLabs.Foundry.*</code> packages together.</p>
+<h2 id="trusted-publishing">Trusted publishing<a class="headerlink" href="#trusted-publishing" title="Permanent link">&para;</a></h2>
+<p>NuGet.org publication uses GitHub OIDC through <code>NuGet/login@v1</code>; no long-lived
+API key is stored in GitHub.</p>
+<p>The NuGet trusted publishing policy is bound to:</p>
+<ul>
+<li>package owner <code>ncosentino</code>;</li>
+<li>repository <code>ncosentino/foundry</code>;</li>
+<li>workflow file <code>release.yml</code>;</li>
+<li>GitHub environment <code>release</code>.</li>
+</ul>
+<p>The publish job requests <code>id-token: write</code> and exchanges the workflow identity
+for a short-lived NuGet API key immediately before package publication.</p>
 <h2 id="prepare-a-release">Prepare a release<a class="headerlink" href="#prepare-a-release" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Confirm the default branch CI is green.</li>
@@ -2895,9 +2918,13 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gu">## [0.1.0-alpha.1] - 2026-07-18</span>
 </code></pre></div>
 <ol>
+<li>Update installation documentation and badges for the release version.</li>
 <li>Update <code>version.json</code> so its version matches the release version.</li>
 <li>Create an annotated tag using the same version with a <code>v</code> prefix.</li>
 </ol>
+<p>Nerdbank.GitVersioning normalizes numeric prerelease identifiers for NuGet. For
+example, tag <code>v0.1.0-alpha.1</code> publishes package version
+<code>0.1.0-alpha-0001</code>.</p>
 <h2 id="release-validation">Release validation<a class="headerlink" href="#release-validation" title="Permanent link">&para;</a></h2>
 <p>The release workflow:</p>
 <ul>
@@ -2911,6 +2938,10 @@
 </ul>
 <p>The workflow fails before publication when the tag, version, changelog, or
 package validation does not match.</p>
+<p>Package publication is resumable rather than atomic. If a transient failure
+occurs after some packages reach NuGet.org, rerun the workflow for the same tag;
+<code>--skip-duplicate</code> preserves completed pushes and continues with the remaining
+packages.</p>
 
 
 

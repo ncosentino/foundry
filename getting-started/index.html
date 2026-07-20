@@ -633,10 +633,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-build-foundry" class="md-nav__link">
+  <a href="#1-install-foundry" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Build Foundry
+        1. Install Foundry
       
     </span>
   </a>
@@ -2898,62 +2898,62 @@
 
 
 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<p>Foundry is currently preparing for its first alpha package release. The
-package references below show the intended package layout but are not available
-from NuGet.org yet. You can explore the complete framework today by building
-the repository and running the included examples.</p>
-<h2 id="1-build-foundry">1. Build Foundry<a class="headerlink" href="#1-build-foundry" title="Permanent link">&para;</a></h2>
-<p>Clone the repository and build the complete solution:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry</span><span class="p">.</span><span class="n">git</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">Set-Location</span> <span class="n">foundry</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">dotnet</span> <span class="n">build</span> <span class="n">src</span><span class="p">\</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">slnx</span>
+<p>Release <code>v0.1.0-alpha.1</code> maps to NuGet package version
+<code>0.1.0-alpha-0001</code>. Package IDs, namespaces, and APIs may change before the
+first stable release.</p>
+<h2 id="1-install-foundry">1. Install Foundry<a class="headerlink" href="#1-install-foundry" title="Permanent link">&para;</a></h2>
+<p>After the release workflow completes, install the runtime, workflows, source
+generator, and analyzers for a generated agent application:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">                  </span><span class="na">Version=</span><span class="s">&quot;0.1.0-alpha-0001&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Workflows&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                  </span><span class="na">Version=</span><span class="s">&quot;0.1.0-alpha-0001&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Generators&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                  </span><span class="na">Version=</span><span class="s">&quot;0.1.0-alpha-0001&quot;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">                  </span><span class="na">PrivateAssets=</span><span class="s">&quot;all&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers&quot;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">                  </span><span class="na">Version=</span><span class="s">&quot;0.1.0-alpha-0001&quot;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">                  </span><span class="na">PrivateAssets=</span><span class="s">&quot;all&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 </code></pre></div>
-<p>The solution includes the production packages, tests, source generators,
-analyzers, and 30 example projects.</p>
+<p>All Foundry packages in a release use the same version.</p>
 <h2 id="2-choose-the-package-boundary">2. Choose the package boundary<a class="headerlink" href="#2-choose-the-package-boundary" title="Permanent link">&para;</a></h2>
-<p>Start with the smallest package set that owns the capability you need:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Workflows&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Generators&quot;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers&quot;</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-</code></pre></div>
+<p>Start with the smallest package set that owns the capability you need. Add
+<code>NexusLabs.Foundry.Evaluation</code>, <code>NexusLabs.Foundry.Langfuse</code>,
+<code>NexusLabs.Foundry.Copilot</code>, or the testing and DevUI packages only when the
+application uses those capabilities.</p>
 <p>Add <code>NexusLabs.Foundry.Needlr.MicrosoftAgentFramework</code> only when the application
 uses Needlr as its composition system.</p>
 <h2 id="3-register-the-runtime">3. Register the runtime<a class="headerlink" href="#3-register-the-runtime" title="Permanent link">&para;</a></h2>
 <p>Register Foundry with a standard <code>IServiceCollection</code> and supply the
 <code>IChatClient</code> used by generated agents:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ServiceCollection</span><span class="p">();</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">services</span><span class="p">.</span><span class="n">AddFoundryAgentFramework</span><span class="p">(</span><span class="n">builder</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">builder</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingChatClient</span><span class="p">(</span><span class="n">chatClient</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingDiagnostics</span><span class="p">());</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ServiceCollection</span><span class="p">();</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">services</span><span class="p">.</span><span class="n">AddFoundryAgentFramework</span><span class="p">(</span><span class="n">builder</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">builder</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingChatClient</span><span class="p">(</span><span class="n">chatClient</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingDiagnostics</span><span class="p">());</span>
 </code></pre></div>
 <p>Needlr applications can use the equivalent <code>UsingAgentFramework</code> integration
 on a <code>Syringe</code>.</p>
 <h2 id="4-declare-an-agent">4. Declare an agent<a class="headerlink" href="#4-declare-an-agent" title="Permanent link">&para;</a></h2>
 <p>Use <code>[FoundryAgent]</code> to define the agent's instructions and tool scope:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="na">[FoundryAgent(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="na">    Instructions = &quot;Research the request and return a concise, sourced answer.&quot;)]</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">partial</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ResearchAgent</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">{</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="na">[FoundryAgent(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="na">    Instructions = &quot;Research the request and return a concise, sourced answer.&quot;)]</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">partial</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ResearchAgent</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">{</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
 </code></pre></div>
 <p>The source generator emits the registries used by <code>IAgentFactory</code> and the
 workflow factories.</p>
 <h2 id="5-create-and-run-the-agent">5. Create and run the agent<a class="headerlink" href="#5-create-and-run-the-agent" title="Permanent link">&para;</a></h2>
 <p>Resolve the factory, create the declared agent, and run it through Microsoft
 Agent Framework:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">var</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">services</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">();</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IAgentFactory</span><span class="o">&gt;</span><span class="p">()</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="p">.</span><span class="n">CreateAgent</span><span class="o">&lt;</span><span class="n">ResearchAgent</span><span class="o">&gt;</span><span class="p">();</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kt">var</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="s">&quot;Compare reflection and source generation.&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">var</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">services</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">();</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IAgentFactory</span><span class="o">&gt;</span><span class="p">()</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="p">.</span><span class="n">CreateAgent</span><span class="o">&lt;</span><span class="n">ResearchAgent</span><span class="o">&gt;</span><span class="p">();</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kt">var</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="s">&quot;Compare reflection and source generation.&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">CancellationToken</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
@@ -2973,13 +2973,13 @@ Agent Framework:</p>
   "step": [
     {
       "@type": "HowToStep",
-      "name": "1. Build Foundry",
-      "text": "Clone the repository and build the complete solution:"
+      "name": "1. Install Foundry",
+      "text": "After the release workflow completes, install the runtime, workflows, source generator, and analyzers for a generated agent application:"
     },
     {
       "@type": "HowToStep",
       "name": "2. Choose the package boundary",
-      "text": "Start with the smallest package set that owns the capability you need:"
+      "text": "Start with the smallest package set that owns the capability you need. Add NexusLabs.Foundry.Evaluation, NexusLabs.Foundry.Langfuse, NexusLabs.Foundry.Copilot, or the testing and DevUI packages only when the application uses those capabilities."
     },
     {
       "@type": "HowToStep",
