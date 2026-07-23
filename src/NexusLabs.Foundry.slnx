@@ -15,6 +15,7 @@
     <Project Path="Examples/AgentFramework/GraphWorkflowApp/GraphWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/GroupChatAgentFrameworkApp.Agents/GroupChatAgentFrameworkApp.Agents.csproj" />
     <Project Path="Examples/AgentFramework/GroupChatAgentFrameworkApp/GroupChatAgentFrameworkApp.csproj" />
+    <Project Path="Examples/AgentFramework/HarnessCompatibilityProbe/HarnessCompatibilityProbe.csproj" />
     <Project Path="Examples/AgentFramework/IterativeLoopDiagnosticsApp/IterativeLoopDiagnosticsApp.csproj" />
     <Project Path="Examples/AgentFramework/IterativeTripPlannerApp.Core/IterativeTripPlannerApp.Core.csproj" />
     <Project Path="Examples/AgentFramework/IterativeTripPlannerApp.Evaluation/IterativeTripPlannerApp.Evaluation.csproj" />

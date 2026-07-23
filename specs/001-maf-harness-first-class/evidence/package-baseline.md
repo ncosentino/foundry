@@ -54,7 +54,7 @@ from versions observed only transitively.
 
 | Consuming surface | Relevant transitive resolution |
 |---|---|
-| MAF core and Workflows | Direct MAF core/Workflows 1.3.0 and OpenTelemetry.Api 1.15.3; transitive MAF.Abstractions 1.3.0, MEAI/MEAI.Abstractions 10.5.0, Evaluation 10.4.0, and DI/Logging abstractions 10.0.6 |
+| MAF core and Workflows | Direct MAF core/Workflows 1.3.0 and OpenTelemetry.Api 1.15.3; transitive MAF.Abstractions 1.3.0, MEAI/MEAI.Abstractions 10.5.0, Evaluation 10.4.0, Compliance.Abstractions 10.5.0, VectorData.Abstractions 9.7.0, ML.Tokenizers 2.0.0, and DI/Logging abstractions 10.0.6 |
 | DevUI | Direct DevUI/Hosting preview 1.3.0 and Hosting.OpenAI alpha 1.3.0; transitive MAF core/Workflows 1.3.0, MEAI/MEAI.Abstractions/MEAI.OpenAI 10.5.0, Evaluation 10.4.0, DI/Logging implementation packages 10.0.1, and abstractions 10.0.6 |
 | Evaluation | Direct Evaluation and Quality 10.5.0; transitive MAF 1.3.0, MEAI 10.5.0, and DI/Logging abstractions 10.0.6 |
 | Evaluation.Reporting | Direct Reporting 10.5.0; transitive Evaluation, Quality, and MEAI 10.5.0 plus MAF 1.3.0 |
@@ -72,3 +72,8 @@ from versions observed only transitively.
 4. The candidate comparison must account for DI, Logging, DiagnosticSource,
    JSON, Channels, tokenization, and Evaluation floor changes introduced by
    MAF/Harness 1.15.0 and MEAI 10.6.0.
+
+The official MAF 1.3.0 nuspec confirms Compliance.Abstractions 10.5.0,
+VectorData.Abstractions 9.7.0, and ML.Tokenizers 2.0.0 were already present.
+They were omitted from the original filtered `dotnet list` display and are not
+candidate-only dependencies.
