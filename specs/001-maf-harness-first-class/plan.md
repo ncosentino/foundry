@@ -806,7 +806,7 @@ API-candidate gate records the surface as reviewed.
   branch/PR, plan, tasks, traceability, and review artifacts.
 - G1-G10 are direct sub-issues of the root.
 - Each group contains vertical, independently reviewable leaf issues.
-- T001-T130 remain checklist items inside leaf issues rather than 130 flat
+- T001-T131 remain checklist items inside leaf issues rather than 131 flat
   GitHub issues.
 - GitHub parent/sub-issue and blocked-by relationships mirror the plan graph.
 
