@@ -2,6 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <IlcDisableReflection>true</IlcDisableReflection>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2060;IL2072;IL2075;IL2091;IL3050</WarningsAsErrors>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>obj\Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +31,15 @@
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" />
     <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Reporting" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.props" />
+  <Import Project="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\build\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.targets" />
 
 </Project>
