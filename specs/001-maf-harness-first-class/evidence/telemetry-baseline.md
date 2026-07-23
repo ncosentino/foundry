@@ -63,3 +63,7 @@ coordinates where available.
   of safe Harness composition.
 - Account for MEAI 10.6.0's OpenTelemetry GenAI semantic-convention changes,
   including streaming, time-to-first-chunk, and reasoning-token attributes.
+
+T013 records the upstream schema and composition delta. G2 T019 owns the
+candidate telemetry-ownership and no-duplication tests once Foundry's Harness
+composition seam exists.
