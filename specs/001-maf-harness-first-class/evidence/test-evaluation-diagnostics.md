@@ -3,8 +3,9 @@
 ## Local deterministic diagnostics selection
 
 The canonical core selection that includes diagnostics, progress, and scenario
-testing passed 102 tests with zero failures or skips. No broad evaluation suite
-was run locally.
+testing passed 102 tests with zero failures or skips. The dedicated candidate
+telemetry selector from `telemetry-baseline.md` also passed 35 tests with zero
+failures or skips. No broad evaluation suite was run locally.
 
 ## Hosted Evaluation and Reporting selection
 

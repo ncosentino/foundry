@@ -6,7 +6,9 @@
 - MAF: 1.3.0
 - MEAI: 10.5.0
 - Canonical core selection: 102 tests passed, zero failed or skipped
-- Dedicated telemetry selection: 35 tests passed, zero failed or skipped
+- Dedicated baseline telemetry selection: 35 tests passed, zero failed or skipped
+- Dedicated MAF 1.15 / MEAI 10.6 candidate telemetry selection: 35 tests
+  passed, zero failed or skipped
 
 ```powershell
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj --configuration Release --filter "FullyQualifiedName~MafAgentDiagnosticsDeduplicationTests|FullyQualifiedName~DiagnosticsChatClientMiddlewareGenAiHistogramComposesWithMeaiTests|FullyQualifiedName~ActivitySourceTracingTests|FullyQualifiedName~ChatCompletionActivityModeTests|FullyQualifiedName~DiagnosticsAgentRunMiddlewareStreamingTests|FullyQualifiedName~DiagnosticsFunctionInvokingChatClientTests" --logger "console;verbosity=minimal" --nologo

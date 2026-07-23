@@ -36,4 +36,3 @@ Compile and package compatibility: **passed**.
 Hosted OpenAI protocol/runtime smoke: **deferred** to the optional satellite
 track. Failure of that alpha runtime path does not block the stable core Harness
 graph.
-

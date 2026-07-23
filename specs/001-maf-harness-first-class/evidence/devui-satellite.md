@@ -29,4 +29,3 @@ Compile and package compatibility: **passed**.
 Interactive browser/runtime smoke: **deferred**. The existing example requires
 an authenticated Copilot chat client and a running web host; G1 does not change
 that runtime path or make the preview satellite part of the core Harness gate.
-

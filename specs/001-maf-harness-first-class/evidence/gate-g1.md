@@ -17,8 +17,11 @@ workspace offload, and hybrid compaction remain downstream gates.
 - Completed leaf PRs:
   [#70](https://github.com/ncosentino/foundry/pull/70),
   [#71](https://github.com/ncosentino/foundry/pull/71), and
-  [#72](https://github.com/ncosentino/foundry/pull/72)
-- Final decision branch: `harness/g1-decision`, based on stage commit `e2bab13`
+  [#72](https://github.com/ncosentino/foundry/pull/72), and
+  [#74](https://github.com/ncosentino/foundry/pull/74)
+- Final G1 stage head: `f9d2768` on `harness/g1-integration`
+- Final leaf CI:
+  [run 30051579247](https://github.com/ncosentino/foundry/actions/runs/30051579247)
 
 ## Gate evidence
 
@@ -53,7 +56,8 @@ The G1 stop condition is not triggered.
 2. **G2 telemetry:** T019 must prove one effective telemetry owner against the
    MEAI 10.6 semantic-convention changes.
    The G2 non-Azure smoke must also exercise the accepted Microsoft.Extensions
-   implementation/abstraction patch-level mix.
+   implementation/abstraction patch-level mix. Gate G2 cannot pass until that
+   runtime risk is closed or explicitly failed with a migration decision.
 3. **G4 eager offload:** offload must occur through `FunctionInvoker` or an
    equivalent explicit selected-provider seam before FICC constructs ordinary
    `FunctionResultContent`.
@@ -77,6 +81,8 @@ The G1 stop condition is not triggered.
 - Harness profile and composition APIs: internal candidate only.
 - Experimental MAF surfaces: no public Foundry promotion.
 - Package publication: none.
+- CI pack outputs are validation artifacts only. DevUI and Hosting packages must
+  not be published from this increment before their runtime/release gate passes.
 - Ordinary non-Harness behavior: unchanged except compatibility updates required
   by the package uplift.
 
