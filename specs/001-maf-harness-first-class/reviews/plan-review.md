@@ -128,5 +128,5 @@
 
 All blocking and critical findings have been applied, modified with documented
 rationale, or rejected using primary-source evidence. The plan and tasks retain
-no unresolved review finding. Final Spec Kit cross-artifact consistency analysis
+no unresolved review finding. Final cross-artifact consistency analysis
 is still required before the package is considered complete.

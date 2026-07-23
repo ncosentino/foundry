@@ -3,34 +3,29 @@
 This guide defines the validation sequence for the future implementation. It
 does not authorize dependency or runtime changes from this specification branch.
 
-## 1. Validate Spec Kit artifacts
+## 1. Validate specification artifacts
 
-From the repository root:
+Verify the feature directory contains:
 
-```powershell
-.\.specify\scripts\powershell\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
-```
-
-Expected:
-
-- active feature directory is `specs/001-maf-harness-first-class`;
-- `spec.md`, `plan.md`, and `tasks.md` exist;
-- research, data model, contracts, quickstart, and tasks are listed;
-- review and traceability artifacts are verified separately because the stock
-  prerequisite script does not enumerate them.
-
-Run the Spec Kit consistency analysis after task generation:
-
-```text
-/speckit.analyze
-```
+- `constitution.md`
+- `spec.md`
+- `plan.md`
+- `tasks.md`
+- `research.md`
+- `data-model.md`
+- `contracts/`
+- `traceability.md`
+- `reviews/spec-review.md`
+- `reviews/plan-review.md`
+- `reviews/final-analysis.md`
 
 Expected:
 
 - no critical constitution conflict;
 - every functional requirement maps to at least one task;
 - no task is unmapped;
-- no unresolved clarification or placeholder remains.
+- no unresolved clarification or placeholder remains;
+- the independent reviews report no unresolved blocking finding.
 
 ## 2. Compatibility gate validation
 

@@ -97,5 +97,5 @@
 
 All critical and blocking findings were addressed or deliberately modified with
 documented rationale. No unresolved constitution conflict or clarification
-marker remains. The specification is ready for Spec Kit planning after final
+marker remains. The specification is ready for technical planning after final
 identifier and placeholder validation.

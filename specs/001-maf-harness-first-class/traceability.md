@@ -95,7 +95,7 @@ groups. It supplements story labels for foundational and cross-cutting tasks.
 
 | Gate | Evidence tasks |
 |---|---|
-| G0 Planning closure | Current reviewed Spec Kit artifacts and final analysis |
+| G0 Planning closure | Current reviewed specification artifacts and final analysis |
 | G1 Package compatibility | T001-T014 |
 | G2 Composition foundation | T015-T028 |
 | G3 Stable provider slices | T029-T040 |

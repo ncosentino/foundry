@@ -281,13 +281,13 @@ T095
 - [ ] T125 Verify every temporary duplication entry has a release-bound disposition in `specs/001-maf-harness-first-class/evidence/duplication-ledger.md`
 - [ ] T126 Prepare release notes and migration guidance in `CHANGELOG.md` and `docs/maf-harness.md`
 
-## Phase 10: Post-Implementation Reconciliation and Spec Kit Cleanup
+## Phase 10: Post-Implementation Reconciliation and Specification Cleanup
 
 - [ ] T127 Compare delivered code, packages, public APIs, capability profiles, and retained/deleted overlaps against `specs/001-maf-harness-first-class/plan.md` in `specs/001-maf-harness-first-class/evidence/implementation-vs-plan.md`
 - [ ] T128 Audit `README.md`, `docs/maf-harness.md`, `docs/iterative-agent-loop.md`, API documentation, examples, and release notes against delivered behavior in `specs/001-maf-harness-first-class/evidence/documentation-vs-delivery.md`
 - [ ] T129 File every accepted non-critical deviation or opportunity as a post-MVP GitHub follow-up linked to the root Harness implementation issue and record links in `specs/001-maf-harness-first-class/evidence/post-mvp-follow-ups.md`
-- [ ] T130 Synthesize T127-T129 into a human-reviewed per-artifact retain/archive/delete decision in `specs/001-maf-harness-first-class/evidence/spec-kit-retention-decision.md`
-- [ ] T131 Execute the approved T130 retention decision in a separate stage-review cleanup PR, preserving ADRs, changelog, migration guidance, and GitHub traceability while removing or archiving no-longer-useful `specs/001-maf-harness-first-class/` artifacts and stale `.specify/feature.json` or agent-context pointers
+- [ ] T130 Synthesize T127-T129 into a human-reviewed per-artifact retain/archive/delete decision in `specs/001-maf-harness-first-class/evidence/specification-retention-decision.md`
+- [ ] T131 Execute the approved T130 retention decision in a separate stage-review cleanup PR, preserving ADRs, changelog, migration guidance, and GitHub traceability while removing or archiving no-longer-useful `specs/001-maf-harness-first-class/` artifacts
 
 ## Dependencies and Execution Order
 

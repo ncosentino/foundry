@@ -1,4 +1,4 @@
-# Final Spec Kit Consistency Analysis
+# Final Specification Consistency Analysis
 
 **Feature**: `001-maf-harness-first-class`
 
@@ -57,7 +57,7 @@ Detailed mappings are in [traceability.md](../traceability.md).
   non-gating workflow constraints, an actual hosted run, and human review.
 - G9 controls final API, duplication, migration, and release decisions.
 - G10 performs implementation-versus-plan reconciliation, documentation parity,
-  post-MVP follow-up filing, and approved Spec Kit cleanup.
+  post-MVP follow-up filing, and approved specification cleanup.
 
 ## Constitution Check
 
@@ -76,7 +76,8 @@ Detailed mappings are in [traceability.md](../traceability.md).
 
 The requested deliverable is complete:
 
-- Spec Kit initialized in Foundry.
+- The specification was produced using the local Spec Kit methodology and is
+  committed as a self-contained feature package.
 - Specification built and independently reviewed by multiple models with
   different architectural focuses.
 - Technical plan built with evidence gates and reviewed independently.

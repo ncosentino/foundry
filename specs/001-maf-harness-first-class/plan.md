@@ -330,7 +330,7 @@ consistency analysis.
 
 **Deliverables**:
 
-- reviewed Spec Kit artifacts;
+- reviewed specification artifacts;
 - current NuGet/package evidence;
 - versioned capability matrix;
 - middleware ordering candidate;
@@ -342,7 +342,7 @@ consistency analysis.
 ambiguity, or constitution conflict.
 
 **Status**: Completed by the reviewed specification, this plan, `tasks.md`,
-`reviews/spec-review.md`, `reviews/plan-review.md`, and the final Spec Kit
+`reviews/spec-review.md`, `reviews/plan-review.md`, and the final
 consistency analysis. No implementation task may start until that record is
 complete.
 
@@ -587,7 +587,7 @@ public promotion or release.
 
 **Deliverables**:
 
-- final Spec Kit consistency analysis;
+- final cross-artifact consistency analysis;
 - shell package/manual-composition requirement evidence;
 - public API and XML-documentation review;
 - completed duplication ledger;
@@ -604,7 +604,7 @@ public promotion or release.
 
 **Release**: Only artifacts and profiles passing G9 may be published.
 
-### Group 10: Post-implementation reconciliation and Spec Kit cleanup
+### Group 10: Post-implementation reconciliation and specification cleanup
 
 **Purpose**: Compare delivered behavior with the original plan, verify
 documentation accuracy, separate follow-up scope, and remove feature-specific
@@ -628,7 +628,7 @@ planning artifacts when they no longer provide operational value.
 - documentation describes the delivered system rather than the intended system;
 - unresolved non-critical scope is tracked outside the MVP;
 - ADRs, changelog, and durable migration guidance remain available;
-- feature-specific Spec Kit artifacts are removed or archived only after their
+- feature-specific specification artifacts are removed or archived only after their
   approved cleanup decision.
 
 **Release**: Separate cleanup PR after the implementation and documentation
@@ -819,7 +819,7 @@ API-candidate gate records the surface as reviewed.
 - At a completed group gate, one stage PR targets `main`.
 - A stage PR may auto-merge only after its gate evidence, CI, architecture
   reviews, and scope audit pass.
-- The G10 Spec Kit cleanup PR is always treated as a stage PR and requires the
+- The G10 specification cleanup PR is always treated as a stage PR and requires the
   scope-preservation and gate-evidence reviews before merge.
 - Direct pushes to `main` are not part of this workflow.
 

@@ -1,4 +1,4 @@
-# Foundry Constitution
+# Foundry Harness Migration Constitution
 
 ## Core Principles
 
@@ -87,11 +87,11 @@ are required.
 
 ## Governance
 
-This constitution governs Spec Kit artifacts and feature planning in this
-repository. It supplements `AGENTS.md` and repository-scoped instructions; the
-stricter requirement applies when guidance overlaps. Amendments require an
-explicit rationale, impact analysis, and version change. Reviews MUST identify
-constitution conflicts as blocking until the specification, plan, or
-constitution is deliberately revised.
+This constitution governs the Harness migration specification and
+implementation program. It supplements `AGENTS.md` and repository-scoped
+instructions; the stricter requirement applies when guidance overlaps.
+Amendments require an explicit rationale, impact analysis, and version change.
+Reviews MUST identify constitution conflicts as blocking until the
+specification, plan, or constitution is deliberately revised.
 
 **Version**: 1.0.0 | **Ratified**: 2026-07-22 | **Last Amended**: 2026-07-22
