@@ -43,13 +43,34 @@ dotnet publish src\Examples\AgentFramework\HarnessCompatibilityProbe\HarnessComp
 - Native execution exit code: 0
 - Native output:
   `Microsoft.Agents.AI.HarnessAgent:foundry-harness-compatibility-probe:tool-result:aot`
-- Native executable size: 10,502,656 bytes
+- Native executable size: 10,528,256 bytes
 - Native executable SHA-256:
-  `5bae90f87e8e00185736377bfd8532872fc9d7f27ed1098d3076e68f06c7aa41`
+  `9d8931a8fd6d48619aa7328c77d0e5d74e26400dd5ba27ce5e420135e7d6cfe3`
 
 The probe verifies exactly one generated function named `Echo`, requests call ID
 `probe-call`, and accepts exactly one matching `FunctionResultContent` before
 reporting success.
+
+The clean-rebuilt native binary also executed both lifecycle modes successfully:
+
+- `--lifecycle`
+- `--lifecycle --default-history`
+
+```text
+default_exit=0
+lifecycle_exit=0
+default_history_exit=0
+
+TRACE:history.provide
+TRACE:history.store:2:1
+TRACE:function.invoker:Echo:probe-call
+TRACE:history.provide
+TRACE:history.store:1:1
+
+TRACE:compaction:call=False:result=False:messages=2
+TRACE:function.invoker:Echo:probe-call
+TRACE:compaction:call=True:result=False:messages=3
+```
 
 The first local publish attempt reached native linking but could not find
 `vswhere.exe` on `PATH`. Retrying in a single `vcvars64.bat`-initialized process
