@@ -52,6 +52,23 @@ The first probe build attempted to implement `Metadata` explicitly on
 as an explicit interface member. The probe was corrected to the actual interface
 without a compatibility shim.
 
+## Hosted compatibility blocker
+
+The first hosted build/test run passed build, NativeAOT, and documentation but
+failed two of 1,569 MAF tests. Both failures were
+`GroupChatOrderingTests` assertions that treated `RunWithDiagnosticsAsync()`
+stage-list order as round-robin invocation order.
+
+MAF 1.15's `GroupChatWorkflowBuilder` designates participant executors as
+intermediate outputs and stores participants in a `HashSet`. The resulting
+diagnostic stage-list order is not a participant-order contract. Foundry's
+round-robin invocation order remained correct.
+
+The existing tests were tightened to assign distinct writer/reviewer
+instructions and capture the actual `ChatOptions.Instructions` sequence observed
+by the chat client. All five group-chat ordering tests pass with the original
+runtime composition, so no production ordering shim was added.
+
 ## Resolved transitive lifts
 
 The following command was run for the probe, MAF core, Workflows, DevUI,
