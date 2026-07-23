@@ -24,20 +24,21 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.1.0" />
     <!-- Microsoft Agent Framework (stable) -->
-    <PackageVersion Include="Microsoft.Agents.AI" Version="1.3.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.3.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Generators" Version="1.3.0" />
+    <PackageVersion Include="Microsoft.Agents.AI" Version="1.15.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Harness" Version="1.15.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.15.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Generators" Version="1.15.0" />
     <!-- DevUI and Hosting (preview — isolated in NexusLabs.Foundry.MicrosoftAgentFramework.DevUI) -->
-    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.3.0-preview.260423.1" />
-    <PackageVersion Include="Microsoft.Agents.AI.Hosting" Version="1.3.0-preview.260423.1" />
-    <PackageVersion Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.3.0-alpha.260423.1" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.5.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.15.0-preview.260722.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting" Version="1.15.0-preview.260722.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.15.0-alpha.260722.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
     <!-- Microsoft.Extensions.AI.Evaluation stable 10.x line -->
-    <PackageVersion Include="Microsoft.Extensions.AI.Evaluation" Version="10.5.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.5.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Evaluation.Reporting" Version="10.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Evaluation" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Evaluation.Reporting" Version="10.6.0" />
     <!-- Azure OpenAI (for SimpleAgentFrameworkApp example) -->
     <PackageVersion Include="Azure.AI.OpenAI" Version="2.7.0-beta.2" />
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.72.0" />
