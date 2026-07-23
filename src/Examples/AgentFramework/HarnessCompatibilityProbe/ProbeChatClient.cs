@@ -2,7 +2,9 @@ using Microsoft.Extensions.AI;
 
 namespace HarnessCompatibilityProbe;
 
-internal sealed class ProbeChatClient(string functionName) : IChatClient
+internal sealed class ProbeChatClient(
+    string functionName,
+    LifecycleTrace? lifecycleTrace = null) : IChatClient
 {
     private int _callCount;
 
@@ -11,7 +13,24 @@ internal sealed class ProbeChatClient(string functionName) : IChatClient
         ChatOptions? options,
         CancellationToken cancellationToken)
     {
-        if (Interlocked.Increment(ref _callCount) == 1)
+        var call = Interlocked.Increment(ref _callCount);
+        lifecycleTrace?.Add($"chat.call:{call}");
+
+        var messageList = chatMessages.ToList();
+        if (messageList.Any(message => message.Text?.Contains("history-probe", StringComparison.Ordinal) is true))
+        {
+            lifecycleTrace?.Add("history.seen");
+        }
+        if (messageList.Any(message => message.Text?.Contains("injected-probe", StringComparison.Ordinal) is true))
+        {
+            lifecycleTrace?.Add("injected.seen");
+        }
+        if (options?.Instructions?.Contains("context-probe", StringComparison.Ordinal) is true)
+        {
+            lifecycleTrace?.Add("context.seen");
+        }
+
+        if (call == 1)
         {
             return Task.FromResult(
                 new ChatResponse(
@@ -25,7 +44,7 @@ internal sealed class ProbeChatClient(string functionName) : IChatClient
                         ])));
         }
 
-        var functionResults = chatMessages
+        var functionResults = messageList
             .SelectMany(message => message.Contents)
             .OfType<FunctionResultContent>()
             .ToList();
