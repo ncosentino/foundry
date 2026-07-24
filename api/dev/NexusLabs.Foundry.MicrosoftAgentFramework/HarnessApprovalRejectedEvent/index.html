@@ -12,7 +12,7 @@
         <meta name="author" content="Nick Cosentino">
       
       
-        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/IProgressEvent/">
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessApprovalRejectedEvent/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>IProgressEvent - Foundry</title>
+        <title>HarnessApprovalRejectedEvent - Foundry</title>
       
     
     
@@ -60,12 +60,12 @@
   
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="IProgressEvent – Foundry" />
+  <meta property="og:title" content="HarnessApprovalRejectedEvent – Foundry" />
   <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
-  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/IProgressEvent/" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessApprovalRejectedEvent/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="IProgressEvent – Foundry" />
+  <meta name="twitter:title" content="HarnessApprovalRejectedEvent – Foundry" />
   <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              IProgressEvent
+              HarnessApprovalRejectedEvent
             
           </span>
         </div>
@@ -2813,82 +2813,123 @@
   
 
 
-  <h1>IProgressEvent</h1>
+  <h1>HarnessApprovalRejectedEvent</h1>
 
 <h4 id="nexuslabsfoundrymicrosoftagentframework"><a href="../" title="index">NexusLabs.Foundry.MicrosoftAgentFramework</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframework" title="Permanent link">&para;</a></h4>
 <h3 id="nexuslabsfoundrymicrosoftagentframeworkprogress"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Progress/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress">NexusLabs.Foundry.MicrosoftAgentFramework.Progress</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkprogress" title="Permanent link">&para;</a></h3>
-<h2 id="iprogressevent-interface">IProgressEvent Interface<a class="headerlink" href="#iprogressevent-interface" title="Permanent link">&para;</a></h2>
-<p>Base interface for all progress events emitted during agent/workflow execution.
-Every event carries correlation context enabling hierarchical trace reconstruction.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IProgressEvent</span>
+<h2 id="harnessapprovalrejectedevent-class">HarnessApprovalRejectedEvent Class<a class="headerlink" href="#harnessapprovalrejectedevent-class" title="Permanent link">&para;</a></h2>
+<p>An ordinary (non-standing) tool-approval response rejected the pending request. Emitted
+once per rejected request. A rejected request results in zero invocations of the
+underlying tool.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">record</span><span class="w"> </span><span class="n">HarnessApprovalRejectedEvent</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">IProgressEvent</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">IEquatable</span><span class="o">&lt;</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">HarnessApprovalRejectedEvent</span><span class="o">&gt;</span>
 </code></pre></div>
-<p>Derived<br />
-&#8627; <a href="../AgentCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentCompletedEvent">AgentCompletedEvent</a><br />
-&#8627; <a href="../AgentFailedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentFailedEvent">AgentFailedEvent</a><br />
-&#8627; <a href="../AgentHandoffEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentHandoffEvent">AgentHandoffEvent</a><br />
-&#8627; <a href="../AgentInvokedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentInvokedEvent">AgentInvokedEvent</a><br />
-&#8627; <a href="../AgentResponseChunkEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentResponseChunkEvent">AgentResponseChunkEvent</a><br />
-&#8627; <a href="../BudgetExceededEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.BudgetExceededEvent">BudgetExceededEvent</a><br />
-&#8627; <a href="../BudgetUpdatedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.BudgetUpdatedEvent">BudgetUpdatedEvent</a><br />
-&#8627; <a href="../HarnessApprovalApprovedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalApprovedEvent">HarnessApprovalApprovedEvent</a><br />
-&#8627; <a href="../HarnessApprovalRejectedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent">HarnessApprovalRejectedEvent</a><br />
-&#8627; <a href="../HarnessApprovalRequestedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRequestedEvent">HarnessApprovalRequestedEvent</a><br />
-&#8627; <a href="../HarnessApprovalStandingReauthorizedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalStandingReauthorizedEvent">HarnessApprovalStandingReauthorizedEvent</a><br />
-&#8627; <a href="../LlmCallCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallCompletedEvent">LlmCallCompletedEvent</a><br />
-&#8627; <a href="../LlmCallFailedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallFailedEvent">LlmCallFailedEvent</a><br />
-&#8627; <a href="../LlmCallStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallStartedEvent">LlmCallStartedEvent</a><br />
-&#8627; <a href="../PhaseCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.PhaseCompletedEvent">PhaseCompletedEvent</a><br />
-&#8627; <a href="../PhaseStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.PhaseStartedEvent">PhaseStartedEvent</a><br />
-&#8627; <a href="../ReducerNodeInvokedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ReducerNodeInvokedEvent">ReducerNodeInvokedEvent</a><br />
-&#8627; <a href="../SuperStepCompletedProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.SuperStepCompletedProgressEvent">SuperStepCompletedProgressEvent</a><br />
-&#8627; <a href="../SuperStepStartedProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.SuperStepStartedProgressEvent">SuperStepStartedProgressEvent</a><br />
-&#8627; <a href="../ToolCallCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ToolCallCompletedEvent">ToolCallCompletedEvent</a><br />
-&#8627; <a href="../ToolCallFailedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ToolCallFailedEvent">ToolCallFailedEvent</a><br />
-&#8627; <a href="../ToolCallStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ToolCallStartedEvent">ToolCallStartedEvent</a><br />
-&#8627; <a href="../WorkflowCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.WorkflowCompletedEvent">WorkflowCompletedEvent</a><br />
-&#8627; <a href="../WorkflowStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.WorkflowStartedEvent">WorkflowStartedEvent</a></p>
-<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId'></a></p>
-<h2 id="iprogresseventagentid-property">IProgressEvent.AgentId Property<a class="headerlink" href="#iprogresseventagentid-property" title="Permanent link">&para;</a></h2>
+<p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; HarnessApprovalRejectedEvent</p>
+<p>Implements <a href="../IProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent">IProgressEvent</a>, <a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">System.IEquatable&lt;</a><a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent">HarnessApprovalRejectedEvent</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">&gt;</a></p>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string)'></a></p>
+<h2 id="harnessapprovalrejectedeventdatetimeoffset-string-string-string-int-long-string-string-string-constructor">HarnessApprovalRejectedEvent(DateTimeOffset, string, string, string, int, long, string, string, string) Constructor<a class="headerlink" href="#harnessapprovalrejectedeventdatetimeoffset-string-string-string-int-long-string-string-string-constructor" title="Permanent link">&para;</a></h2>
+<p>An ordinary (non-standing) tool-approval response rejected the pending request. Emitted
+once per rejected request. A rejected request results in zero invocations of the
+underlying tool.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="nf">HarnessApprovalRejectedEvent</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ToolName</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Reason</span><span class="p">);</span>
+</code></pre></div>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).Timestamp'></a></p>
+<p><code>Timestamp</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
+<p>When the event occurred.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).WorkflowId'></a></p>
+<p><code>WorkflowId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Top-level workflow correlation ID.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).AgentId'></a></p>
+<p><code>AgentId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p>Which agent emitted this event, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for workflow-level events.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).ParentAgentId'></a></p>
+<p><code>ParentAgentId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Parent agent ID for sub-agent runs, enabling tree reconstruction.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).Depth'></a></p>
+<p><code>Depth</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
+<p>Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).SequenceNumber'></a></p>
+<p><code>SequenceNumber</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
+<p>Globally ordered sequence number for event ordering.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).RequestId'></a></p>
+<p><code>RequestId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>The request identifier the approval response answered.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).ToolName'></a></p>
+<p><code>ToolName</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>The name of the tool that was rejected.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.HarnessApprovalRejectedEvent(System.DateTimeOffset,string,string,string,int,long,string,string,string).Reason'></a></p>
+<p><code>Reason</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>The caller-supplied rejection reason, when provided.</p>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.AgentId'></a></p>
+<h2 id="harnessapprovalrejectedeventagentid-property">HarnessApprovalRejectedEvent.AgentId Property<a class="headerlink" href="#harnessapprovalrejectedeventagentid-property" title="Permanent link">&para;</a></h2>
+<p>Which agent emitted this event, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for workflow-level events.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId">AgentId</a></p>
 <h4 id="property-value">Property Value<a class="headerlink" href="#property-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth'></a></p>
-<h2 id="iprogresseventdepth-property">IProgressEvent.Depth Property<a class="headerlink" href="#iprogresseventdepth-property" title="Permanent link">&para;</a></h2>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.Depth'></a></p>
+<h2 id="harnessapprovalrejectedeventdepth-property">HarnessApprovalRejectedEvent.Depth Property<a class="headerlink" href="#harnessapprovalrejectedeventdepth-property" title="Permanent link">&para;</a></h2>
 <p>Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth">Depth</a></p>
 <h4 id="property-value_1">Property Value<a class="headerlink" href="#property-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId'></a></p>
-<h2 id="iprogresseventparentagentid-property">IProgressEvent.ParentAgentId Property<a class="headerlink" href="#iprogresseventparentagentid-property" title="Permanent link">&para;</a></h2>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.ParentAgentId'></a></p>
+<h2 id="harnessapprovalrejectedeventparentagentid-property">HarnessApprovalRejectedEvent.ParentAgentId Property<a class="headerlink" href="#harnessapprovalrejectedeventparentagentid-property" title="Permanent link">&para;</a></h2>
 <p>Parent agent ID for sub-agent runs, enabling tree reconstruction.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId">ParentAgentId</a></p>
 <h4 id="property-value_2">Property Value<a class="headerlink" href="#property-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber'></a></p>
-<h2 id="iprogresseventsequencenumber-property">IProgressEvent.SequenceNumber Property<a class="headerlink" href="#iprogresseventsequencenumber-property" title="Permanent link">&para;</a></h2>
-<p>Globally ordered sequence number for event ordering.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.Reason'></a></p>
+<h2 id="harnessapprovalrejectedeventreason-property">HarnessApprovalRejectedEvent.Reason Property<a class="headerlink" href="#harnessapprovalrejectedeventreason-property" title="Permanent link">&para;</a></h2>
+<p>The caller-supplied rejection reason, when provided.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Reason</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h4 id="property-value_3">Property Value<a class="headerlink" href="#property-value_3" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp'></a></p>
-<h2 id="iprogresseventtimestamp-property">IProgressEvent.Timestamp Property<a class="headerlink" href="#iprogresseventtimestamp-property" title="Permanent link">&para;</a></h2>
-<p>When the event occurred.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.RequestId'></a></p>
+<h2 id="harnessapprovalrejectedeventrequestid-property">HarnessApprovalRejectedEvent.RequestId Property<a class="headerlink" href="#harnessapprovalrejectedeventrequestid-property" title="Permanent link">&para;</a></h2>
+<p>The request identifier the approval response answered.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">RequestId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h4 id="property-value_4">Property Value<a class="headerlink" href="#property-value_4" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId'></a></p>
-<h2 id="iprogresseventworkflowid-property">IProgressEvent.WorkflowId Property<a class="headerlink" href="#iprogresseventworkflowid-property" title="Permanent link">&para;</a></h2>
-<p>Top-level workflow correlation ID.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.SequenceNumber'></a></p>
+<h2 id="harnessapprovalrejectedeventsequencenumber-property">HarnessApprovalRejectedEvent.SequenceNumber Property<a class="headerlink" href="#harnessapprovalrejectedeventsequencenumber-property" title="Permanent link">&para;</a></h2>
+<p>Globally ordered sequence number for event ordering.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber">SequenceNumber</a></p>
 <h4 id="property-value_5">Property Value<a class="headerlink" href="#property-value_5" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.Timestamp'></a></p>
+<h2 id="harnessapprovalrejectedeventtimestamp-property">HarnessApprovalRejectedEvent.Timestamp Property<a class="headerlink" href="#harnessapprovalrejectedeventtimestamp-property" title="Permanent link">&para;</a></h2>
+<p>When the event occurred.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp">Timestamp</a></p>
+<h4 id="property-value_6">Property Value<a class="headerlink" href="#property-value_6" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.ToolName'></a></p>
+<h2 id="harnessapprovalrejectedeventtoolname-property">HarnessApprovalRejectedEvent.ToolName Property<a class="headerlink" href="#harnessapprovalrejectedeventtoolname-property" title="Permanent link">&para;</a></h2>
+<p>The name of the tool that was rejected.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ToolName</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h4 id="property-value_7">Property Value<a class="headerlink" href="#property-value_7" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent.WorkflowId'></a></p>
+<h2 id="harnessapprovalrejectedeventworkflowid-property">HarnessApprovalRejectedEvent.WorkflowId Property<a class="headerlink" href="#harnessapprovalrejectedeventworkflowid-property" title="Permanent link">&para;</a></h2>
+<p>Top-level workflow correlation ID.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId">WorkflowId</a></p>
+<h4 id="property-value_8">Property Value<a class="headerlink" href="#property-value_8" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 
 

@@ -877,6 +877,14 @@
     <lastmod>2026-07-24</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessApprovalApprovedEvent/</loc>
+    <lastmod>2026-07-24</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessApprovalStandingReauthorizedEvent/</loc>
+    <lastmod>2026-07-24</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/PhaseCompletedEvent/</loc>
     <lastmod>2026-07-24</lastmod>
   </url>
@@ -926,6 +934,10 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/StageTermination.CompletedEarlyAfterToolCall/</loc>
+    <lastmod>2026-07-24</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessApprovalRequestedEvent/</loc>
     <lastmod>2026-07-24</lastmod>
   </url>
   <url>
@@ -1190,6 +1202,10 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/AgentFrameworkBuilder/</loc>
+    <lastmod>2026-07-24</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessApprovalRejectedEvent/</loc>
     <lastmod>2026-07-24</lastmod>
   </url>
   <url>

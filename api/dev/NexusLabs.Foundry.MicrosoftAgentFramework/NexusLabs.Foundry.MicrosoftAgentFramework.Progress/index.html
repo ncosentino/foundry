@@ -2862,6 +2862,22 @@
 <td style="text-align: left;">Composite <a href="https://learn.microsoft.com/en-us/dotnet/api/system.idisposable" title="System.IDisposable">System.IDisposable</a> that owns a fixed set of child disposables and releases them in reverse order on <a href="../">NexusLabs.Foundry.MicrosoftAgentFramework.Progress.CompositeDisposable.Dispose</a>.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><a href="../HarnessApprovalApprovedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalApprovedEvent">HarnessApprovalApprovedEvent</a></td>
+<td style="text-align: left;">An ordinary (non-standing) tool-approval response approved the pending request. Emitted once per approved request; a standing ("always approve") response is reported via <a href="../HarnessApprovalStandingReauthorizedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalStandingReauthorizedEvent">HarnessApprovalStandingReauthorizedEvent</a> instead, never both.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../HarnessApprovalRejectedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent">HarnessApprovalRejectedEvent</a></td>
+<td style="text-align: left;">An ordinary (non-standing) tool-approval response rejected the pending request. Emitted once per rejected request. A rejected request results in zero invocations of the underlying tool.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../HarnessApprovalRequestedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRequestedEvent">HarnessApprovalRequestedEvent</a></td>
+<td style="text-align: left;">A tool-approval request surfaced to the caller. Emitted once per distinct request identifier when the composed agent's response contains a <code>ToolApprovalRequestContent</code> item (MAF's approval-required tool-call surface). The MAF content type itself is never exposed; only stable identifiers are carried.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../HarnessApprovalStandingReauthorizedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalStandingReauthorizedEvent">HarnessApprovalStandingReauthorizedEvent</a></td>
+<td style="text-align: left;">A standing ("always approve") tool approval -- newly supplied this run, or implied by continuing a session that could carry one from a prior turn -- was submitted for the required host reauthorization check. Emitted exactly once per reauthorization attempt, whether the host granted or declined it; a declined reauthorization fails the run closed with zero tool invocations.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><a href="../LlmCallCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallCompletedEvent">LlmCallCompletedEvent</a></td>
 <td style="text-align: left;">An LLM response has been received.</td>
 </tr>
