@@ -113,6 +113,7 @@ nav:
       - ADR-0002 Build ScriptedChatClient Locally: adr/adr-0002-build-scriptedchatclient-locally.md
       - ADR-0003 Provider-Neutral Experiment Runner: adr/adr-0003-provider-neutral-experiment-runner.md
       - ADR-0004 Extract AI Platform from Needlr: adr/adr-0004-extract-ai-platform-from-needlr.md
+      - ADR-0005 First-Class MAF Harness Integration: adr/adr-0005-first-class-maf-harness-integration.md
 
 plugins:
   - search

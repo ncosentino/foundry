@@ -276,8 +276,14 @@ internal sealed class AgentFactory : IAgentFactory
     [UnconditionalSuppressMessage("TrimAnalysis", "IL2067", Justification = "ActivatorUtilities.CreateInstance is only reached in non-AOT builds where all member metadata is available.")]
     private IReadOnlyList<AIFunction> BuildFunctionsForType(Type type)
     {
-        if (_generatedProvider?.TryGetFunctions(type, _serviceProvider, out var generated) == true)
+        if (GeneratedAIFunctionResolver.TryResolve(
+            _generatedProvider,
+            _serviceProvider,
+            type,
+            out var generated))
+        {
             return generated!;
+        }
 
         var isStatic = type.IsAbstract && type.IsSealed;
         object? instance = isStatic
