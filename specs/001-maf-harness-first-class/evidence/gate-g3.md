@@ -46,11 +46,11 @@ Cumulative slice history on top of the G2 foundation gate (`gate-g2.md`):
 | Planning | `f714991` | [#85](https://github.com/ncosentino/foundry/pull/85) | 19 | 95 | 1,664 |
 | Approval | `2974fc9` | [#87](https://github.com/ncosentino/foundry/pull/87) | 35 | 130 | 1,699 |
 | Skills | `556a458` | [#88](https://github.com/ncosentino/foundry/pull/88) | 24 | 154 | 1,723 |
-| Web search (this work) | branch `harness/g3-web`, based on `556a458` (no commit, push, or PR was made) | — | 16 | 170 | 1,739 |
+| Web search | `01adeea5f9cdde82390ac45368156d5efd075edc` | [#89](https://github.com/ncosentino/foundry/pull/89) | 16 | 170 | 1,739 |
 
-- Current branch `harness/g3-web` HEAD: `556a458d707917882cf40ba7416531aa380e61fa`
-  (identical to the Skills slice merge commit; all web-search changes remain
-  uncommitted working-tree edits, per explicit instruction).
+- Final reviewed G3 implementation head:
+  `01adeea5f9cdde82390ac45368156d5efd075edc`
+  on `harness/g3-integration`.
 - Local deterministic validation for the web-search slice specifically:
   - `HarnessWebSearchCapabilityTests` in isolation: **16 passed, 0 failed**.
   - Full Harness filter (`FullyQualifiedName~Harness`): **170 passed, 0
@@ -63,9 +63,11 @@ Cumulative slice history on top of the G2 foundation gate (`gate-g2.md`):
     with clean versus incremental build order and are unchanged by this work.
 - All `dotnet build`/`dotnet test` commands were run with
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'` set.
-- No hosted CI run was performed for the web-search slice; no commit, push,
-  or PR was made as part of this work, matching the approval and skills
-  slices before it.
+- Final cumulative hosted validation:
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30117501638/job/89561673495),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30117501638/job/89561673604),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30117501689/job/89561673390), and
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30117501614/job/89561673640).
 - Exact MAF 1.15 / MEAI 10.6 API shapes for this slice
   (`HostedWebSearchTool`'s two public constructors, its fixed default
   `Name` value of `"web_search"`, its direct `AITool` base, and that
