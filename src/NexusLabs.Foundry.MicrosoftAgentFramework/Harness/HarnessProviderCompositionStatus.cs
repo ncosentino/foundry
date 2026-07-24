@@ -14,5 +14,11 @@ internal enum HarnessProviderCompositionStatus
     HistoryProviderUnexpected,
     HistoryProviderModeMismatch,
     HistoryProviderUnsupportedPersistenceMode,
+    PlanningPluginUnexpected,
+    TodoProviderRequired,
+    TodoProviderUnexpected,
+    AgentModeProviderRequired,
+    AgentModeProviderUnexpected,
+    ProviderStateKeyCollision,
     FoundryMetricsMissing,
 }

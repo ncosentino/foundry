@@ -8,7 +8,14 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
 internal static class HarnessCompositionGuard
 {
-    private static readonly IReadOnlySet<HarnessCapability> G2SupportedCapabilities =
+    /// <summary>
+    /// The base set of capabilities the shared composition root supports with no
+    /// selected-provider plugin enabled. Composition roots that opt a coherent plugin in
+    /// (history, planning, ...) union this base set with the capabilities the plugin
+    /// contributes rather than maintaining a separate combinatorial static set per
+    /// plugin combination; see <see cref="HarnessProviderComposition"/>.
+    /// </summary>
+    internal static readonly IReadOnlySet<HarnessCapability> G2SupportedCapabilities =
         new HashSet<HarnessCapability>
         {
             HarnessCapability.GeneratedTools,

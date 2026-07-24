@@ -9,16 +9,6 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
 internal sealed class HarnessProviderComposition
 {
-    private static readonly IReadOnlySet<HarnessCapability> HistorySupportedCapabilities =
-        new HashSet<HarnessCapability>
-        {
-            HarnessCapability.GeneratedTools,
-            HarnessCapability.FunctionInvocation,
-            HarnessCapability.MessageInjection,
-            HarnessCapability.OpenTelemetry,
-            HarnessCapability.PerServiceHistory,
-        };
-
     internal HarnessProviderCompositionResult Compose(
         HarnessProviderCompositionRequest request)
     {
@@ -43,6 +33,28 @@ internal sealed class HarnessProviderComposition
                 historyGuard.Detail);
         }
 
+        var planningGuard = HarnessPlanningCompositionGuard.Validate(
+            request.Profile,
+            request.PlanningProviders);
+        if (planningGuard.Status != HarnessPlanningCompositionGuardStatus.Valid)
+        {
+            return Failure(
+                MapPlanningStatus(planningGuard.Status),
+                request.Profile,
+                planningGuard.Detail);
+        }
+
+        var providerStateKeysResult = BuildProviderStateKeys(
+            request.HistoryProvider,
+            request.PlanningProviders);
+        if (providerStateKeysResult.Status != HarnessProviderCompositionStatus.Success)
+        {
+            return Failure(
+                providerStateKeysResult.Status,
+                request.Profile,
+                providerStateKeysResult.Detail);
+        }
+
         var bindingValidation = request.ExecutionBinding.ValidateCurrent(
             request.ExecutionContextAccessor,
             request.SessionId);
@@ -54,14 +66,17 @@ internal sealed class HarnessProviderComposition
                 bindingValidation.Detail);
         }
 
-        var guard = request.HistoryProvider is null
+        var supportedCapabilities = BuildSupportedCapabilities(
+            request.HistoryProvider,
+            request.PlanningProviders);
+        var guard = supportedCapabilities.SetEquals(HarnessCompositionGuard.G2SupportedCapabilities)
             ? HarnessCompositionGuard.Validate(
                 request.ChatClient,
                 request.Profile)
             : HarnessCompositionGuard.Validate(
                 request.ChatClient,
                 request.Profile,
-                HistorySupportedCapabilities);
+                supportedCapabilities);
         if (guard.Status != HarnessCompositionGuardStatus.Valid)
         {
             return Failure(
@@ -177,6 +192,7 @@ internal sealed class HarnessProviderComposition
                 ChatHistoryProvider = historyOptions?.ChatHistoryProvider,
                 RequirePerServiceCallChatHistoryPersistence =
                     historyOptions?.RequirePerServiceCallChatHistoryPersistence ?? false,
+                AIContextProviders = request.PlanningProviders?.AIContextProviders,
             },
             request.LoggerFactory,
             request.Services);
@@ -224,21 +240,96 @@ internal sealed class HarnessProviderComposition
                 request.SessionId);
         }
 
+        IHarnessTodoAccessor? todoAccessor =
+            request.PlanningProviders?.TodoProvider is { } todoProvider
+                ? new HarnessTodoAccessor(
+                    todoProvider,
+                    request.ExecutionBinding,
+                    request.ExecutionContextAccessor,
+                    request.SessionId)
+                : null;
+        IHarnessAgentModeAccessor? agentModeAccessor =
+            request.PlanningProviders?.AgentModeProvider is { } agentModeProvider
+                ? new HarnessAgentModeAccessor(
+                    agentModeProvider,
+                    request.ExecutionBinding,
+                    request.ExecutionContextAccessor,
+                    request.SessionId)
+                : null;
+
         return new HarnessProviderCompositionResult(
             HarnessProviderCompositionStatus.Success,
             new HarnessGuardedAgent(
                 agent,
-                messageInjector,
+                new HarnessGuardedAgentServices(
+                    messageInjector,
+                    todoAccessor,
+                    agentModeAccessor),
                 request.ExecutionBinding,
                 request.ExecutionContextAccessor,
                 request.SessionId,
-                request.HistoryProvider is not null,
+                request.HistoryProvider is not null || request.PlanningProviders is not null,
                 request.HistoryProvider?.PersistenceMode ??
                     HarnessHistoryPersistenceMode.NotApplicable,
-                request.HistoryProvider?.ProviderStateKeys ?? Array.Empty<string>()),
+                providerStateKeysResult.Keys),
             request.Profile,
             null);
     }
+
+    private static IReadOnlySet<HarnessCapability> BuildSupportedCapabilities(
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders)
+    {
+        var capabilities = new HashSet<HarnessCapability>(
+            HarnessCompositionGuard.G2SupportedCapabilities);
+        if (historyProvider is not null)
+        {
+            capabilities.Add(HarnessCapability.PerServiceHistory);
+        }
+        if (planningProviders?.TodoProvider is not null)
+        {
+            capabilities.Add(HarnessCapability.Todo);
+        }
+        if (planningProviders?.AgentModeProvider is not null)
+        {
+            capabilities.Add(HarnessCapability.AgentMode);
+        }
+        return capabilities;
+    }
+
+    private static ProviderStateKeysResult BuildProviderStateKeys(
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders)
+    {
+        var keys = new List<string>();
+        if (historyProvider is not null)
+        {
+            keys.AddRange(historyProvider.ProviderStateKeys);
+        }
+        if (planningProviders is not null)
+        {
+            keys.AddRange(planningProviders.ProviderStateKeys);
+        }
+
+        var distinctCount = keys.Distinct(StringComparer.Ordinal).Count();
+        if (distinctCount != keys.Count)
+        {
+            return new ProviderStateKeysResult(
+                HarnessProviderCompositionStatus.ProviderStateKeyCollision,
+                Array.Empty<string>(),
+                "The enabled selected providers contribute colliding session state keys.");
+        }
+
+        return new ProviderStateKeysResult(
+            HarnessProviderCompositionStatus.Success,
+            [.. keys.OrderBy(key => key, StringComparer.Ordinal)],
+            null);
+    }
+
+    private readonly record struct ProviderStateKeysResult(
+        HarnessProviderCompositionStatus Status,
+        IReadOnlyList<string> Keys,
+        string? Detail);
 
     private static HarnessProviderCompositionStatus MapHistoryStatus(
         HarnessHistoryCompositionGuardStatus status) =>
@@ -252,6 +343,23 @@ internal sealed class HarnessProviderComposition
                 HarnessProviderCompositionStatus.HistoryProviderModeMismatch,
             HarnessHistoryCompositionGuardStatus.UnsupportedPersistenceMode =>
                 HarnessProviderCompositionStatus.HistoryProviderUnsupportedPersistenceMode,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+
+    private static HarnessProviderCompositionStatus MapPlanningStatus(
+        HarnessPlanningCompositionGuardStatus status) =>
+        status switch
+        {
+            HarnessPlanningCompositionGuardStatus.PlanningPluginUnexpected =>
+                HarnessProviderCompositionStatus.PlanningPluginUnexpected,
+            HarnessPlanningCompositionGuardStatus.TodoProviderRequired =>
+                HarnessProviderCompositionStatus.TodoProviderRequired,
+            HarnessPlanningCompositionGuardStatus.TodoProviderUnexpected =>
+                HarnessProviderCompositionStatus.TodoProviderUnexpected,
+            HarnessPlanningCompositionGuardStatus.AgentModeProviderRequired =>
+                HarnessProviderCompositionStatus.AgentModeProviderRequired,
+            HarnessPlanningCompositionGuardStatus.AgentModeProviderUnexpected =>
+                HarnessProviderCompositionStatus.AgentModeProviderUnexpected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
 
