@@ -13,7 +13,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 /// <remarks>
 /// Deliberately does not carry a workspace reference: the active, host-authorized workspace
 /// is never selected from serialized state. It always comes from the current
-/// <see cref="Context.IAgentExecutionContext"/> and is revalidated by
+/// <see cref="NexusLabs.Foundry.MicrosoftAgentFramework.Context.IAgentExecutionContext"/> and is revalidated by
 /// <see cref="HarnessExecutionBinding.ValidateCurrent"/> before and after every session
 /// operation.
 /// </remarks>
