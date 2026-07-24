@@ -7,6 +7,7 @@ on:
       - src/Directory.Packages.props
       - src/Examples/AgentFramework/HarnessCompatibilityProbe/**
       - src/NexusLabs.Foundry.MicrosoftAgentFramework/**
+      - src/NexusLabs.Foundry.MicrosoftAgentFramework.Generators/**
   workflow_dispatch:
 
 env:
