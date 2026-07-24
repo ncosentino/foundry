@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Tests" />
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests" />
     <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
   </ItemGroup>
 
