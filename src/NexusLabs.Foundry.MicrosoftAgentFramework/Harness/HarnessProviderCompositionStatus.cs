@@ -21,4 +21,11 @@ internal enum HarnessProviderCompositionStatus
     AgentModeProviderUnexpected,
     ProviderStateKeyCollision,
     FoundryMetricsMissing,
+    ApprovalPluginUnexpected,
+    ApprovalResponseBindingRequired,
+    ApprovalResponseBindingUnexpected,
+    ApprovalNotRequiredBypassingRequired,
+    ApprovalNotRequiredBypassingUnexpected,
+    ToolAutoApprovalRequired,
+    ToolAutoApprovalUnexpected,
 }

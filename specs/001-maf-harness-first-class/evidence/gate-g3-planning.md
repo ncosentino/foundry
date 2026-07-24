@@ -210,3 +210,11 @@ by this and the prior two gates. `ServiceManaged` history persistence and any
 loop-evaluation behavior (G6) remain blocked pending their own
 evidence-backed gate decisions; do not infer support or add runtime
 negotiation without one.
+
+## Subsequent G3 envelope evolution
+
+The approval slice advances `HarnessSessionEnvelope` to schema version 2 by
+adding the canonical enabled-capability set and activates the envelope for
+approval-only profiles. Todo/AgentMode state-key binding is unchanged; the
+additional field prevents restoring provider or approval state under a
+different selected capability profile.

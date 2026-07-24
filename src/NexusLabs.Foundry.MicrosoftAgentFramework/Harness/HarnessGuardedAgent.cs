@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 using Microsoft.Agents.AI;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.AI;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
@@ -17,7 +19,11 @@ internal sealed class HarnessGuardedAgent(
     string sessionId,
     bool sessionContinuityEnabled,
     HarnessHistoryPersistenceMode historyPersistenceMode,
-    IReadOnlyList<string> providerStateKeys)
+    IReadOnlyList<string> providerStateKeys,
+    IReadOnlyList<HarnessCapability> enabledCapabilities,
+    bool toolAutoApprovalEnabled,
+    HarnessApprovalHostValidator? approvalHostValidator,
+    IProgressReporterAccessor? progressAccessor)
     : DelegatingAIAgent(innerAgent)
 {
     /// <inheritdoc />
@@ -50,7 +56,8 @@ internal sealed class HarnessGuardedAgent(
             typeof(ChatHistoryProvider).IsAssignableFrom(serviceType) ||
             serviceType == typeof(ChatClientAgentOptions) ||
             serviceType == typeof(ChatOptions) ||
-            serviceType == typeof(IDisposable))
+            serviceType == typeof(IDisposable) ||
+            serviceType == typeof(ToolApprovalAgentOptions))
         {
             return null;
         }
@@ -65,28 +72,50 @@ internal sealed class HarnessGuardedAgent(
         return base.GetService(serviceType, serviceKey);
     }
 
-    protected override Task<AgentResponse> RunCoreAsync(
+    protected override async Task<AgentResponse> RunCoreAsync(
         IEnumerable<ChatMessage> messages,
         AgentSession? session = null,
         AgentRunOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         EnsureSupported(options);
-        return base.RunCoreAsync(messages, session, options, cancellationToken);
+        var materializedMessages = AsReadOnlyList(messages);
+        await EnsureApprovalReauthorizedAsync(materializedMessages, session, cancellationToken)
+            .ConfigureAwait(false);
+
+        var response = await base
+            .RunCoreAsync(materializedMessages, session, options, cancellationToken)
+            .ConfigureAwait(false);
+        ReportApprovalResponses(materializedMessages);
+        ReportApprovalRequests(response.Messages, new HashSet<string>(StringComparer.Ordinal));
+        return response;
     }
 
-    protected override IAsyncEnumerable<AgentResponseUpdate> RunCoreStreamingAsync(
+    protected override async IAsyncEnumerable<AgentResponseUpdate> RunCoreStreamingAsync(
         IEnumerable<ChatMessage> messages,
         AgentSession? session = null,
         AgentRunOptions? options = null,
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureSupported(options);
-        return base.RunCoreStreamingAsync(
-            messages,
-            session,
-            options,
-            cancellationToken);
+        var materializedMessages = AsReadOnlyList(messages);
+        await EnsureApprovalReauthorizedAsync(materializedMessages, session, cancellationToken)
+            .ConfigureAwait(false);
+        var reportedApprovalRequests = new HashSet<string>(StringComparer.Ordinal);
+
+        await foreach (var update in base
+            .RunCoreStreamingAsync(materializedMessages, session, options, cancellationToken)
+            .WithCancellation(cancellationToken)
+            .ConfigureAwait(false))
+        {
+            ReportApprovalRequests(update.Contents.Count == 0
+                ? []
+                : [new ChatMessage(update.Role ?? ChatRole.Assistant, update.Contents)],
+                reportedApprovalRequests);
+            yield return update;
+        }
+
+        ReportApprovalResponses(materializedMessages);
     }
 
     protected override async ValueTask<AgentSession> CreateSessionCoreAsync(
@@ -137,6 +166,7 @@ internal sealed class HarnessGuardedAgent(
             sessionId,
             historyPersistenceMode,
             providerStateKeys,
+            enabledCapabilities,
             innerSession);
         return JsonSerializer.SerializeToElement(
             envelope,
@@ -177,6 +207,220 @@ internal sealed class HarnessGuardedAgent(
         executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
         return session;
     }
+
+    /// <summary>
+    /// Requires successful host reauthorization, under
+    /// <see cref="HarnessExecutionBinding.EnsureCurrent"/>, before a run that could create
+    /// or rely on a standing ("always approve") tool approval is allowed to proceed.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// MAF 1.15's <c>ToolApprovalAgent</c> persists standing approval rules into
+    /// <c>AgentSession.StateBag</c> with no public API to detect whether a restored session
+    /// already carries one. This method therefore requires reauthorization conservatively
+    /// whenever <paramref name="session"/> is non-<see langword="null"/> (a continued
+    /// session that could carry a previously recorded rule) in addition to whenever the
+    /// inbound <paramref name="messages"/> newly supply an
+    /// <c>AlwaysApproveToolApprovalResponseContent</c>. A restored or newly supplied
+    /// standing approval never becomes trusted solely because it exists: the host must
+    /// affirmatively reauthorize it every time, and a missing validator, a declined
+    /// reauthorization, or the delegate throwing all fail the run closed with zero tool
+    /// invocations.
+    /// </para>
+    /// </remarks>
+    private async ValueTask EnsureApprovalReauthorizedAsync(
+        IReadOnlyList<ChatMessage> messages,
+        AgentSession? session,
+        CancellationToken cancellationToken)
+    {
+        if (!toolAutoApprovalEnabled)
+        {
+            return;
+        }
+
+        var standingToolNames = FindStandingApprovalToolNames(messages);
+        if (standingToolNames.Count > 1)
+        {
+            throw new InvalidOperationException(
+                "Standing tool approvals must be submitted one at a time for host " +
+                "reauthorization.");
+        }
+
+        var hasNewStandingApproval = standingToolNames.Count == 1;
+        var standingToolName = hasNewStandingApproval
+            ? standingToolNames[0]
+            : null;
+        var isRestoredContinuation = session is not null;
+        if (!hasNewStandingApproval && !isRestoredContinuation)
+        {
+            return;
+        }
+
+        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
+
+        if (approvalHostValidator is null)
+        {
+            throw new InvalidOperationException(
+                "Standing tool approvals require a host reauthorization validator, but none " +
+                "is configured.");
+        }
+
+        var reason = hasNewStandingApproval
+            ? HarnessApprovalHostValidationReason.NewlySuppliedStandingApproval
+            : HarnessApprovalHostValidationReason.ContinuedSessionReauthorization;
+        var context = new HarnessApprovalHostValidationContext(
+            executionBinding.UserId,
+            executionBinding.OrchestrationId,
+            sessionId,
+            reason,
+            standingToolName);
+
+        var granted = await approvalHostValidator(context, cancellationToken)
+            .ConfigureAwait(false);
+        ReportStandingReauthorized(standingToolName, granted);
+
+        if (!granted)
+        {
+            throw new InvalidOperationException(
+                "Standing tool approval reauthorization was declined by the host.");
+        }
+
+        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
+    }
+
+    private void ReportApprovalRequests(
+        IEnumerable<ChatMessage> messages,
+        ISet<string> reportedRequestIds)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        foreach (var message in messages)
+        {
+            foreach (var content in message.Contents)
+            {
+                if (content is ToolApprovalRequestContent request)
+                {
+                    if (!reportedRequestIds.Add(request.RequestId))
+                    {
+                        continue;
+                    }
+
+                    reporter.Report(new HarnessApprovalRequestedEvent(
+                        Timestamp: DateTimeOffset.UtcNow,
+                        WorkflowId: reporter.WorkflowId,
+                        AgentId: reporter.AgentId,
+                        ParentAgentId: null,
+                        Depth: reporter.Depth,
+                        SequenceNumber: reporter.NextSequence(),
+                        RequestId: request.RequestId,
+                        ToolName: ToolName(request.ToolCall)));
+                }
+            }
+        }
+    }
+
+    private void ReportApprovalResponses(IReadOnlyList<ChatMessage> messages)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        foreach (var message in messages)
+        {
+            foreach (var content in message.Contents)
+            {
+                // Standing responses are reported via ReportStandingReauthorized instead,
+                // never both.
+                if (content is AlwaysApproveToolApprovalResponseContent)
+                {
+                    continue;
+                }
+
+                if (content is not ToolApprovalResponseContent response)
+                {
+                    continue;
+                }
+
+                if (response.Approved)
+                {
+                    reporter.Report(new HarnessApprovalApprovedEvent(
+                        Timestamp: DateTimeOffset.UtcNow,
+                        WorkflowId: reporter.WorkflowId,
+                        AgentId: reporter.AgentId,
+                        ParentAgentId: null,
+                        Depth: reporter.Depth,
+                        SequenceNumber: reporter.NextSequence(),
+                        RequestId: response.RequestId,
+                        ToolName: ToolName(response.ToolCall)));
+                }
+                else
+                {
+                    reporter.Report(new HarnessApprovalRejectedEvent(
+                        Timestamp: DateTimeOffset.UtcNow,
+                        WorkflowId: reporter.WorkflowId,
+                        AgentId: reporter.AgentId,
+                        ParentAgentId: null,
+                        Depth: reporter.Depth,
+                        SequenceNumber: reporter.NextSequence(),
+                        RequestId: response.RequestId,
+                        ToolName: ToolName(response.ToolCall),
+                        Reason: response.Reason));
+                }
+            }
+        }
+    }
+
+    private void ReportStandingReauthorized(string? toolName, bool granted)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        reporter.Report(new HarnessApprovalStandingReauthorizedEvent(
+            Timestamp: DateTimeOffset.UtcNow,
+            WorkflowId: reporter.WorkflowId,
+            AgentId: reporter.AgentId,
+            ParentAgentId: null,
+            Depth: reporter.Depth,
+            SequenceNumber: reporter.NextSequence(),
+            ToolName: toolName,
+            Granted: granted));
+    }
+
+    private static string ToolName(ToolCallContent? toolCall) =>
+        (toolCall as FunctionCallContent)?.Name ?? "unknown";
+
+    private static IReadOnlyList<string?> FindStandingApprovalToolNames(
+        IReadOnlyList<ChatMessage> messages)
+    {
+        var toolNames = new List<string?>();
+        foreach (var message in messages)
+        {
+            foreach (var content in message.Contents)
+            {
+                if (content is AlwaysApproveToolApprovalResponseContent always)
+                {
+                    toolNames.Add(
+                        always.InnerResponse.ToolCall is FunctionCallContent function
+                            ? function.Name
+                            : null);
+                }
+            }
+        }
+
+        return toolNames;
+    }
+
+    private static IReadOnlyList<ChatMessage> AsReadOnlyList(IEnumerable<ChatMessage> messages) =>
+        messages as IReadOnlyList<ChatMessage> ?? [.. messages];
 
     private static void EnsureSupported(AgentRunOptions? options)
     {
@@ -248,6 +492,14 @@ internal sealed class HarnessGuardedAgent(
             throw new InvalidOperationException(
                 "The serialized session envelope provider state keys do not match the " +
                 "currently configured selected providers.");
+        }
+
+        if (envelope.EnabledCapabilities is null ||
+            !envelope.EnabledCapabilities.SequenceEqual(enabledCapabilities))
+        {
+            throw new InvalidOperationException(
+                "The serialized session envelope enabled capabilities do not match the " +
+                "currently configured Harness profile.");
         }
 
         if (envelope.InnerSession.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)

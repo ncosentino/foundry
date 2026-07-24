@@ -8,6 +8,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
@@ -92,6 +93,47 @@ internal static class HarnessCompositionTestFixture
         return resolver.Resolve(
             new HarnessCapabilityResolutionRequest(
                 ProfileId: "g3-planning-test",
+                Lane: HarnessConstructionLane.SelectedProviders,
+                Acceptance: HarnessCapabilityAcceptance.StableOnly,
+                EvidenceThroughPhase: HarnessDeliveryPhase.G3,
+                RequestedCapabilities: requestedCapabilities,
+                ProviderCapabilities: new HashSet<HarnessProviderCapability>(),
+                ToolLoopOwner: toolLoopOwner,
+                TelemetryOwner: telemetryOwner,
+                HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable));
+    }
+
+    internal static HarnessCapabilityProfile CreateApprovalProfile(
+        HarnessToolLoopOwner toolLoopOwner,
+        HarnessTelemetryOwner telemetryOwner,
+        bool includeResponseBinding,
+        bool includeNotRequiredBypassing,
+        bool includeToolAutoApproval)
+    {
+        var requestedCapabilities = new HashSet<HarnessCapability>
+        {
+            HarnessCapability.GeneratedTools,
+            HarnessCapability.FunctionInvocation,
+            HarnessCapability.MessageInjection,
+            HarnessCapability.OpenTelemetry,
+        };
+        if (includeResponseBinding)
+        {
+            requestedCapabilities.Add(HarnessCapability.ApprovalResponseBinding);
+        }
+        if (includeNotRequiredBypassing)
+        {
+            requestedCapabilities.Add(HarnessCapability.ApprovalNotRequiredBypassing);
+        }
+        if (includeToolAutoApproval)
+        {
+            requestedCapabilities.Add(HarnessCapability.ToolAutoApproval);
+        }
+
+        var resolver = new HarnessCapabilityResolver();
+        return resolver.Resolve(
+            new HarnessCapabilityResolutionRequest(
+                ProfileId: "g3-approval-test",
                 Lane: HarnessConstructionLane.SelectedProviders,
                 Acceptance: HarnessCapabilityAcceptance.StableOnly,
                 EvidenceThroughPhase: HarnessDeliveryPhase.G3,
@@ -192,6 +234,54 @@ internal static class HarnessCompositionTestFixture
         IAgentMetrics? metrics,
         HarnessHistoryProviderPlugin? historyProvider,
         HarnessPlanningProvidersPlugin? planningProviders) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders,
+            approvalPlugin: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders,
+            approvalPlugin,
+            progressAccessor: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin,
+        IProgressReporterAccessor? progressAccessor) =>
         new(
             ChatClient: chatClient,
             Services: services,
@@ -207,7 +297,8 @@ internal static class HarnessCompositionTestFixture
             HistoryProvider: historyProvider,
             PlanningProviders: planningProviders,
             Metrics: metrics,
-            ProgressAccessor: null);
+            ApprovalPlugin: approvalPlugin,
+            ProgressAccessor: progressAccessor);
 
     internal static ServiceProvider CreateServices() =>
         new ServiceCollection().BuildServiceProvider();
@@ -223,6 +314,17 @@ internal static class HarnessCompositionTestFixture
         TodoProvider? todoProvider,
         AgentModeProvider? agentModeProvider) =>
         HarnessPlanningProvidersPlugin.Create(todoProvider, agentModeProvider);
+
+    internal static HarnessApprovalPlugin CreateApprovalPlugin(
+        bool responseBindingEnabled,
+        bool notRequiredBypassingEnabled,
+        ToolApprovalAgentOptions? toolApprovalOptions,
+        HarnessApprovalHostValidator? hostValidator) =>
+        HarnessApprovalPlugin.Create(
+            responseBindingEnabled,
+            notRequiredBypassingEnabled,
+            toolApprovalOptions,
+            hostValidator);
 
     internal static IChatClient WithFoundryTelemetry(
         IChatClient inner,

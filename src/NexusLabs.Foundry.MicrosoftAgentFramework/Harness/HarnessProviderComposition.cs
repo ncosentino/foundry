@@ -44,6 +44,17 @@ internal sealed class HarnessProviderComposition
                 planningGuard.Detail);
         }
 
+        var approvalGuard = HarnessApprovalCompositionGuard.Validate(
+            request.Profile,
+            request.ApprovalPlugin);
+        if (approvalGuard.Status != HarnessApprovalCompositionGuardStatus.Valid)
+        {
+            return Failure(
+                MapApprovalStatus(approvalGuard.Status),
+                request.Profile,
+                approvalGuard.Detail);
+        }
+
         var providerStateKeysResult = BuildProviderStateKeys(
             request.HistoryProvider,
             request.PlanningProviders);
@@ -68,7 +79,14 @@ internal sealed class HarnessProviderComposition
 
         var supportedCapabilities = BuildSupportedCapabilities(
             request.HistoryProvider,
-            request.PlanningProviders);
+            request.PlanningProviders,
+            request.ApprovalPlugin);
+        var enabledCapabilities = request.Profile.Capabilities.Values
+            .Where(evidence =>
+                evidence.EffectiveState == HarnessCapabilityState.Enabled)
+            .Select(evidence => evidence.Capability)
+            .OrderBy(capability => capability)
+            .ToArray();
         var guard = supportedCapabilities.SetEquals(HarnessCompositionGuard.G2SupportedCapabilities)
             ? HarnessCompositionGuard.Validate(
                 request.ChatClient,
@@ -132,6 +150,34 @@ internal sealed class HarnessProviderComposition
                 ? request.Metrics
                 : null;
         var builder = request.ChatClient.AsBuilder();
+
+        if (request.ApprovalPlugin is not null)
+        {
+            builder = builder.Use(innerClient =>
+                new HarnessExecutionBindingChatClient(
+                    innerClient,
+                    request.ExecutionBinding,
+                    request.ExecutionContextAccessor,
+                    request.SessionId));
+        }
+
+        // MAF's canonical pipeline order places approval response binding outermost,
+        // then not-required-bypassing, then function invocation (see
+        // ChatClientExtensions.WithDefaultAgentMiddleware upstream), so both approval
+        // decorators are added before the function-invocation decorator below, using the
+        // same public ChatClientBuilderExtensions seam already used for message injection
+        // and history persistence elsewhere in this method. The additional binding wrapper
+        // above these decorators prevents them from reading or mutating approval session
+        // state before the trusted execution context has been validated.
+        if (request.ApprovalPlugin?.ResponseBindingEnabled == true)
+        {
+            builder = builder.UseApprovalResponseBinding(request.LoggerFactory);
+        }
+        if (request.ApprovalPlugin?.NotRequiredBypassingEnabled == true)
+        {
+            builder = builder.UseApprovalNotRequiredFunctionBypassing(request.LoggerFactory);
+        }
+
         builder = request.Profile.ToolLoopOwner == HarnessToolLoopOwner.Foundry
             ? builder.UseDiagnosticsFunctionInvocation(
                 request.LoggerFactory,
@@ -193,6 +239,15 @@ internal sealed class HarnessProviderComposition
                 RequirePerServiceCallChatHistoryPersistence =
                     historyOptions?.RequirePerServiceCallChatHistoryPersistence ?? false,
                 AIContextProviders = request.PlanningProviders?.AIContextProviders,
+                // These two flags reflect effective profile state for documentation and
+                // defense-in-depth, but MAF documents them as having no effect when
+                // UseProvidedChatClientAsIs is true (always true above): the real
+                // behavioral control is the builder.UseApprovalResponseBinding /
+                // .UseApprovalNotRequiredFunctionBypassing calls above.
+                DisableApprovalResponseBinding =
+                    request.ApprovalPlugin?.ResponseBindingEnabled != true,
+                DisableApprovalNotRequiredFunctionBypassing =
+                    request.ApprovalPlugin?.NotRequiredBypassingEnabled != true,
             },
             request.LoggerFactory,
             request.Services);
@@ -257,10 +312,21 @@ internal sealed class HarnessProviderComposition
                     request.SessionId)
                 : null;
 
+        // Chat-client middleware services (function invocation, message injection) are
+        // resolved above, from the raw ChatClientAgent, before ToolApprovalAgent -- an
+        // agent-level (not chat-client-level) decorator -- is layered around it. The
+        // ToolApprovalAgent then sits inside HarnessGuardedAgent, which remains the
+        // outermost returned surface either way.
+        AIAgent runtimeAgent = agent;
+        if (request.ApprovalPlugin?.ToolApprovalOptions is not null)
+        {
+            runtimeAgent = new ToolApprovalAgent(agent, request.ApprovalPlugin.ToolApprovalOptions);
+        }
+
         return new HarnessProviderCompositionResult(
             HarnessProviderCompositionStatus.Success,
             new HarnessGuardedAgent(
-                agent,
+                runtimeAgent,
                 new HarnessGuardedAgentServices(
                     messageInjector,
                     todoAccessor,
@@ -268,17 +334,24 @@ internal sealed class HarnessProviderComposition
                 request.ExecutionBinding,
                 request.ExecutionContextAccessor,
                 request.SessionId,
-                request.HistoryProvider is not null || request.PlanningProviders is not null,
+                request.HistoryProvider is not null ||
+                    request.PlanningProviders is not null ||
+                    request.ApprovalPlugin is not null,
                 request.HistoryProvider?.PersistenceMode ??
                     HarnessHistoryPersistenceMode.NotApplicable,
-                providerStateKeysResult.Keys),
+                providerStateKeysResult.Keys,
+                enabledCapabilities,
+                request.ApprovalPlugin?.ToolApprovalOptions is not null,
+                request.ApprovalPlugin?.HostValidator,
+                request.ProgressAccessor),
             request.Profile,
             null);
     }
 
     private static IReadOnlySet<HarnessCapability> BuildSupportedCapabilities(
         HarnessHistoryProviderPlugin? historyProvider,
-        HarnessPlanningProvidersPlugin? planningProviders)
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin)
     {
         var capabilities = new HashSet<HarnessCapability>(
             HarnessCompositionGuard.G2SupportedCapabilities);
@@ -293,6 +366,18 @@ internal sealed class HarnessProviderComposition
         if (planningProviders?.AgentModeProvider is not null)
         {
             capabilities.Add(HarnessCapability.AgentMode);
+        }
+        if (approvalPlugin?.ResponseBindingEnabled == true)
+        {
+            capabilities.Add(HarnessCapability.ApprovalResponseBinding);
+        }
+        if (approvalPlugin?.NotRequiredBypassingEnabled == true)
+        {
+            capabilities.Add(HarnessCapability.ApprovalNotRequiredBypassing);
+        }
+        if (approvalPlugin?.ToolApprovalOptions is not null)
+        {
+            capabilities.Add(HarnessCapability.ToolAutoApproval);
         }
         return capabilities;
     }
@@ -360,6 +445,27 @@ internal sealed class HarnessProviderComposition
                 HarnessProviderCompositionStatus.AgentModeProviderRequired,
             HarnessPlanningCompositionGuardStatus.AgentModeProviderUnexpected =>
                 HarnessProviderCompositionStatus.AgentModeProviderUnexpected,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+
+    private static HarnessProviderCompositionStatus MapApprovalStatus(
+        HarnessApprovalCompositionGuardStatus status) =>
+        status switch
+        {
+            HarnessApprovalCompositionGuardStatus.ApprovalPluginUnexpected =>
+                HarnessProviderCompositionStatus.ApprovalPluginUnexpected,
+            HarnessApprovalCompositionGuardStatus.ApprovalResponseBindingRequired =>
+                HarnessProviderCompositionStatus.ApprovalResponseBindingRequired,
+            HarnessApprovalCompositionGuardStatus.ApprovalResponseBindingUnexpected =>
+                HarnessProviderCompositionStatus.ApprovalResponseBindingUnexpected,
+            HarnessApprovalCompositionGuardStatus.ApprovalNotRequiredBypassingRequired =>
+                HarnessProviderCompositionStatus.ApprovalNotRequiredBypassingRequired,
+            HarnessApprovalCompositionGuardStatus.ApprovalNotRequiredBypassingUnexpected =>
+                HarnessProviderCompositionStatus.ApprovalNotRequiredBypassingUnexpected,
+            HarnessApprovalCompositionGuardStatus.ToolAutoApprovalRequired =>
+                HarnessProviderCompositionStatus.ToolAutoApprovalRequired,
+            HarnessApprovalCompositionGuardStatus.ToolAutoApprovalUnexpected =>
+                HarnessProviderCompositionStatus.ToolAutoApprovalUnexpected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
 

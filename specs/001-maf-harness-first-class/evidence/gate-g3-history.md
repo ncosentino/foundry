@@ -145,3 +145,10 @@ Proceed with the next independently gated stable selected-provider slice
 sequence. `ServiceManaged` history persistence remains blocked pending
 provider-specific Foundry evidence; do not infer support or add runtime
 negotiation without a new evidence-backed gate decision.
+
+## Subsequent G3 envelope evolution
+
+The approval slice advances `HarnessSessionEnvelope` to schema version 2 by
+adding the canonical enabled-capability set. History fields and restore
+semantics remain unchanged; the additional field prevents restoring opaque
+session state under a different selected capability profile.
