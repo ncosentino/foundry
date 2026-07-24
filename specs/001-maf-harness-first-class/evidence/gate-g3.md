@@ -51,6 +51,8 @@ Cumulative slice history on top of the G2 foundation gate (`gate-g2.md`):
 - Final reviewed G3 implementation head:
   `01adeea5f9cdde82390ac45368156d5efd075edc`
   on `harness/g3-integration`.
+- Final evidence refresh:
+  [#90](https://github.com/ncosentino/foundry/pull/90)
 - Local deterministic validation for the web-search slice specifically:
   - `HarnessWebSearchCapabilityTests` in isolation: **16 passed, 0 failed**.
   - Full Harness filter (`FullyQualifiedName~Harness`): **170 passed, 0
