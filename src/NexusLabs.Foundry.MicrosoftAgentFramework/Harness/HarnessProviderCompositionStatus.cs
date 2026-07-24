@@ -28,4 +28,7 @@ internal enum HarnessProviderCompositionStatus
     ApprovalNotRequiredBypassingUnexpected,
     ToolAutoApprovalRequired,
     ToolAutoApprovalUnexpected,
+    SkillsPluginUnexpected,
+    SkillsPluginRequired,
+    SkillsApprovalCoherenceRequired,
 }
