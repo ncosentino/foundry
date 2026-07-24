@@ -35,11 +35,20 @@ internal sealed class HarnessScriptedChatClient : IChatClient
 
     internal int CallCount => _callCount;
 
+    /// <summary>
+    /// The <see cref="ChatOptions"/> instance supplied to the most recent
+    /// <see cref="IChatClient.GetResponseAsync"/> call, captured verbatim for tests that
+    /// assert on the exact composed <c>ChatOptions.Tools</c> shape (for example, that
+    /// exactly one hosted web search marker was appended).
+    /// </summary>
+    internal ChatOptions? LastOptions { get; private set; }
+
     Task<ChatResponse> IChatClient.GetResponseAsync(
         IEnumerable<ChatMessage> chatMessages,
         ChatOptions? options,
         CancellationToken cancellationToken)
     {
+        LastOptions = options;
         if (Interlocked.Increment(ref _callCount) == 1)
         {
             var response = _requestFunctionCall
