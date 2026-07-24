@@ -32,7 +32,7 @@ approved by this gate.
   `8ec072d6372c923e0aca6500c408183269f053a5`, and
   `9c2d2541d4ded809b17adc353739ee5fc0fbb51c`
 - Cumulative local deterministic validation:
-  44 Harness tests, 66 generated-wrapper tests, and all 1,613
+  47 Harness tests, 66 generated-wrapper tests, and all 1,616
   `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` tests passed.
 - Cumulative G2.3 hosted validation:
   [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30076244936/job/89427494563),
@@ -52,10 +52,10 @@ approved by this gate.
 | Message-injection inner calls are guarded | Pass | Effective order is FICC -> message injection -> execution binding -> telemetry -> leaf. Deterministic streaming and non-streaming fixtures expire identity after the first call and prove no second provider call occurs. |
 | Exactly one function loop | Pass | Existing standard or Foundry diagnostics FICC layers are rejected. `UseProvidedChatClientAsIs` prevents MAF from adding another default loop. |
 | Exactly one aligned telemetry owner | Pass | Harness/Harness and Foundry/Foundry ownership sets pass. Mixed ownership and pre-instrumented input fail closed. One tool round records one Foundry tool metric and two Foundry model-call metrics. |
-| Safe composed service surface | Pass | The guarded agent rejects per-run `ChatClientFactory`, hides callable `IChatClient`, raw `ChatClientAgent`, and mutable function-loop services, and exposes only a binding-aware internal message injector. |
+| Safe composed service surface | Pass | The guarded agent rejects all per-run `AgentRunOptions`, hides callable `IChatClient`, raw `ChatClientAgent`, and mutable function-loop services, and exposes only a binding-aware internal message injector. |
 | Function-invocation services preserved | Pass | The Foundry diagnostics FICC receives the composition `IServiceProvider`; a generated-style test function observes it through `AIFunctionArguments.Services`. |
 | Non-Azure deterministic execution | Pass | Scripted local `IChatClient` fixtures execute generated tools, message injection, telemetry, streaming, and ownership guards without Azure hosting or credentials. |
-| Ordinary Foundry behavior unchanged | Pass | The non-adopter regression constructs and runs ordinary `AgentFactory` behavior without Harness composition. The full 1,613-test MAF project passes. |
+| Ordinary Foundry behavior unchanged | Pass | The non-adopter regression constructs and runs ordinary `AgentFactory` behavior without Harness composition. The full 1,616-test MAF project passes. |
 | Workspace bridge boundary understood | Pass for feasibility only | `workspace-identity-feasibility.md` proves a per-execution, explicitly partial bridge is possible and records unsupported delete, generic search, CAS, mid-call cancellation, and ambient singleton semantics. Implementation remains G4 work. |
 | Hosted compatibility | Pass with an explicit selected-composition AOT gap | G2 leaf PRs passed build/test/package and documentation. Existing standard and Harness NativeAOT jobs pass for the package and generated-tool paths, but do not directly invoke `HarnessProviderComposition`; the minimum selected-provider AOT app must close that gap before profile promotion. |
 
@@ -87,8 +87,9 @@ The G2 stop condition is not triggered.
    Do not select workspace or identity from model input, paths, restored state,
    or a reusable ambient singleton.
 6. **Service discovery:** do not expose live chat middleware below the trust
-   guard. Use narrow binding-aware surfaces for capabilities that require host
-   access.
+   guard or forward caller-owned per-run options. Use narrow binding-aware
+   surfaces for capabilities that require host access. Any safe run-time
+   override requires explicit later evidence.
 7. **Opt-in behavior:** ordinary `AgentFactory` and the existing iterative loop
    remain unchanged.
 
@@ -99,10 +100,11 @@ following blocking findings, all adopted before this gate:
 
 - preserve `IServiceProvider` in the Foundry-owned function loop;
 - revalidate identity after non-streaming provider calls;
-- reject per-run chat-client replacement;
+- reject caller-owned per-run agent options;
 - hide callable chat middleware from the composed agent;
-- place execution binding inside the message-injection service-call loop; and
-- exclude the mutable test accessor from Needlr reflection registration.
+- place execution binding inside the message-injection service-call loop;
+- exclude the mutable test accessor from Needlr reflection registration; and
+- reject run-time capability mutation that bypasses profile selection.
 
 One proposed direct generated-tool bypass was discarded after decompilation
 showed `ChatClientAgent.ChatOptions` is internal in MAF 1.15 and not available

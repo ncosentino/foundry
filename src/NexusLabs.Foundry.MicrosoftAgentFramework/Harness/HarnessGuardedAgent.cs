@@ -63,13 +63,10 @@ internal sealed class HarnessGuardedAgent(
 
     private static void EnsureSupported(AgentRunOptions? options)
     {
-        if (options is ChatClientAgentRunOptions
-            {
-                ChatClientFactory: not null,
-            })
+        if (options is not null)
         {
             throw new InvalidOperationException(
-                "Harness composition does not allow per-run chat client replacement.");
+                "Harness composition does not allow per-run agent options.");
         }
     }
 }

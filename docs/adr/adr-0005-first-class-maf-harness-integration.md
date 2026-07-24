@@ -97,12 +97,13 @@ Foundry's existing generated-function provider and fail closed when generated
 metadata cannot be resolved.
 
 Agent construction uses `UseProvidedChatClientAsIs` so MAF does not add a second
-default loop or telemetry layer. The returned internal agent rejects per-run
-`ChatClientFactory` replacement and does not expose a callable `IChatClient`,
-the raw `ChatClientAgent`, or mutable function-loop middleware through
-`GetService`. Message injection remains available through a narrow internal
-surface that validates the same trusted binding without exposing the underlying
-chat client.
+default loop or telemetry layer. The returned internal agent rejects all
+per-run `AgentRunOptions`; safe run-time overrides require later
+capability-profile evidence rather than forwarding a caller-owned mutable
+options object. It does not expose a callable `IChatClient`, the raw
+`ChatClientAgent`, or mutable function-loop middleware through `GetService`.
+Message injection remains available through a narrow internal surface that
+validates the same trusted binding without exposing the underlying chat client.
 
 The trusted binding is captured per execution from host-issued user,
 orchestration, session, and authorized workspace state. It is immutable and is
@@ -169,7 +170,7 @@ host authorization boundary and fails closed after scope completion.
 ### Negative
 
 - Selected-provider agents require per-execution binding and cannot freely
-  replace their chat-client pipeline at run time.
+  replace their chat-client pipeline or apply per-run agent options.
 - Raw chat middleware is intentionally hidden, so capabilities such as message
   injection need narrow Foundry-owned access surfaces.
 - Foundry must maintain composition and conformance tests across MAF and MEAI
