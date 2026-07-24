@@ -63,6 +63,9 @@ internal sealed class HarnessCapabilityResolver
                 capabilities[definition.Capability].EffectiveState ==
                 HarnessCapabilityState.Enabled);
 
+        var historyCoherent = ResolveHistoryCoherence(request, capabilities);
+        isExecutable = isExecutable && historyCoherent;
+
         return new HarnessCapabilityProfile(
             SchemaVersion,
             request.ProfileId,
@@ -73,7 +76,83 @@ internal sealed class HarnessCapabilityResolver
             isExecutable,
             new ReadOnlyDictionary<HarnessCapability, HarnessCapabilityEvidence>(capabilities),
             request.ToolLoopOwner,
-            request.TelemetryOwner);
+            request.TelemetryOwner,
+            request.HistoryPersistenceMode);
+    }
+
+    /// <summary>
+    /// Applies the session-continuity coherence rule on top of the per-capability resolution:
+    /// a selected <see cref="HarnessCapability.PerServiceHistory"/> capability must carry an
+    /// explicit, supported persistence mode to be enabled, and a persistence mode must not be
+    /// requested unless the capability itself is selected. Returns whether the history slice
+    /// (if any) is coherent with the rest of the profile.
+    /// </summary>
+    private static bool ResolveHistoryCoherence(
+        HarnessCapabilityResolutionRequest request,
+        Dictionary<HarnessCapability, HarnessCapabilityEvidence> capabilities)
+    {
+        var historyEvidence = capabilities[HarnessCapability.PerServiceHistory];
+        var historySelected = historyEvidence.Requested ||
+            request.Lane == HarnessConstructionLane.CompleteBundle &&
+                historyEvidence.DefaultEnabledInBundle;
+
+        if (!historySelected)
+        {
+            // A persistence mode without the capability selected must never produce an
+            // executable profile: there is nothing for the mode to apply to.
+            return request.HistoryPersistenceMode == HarnessHistoryPersistenceMode.NotApplicable;
+        }
+
+        if (request.HistoryPersistenceMode == HarnessHistoryPersistenceMode.ServiceManaged)
+        {
+            capabilities[HarnessCapability.PerServiceHistory] = historyEvidence with
+            {
+                EffectiveState = HarnessCapabilityState.Deferred,
+                Rationale = "MAF 1.15 supports service-stored conversation history, but " +
+                    "this selected-provider slice has no approved provider-specific " +
+                    "capability evidence and performs no runtime negotiation.",
+            };
+            return false;
+        }
+
+        if (historyEvidence.EffectiveState != HarnessCapabilityState.Enabled)
+        {
+            // Deferred/disabled for an unrelated reason (evidence phase, experimental
+            // acceptance, ...); the history-specific coherence rule does not apply.
+            return true;
+        }
+
+        if (request.HistoryPersistenceMode == HarnessHistoryPersistenceMode.NotApplicable)
+        {
+            capabilities[HarnessCapability.PerServiceHistory] = historyEvidence with
+            {
+                EffectiveState = HarnessCapabilityState.Deferred,
+                Rationale = "A selected PerServiceHistory capability requires an explicit " +
+                    "in-memory, serialized, or durable-provider persistence mode.",
+            };
+            return false;
+        }
+
+        var persistenceRationale = request.HistoryPersistenceMode switch
+        {
+            HarnessHistoryPersistenceMode.InMemory =>
+                "non-durable in-memory state.",
+            HarnessHistoryPersistenceMode.Serialized =>
+                "serializable state whose durability depends on caller-owned persistence.",
+            HarnessHistoryPersistenceMode.DurableProvider =>
+                "a caller-supplied durable provider.",
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(request.HistoryPersistenceMode),
+                request.HistoryPersistenceMode,
+                null),
+        };
+        capabilities[HarnessCapability.PerServiceHistory] = historyEvidence with
+        {
+            Rationale = historyEvidence.Rationale +
+                $" Persistence mode '{request.HistoryPersistenceMode}' uses " +
+                persistenceRationale,
+        };
+        return true;
     }
 
     private static HarnessCapabilityEvidence ResolveCapability(

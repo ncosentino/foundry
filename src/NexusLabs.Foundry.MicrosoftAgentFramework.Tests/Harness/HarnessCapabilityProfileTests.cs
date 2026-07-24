@@ -236,5 +236,6 @@ public sealed class HarnessCapabilityProfileTests
             RequestedCapabilities: new HashSet<HarnessCapability>(requestedCapabilities),
             ProviderCapabilities: new HashSet<HarnessProviderCapability>(providerCapabilities),
             ToolLoopOwner: HarnessToolLoopOwner.Harness,
-            TelemetryOwner: HarnessTelemetryOwner.Foundry);
+            TelemetryOwner: HarnessTelemetryOwner.Foundry,
+            HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable);
 }

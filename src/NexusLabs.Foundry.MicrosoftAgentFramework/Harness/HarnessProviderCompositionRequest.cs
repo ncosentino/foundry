@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
@@ -20,5 +21,6 @@ internal sealed record HarnessProviderCompositionRequest(
     HarnessExecutionBinding ExecutionBinding,
     IAgentExecutionContextAccessor ExecutionContextAccessor,
     string SessionId,
+    HarnessHistoryProviderPlugin? HistoryProvider,
     IAgentMetrics? Metrics,
     IProgressReporterAccessor? ProgressAccessor);

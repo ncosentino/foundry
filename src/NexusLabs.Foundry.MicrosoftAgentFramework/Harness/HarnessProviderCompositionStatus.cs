@@ -10,5 +10,9 @@ internal enum HarnessProviderCompositionStatus
     GeneratedToolsNotEnabled,
     FunctionInvocationLoopMissing,
     MessageInjectionMissing,
+    HistoryProviderRequired,
+    HistoryProviderUnexpected,
+    HistoryProviderModeMismatch,
+    HistoryProviderUnsupportedPersistenceMode,
     FoundryMetricsMissing,
 }

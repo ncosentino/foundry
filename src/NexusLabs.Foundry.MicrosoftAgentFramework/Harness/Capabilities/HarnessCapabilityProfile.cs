@@ -10,4 +10,5 @@ internal sealed record HarnessCapabilityProfile(
     bool IsExecutable,
     IReadOnlyDictionary<HarnessCapability, HarnessCapabilityEvidence> Capabilities,
     HarnessToolLoopOwner ToolLoopOwner,
-    HarnessTelemetryOwner TelemetryOwner);
+    HarnessTelemetryOwner TelemetryOwner,
+    HarnessHistoryPersistenceMode HistoryPersistenceMode);
