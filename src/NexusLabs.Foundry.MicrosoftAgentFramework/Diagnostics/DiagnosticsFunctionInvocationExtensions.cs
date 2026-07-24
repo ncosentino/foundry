@@ -1,4 +1,6 @@
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
@@ -29,11 +31,26 @@ public static class DiagnosticsFunctionInvocationExtensions
         this ChatClientBuilder builder,
         IAgentMetrics? metrics = null,
         IProgressReporterAccessor? progressAccessor = null)
+        => UseDiagnosticsFunctionInvocation(
+            builder,
+            loggerFactory: null,
+            metrics,
+            progressAccessor);
+
+    internal static ChatClientBuilder UseDiagnosticsFunctionInvocation(
+        this ChatClientBuilder builder,
+        ILoggerFactory? loggerFactory,
+        IAgentMetrics? metrics,
+        IProgressReporterAccessor? progressAccessor)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        return builder.Use(innerClient =>
+        return builder.Use((innerClient, services) =>
             new DiagnosticsFunctionInvokingChatClient(
-                innerClient, metrics, progressAccessor));
+                innerClient,
+                loggerFactory ?? services.GetService<ILoggerFactory>(),
+                services,
+                metrics,
+                progressAccessor));
     }
 }

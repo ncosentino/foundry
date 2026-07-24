@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
@@ -39,7 +40,22 @@ public sealed class DiagnosticsFunctionInvokingChatClient : FunctionInvokingChat
         IChatClient innerClient,
         IAgentMetrics? metrics = null,
         IProgressReporterAccessor? progressAccessor = null)
-        : base(innerClient)
+        : this(
+            innerClient,
+            loggerFactory: null,
+            functionInvocationServices: null,
+            metrics,
+            progressAccessor)
+    {
+    }
+
+    internal DiagnosticsFunctionInvokingChatClient(
+        IChatClient innerClient,
+        ILoggerFactory? loggerFactory,
+        IServiceProvider? functionInvocationServices,
+        IAgentMetrics? metrics,
+        IProgressReporterAccessor? progressAccessor)
+        : base(innerClient, loggerFactory, functionInvocationServices)
     {
         _metrics = metrics;
         _progressAccessor = progressAccessor;
