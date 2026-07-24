@@ -5,18 +5,19 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
 internal sealed class HarnessGuardedAgent(
     AIAgent innerAgent,
-    IHarnessMessageInjector? messageInjector,
+    HarnessGuardedAgentServices services,
     HarnessExecutionBinding executionBinding,
     IAgentExecutionContextAccessor executionContextAccessor,
     string sessionId,
     bool sessionContinuityEnabled,
     HarnessHistoryPersistenceMode historyPersistenceMode,
-    IReadOnlyList<string> historyProviderStateKeys)
+    IReadOnlyList<string> providerStateKeys)
     : DelegatingAIAgent(innerAgent)
 {
     /// <inheritdoc />
@@ -29,9 +30,26 @@ internal sealed class HarnessGuardedAgent(
         if (serviceKey is null &&
             serviceType == typeof(IHarnessMessageInjector))
         {
-            return messageInjector;
+            return services.MessageInjector;
         }
+
+        if (serviceKey is null &&
+            serviceType == typeof(IHarnessTodoAccessor))
+        {
+            return services.TodoAccessor;
+        }
+
+        if (serviceKey is null &&
+            serviceType == typeof(IHarnessAgentModeAccessor))
+        {
+            return services.AgentModeAccessor;
+        }
+
         if (typeof(IChatClient).IsAssignableFrom(serviceType) ||
+            typeof(AIContextProvider).IsAssignableFrom(serviceType) ||
+            typeof(ChatHistoryProvider).IsAssignableFrom(serviceType) ||
+            serviceType == typeof(ChatClientAgentOptions) ||
+            serviceType == typeof(ChatOptions) ||
             serviceType == typeof(IDisposable))
         {
             return null;
@@ -118,7 +136,7 @@ internal sealed class HarnessGuardedAgent(
             executionBinding.OrchestrationId,
             sessionId,
             historyPersistenceMode,
-            historyProviderStateKeys,
+            providerStateKeys,
             innerSession);
         return JsonSerializer.SerializeToElement(
             envelope,
@@ -224,12 +242,12 @@ internal sealed class HarnessGuardedAgent(
 
         if (envelope.ProviderStateKeys is null ||
             !envelope.ProviderStateKeys.SequenceEqual(
-            historyProviderStateKeys,
+            providerStateKeys,
             StringComparer.Ordinal))
         {
             throw new InvalidOperationException(
                 "The serialized session envelope provider state keys do not match the " +
-                "currently configured history provider.");
+                "currently configured selected providers.");
         }
 
         if (envelope.InnerSession.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)

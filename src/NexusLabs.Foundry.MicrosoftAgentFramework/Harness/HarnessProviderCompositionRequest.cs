@@ -22,5 +22,6 @@ internal sealed record HarnessProviderCompositionRequest(
     IAgentExecutionContextAccessor ExecutionContextAccessor,
     string SessionId,
     HarnessHistoryProviderPlugin? HistoryProvider,
+    HarnessPlanningProvidersPlugin? PlanningProviders,
     IAgentMetrics? Metrics,
     IProgressReporterAccessor? ProgressAccessor);

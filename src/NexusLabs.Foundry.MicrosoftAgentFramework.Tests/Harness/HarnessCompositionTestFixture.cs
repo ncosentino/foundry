@@ -66,6 +66,42 @@ internal static class HarnessCompositionTestFixture
                 HistoryPersistenceMode: historyPersistenceMode));
     }
 
+    internal static HarnessCapabilityProfile CreatePlanningProfile(
+        HarnessToolLoopOwner toolLoopOwner,
+        HarnessTelemetryOwner telemetryOwner,
+        bool includeTodo,
+        bool includeAgentMode)
+    {
+        var requestedCapabilities = new HashSet<HarnessCapability>
+        {
+            HarnessCapability.GeneratedTools,
+            HarnessCapability.FunctionInvocation,
+            HarnessCapability.MessageInjection,
+            HarnessCapability.OpenTelemetry,
+        };
+        if (includeTodo)
+        {
+            requestedCapabilities.Add(HarnessCapability.Todo);
+        }
+        if (includeAgentMode)
+        {
+            requestedCapabilities.Add(HarnessCapability.AgentMode);
+        }
+
+        var resolver = new HarnessCapabilityResolver();
+        return resolver.Resolve(
+            new HarnessCapabilityResolutionRequest(
+                ProfileId: "g3-planning-test",
+                Lane: HarnessConstructionLane.SelectedProviders,
+                Acceptance: HarnessCapabilityAcceptance.StableOnly,
+                EvidenceThroughPhase: HarnessDeliveryPhase.G3,
+                RequestedCapabilities: requestedCapabilities,
+                ProviderCapabilities: new HashSet<HarnessProviderCapability>(),
+                ToolLoopOwner: toolLoopOwner,
+                TelemetryOwner: telemetryOwner,
+                HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable));
+    }
+
     internal static HarnessExecutionBinding CaptureBinding(
         AgentExecutionContextAccessor accessor,
         out IDisposable scope)
@@ -135,6 +171,27 @@ internal static class HarnessCompositionTestFixture
         IAgentExecutionContextAccessor accessor,
         IAgentMetrics? metrics,
         HarnessHistoryProviderPlugin? historyProvider) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders) =>
         new(
             ChatClient: chatClient,
             Services: services,
@@ -148,6 +205,7 @@ internal static class HarnessCompositionTestFixture
             ExecutionContextAccessor: accessor,
             SessionId: SessionId,
             HistoryProvider: historyProvider,
+            PlanningProviders: planningProviders,
             Metrics: metrics,
             ProgressAccessor: null);
 
@@ -160,6 +218,11 @@ internal static class HarnessCompositionTestFixture
         HarnessHistoryProviderPlugin.Create(
             persistenceMode,
             callerSuppliedHistoryProvider);
+
+    internal static HarnessPlanningProvidersPlugin CreatePlanningProvidersPlugin(
+        TodoProvider? todoProvider,
+        AgentModeProvider? agentModeProvider) =>
+        HarnessPlanningProvidersPlugin.Create(todoProvider, agentModeProvider);
 
     internal static IChatClient WithFoundryTelemetry(
         IChatClient inner,
