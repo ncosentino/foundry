@@ -79,6 +79,7 @@ internal sealed class HarnessGuardedAgent(
         CancellationToken cancellationToken = default)
     {
         EnsureSupported(options);
+        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
         var materializedMessages = AsReadOnlyList(messages);
         await EnsureApprovalReauthorizedAsync(materializedMessages, session, cancellationToken)
             .ConfigureAwait(false);
@@ -86,6 +87,7 @@ internal sealed class HarnessGuardedAgent(
         var response = await base
             .RunCoreAsync(materializedMessages, session, options, cancellationToken)
             .ConfigureAwait(false);
+        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
         ReportApprovalResponses(materializedMessages);
         ReportApprovalRequests(response.Messages, new HashSet<string>(StringComparer.Ordinal));
         return response;
@@ -98,6 +100,7 @@ internal sealed class HarnessGuardedAgent(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureSupported(options);
+        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
         var materializedMessages = AsReadOnlyList(messages);
         await EnsureApprovalReauthorizedAsync(materializedMessages, session, cancellationToken)
             .ConfigureAwait(false);
@@ -115,6 +118,7 @@ internal sealed class HarnessGuardedAgent(
             yield return update;
         }
 
+        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
         ReportApprovalResponses(materializedMessages);
     }
 

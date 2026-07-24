@@ -1460,7 +1460,8 @@ public sealed class HarnessApprovalTests
             historyProvider,
             planningProviders: null,
             approvalPlugin,
-            progressAccessor);
+            skillsPlugin: null,
+            progressAccessor: progressAccessor);
         var result = new HarnessProviderComposition().Compose(request);
         Assert.Equal(HarnessProviderCompositionStatus.Success, result.Status);
         return Assert.IsAssignableFrom<AIAgent>(result.Agent);

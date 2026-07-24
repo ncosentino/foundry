@@ -144,6 +144,42 @@ internal static class HarnessCompositionTestFixture
                 HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable));
     }
 
+    internal static HarnessCapabilityProfile CreateSkillsProfile(
+        HarnessToolLoopOwner toolLoopOwner,
+        HarnessTelemetryOwner telemetryOwner,
+        bool includeSkills,
+        bool includeApprovalResponseBinding)
+    {
+        var requestedCapabilities = new HashSet<HarnessCapability>
+        {
+            HarnessCapability.GeneratedTools,
+            HarnessCapability.FunctionInvocation,
+            HarnessCapability.MessageInjection,
+            HarnessCapability.OpenTelemetry,
+        };
+        if (includeSkills)
+        {
+            requestedCapabilities.Add(HarnessCapability.Skills);
+        }
+        if (includeApprovalResponseBinding)
+        {
+            requestedCapabilities.Add(HarnessCapability.ApprovalResponseBinding);
+        }
+
+        var resolver = new HarnessCapabilityResolver();
+        return resolver.Resolve(
+            new HarnessCapabilityResolutionRequest(
+                ProfileId: "g3-skills-test",
+                Lane: HarnessConstructionLane.SelectedProviders,
+                Acceptance: HarnessCapabilityAcceptance.StableOnly,
+                EvidenceThroughPhase: HarnessDeliveryPhase.G3,
+                RequestedCapabilities: requestedCapabilities,
+                ProviderCapabilities: new HashSet<HarnessProviderCapability>(),
+                ToolLoopOwner: toolLoopOwner,
+                TelemetryOwner: telemetryOwner,
+                HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable));
+    }
+
     internal static HarnessExecutionBinding CaptureBinding(
         AgentExecutionContextAccessor accessor,
         out IDisposable scope)
@@ -268,6 +304,32 @@ internal static class HarnessCompositionTestFixture
             historyProvider,
             planningProviders,
             approvalPlugin,
+            skillsPlugin: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin,
+        HarnessSkillsPlugin? skillsPlugin) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders,
+            approvalPlugin,
+            skillsPlugin,
             progressAccessor: null);
 
     internal static HarnessProviderCompositionRequest CreateRequest(
@@ -281,6 +343,7 @@ internal static class HarnessCompositionTestFixture
         HarnessHistoryProviderPlugin? historyProvider,
         HarnessPlanningProvidersPlugin? planningProviders,
         HarnessApprovalPlugin? approvalPlugin,
+        HarnessSkillsPlugin? skillsPlugin,
         IProgressReporterAccessor? progressAccessor) =>
         new(
             ChatClient: chatClient,
@@ -296,8 +359,9 @@ internal static class HarnessCompositionTestFixture
             SessionId: SessionId,
             HistoryProvider: historyProvider,
             PlanningProviders: planningProviders,
-            Metrics: metrics,
             ApprovalPlugin: approvalPlugin,
+            SkillsPlugin: skillsPlugin,
+            Metrics: metrics,
             ProgressAccessor: progressAccessor);
 
     internal static ServiceProvider CreateServices() =>
@@ -325,6 +389,11 @@ internal static class HarnessCompositionTestFixture
             notRequiredBypassingEnabled,
             toolApprovalOptions,
             hostValidator);
+
+    internal static HarnessSkillsPlugin CreateSkillsPlugin(
+        IReadOnlyList<AgentInlineSkill> skills,
+        HarnessSkillsTrustPolicy trustPolicy) =>
+        HarnessSkillsPlugin.Create(skills, trustPolicy);
 
     internal static IChatClient WithFoundryTelemetry(
         IChatClient inner,

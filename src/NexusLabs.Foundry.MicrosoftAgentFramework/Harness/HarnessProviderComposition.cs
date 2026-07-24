@@ -55,9 +55,22 @@ internal sealed class HarnessProviderComposition
                 approvalGuard.Detail);
         }
 
+        var skillsGuard = HarnessSkillsCompositionGuard.Validate(
+            request.Profile,
+            request.SkillsPlugin,
+            request.ApprovalPlugin);
+        if (skillsGuard.Status != HarnessSkillsCompositionGuardStatus.Valid)
+        {
+            return Failure(
+                MapSkillsStatus(skillsGuard.Status),
+                request.Profile,
+                skillsGuard.Detail);
+        }
+
         var providerStateKeysResult = BuildProviderStateKeys(
             request.HistoryProvider,
-            request.PlanningProviders);
+            request.PlanningProviders,
+            request.SkillsPlugin);
         if (providerStateKeysResult.Status != HarnessProviderCompositionStatus.Success)
         {
             return Failure(
@@ -80,7 +93,8 @@ internal sealed class HarnessProviderComposition
         var supportedCapabilities = BuildSupportedCapabilities(
             request.HistoryProvider,
             request.PlanningProviders,
-            request.ApprovalPlugin);
+            request.ApprovalPlugin,
+            request.SkillsPlugin);
         var enabledCapabilities = request.Profile.Capabilities.Values
             .Where(evidence =>
                 evidence.EffectiveState == HarnessCapabilityState.Enabled)
@@ -228,6 +242,18 @@ internal sealed class HarnessProviderComposition
             Tools = [.. request.GeneratedTools.Functions],
         };
         var historyOptions = request.HistoryProvider?.GetAgentOptionsConfiguration();
+        // Planning and Skills each contribute their own AIContextProvider set independently;
+        // this union generalizes across both without a combinatorial static list per
+        // plugin-presence combination (mirrors the state-key union in BuildProviderStateKeys).
+        var aiContextProviders = new List<AIContextProvider>();
+        if (request.PlanningProviders is not null)
+        {
+            aiContextProviders.AddRange(request.PlanningProviders.AIContextProviders);
+        }
+        if (request.SkillsPlugin is not null)
+        {
+            aiContextProviders.Add(request.SkillsPlugin.SkillsProvider);
+        }
         var agent = builder.BuildAIAgent(
             new ChatClientAgentOptions
             {
@@ -238,7 +264,7 @@ internal sealed class HarnessProviderComposition
                 ChatHistoryProvider = historyOptions?.ChatHistoryProvider,
                 RequirePerServiceCallChatHistoryPersistence =
                     historyOptions?.RequirePerServiceCallChatHistoryPersistence ?? false,
-                AIContextProviders = request.PlanningProviders?.AIContextProviders,
+                AIContextProviders = aiContextProviders.Count > 0 ? aiContextProviders : null,
                 // These two flags reflect effective profile state for documentation and
                 // defense-in-depth, but MAF documents them as having no effect when
                 // UseProvidedChatClientAsIs is true (always true above): the real
@@ -336,7 +362,8 @@ internal sealed class HarnessProviderComposition
                 request.SessionId,
                 request.HistoryProvider is not null ||
                     request.PlanningProviders is not null ||
-                    request.ApprovalPlugin is not null,
+                    request.ApprovalPlugin is not null ||
+                    request.SkillsPlugin is not null,
                 request.HistoryProvider?.PersistenceMode ??
                     HarnessHistoryPersistenceMode.NotApplicable,
                 providerStateKeysResult.Keys,
@@ -351,7 +378,8 @@ internal sealed class HarnessProviderComposition
     private static IReadOnlySet<HarnessCapability> BuildSupportedCapabilities(
         HarnessHistoryProviderPlugin? historyProvider,
         HarnessPlanningProvidersPlugin? planningProviders,
-        HarnessApprovalPlugin? approvalPlugin)
+        HarnessApprovalPlugin? approvalPlugin,
+        HarnessSkillsPlugin? skillsPlugin)
     {
         var capabilities = new HashSet<HarnessCapability>(
             HarnessCompositionGuard.G2SupportedCapabilities);
@@ -379,12 +407,17 @@ internal sealed class HarnessProviderComposition
         {
             capabilities.Add(HarnessCapability.ToolAutoApproval);
         }
+        if (skillsPlugin is not null)
+        {
+            capabilities.Add(HarnessCapability.Skills);
+        }
         return capabilities;
     }
 
     private static ProviderStateKeysResult BuildProviderStateKeys(
         HarnessHistoryProviderPlugin? historyProvider,
-        HarnessPlanningProvidersPlugin? planningProviders)
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessSkillsPlugin? skillsPlugin)
     {
         var keys = new List<string>();
         if (historyProvider is not null)
@@ -394,6 +427,10 @@ internal sealed class HarnessProviderComposition
         if (planningProviders is not null)
         {
             keys.AddRange(planningProviders.ProviderStateKeys);
+        }
+        if (skillsPlugin is not null)
+        {
+            keys.AddRange(skillsPlugin.ProviderStateKeys);
         }
 
         var distinctCount = keys.Distinct(StringComparer.Ordinal).Count();
@@ -466,6 +503,19 @@ internal sealed class HarnessProviderComposition
                 HarnessProviderCompositionStatus.ToolAutoApprovalRequired,
             HarnessApprovalCompositionGuardStatus.ToolAutoApprovalUnexpected =>
                 HarnessProviderCompositionStatus.ToolAutoApprovalUnexpected,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+
+    private static HarnessProviderCompositionStatus MapSkillsStatus(
+        HarnessSkillsCompositionGuardStatus status) =>
+        status switch
+        {
+            HarnessSkillsCompositionGuardStatus.SkillsPluginUnexpected =>
+                HarnessProviderCompositionStatus.SkillsPluginUnexpected,
+            HarnessSkillsCompositionGuardStatus.SkillsPluginRequired =>
+                HarnessProviderCompositionStatus.SkillsPluginRequired,
+            HarnessSkillsCompositionGuardStatus.SkillsApprovalCoherenceRequired =>
+                HarnessProviderCompositionStatus.SkillsApprovalCoherenceRequired,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
 
