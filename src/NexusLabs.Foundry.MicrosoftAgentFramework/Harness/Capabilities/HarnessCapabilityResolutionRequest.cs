@@ -8,4 +8,5 @@ internal sealed record HarnessCapabilityResolutionRequest(
     IReadOnlySet<HarnessCapability> RequestedCapabilities,
     IReadOnlySet<HarnessProviderCapability> ProviderCapabilities,
     HarnessToolLoopOwner ToolLoopOwner,
-    HarnessTelemetryOwner TelemetryOwner);
+    HarnessTelemetryOwner TelemetryOwner,
+    HarnessHistoryPersistenceMode HistoryPersistenceMode);

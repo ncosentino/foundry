@@ -42,7 +42,8 @@ public sealed class HarnessLoopOwnershipTests
                 new HashSet<HarnessCapability> { HarnessCapability.FileMemory },
                 new HashSet<HarnessProviderCapability>(),
                 HarnessToolLoopOwner.Harness,
-                HarnessTelemetryOwner.Harness));
+                HarnessTelemetryOwner.Harness,
+                HarnessHistoryPersistenceMode.NotApplicable));
 
         var result = HarnessCompositionGuard.Validate(chatClient, profile);
 
@@ -103,7 +104,8 @@ public sealed class HarnessLoopOwnershipTests
                     HarnessProviderCapability.HostedWebSearch,
                 },
                 HarnessToolLoopOwner.Harness,
-                HarnessTelemetryOwner.Harness));
+                HarnessTelemetryOwner.Harness,
+                HarnessHistoryPersistenceMode.InMemory));
 
         var result = HarnessCompositionGuard.Validate(chatClient, profile);
 
@@ -133,7 +135,8 @@ public sealed class HarnessLoopOwnershipTests
                 },
                 new HashSet<HarnessProviderCapability>(),
                 HarnessToolLoopOwner.Harness,
-                HarnessTelemetryOwner.Harness));
+                HarnessTelemetryOwner.Harness,
+                HarnessHistoryPersistenceMode.InMemory));
 
         var result = HarnessCompositionGuard.Validate(chatClient, profile);
 

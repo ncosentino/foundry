@@ -8,12 +8,35 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
 internal static class HarnessCompositionGuard
 {
+    /// <summary>
+    /// The base set of capabilities the shared composition root supports with no
+    /// selected-provider plugin enabled. Composition roots that opt a coherent plugin in
+    /// (history, planning, ...) union this base set with the capabilities the plugin
+    /// contributes rather than maintaining a separate combinatorial static set per
+    /// plugin combination; see <see cref="HarnessProviderComposition"/>.
+    /// </summary>
+    internal static readonly IReadOnlySet<HarnessCapability> G2SupportedCapabilities =
+        new HashSet<HarnessCapability>
+        {
+            HarnessCapability.GeneratedTools,
+            HarnessCapability.FunctionInvocation,
+            HarnessCapability.MessageInjection,
+            HarnessCapability.OpenTelemetry,
+        };
+
     internal static HarnessCompositionGuardResult Validate(
         IChatClient chatClient,
-        HarnessCapabilityProfile profile)
+        HarnessCapabilityProfile profile) =>
+        Validate(chatClient, profile, G2SupportedCapabilities);
+
+    internal static HarnessCompositionGuardResult Validate(
+        IChatClient chatClient,
+        HarnessCapabilityProfile profile,
+        IReadOnlySet<HarnessCapability> supportedCapabilities)
     {
         ArgumentNullException.ThrowIfNull(chatClient);
         ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(supportedCapabilities);
 
         if (profile.Lane != HarnessConstructionLane.SelectedProviders)
         {
@@ -31,12 +54,14 @@ internal static class HarnessCompositionGuard
 
         var laterCapability = profile.Capabilities.Values.FirstOrDefault(evidence =>
             evidence.EffectiveState == HarnessCapabilityState.Enabled &&
-            evidence.DeliveryPhase > HarnessDeliveryPhase.G2);
+            !supportedCapabilities.Contains(evidence.Capability));
         if (laterCapability is not null)
         {
             return Failure(
                 HarnessCompositionGuardStatus.CapabilityOutsideCompositionPhase,
-                $"Capability '{laterCapability.Capability}' belongs to '{laterCapability.DeliveryPhase}'.");
+                $"Capability '{laterCapability.Capability}' belongs to " +
+                $"'{laterCapability.DeliveryPhase}' and is not supported by this " +
+                "composition root.");
         }
 
         if (profile.Capabilities[HarnessCapability.FunctionInvocation].EffectiveState !=
