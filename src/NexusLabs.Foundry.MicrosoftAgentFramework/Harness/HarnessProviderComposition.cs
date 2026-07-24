@@ -67,6 +67,18 @@ internal sealed class HarnessProviderComposition
                 skillsGuard.Detail);
         }
 
+        var webSearchGuard = HarnessWebSearchCompositionGuard.Validate(
+            request.Profile,
+            request.WebSearchPlugin,
+            request.GeneratedTools.Functions);
+        if (webSearchGuard.Status != HarnessWebSearchCompositionGuardStatus.Valid)
+        {
+            return Failure(
+                MapWebSearchStatus(webSearchGuard.Status),
+                request.Profile,
+                webSearchGuard.Detail);
+        }
+
         var providerStateKeysResult = BuildProviderStateKeys(
             request.HistoryProvider,
             request.PlanningProviders,
@@ -94,7 +106,8 @@ internal sealed class HarnessProviderComposition
             request.HistoryProvider,
             request.PlanningProviders,
             request.ApprovalPlugin,
-            request.SkillsPlugin);
+            request.SkillsPlugin,
+            request.WebSearchPlugin);
         var enabledCapabilities = request.Profile.Capabilities.Values
             .Where(evidence =>
                 evidence.EffectiveState == HarnessCapabilityState.Enabled)
@@ -236,10 +249,15 @@ internal sealed class HarnessProviderComposition
             builder = builder.UseOpenTelemetry();
         }
 
+        var tools = new List<AITool>(request.GeneratedTools.Functions);
+        if (request.WebSearchPlugin is not null)
+        {
+            tools.Add(request.WebSearchPlugin.Tool);
+        }
         var chatOptions = new ChatOptions
         {
             Instructions = request.Instructions,
-            Tools = [.. request.GeneratedTools.Functions],
+            Tools = tools,
         };
         var historyOptions = request.HistoryProvider?.GetAgentOptionsConfiguration();
         // Planning and Skills each contribute their own AIContextProvider set independently;
@@ -379,7 +397,8 @@ internal sealed class HarnessProviderComposition
         HarnessHistoryProviderPlugin? historyProvider,
         HarnessPlanningProvidersPlugin? planningProviders,
         HarnessApprovalPlugin? approvalPlugin,
-        HarnessSkillsPlugin? skillsPlugin)
+        HarnessSkillsPlugin? skillsPlugin,
+        HarnessWebSearchPlugin? webSearchPlugin)
     {
         var capabilities = new HashSet<HarnessCapability>(
             HarnessCompositionGuard.G2SupportedCapabilities);
@@ -410,6 +429,10 @@ internal sealed class HarnessProviderComposition
         if (skillsPlugin is not null)
         {
             capabilities.Add(HarnessCapability.Skills);
+        }
+        if (webSearchPlugin is not null)
+        {
+            capabilities.Add(HarnessCapability.WebSearch);
         }
         return capabilities;
     }
@@ -516,6 +539,21 @@ internal sealed class HarnessProviderComposition
                 HarnessProviderCompositionStatus.SkillsPluginRequired,
             HarnessSkillsCompositionGuardStatus.SkillsApprovalCoherenceRequired =>
                 HarnessProviderCompositionStatus.SkillsApprovalCoherenceRequired,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+
+    private static HarnessProviderCompositionStatus MapWebSearchStatus(
+        HarnessWebSearchCompositionGuardStatus status) =>
+        status switch
+        {
+            HarnessWebSearchCompositionGuardStatus.WebSearchPluginUnexpected =>
+                HarnessProviderCompositionStatus.WebSearchPluginUnexpected,
+            HarnessWebSearchCompositionGuardStatus.WebSearchPluginRequired =>
+                HarnessProviderCompositionStatus.WebSearchPluginRequired,
+            HarnessWebSearchCompositionGuardStatus.WebSearchToolNameCollision =>
+                HarnessProviderCompositionStatus.WebSearchToolNameCollision,
+            HarnessWebSearchCompositionGuardStatus.WebSearchToolTypeCollision =>
+                HarnessProviderCompositionStatus.WebSearchToolTypeCollision,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
 

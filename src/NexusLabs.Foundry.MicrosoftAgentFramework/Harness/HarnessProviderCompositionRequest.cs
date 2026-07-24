@@ -25,5 +25,6 @@ internal sealed record HarnessProviderCompositionRequest(
     HarnessPlanningProvidersPlugin? PlanningProviders,
     HarnessApprovalPlugin? ApprovalPlugin,
     HarnessSkillsPlugin? SkillsPlugin,
+    HarnessWebSearchPlugin? WebSearchPlugin,
     IAgentMetrics? Metrics,
     IProgressReporterAccessor? ProgressAccessor);

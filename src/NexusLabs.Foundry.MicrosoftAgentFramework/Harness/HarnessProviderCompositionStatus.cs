@@ -31,4 +31,8 @@ internal enum HarnessProviderCompositionStatus
     SkillsPluginUnexpected,
     SkillsPluginRequired,
     SkillsApprovalCoherenceRequired,
+    WebSearchPluginUnexpected,
+    WebSearchPluginRequired,
+    WebSearchToolNameCollision,
+    WebSearchToolTypeCollision,
 }

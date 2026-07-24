@@ -180,6 +180,44 @@ internal static class HarnessCompositionTestFixture
                 HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable));
     }
 
+    internal static HarnessCapabilityProfile CreateWebSearchProfile(
+        HarnessToolLoopOwner toolLoopOwner,
+        HarnessTelemetryOwner telemetryOwner,
+        bool includeWebSearch,
+        bool includeHostedWebSearchEvidence)
+    {
+        var requestedCapabilities = new HashSet<HarnessCapability>
+        {
+            HarnessCapability.GeneratedTools,
+            HarnessCapability.FunctionInvocation,
+            HarnessCapability.MessageInjection,
+            HarnessCapability.OpenTelemetry,
+        };
+        if (includeWebSearch)
+        {
+            requestedCapabilities.Add(HarnessCapability.WebSearch);
+        }
+
+        var providerCapabilities = new HashSet<HarnessProviderCapability>();
+        if (includeHostedWebSearchEvidence)
+        {
+            providerCapabilities.Add(HarnessProviderCapability.HostedWebSearch);
+        }
+
+        var resolver = new HarnessCapabilityResolver();
+        return resolver.Resolve(
+            new HarnessCapabilityResolutionRequest(
+                ProfileId: "g3-web-search-test",
+                Lane: HarnessConstructionLane.SelectedProviders,
+                Acceptance: HarnessCapabilityAcceptance.StableOnly,
+                EvidenceThroughPhase: HarnessDeliveryPhase.G3,
+                RequestedCapabilities: requestedCapabilities,
+                ProviderCapabilities: providerCapabilities,
+                ToolLoopOwner: toolLoopOwner,
+                TelemetryOwner: telemetryOwner,
+                HistoryPersistenceMode: HarnessHistoryPersistenceMode.NotApplicable));
+    }
+
     internal static HarnessExecutionBinding CaptureBinding(
         AgentExecutionContextAccessor accessor,
         out IDisposable scope)
@@ -345,6 +383,35 @@ internal static class HarnessCompositionTestFixture
         HarnessApprovalPlugin? approvalPlugin,
         HarnessSkillsPlugin? skillsPlugin,
         IProgressReporterAccessor? progressAccessor) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders,
+            approvalPlugin,
+            skillsPlugin,
+            progressAccessor,
+            webSearchPlugin: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin,
+        HarnessSkillsPlugin? skillsPlugin,
+        IProgressReporterAccessor? progressAccessor,
+        HarnessWebSearchPlugin? webSearchPlugin) =>
         new(
             ChatClient: chatClient,
             Services: services,
@@ -361,6 +428,7 @@ internal static class HarnessCompositionTestFixture
             PlanningProviders: planningProviders,
             ApprovalPlugin: approvalPlugin,
             SkillsPlugin: skillsPlugin,
+            WebSearchPlugin: webSearchPlugin,
             Metrics: metrics,
             ProgressAccessor: progressAccessor);
 
@@ -394,6 +462,9 @@ internal static class HarnessCompositionTestFixture
         IReadOnlyList<AgentInlineSkill> skills,
         HarnessSkillsTrustPolicy trustPolicy) =>
         HarnessSkillsPlugin.Create(skills, trustPolicy);
+
+    internal static HarnessWebSearchPlugin CreateWebSearchPlugin() =>
+        HarnessWebSearchPlugin.Create();
 
     internal static IChatClient WithFoundryTelemetry(
         IChatClient inner,
