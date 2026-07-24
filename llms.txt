@@ -90,3 +90,4 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [ADR-0002 Build ScriptedChatClient Locally](https://www.devleader.ca/projects/foundry/adr/adr-0002-build-scriptedchatclient-locally/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0003 Provider-Neutral Experiment Runner](https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0004 Extract AI Platform from Needlr](https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0005 First-Class MAF Harness Integration](https://www.devleader.ca/projects/foundry/adr/adr-0005-first-class-maf-harness-integration/) -- Build reliable, observable, and testable AI agent systems in .NET
