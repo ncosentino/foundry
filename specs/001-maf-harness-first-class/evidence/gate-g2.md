@@ -19,26 +19,29 @@ approved by this gate.
 - G1 mainline baseline:
   `be45298ae1dd627318d9c9f557f38f5b1d8a7192`
 - G2 integration branch: `harness/g2-integration`
-- G2 integration evidence head before the decision record:
-  `9c2d2541d4ded809b17adc353739ee5fc0fbb51c`
-- Completed leaf PRs:
+- Final reviewed G2 implementation head:
+  `62680984e919f461af727ff4930a9d18a43b34cf`
+- Completed implementation and review-fix PRs:
   [#76](https://github.com/ncosentino/foundry/pull/76),
-  [#77](https://github.com/ncosentino/foundry/pull/77), and
-  [#79](https://github.com/ncosentino/foundry/pull/79)
+  [#77](https://github.com/ncosentino/foundry/pull/77),
+  [#79](https://github.com/ncosentino/foundry/pull/79), and
+  [#81](https://github.com/ncosentino/foundry/pull/81)
 - G2 decision leaf:
   [#80](https://github.com/ncosentino/foundry/pull/80)
 - Leaf merge commits:
   `10f279ab93efc1bfef1aafc4293db26944bd7750`,
-  `8ec072d6372c923e0aca6500c408183269f053a5`, and
-  `9c2d2541d4ded809b17adc353739ee5fc0fbb51c`
+  `8ec072d6372c923e0aca6500c408183269f053a5`,
+  `9c2d2541d4ded809b17adc353739ee5fc0fbb51c`,
+  `e7f312a2d6febb68ee09bbb448a69c57f198eeae`, and
+  `62680984e919f461af727ff4930a9d18a43b34cf`
 - Cumulative local deterministic validation:
   47 Harness tests, 66 generated-wrapper tests, and all 1,616
   `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` tests passed.
-- Cumulative G2.3 hosted validation:
-  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30076244936/job/89427494563),
-  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30076244936/job/89427494585),
-  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30076244863/job/89427494264), and
-  [documentation](https://github.com/ncosentino/foundry/actions/runs/30076244954/job/89427494762)
+- Final cumulative hosted validation:
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30081458071/job/89443772271),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30081458071/job/89443772249),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30081458061/job/89443772066), and
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30081458119/job/89443772649)
 
 ## Gate evidence
 
