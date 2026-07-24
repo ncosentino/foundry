@@ -3,11 +3,22 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
 internal sealed class HarnessProviderComposition
 {
+    private static readonly IReadOnlySet<HarnessCapability> HistorySupportedCapabilities =
+        new HashSet<HarnessCapability>
+        {
+            HarnessCapability.GeneratedTools,
+            HarnessCapability.FunctionInvocation,
+            HarnessCapability.MessageInjection,
+            HarnessCapability.OpenTelemetry,
+            HarnessCapability.PerServiceHistory,
+        };
+
     internal HarnessProviderCompositionResult Compose(
         HarnessProviderCompositionRequest request)
     {
@@ -21,6 +32,17 @@ internal sealed class HarnessProviderComposition
         ArgumentNullException.ThrowIfNull(request.ExecutionBinding);
         ArgumentNullException.ThrowIfNull(request.ExecutionContextAccessor);
 
+        var historyGuard = HarnessHistoryCompositionGuard.Validate(
+            request.Profile,
+            request.HistoryProvider);
+        if (historyGuard.Status != HarnessHistoryCompositionGuardStatus.Valid)
+        {
+            return Failure(
+                MapHistoryStatus(historyGuard.Status),
+                request.Profile,
+                historyGuard.Detail);
+        }
+
         var bindingValidation = request.ExecutionBinding.ValidateCurrent(
             request.ExecutionContextAccessor,
             request.SessionId);
@@ -32,9 +54,14 @@ internal sealed class HarnessProviderComposition
                 bindingValidation.Detail);
         }
 
-        var guard = HarnessCompositionGuard.Validate(
-            request.ChatClient,
-            request.Profile);
+        var guard = request.HistoryProvider is null
+            ? HarnessCompositionGuard.Validate(
+                request.ChatClient,
+                request.Profile)
+            : HarnessCompositionGuard.Validate(
+                request.ChatClient,
+                request.Profile,
+                HistorySupportedCapabilities);
         if (guard.Status != HarnessCompositionGuardStatus.Valid)
         {
             return Failure(
@@ -112,6 +139,12 @@ internal sealed class HarnessProviderComposition
                 request.ExecutionContextAccessor,
                 request.SessionId));
 
+        if (request.HistoryProvider is not null)
+        {
+            builder = request.HistoryProvider.UsePerServiceCallChatHistoryPersistence(
+                builder);
+        }
+
         if (telemetryEnabled &&
             request.Profile.TelemetryOwner == HarnessTelemetryOwner.Foundry)
         {
@@ -133,6 +166,7 @@ internal sealed class HarnessProviderComposition
             Instructions = request.Instructions,
             Tools = [.. request.GeneratedTools.Functions],
         };
+        var historyOptions = request.HistoryProvider?.GetAgentOptionsConfiguration();
         var agent = builder.BuildAIAgent(
             new ChatClientAgentOptions
             {
@@ -140,6 +174,9 @@ internal sealed class HarnessProviderComposition
                 Description = request.Description,
                 ChatOptions = chatOptions,
                 UseProvidedChatClientAsIs = true,
+                ChatHistoryProvider = historyOptions?.ChatHistoryProvider,
+                RequirePerServiceCallChatHistoryPersistence =
+                    historyOptions?.RequirePerServiceCallChatHistoryPersistence ?? false,
             },
             request.LoggerFactory,
             request.Services);
@@ -189,10 +226,34 @@ internal sealed class HarnessProviderComposition
 
         return new HarnessProviderCompositionResult(
             HarnessProviderCompositionStatus.Success,
-            new HarnessGuardedAgent(agent, messageInjector),
+            new HarnessGuardedAgent(
+                agent,
+                messageInjector,
+                request.ExecutionBinding,
+                request.ExecutionContextAccessor,
+                request.SessionId,
+                request.HistoryProvider is not null,
+                request.HistoryProvider?.PersistenceMode ??
+                    HarnessHistoryPersistenceMode.NotApplicable,
+                request.HistoryProvider?.ProviderStateKeys ?? Array.Empty<string>()),
             request.Profile,
             null);
     }
+
+    private static HarnessProviderCompositionStatus MapHistoryStatus(
+        HarnessHistoryCompositionGuardStatus status) =>
+        status switch
+        {
+            HarnessHistoryCompositionGuardStatus.HistoryProviderRequired =>
+                HarnessProviderCompositionStatus.HistoryProviderRequired,
+            HarnessHistoryCompositionGuardStatus.HistoryProviderUnexpected =>
+                HarnessProviderCompositionStatus.HistoryProviderUnexpected,
+            HarnessHistoryCompositionGuardStatus.PersistenceModeMismatch =>
+                HarnessProviderCompositionStatus.HistoryProviderModeMismatch,
+            HarnessHistoryCompositionGuardStatus.UnsupportedPersistenceMode =>
+                HarnessProviderCompositionStatus.HistoryProviderUnsupportedPersistenceMode,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
 
     private static HarnessProviderCompositionResult Failure(
         HarnessProviderCompositionStatus status,
