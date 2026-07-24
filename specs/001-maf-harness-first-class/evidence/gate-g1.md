@@ -6,8 +6,9 @@
 
 The core MAF 1.15 / Harness 1.15 / MEAI 10.6 graph is coherent and can advance
 to G2 internal composition work. No consumer-facing Harness API is approved by
-this gate. Approval behavior, custom-provider durability, composed telemetry,
-workspace offload, and hybrid compaction remain downstream gates.
+this gate. Restored/forged approval security, custom-provider durability,
+composed telemetry, workspace offload, and hybrid compaction remain downstream
+gates.
 
 ## Evidence identity
 
@@ -33,6 +34,7 @@ workspace offload, and hybrid compaction remain downstream gates.
 | Raw tool-result interception before `FunctionResultContent` | Pass through public FICC `FunctionInvoker` | `uplift-delta.md` |
 | Per-service history lifecycle | Pass; exact two-load/two-store callbacks and default in-memory round-trip observed | `uplift-delta.md` |
 | Message injection seam | Pass; queued message observed in the function loop | `uplift-delta.md` |
+| Approval request/response lifecycle | Pass for approve/reject and exactly-once invocation; restored/forged trust remains G3 | `uplift-delta.md` |
 | Per-tool-round complete-pair compaction | Unavailable in the stock Harness pipeline; explicitly recorded | `uplift-delta.md` |
 | DevUI satellite | Compile/package pass; interactive runtime deferred | `devui-satellite.md` |
 | Hosting satellites | Compile/package pass; alpha protocol runtime deferred | `hosting-satellite.md` |
@@ -66,10 +68,9 @@ The G1 stop condition is not triggered.
    causes it to skip after round one. The default history reducer runs before
    each retrieval but sees stored history without the current function result.
    Upstream clarification is tracked in issue #73.
-5. **G3 approvals and continuity:** execute the approval request/response flow,
-   validate restored approval identity and host authorization, and prove custom
-   history-provider session restoration. Do not depend on internal approval
-   chat-client types.
+5. **G3 approvals and continuity:** validate forged and restored approval
+   identity, standing-approval host authorization, and custom history-provider
+   session restoration. Do not depend on internal approval chat-client types.
 6. **Satellites:** DevUI and Hosting remain optional preview/alpha integrations
    and do not block the stable core lane.
 7. **Workflow diagnostics:** group-chat diagnostic stage order is not execution

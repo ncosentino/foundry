@@ -43,9 +43,9 @@ dotnet publish src\Examples\AgentFramework\HarnessCompatibilityProbe\HarnessComp
 - Native execution exit code: 0
 - Native output:
   `Microsoft.Agents.AI.HarnessAgent:foundry-harness-compatibility-probe:tool-result:aot`
-- Native executable size: 10,528,256 bytes
+- Native executable size: 10,543,104 bytes
 - Native executable SHA-256:
-  `9d8931a8fd6d48619aa7328c77d0e5d74e26400dd5ba27ce5e420135e7d6cfe3`
+  `db2376f1334bdf055dd0ec31ea5210148b62ddc4ecc3945de761d018e22db879`
 
 The probe verifies exactly one generated function named `Echo`, requests call ID
 `probe-call`, and accepts exactly one matching `FunctionResultContent` before
@@ -55,11 +55,13 @@ The clean-rebuilt native binary also executed both lifecycle modes successfully:
 
 - `--lifecycle`
 - `--lifecycle --default-history`
+- `--approval`
 
 ```text
 default_exit=0
 lifecycle_exit=0
 default_history_exit=0
+approval_exit=0
 
 TRACE:history.provide
 TRACE:history.store:2:1
@@ -70,12 +72,26 @@ TRACE:history.store:1:1
 TRACE:compaction:call=False:result=False:messages=2
 TRACE:function.invoker:Echo:probe-call
 TRACE:compaction:call=True:result=False:messages=3
+
+APPROVAL:approved:request=probe-call:invocations=1:result=tool-result:aot
+APPROVAL:rejected:request=probe-call:invocations=0:result=tool-result:Tool call invocation rejected. rejected
 ```
 
 The first local publish attempt reached native linking but could not find
 `vswhere.exe` on `PATH`. Retrying in a single `vcvars64.bat`-initialized process
 resolved the host-toolchain issue without changing source or suppressing a
 warning.
+
+## Hosted Linux gate
+
+`.github/workflows/harness-g1-aot.yml` is a path-filtered, GitHub-hosted gate
+that publishes and executes the probe in all four modes on Linux x64. It runs
+only when the probe, central package graph, neutral MAF core, or its own workflow
+changes.
+
+This workflow is G1 evidence infrastructure, not the final product profile.
+G7 T086 must supersede it with the supported AOT Harness application, and G10
+must remove or retain it explicitly.
 
 ## Disposition
 

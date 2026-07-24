@@ -21,6 +21,12 @@ var lifecycleTrace = args.Contains("--lifecycle", StringComparer.Ordinal)
     ? new LifecycleTrace()
     : null;
 var useDefaultHistory = args.Contains("--default-history", StringComparer.Ordinal);
+var approvalMode = args.Contains("--approval", StringComparer.Ordinal);
+
+if (approvalMode)
+{
+    return await ApprovalProbeRunner.RunAsync(functions[0]) ? 0 : 5;
+}
 
 var options = new HarnessAgentOptions
 {

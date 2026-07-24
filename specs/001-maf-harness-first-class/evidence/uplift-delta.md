@@ -171,10 +171,18 @@ compaction. Upstream intent and documentation are tracked in
 - `ApprovalRequiredAIFunction` is handled by FICC as a surfaced approval request
   rather than direct invocation.
 
-The chat decorators are internal implementation types, so G1 verifies their
-source ordering and public behavior surface rather than taking a dependency on
-their concrete classes. Structured host validation and restored-approval trust
-remain G3. G1 does not execute an approval-required tool round-trip.
+The `--approval` probe executes two fresh-session flows:
+
+```text
+APPROVAL:approved:request=probe-call:invocations=1:result=tool-result:aot
+APPROVAL:rejected:request=probe-call:invocations=0:result=tool-result:Tool call invocation rejected. rejected
+```
+
+This proves request surfacing, correlated response continuation, exactly-once
+execution after approval, and no execution after rejection. The chat decorators
+remain internal implementation types, so Foundry depends on their public
+behavior rather than their concrete classes. Forged-response handling,
+restored-session identity, and standing approvals remain G3.
 
 ## Telemetry ordering
 
