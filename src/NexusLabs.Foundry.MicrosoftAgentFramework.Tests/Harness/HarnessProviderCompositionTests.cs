@@ -266,6 +266,134 @@ public sealed class HarnessProviderCompositionTests
     }
 
     [Fact]
+    public async Task Compose_RunTimeToolInjection_IsRejectedBeforeModelCall()
+    {
+        var function = AIFunctionFactory.Create(() => "ok", "G2Tool");
+        var injectedInvocationCount = 0;
+        var injectedFunction = AIFunctionFactory.Create(
+            () =>
+            {
+                injectedInvocationCount++;
+                return "injected";
+            },
+            "InjectedTool");
+        using var services = HarnessCompositionTestFixture.CreateServices();
+        var accessor = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(
+            accessor,
+            out var scope);
+        using (scope)
+        {
+            var chatClient = new HarnessScriptedChatClient(function.Name);
+            var request = HarnessCompositionTestFixture.CreateRequest(
+                chatClient,
+                services,
+                HarnessCompositionTestFixture.CreateProfile(
+                    HarnessToolLoopOwner.Harness,
+                    HarnessTelemetryOwner.Harness),
+                HarnessCompositionTestFixture.CreateToolResolution(function),
+                binding,
+                accessor);
+            var composition = new HarnessProviderComposition().Compose(request);
+            var agent = Assert.IsAssignableFrom<AIAgent>(composition.Agent);
+            var runOptions = new ChatClientAgentRunOptions(
+                new ChatOptions
+                {
+                    Tools = [injectedFunction],
+                });
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await agent.RunAsync(
+                    "run",
+                    options: runOptions,
+                    cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal(0, injectedInvocationCount);
+            Assert.Equal(0, chatClient.CallCount);
+        }
+    }
+
+    [Fact]
+    public async Task Compose_OtherRunOptions_AreRejectedBeforeModelCall()
+    {
+        var function = AIFunctionFactory.Create(() => "ok", "G2Tool");
+        using var services = HarnessCompositionTestFixture.CreateServices();
+        var accessor = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(
+            accessor,
+            out var scope);
+        using (scope)
+        {
+            var chatClient = new HarnessScriptedChatClient(function.Name);
+            var request = HarnessCompositionTestFixture.CreateRequest(
+                chatClient,
+                services,
+                HarnessCompositionTestFixture.CreateProfile(
+                    HarnessToolLoopOwner.Harness,
+                    HarnessTelemetryOwner.Harness),
+                HarnessCompositionTestFixture.CreateToolResolution(function),
+                binding,
+                accessor);
+            var composition = new HarnessProviderComposition().Compose(request);
+            var agent = Assert.IsAssignableFrom<AIAgent>(composition.Agent);
+            var runOptions = new ChatClientAgentRunOptions(
+                new ChatOptions
+                {
+                    MaxOutputTokens = 32,
+                });
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await agent.RunAsync(
+                    "run",
+                    options: runOptions,
+                    cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal(0, chatClient.CallCount);
+        }
+    }
+
+    [Fact]
+    public async Task Compose_StreamingRunOptions_AreRejectedBeforeModelCall()
+    {
+        var function = AIFunctionFactory.Create(() => "ok", "G2Tool");
+        using var services = HarnessCompositionTestFixture.CreateServices();
+        var accessor = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(
+            accessor,
+            out var scope);
+        using (scope)
+        {
+            var chatClient = new HarnessInjectionLoopStreamingChatClient(
+                static () => { });
+            var request = HarnessCompositionTestFixture.CreateRequest(
+                chatClient,
+                services,
+                HarnessCompositionTestFixture.CreateProfile(
+                    HarnessToolLoopOwner.Harness,
+                    HarnessTelemetryOwner.Harness),
+                HarnessCompositionTestFixture.CreateToolResolution(function),
+                binding,
+                accessor);
+            var composition = new HarnessProviderComposition().Compose(request);
+            var agent = Assert.IsAssignableFrom<AIAgent>(composition.Agent);
+            var runOptions = new ChatClientAgentRunOptions(
+                new ChatOptions
+                {
+                    MaxOutputTokens = 32,
+                });
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await foreach (var _ in agent.RunStreamingAsync(
+                    "run",
+                    options: runOptions,
+                    cancellationToken: TestContext.Current.CancellationToken))
+                {
+                }
+            });
+            Assert.Equal(0, chatClient.CallCount);
+        }
+    }
+
+    [Fact]
     public async Task Compose_MessageInjectorRejectsExpiredExecutionScope()
     {
         var function = AIFunctionFactory.Create(() => "ok", "G2Tool");
