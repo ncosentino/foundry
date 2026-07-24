@@ -1,0 +1,58 @@
+name: Harness G1 AOT
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/harness-g1-aot.yml
+      - src/Directory.Packages.props
+      - src/Examples/AgentFramework/HarnessCompatibilityProbe/**
+      - src/NexusLabs.Foundry.MicrosoftAgentFramework/**
+      - src/NexusLabs.Foundry.MicrosoftAgentFramework.Generators/**
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: 10.0.x
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  harness-aot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install NativeAOT dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev file
+
+      - name: Publish generated-tool Harness NativeAOT probe
+        run: |
+          dotnet publish src/Examples/AgentFramework/HarnessCompatibilityProbe/HarnessCompatibilityProbe.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained \
+            --output artifacts/harness-aot
+
+      - name: Execute generated-tool Harness NativeAOT probe
+        run: |
+          test -f artifacts/harness-aot/HarnessCompatibilityProbe
+          file artifacts/harness-aot/HarnessCompatibilityProbe
+          artifacts/harness-aot/HarnessCompatibilityProbe
+          artifacts/harness-aot/HarnessCompatibilityProbe --lifecycle
+          artifacts/harness-aot/HarnessCompatibilityProbe --lifecycle --default-history
+          artifacts/harness-aot/HarnessCompatibilityProbe --approval
+
+      - name: Upload Harness NativeAOT artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-g1-aot-linux-x64
+          path: artifacts/harness-aot/HarnessCompatibilityProbe

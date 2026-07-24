@@ -24,33 +24,10 @@ public class GroupChatOrderingTests
     [Fact]
     public async Task GroupChat_WriterOrder1_ReviewerOrder2_WriterRunsFirst()
     {
-        var turnOrder = new List<string>();
-        var callCount = 0;
-
-        Task<ChatResponse> ProduceAsync()
-        {
-            var turn = Interlocked.Increment(ref callCount);
-            var text = turn == 1 ? "Article content here." : "APPROVED";
-            turnOrder.Add(turn == 1 ? "first-agent" : "second-agent");
-            return Task.FromResult(
-                new ChatResponse([new ChatMessage(ChatRole.Assistant, text)]));
-        }
-
-        var mockChat = new Mock<IChatClient>();
-        mockChat
-            .Setup(c => c.GetResponseAsync(
-                It.IsAny<IEnumerable<ChatMessage>>(),
-                It.IsAny<ChatOptions>(),
-                It.IsAny<CancellationToken>()))
-            .Returns<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
-                (_, __, ___) => ProduceAsync());
-        mockChat
-            .Setup(c => c.GetStreamingResponseAsync(
-                It.IsAny<IEnumerable<ChatMessage>>(),
-                It.IsAny<ChatOptions>(),
-                It.IsAny<CancellationToken>()))
-            .Returns<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
-                (_, __, ___) => ToStream(ProduceAsync()));
+        var invocationOrder = new List<string>();
+        var mockChat = CreateOrderedChatClient(
+            invocationOrder,
+            turn => turn == 1 ? "Article content here." : "APPROVED");
 
         var sp = BuildServiceProvider(mockChat);
         var workflowFactory = sp.GetRequiredService<IWorkflowFactory>();
@@ -59,47 +36,24 @@ public class GroupChatOrderingTests
         var workflow = workflowFactory.CreateGroupChatWorkflow(
             "ordered-chat", maxIterations: 2);
 
-        var result = await workflow.RunWithDiagnosticsAsync(
+        _ = await workflow.RunWithDiagnosticsAsync(
             "Write about roses.",
             diagAccessor,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        // The writer (Order=1) must be the first stage, not the reviewer (Order=2)
-        Assert.NotEmpty(result.Stages);
-        // ZzzOrderedWriterAgent has Order=1, AaaOrderedReviewerAgent has Order=2.
-        // Without ordering, Aaa would come first alphabetically.
-        Assert.StartsWith("ZzzOrderedWriter", result.Stages[0].AgentName);
+        Assert.Collection(
+            invocationOrder,
+            first => Assert.Equal("WRITER", first),
+            second => Assert.Equal("REVIEWER", second));
     }
 
     [Fact]
     public async Task GroupChat_HigherOrderAgent_RunsSecond()
     {
-        var turnOrder = new List<string>();
-        var callCount = 0;
-
-        Task<ChatResponse> ProduceAsync()
-        {
-            var turn = Interlocked.Increment(ref callCount);
-            var text = turn <= 1 ? "Content." : "APPROVED";
-            return Task.FromResult(
-                new ChatResponse([new ChatMessage(ChatRole.Assistant, text)]));
-        }
-
-        var mockChat = new Mock<IChatClient>();
-        mockChat
-            .Setup(c => c.GetResponseAsync(
-                It.IsAny<IEnumerable<ChatMessage>>(),
-                It.IsAny<ChatOptions>(),
-                It.IsAny<CancellationToken>()))
-            .Returns<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
-                (_, __, ___) => ProduceAsync());
-        mockChat
-            .Setup(c => c.GetStreamingResponseAsync(
-                It.IsAny<IEnumerable<ChatMessage>>(),
-                It.IsAny<ChatOptions>(),
-                It.IsAny<CancellationToken>()))
-            .Returns<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
-                (_, __, ___) => ToStream(ProduceAsync()));
+        var invocationOrder = new List<string>();
+        var mockChat = CreateOrderedChatClient(
+            invocationOrder,
+            turn => turn == 1 ? "Content." : "APPROVED");
 
         var sp = BuildServiceProvider(mockChat);
         var workflowFactory = sp.GetRequiredService<IWorkflowFactory>();
@@ -108,16 +62,15 @@ public class GroupChatOrderingTests
         var workflow = workflowFactory.CreateGroupChatWorkflow(
             "ordered-chat", maxIterations: 2);
 
-        var result = await workflow.RunWithDiagnosticsAsync(
+        _ = await workflow.RunWithDiagnosticsAsync(
             "Write.",
             diagAccessor,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        // With 2+ stages, the second must be the reviewer
-        if (result.Stages.Count >= 2)
-        {
-            Assert.StartsWith("AaaOrderedReviewer", result.Stages[1].AgentName);
-        }
+        Assert.Collection(
+            invocationOrder,
+            first => Assert.Equal("WRITER", first),
+            second => Assert.Equal("REVIEWER", second));
     }
 
     // -------------------------------------------------------------------------
@@ -180,6 +133,39 @@ public class GroupChatOrderingTests
             .BuildServiceProvider(config);
     }
 
+    private static Mock<IChatClient> CreateOrderedChatClient(
+        List<string> invocationOrder,
+        Func<int, string> responseFactory)
+    {
+        var callCount = 0;
+
+        Task<ChatResponse> ProduceAsync(ChatOptions? options)
+        {
+            invocationOrder.Add(options?.Instructions ?? string.Empty);
+            var turn = Interlocked.Increment(ref callCount);
+            return Task.FromResult(
+                new ChatResponse([new ChatMessage(ChatRole.Assistant, responseFactory(turn))]));
+        }
+
+        var mockChat = new Mock<IChatClient>();
+        mockChat
+            .Setup(c => c.GetResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
+                (_, options, _) => ProduceAsync(options));
+        mockChat
+            .Setup(c => c.GetStreamingResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<IEnumerable<ChatMessage>, ChatOptions?, CancellationToken>(
+                (_, options, _) => ToStream(ProduceAsync(options)));
+
+        return mockChat;
+    }
+
     private static async IAsyncEnumerable<ChatResponseUpdate> ToStream(
         Task<ChatResponse> responseTask)
     {
@@ -194,11 +180,15 @@ public class GroupChatOrderingTests
 // OPPOSITE of the desired round-robin order. This proves the Order attribute
 // overrides alphabetical/discovery order.
 
-[FoundryAgent(Description = "Reviewer that should run SECOND despite being alphabetically first")]
+[FoundryAgent(
+    Instructions = "REVIEWER",
+    Description = "Reviewer that should run SECOND despite being alphabetically first")]
 [AgentGroupChatMember("ordered-chat", Order = 2)]
 [AgentTerminationCondition(typeof(Workflows.KeywordTerminationCondition), "APPROVED")]
 public sealed class AaaOrderedReviewerAgent;
 
-[FoundryAgent(Description = "Writer that should run FIRST despite being alphabetically last")]
+[FoundryAgent(
+    Instructions = "WRITER",
+    Description = "Writer that should run FIRST despite being alphabetically last")]
 [AgentGroupChatMember("ordered-chat", Order = 1)]
 public sealed class ZzzOrderedWriterAgent;
