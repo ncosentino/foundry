@@ -20,9 +20,14 @@ gates.
   [#71](https://github.com/ncosentino/foundry/pull/71), and
   [#72](https://github.com/ncosentino/foundry/pull/72), and
   [#74](https://github.com/ncosentino/foundry/pull/74)
-- Final G1 stage head: `f9d2768` on `harness/g1-integration`
-- Final leaf CI:
-  [run 30051579247](https://github.com/ncosentino/foundry/actions/runs/30051579247)
+- G1 stage PR:
+  [#75](https://github.com/ncosentino/foundry/pull/75)
+- Hosted Harness AOT implementation commit:
+  `932cb5ec701a9aa9dc93c3315e8fc16eacede6c5`
+- Stage CI:
+  [build/test/AOT run 30055150928](https://github.com/ncosentino/foundry/actions/runs/30055150928),
+  [documentation run 30055150876](https://github.com/ncosentino/foundry/actions/runs/30055150876), and
+  [Harness AOT run 30055150937](https://github.com/ncosentino/foundry/actions/runs/30055150937)
 
 ## Gate evidence
 
@@ -30,7 +35,7 @@ gates.
 |---|---|---|
 | Coherent core package graph | Pass with a known Microsoft.Extensions patch-level runtime risk assigned to the G2 non-Azure smoke | `package-candidate.md` |
 | No unexplained targeted regression | Pass | `test-core-workflows.md`, `test-generators-analyzers.md`, `test-evaluation-diagnostics.md` |
-| Generated-tool Harness NativeAOT publishes and executes | Pass on Windows x64; existing Linux x64 control publishes | `aot-candidate.md` |
+| Generated-tool Harness NativeAOT publishes and executes | Pass on Windows x64 and GitHub-hosted Linux x64 | `aot-candidate.md` |
 | Raw tool-result interception before `FunctionResultContent` | Pass through public FICC `FunctionInvoker` | `uplift-delta.md` |
 | Per-service history lifecycle | Pass; exact two-load/two-store callbacks and default in-memory round-trip observed | `uplift-delta.md` |
 | Message injection seam | Pass; queued message observed in the function loop | `uplift-delta.md` |

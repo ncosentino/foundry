@@ -89,13 +89,27 @@ that publishes and executes the probe in all four modes on Linux x64. It runs
 only when the probe, central package graph, neutral MAF core, or its own workflow
 changes.
 
+The workflow passed against implementation commit
+`932cb5ec701a9aa9dc93c3315e8fc16eacede6c5`:
+
+- [run 30055150937](https://github.com/ncosentino/foundry/actions/runs/30055150937)
+- job: `harness-aot`
+- runtime: Linux x64
+- file type: stripped x86-64 ELF executable
+- Build ID: `42a84cfa557ddd4780a955f30958abda5c34acdc`
+- all default, custom-history, default-history, and approval modes: exit 0
+- artifact: `harness-g1-aot-linux-x64`, ID `8582497812`
+- artifact archive size: 4,232,216 bytes
+- native executable size: 9,561,528 bytes
+- native executable SHA-256:
+  `420fabbf1514f7c828ffdaa39d5eb993229961d9b893ee21638765270bce10ae`
+
 This workflow is G1 evidence infrastructure, not the final product profile.
 G7 T086 must supersede it with the supported AOT Harness application, and G10
 must remove or retain it explicitly.
 
 ## Disposition
 
-Pass on Windows x64. The minimum generated-tool Harness profile publishes and
-executes with reflection disabled. The existing Foundry Linux x64 AOT control
-also publishes on the candidate graph; hosted Linux execution of the Harness
-probe remains later hardening work rather than a G1 claim.
+Pass on Windows x64 and GitHub-hosted Linux x64. The minimum generated-tool
+Harness profile publishes and executes with reflection disabled in all required
+G1 modes. The existing Foundry Linux x64 AOT control also remains green.
