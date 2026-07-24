@@ -28,6 +28,8 @@ approved by this gate.
   [#81](https://github.com/ncosentino/foundry/pull/81)
 - G2 decision leaf:
   [#80](https://github.com/ncosentino/foundry/pull/80)
+- Final evidence refresh:
+  [#82](https://github.com/ncosentino/foundry/pull/82)
 - Leaf merge commits:
   `10f279ab93efc1bfef1aafc4293db26944bd7750`,
   `8ec072d6372c923e0aca6500c408183269f053a5`,
