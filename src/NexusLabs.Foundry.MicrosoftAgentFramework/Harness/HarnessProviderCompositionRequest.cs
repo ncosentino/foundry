@@ -23,5 +23,6 @@ internal sealed record HarnessProviderCompositionRequest(
     string SessionId,
     HarnessHistoryProviderPlugin? HistoryProvider,
     HarnessPlanningProvidersPlugin? PlanningProviders,
+    HarnessApprovalPlugin? ApprovalPlugin,
     IAgentMetrics? Metrics,
     IProgressReporterAccessor? ProgressAccessor);

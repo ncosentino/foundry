@@ -24,8 +24,9 @@ internal sealed record HarnessSessionEnvelope(
     string SessionId,
     HarnessHistoryPersistenceMode PersistenceMode,
     IReadOnlyList<string> ProviderStateKeys,
+    IReadOnlyList<HarnessCapability> EnabledCapabilities,
     JsonElement InnerSession)
 {
     /// <summary>The current envelope schema version. Bump when the envelope shape changes.</summary>
-    internal const int CurrentSchemaVersion = 1;
+    internal const int CurrentSchemaVersion = 2;
 }

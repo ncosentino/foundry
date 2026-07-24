@@ -68,6 +68,10 @@ public class ProgressEventCoverageTests
             nameof(AgentResponseChunkEvent),
             nameof(PhaseStartedEvent),
             nameof(PhaseCompletedEvent),
+            nameof(HarnessApprovalRequestedEvent),
+            nameof(HarnessApprovalApprovedEvent),
+            nameof(HarnessApprovalRejectedEvent),
+            nameof(HarnessApprovalStandingReauthorizedEvent),
         };
 
         var actual = GetConcreteProgressEventTypes().Select(t => t.Name).ToHashSet();
