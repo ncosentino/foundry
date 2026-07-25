@@ -2,6 +2,8 @@ using System.Text;
 
 using Microsoft.Extensions.AI;
 
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
@@ -22,6 +24,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// </remarks>
 internal sealed class HarnessUtf8TextSizeEstimator : IHarnessContextSizeEstimator
 {
+    /// <summary>Always <see cref="HarnessContextMeasurementUnit.Utf8Bytes"/>: this estimator counts UTF-8 text bytes only.</summary>
+    public HarnessContextMeasurementUnit MeasurementUnit => HarnessContextMeasurementUnit.Utf8Bytes;
+
     /// <exception cref="ArgumentNullException"><paramref name="entry"/> is <see langword="null"/>.</exception>
     public int EstimateSize(HarnessContextEntry entry)
     {

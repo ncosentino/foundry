@@ -119,7 +119,8 @@ internal sealed class HarnessProviderComposition
                 request.HybridProfile,
                 request.ExecutionBinding,
                 request.ExecutionContextAccessor,
-                request.SessionId));
+                request.SessionId,
+                request.ProgressAccessor));
         if (compactionResult.Status is not (
             HarnessCompactionCompositionStatus.Disabled or HarnessCompactionCompositionStatus.Success))
         {

@@ -2,6 +2,7 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
@@ -18,4 +19,5 @@ internal sealed record HarnessCompactionCompositionRequest(
     HarnessHybridProfile? HybridProfile,
     HarnessExecutionBinding ExecutionBinding,
     IAgentExecutionContextAccessor ExecutionContextAccessor,
-    string SessionId);
+    string SessionId,
+    IProgressReporterAccessor? ProgressAccessor);

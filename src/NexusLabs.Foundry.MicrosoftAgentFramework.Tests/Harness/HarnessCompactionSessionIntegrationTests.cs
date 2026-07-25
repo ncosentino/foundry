@@ -4,6 +4,7 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
@@ -220,6 +221,12 @@ public sealed class HarnessCompactionSessionIntegrationTests
     private sealed class FallbackSizeContextEstimator(
         IReadOnlyDictionary<string, int> sizesByEntryId, int fallbackSize) : IHarnessContextSizeEstimator
     {
+        /// <summary>
+        /// Always <see cref="HarnessContextMeasurementUnit.HostDefinedUnits"/>: this fixture's sizes
+        /// are arbitrary configured values with no byte or token meaning.
+        /// </summary>
+        public HarnessContextMeasurementUnit MeasurementUnit => HarnessContextMeasurementUnit.HostDefinedUnits;
+
         public int EstimateSize(HarnessContextEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);

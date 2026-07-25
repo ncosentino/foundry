@@ -33,7 +33,7 @@ public sealed class HarnessCompactionCancellationTests
             var hybridProfile = HarnessCompactionSeamTestFixture.CreateHybridProfile(
                 1000, 999, 5, 3, new HarnessConstantSizeContextEstimator(1));
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             using var cts = new CancellationTokenSource();
             cts.Cancel();
@@ -58,7 +58,7 @@ public sealed class HarnessCompactionCancellationTests
             var hybridProfile = HarnessCompactionSeamTestFixture.CreateHybridProfile(
                 1000, 999, 5, 3, new HarnessConstantSizeContextEstimator(1));
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             using var cts = new CancellationTokenSource();
             cts.Cancel();
@@ -100,7 +100,7 @@ public sealed class HarnessCompactionCancellationTests
             var hybridProfile = HarnessCompactionSeamTestFixture.CreateHybridProfile(
                 2, 1, 5, 1, new HarnessConstantSizeContextEstimator(5), reducer);
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             var messages = new List<ChatMessage>
             {
@@ -141,7 +141,7 @@ public sealed class HarnessCompactionCancellationTests
             var hybridProfile = HarnessCompactionSeamTestFixture.CreateHybridProfile(
                 2, 1, 5, 1, new HarnessConstantSizeContextEstimator(5), reducer);
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             var messages = new List<ChatMessage>
             {
@@ -184,7 +184,7 @@ public sealed class HarnessCompactionCancellationTests
         var hybridProfile = HarnessCompactionSeamTestFixture.CreateHybridProfile(
             1000, 999, 5, 3, new HarnessConstantSizeContextEstimator(1), reducer);
         var compactionClient = new HarnessHybridCompactionChatClient(
-            leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+            leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
         var messages = new List<ChatMessage>
         {
@@ -221,7 +221,7 @@ public sealed class HarnessCompactionCancellationTests
         var hybridProfile = HarnessCompactionSeamTestFixture.CreateHybridProfile(
             1000, 999, 5, 3, new HarnessConstantSizeContextEstimator(1), reducer);
         var compactionClient = new HarnessHybridCompactionChatClient(
-            leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+            leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
         var messages = new List<ChatMessage>
         {
@@ -341,7 +341,7 @@ public sealed class HarnessCompactionCancellationTests
                 new HarnessScriptedMessageClassifier(),
                 snapshotIntegration);
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             var messages = new List<ChatMessage>
             {

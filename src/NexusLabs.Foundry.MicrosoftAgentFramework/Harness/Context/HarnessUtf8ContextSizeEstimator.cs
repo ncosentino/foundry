@@ -3,6 +3,8 @@ using System.Text.Json;
 
 using Microsoft.Extensions.AI;
 
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
@@ -33,6 +35,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// </remarks>
 internal sealed class HarnessUtf8ContextSizeEstimator : IHarnessContextSizeEstimator
 {
+    /// <summary>Always <see cref="HarnessContextMeasurementUnit.Utf8Bytes"/>: this estimator counts UTF-8 bytes only.</summary>
+    public HarnessContextMeasurementUnit MeasurementUnit => HarnessContextMeasurementUnit.Utf8Bytes;
+
     /// <exception cref="ArgumentNullException"><paramref name="entry"/> is <see langword="null"/>.</exception>
     /// <exception cref="NotSupportedException">
     /// A function-call argument value or a function-result payload value has a type this estimator

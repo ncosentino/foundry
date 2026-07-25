@@ -60,6 +60,9 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(reporter.WorkflowId, evt.WorkflowId);
         Assert.Null(evt.ParentAgentId);
         Assert.Equal(0, evt.Depth);
+        Assert.Equal(HarnessArtifactOperationCategory.Offload, evt.Diagnostics.Attribution.Operation);
+        Assert.Equal(50, evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Equal(50, evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -86,6 +89,11 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(100, evt.Diagnostics.ConfiguredThresholdOrBudget);
         Assert.Equal(outcome.ReferenceText, evt.Diagnostics.ReferenceId);
         Assert.StartsWith("artifact://sha256/", evt.Diagnostics.ReferenceId);
+        Assert.Equal(HarnessArtifactOperationCategory.Offload, evt.Diagnostics.Attribution.Operation);
+        Assert.Equal(101, evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(outcome.ReferenceText!),
+            evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -116,6 +124,11 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactDecisionReason.ExistingContentMatch, evt.Diagnostics.Reason);
         Assert.Equal(101, evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(outcome.ReferenceText, evt.Diagnostics.ReferenceId);
+        Assert.Equal(HarnessArtifactOperationCategory.Offload, evt.Diagnostics.Attribution.Operation);
+        Assert.Equal(101, evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(outcome.ReferenceText!),
+            evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -153,6 +166,8 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(50, evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(10, evt.Diagnostics.ConfiguredThresholdOrBudget);
         Assert.Null(evt.Diagnostics.ReferenceId);
+        Assert.Equal(50, evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Null(evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -197,6 +212,8 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactDecisionReason.CanceledAfterWrite, evt.Diagnostics.Reason);
         Assert.Equal(500, evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Null(evt.Diagnostics.ReferenceId);
+        Assert.Equal(500, evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Null(evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     // ================================================================================
@@ -230,6 +247,13 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactIdentity.ComputeUtf8ByteLength(content), evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(1_000_000, evt.Diagnostics.ConfiguredThresholdOrBudget);
         Assert.Equal(reference.ReferenceId, evt.Diagnostics.ReferenceId);
+        Assert.Equal(HarnessArtifactOperationCategory.Rehydration, evt.Diagnostics.Attribution.Operation);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(reference.ReferenceId),
+            evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(content),
+            evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -257,6 +281,10 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactDecisionReason.DigestMismatch, evt.Diagnostics.Reason);
         Assert.NotNull(evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(reference.ReferenceId, evt.Diagnostics.ReferenceId);
+        Assert.Null(evt.Diagnostics.Attribution.OutputUtf8Bytes);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(reference.ReferenceId),
+            evt.Diagnostics.Attribution.InputUtf8Bytes);
     }
 
     [Fact]
@@ -281,6 +309,7 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactDecisionReason.Missing, evt.Diagnostics.Reason);
         Assert.Null(evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(reference.ReferenceId, evt.Diagnostics.ReferenceId);
+        Assert.Null(evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -307,6 +336,7 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactDecisionReason.OwnerMismatch, evt.Diagnostics.Reason);
         Assert.Null(evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(foreignReference.ReferenceId, evt.Diagnostics.ReferenceId);
+        Assert.Null(evt.Diagnostics.Attribution.OutputUtf8Bytes);
     }
 
     [Fact]
@@ -333,6 +363,71 @@ public sealed class HarnessArtifactObservabilityTests
         Assert.Equal(HarnessArtifactDecisionReason.BudgetExceeded, evt.Diagnostics.Reason);
         Assert.Equal(100, evt.Diagnostics.ObservedUtf8ByteSize);
         Assert.Equal(10, evt.Diagnostics.ConfiguredThresholdOrBudget);
+        Assert.Null(evt.Diagnostics.Attribution.OutputUtf8Bytes);
+    }
+
+    // ================================================================================
+    // Attribution: multibyte payload/reference byte counting
+    // ================================================================================
+
+    [Fact]
+    public void OffloadAttribution_MultibyteContent_ReportsActualUtf8ByteCountNotCharCount()
+    {
+        var (accessor, reporter, events) = CreateProgressHarness();
+        using var fixture = HarnessArtifactTestFixture.Create();
+
+        // Each repeated character is a 3-byte UTF-8 sequence (U+65E5, "日"), so the UTF-8 byte size
+        // is exactly 3x the .NET char count — never equal to it — proving byte counting is actually
+        // UTF-8-based rather than a mistaken char-count or Length substitute.
+        var content = new string('\u65e5', 40);
+        Assert.Equal(120, System.Text.Encoding.UTF8.GetByteCount(content));
+        var policy = CreatePolicy(fixture, maximumInlineToolResultBytes: 100);
+
+        HarnessToolResultOffloadOutcome outcome;
+        using (accessor.BeginScope(reporter))
+        {
+            outcome = HarnessToolResultOffloadTransform.Transform(
+                CreateOffloadRequest(fixture, content, policy, accessor));
+        }
+
+        Assert.Equal(HarnessToolResultOffloadStatus.Offloaded, outcome.Status);
+        var evt = Assert.Single(events.OfType<HarnessArtifactOffloadDecisionEvent>());
+        Assert.Equal(120, evt.Diagnostics.ObservedUtf8ByteSize);
+        Assert.Equal(120, evt.Diagnostics.Attribution.InputUtf8Bytes);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(outcome.ReferenceText!),
+            evt.Diagnostics.Attribution.OutputUtf8Bytes);
+    }
+
+    [Fact]
+    public void RehydrationAttribution_MultibyteResolvedBody_ReportsActualUtf8ByteCountNotCharCount()
+    {
+        var (accessor, reporter, events) = CreateProgressHarness();
+        using var fixture = HarnessArtifactTestFixture.Create(new FakeWorkspace(), accessor);
+
+        // A mix of single-byte and multi-byte (2-byte "é", 4-byte emoji) UTF-8 sequences: the
+        // resolved-body byte count must reflect the true encoded size, never the .NET char/UTF-16
+        // code-unit count.
+        const string content = "café \ud83d\ude00 test";
+        var expectedBytes = System.Text.Encoding.UTF8.GetByteCount(content);
+        var reference = fixture.CreateReference(content, CreatedAtUtc);
+        fixture.Workspace.TryWriteFile(reference.WorkspacePath, content);
+        var request = HarnessArtifactRehydrationRequest.Create(
+            reference, HarnessArtifactRehydrationRequestSource.ToolRequest, 1_000_000);
+
+        HarnessArtifactRehydrationResult result;
+        using (accessor.BeginScope(reporter))
+        {
+            result = fixture.Rehydration.Rehydrate(request, RehydratedAtUtc, CancellationToken.None);
+        }
+
+        Assert.Equal(HarnessArtifactResolutionStatus.Resolved, result.Status);
+        var evt = Assert.Single(events.OfType<HarnessArtifactRehydrationDecisionEvent>());
+        Assert.Equal(expectedBytes, evt.Diagnostics.ObservedUtf8ByteSize);
+        Assert.Equal(expectedBytes, evt.Diagnostics.Attribution.OutputUtf8Bytes);
+        Assert.Equal(
+            HarnessArtifactIdentity.ComputeUtf8ByteLength(reference.ReferenceId),
+            evt.Diagnostics.Attribution.InputUtf8Bytes);
     }
 
     // ================================================================================

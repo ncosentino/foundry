@@ -92,6 +92,13 @@ internal sealed class HarnessHybridContextPolicy
     /// <summary>The required, positive compaction execution safety margin.</summary>
     internal int TriggerMargin { get; }
 
+    /// <summary>
+    /// The trigger threshold (<see cref="HardLimit"/> minus <see cref="TriggerMargin"/>), in the
+    /// configured estimator's units. An estimated size at or above this threshold triggers
+    /// compaction evaluation.
+    /// </summary>
+    internal int TriggerThreshold => HardLimit - TriggerMargin;
+
     /// <summary>The required, positive number of trailing recency units to always retain.</summary>
     internal int RecentMessageRetentionCount { get; }
 
@@ -107,6 +114,14 @@ internal sealed class HarnessHybridContextPolicy
 
     /// <summary>The required, positive version of this preservation scheme.</summary>
     internal int PreservationVersion { get; }
+
+    /// <summary>
+    /// The configured size estimator this policy evaluates every entry with. Exposed so a caller
+    /// building diagnostics from an assembly result can compute per-category contributions using the
+    /// exact same estimator instance that governed this policy's own <see cref="Evaluate"/> decision,
+    /// so the two are guaranteed to agree.
+    /// </summary>
+    internal IHarnessContextSizeEstimator SizeEstimator => _sizeEstimator;
 
     /// <exception cref="ArgumentOutOfRangeException">
     /// <paramref name="hardLimit"/>, <paramref name="recentMessageRetentionCount"/>,
@@ -230,7 +245,7 @@ internal sealed class HarnessHybridContextPolicy
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var threshold = HardLimit - TriggerMargin;
+        var threshold = TriggerThreshold;
         return HarnessCompactionTriggerEvaluation.Create(estimatedSize, HardLimit, TriggerMargin, estimatedSize >= threshold);
     }
 

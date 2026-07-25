@@ -27,7 +27,7 @@ public sealed class HarnessCompactionComposeTests
                 HybridProfile: null,
                 binding,
                 accessor,
-                HarnessCompositionTestFixture.SessionId);
+                HarnessCompositionTestFixture.SessionId, ProgressAccessor: null);
 
             var result = new HarnessCompactionComposition().Compose(request);
 
@@ -52,7 +52,7 @@ public sealed class HarnessCompactionComposeTests
                 HybridProfile: null,
                 binding,
                 accessor,
-                HarnessCompositionTestFixture.SessionId);
+                HarnessCompositionTestFixture.SessionId, ProgressAccessor: null);
 
             var result = new HarnessCompactionComposition().Compose(request);
 
@@ -79,7 +79,7 @@ public sealed class HarnessCompactionComposeTests
                 hybridProfile,
                 binding,
                 accessor,
-                HarnessCompositionTestFixture.SessionId);
+                HarnessCompositionTestFixture.SessionId, ProgressAccessor: null);
 
             var result = new HarnessCompactionComposition().Compose(request);
 
@@ -107,7 +107,7 @@ public sealed class HarnessCompactionComposeTests
                 hybridProfile,
                 binding,
                 accessor,
-                HarnessCompositionTestFixture.SessionId);
+                HarnessCompositionTestFixture.SessionId, ProgressAccessor: null);
 
             var result = new HarnessCompactionComposition().Compose(request);
 
@@ -135,7 +135,7 @@ public sealed class HarnessCompactionComposeTests
                 hybridProfile,
                 binding,
                 accessor,
-                HarnessCompositionTestFixture.SessionId);
+                HarnessCompositionTestFixture.SessionId, ProgressAccessor: null);
 
             var result = new HarnessCompactionComposition().Compose(request);
 
@@ -163,13 +163,13 @@ public sealed class HarnessCompactionComposeTests
             var firstResult = new HarnessCompactionComposition().Compose(
                 new HarnessCompactionCompositionRequest(
                     chatClient, enabledProfile, hybridProfile, binding, accessor,
-                    HarnessCompositionTestFixture.SessionId));
+                    HarnessCompositionTestFixture.SessionId, ProgressAccessor: null));
             Assert.Equal(HarnessCompactionCompositionStatus.Success, firstResult.Status);
 
             var secondResult = new HarnessCompactionComposition().Compose(
                 new HarnessCompactionCompositionRequest(
                     firstResult.ChatClient!, enabledProfile, hybridProfile, binding, accessor,
-                    HarnessCompositionTestFixture.SessionId));
+                    HarnessCompositionTestFixture.SessionId, ProgressAccessor: null));
 
             Assert.Equal(HarnessCompactionCompositionStatus.ExistingCompactionComponent, secondResult.Status);
             Assert.Null(secondResult.ChatClient);
@@ -194,7 +194,7 @@ public sealed class HarnessCompactionComposeTests
             var result = new HarnessCompactionComposition().Compose(
                 new HarnessCompactionCompositionRequest(
                     chatClient, notExecutableProfile, hybridProfile, binding, accessor,
-                    HarnessCompositionTestFixture.SessionId));
+                    HarnessCompositionTestFixture.SessionId, ProgressAccessor: null));
 
             Assert.Equal(HarnessCompactionCompositionStatus.ProfileNotExecutable, result.Status);
             Assert.Null(result.ChatClient);
