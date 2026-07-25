@@ -742,6 +742,95 @@ public sealed class HarnessCompactionRunCoordinatorTests
         }
     }
 
+    /// <summary>
+    /// Proves the closure fix in
+    /// <see cref="HarnessHybridCompactionChatClient.GetStreamingResponseAsync"/>: when the inner
+    /// <see cref="IAsyncEnumerable{T}.GetAsyncEnumerator"/> throws <em>synchronously</em> after
+    /// assembly has already reserved the recoverable body's digest for the call's lease, the
+    /// <see langword="finally"/> block must still release that reservation — not leave it
+    /// stranded — so a retry within the same outer run scope can reserve the exact same digest
+    /// and deliver the raw body again.
+    /// <para>
+    /// This is the streaming analogue of
+    /// <see cref="ProviderCallFails_ReservationReleased_RetryWithinSameRunRedeliversRawBody"/>.
+    /// The distinction being exercised here is specifically that the failure occurs synchronously
+    /// inside <c>GetAsyncEnumerator</c> (enumerator initialization), not during
+    /// <c>MoveNextAsync</c> iteration — a code path that is only guarded if both
+    /// <c>GetStreamingResponseAsync</c> and <c>GetAsyncEnumerator</c> are inside the
+    /// <see langword="try"/>/<see langword="finally"/> region.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public async Task StreamingGetAsyncEnumeratorThrows_LeaseReleased_RetryWithinSameRunRedeliversRawBody()
+    {
+        const string rawBody = "SECRET-RAW-RECOVERED-BODY";
+        const string artifactContentSeed = "coordinator-streaming-enum-throw-artifact-content";
+        const string recoveredEntryId = "recovered-entry-id";
+        var digest = HarnessArtifactIdentity.ComputeDigest(artifactContentSeed);
+        var reference = HarnessCompactionTestFixture.SampleReference(artifactContentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+
+        using var services = HarnessCompositionTestFixture.CreateServices();
+        var accessor = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(accessor, out var scope);
+        using (scope)
+        {
+            var messages = new List<ChatMessage>
+            {
+                new(ChatRole.System, "be helpful"),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
+                new(ChatRole.User, "hello"),
+            };
+            var classifier = new HarnessScriptedMessageClassifier();
+            var hybridProfile = HarnessHybridProfile.Create(
+                HarnessCompactionTestFixture.CreatePolicy(
+                    1000, 1, 5, 3, new HarnessConstantSizeContextEstimator(1)),
+                HarnessScriptedUpstreamChatReducer.Echo(),
+                classifier,
+                baselineEntries => new HarnessMutableContextSnapshotProvider(
+                    HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+                        baselineEntries, recoveredEntryId, segment)));
+
+            var leaf = new StreamingEnumeratorThrowingFirstCallThenSucceedingChatClient();
+            var coordinator = new HarnessCompactionRunCoordinator();
+
+            // One shared outer run scope: the failed first call and its retry both nest inside it,
+            // exactly as a caller-level retry loop within one outer agent run would.
+            using var runScope = coordinator.BeginRun();
+            var compactionClient = new HarnessHybridCompactionChatClient(
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+
+            // The first streaming call's GetAsyncEnumerator() throws synchronously after assembly
+            // already reserved the recoverable body's digest for that call's lease. The guarded
+            // try/finally in GetStreamingResponseAsync must release the reservation — not strand
+            // it — so the retry below can still deliver the body.
+            var enumerator = compactionClient
+                .GetStreamingResponseAsync(messages, cancellationToken: TestContext.Current.CancellationToken)
+                .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await enumerator.MoveNextAsync());
+
+            // The retry, within the very same run scope, must still receive the raw body: the
+            // reservation the failed call held was released by the guarded finally, not stranded.
+            await foreach (var _ in compactionClient.GetStreamingResponseAsync(
+                messages, cancellationToken: TestContext.Current.CancellationToken))
+            {
+            }
+
+            Assert.Equal(2, leaf.CallCount);
+
+            // The first call was dispatched to the inner client (its GetStreamingResponseAsync
+            // ran) and recorded those messages, including the raw recovered body.
+            Assert.Contains(leaf.ObservedCalls[0], message => message.Text == rawBody);
+
+            // The retry within the same run scope also receives the raw recovered body — had the
+            // lease not been released by the first call's finally, this fresh lease would have
+            // found the digest still reserved and filtered it out.
+            Assert.Contains(leaf.ObservedCalls[1], message => message.Text == rawBody);
+        }
+    }
+
     // ── Direct coordinator unit tests ─────────────────────────────────────────────────────────
 
     /// <summary>
@@ -1076,5 +1165,97 @@ public sealed class HarnessCompactionRunCoordinatorTests
 
         public HarnessContextEntryKind? ClassifyOverride(
             ChatMessage message, int index, IReadOnlyList<ChatMessage> allMessages) => null;
+    }
+
+    /// <summary>
+    /// Test-only leaf <see cref="IChatClient"/> supporting only streaming. Records the exact
+    /// materialized message list supplied to every <c>GetStreamingResponseAsync</c> call. On the
+    /// first call, returns an <see cref="IAsyncEnumerable{T}"/> whose
+    /// <see cref="IAsyncEnumerable{T}.GetAsyncEnumerator"/> throws synchronously with an
+    /// <see cref="InvalidOperationException"/> — simulating a synchronous initialization failure
+    /// that occurs after assembly has already reserved a recoverable body's lease. On every
+    /// subsequent call, returns a normal enumerable that yields a single update, so a retry can
+    /// prove the first call's reservation was correctly released.
+    /// </summary>
+    private sealed class StreamingEnumeratorThrowingFirstCallThenSucceedingChatClient : IChatClient
+    {
+        private readonly List<IReadOnlyList<ChatMessage>> _observedCalls = [];
+        private int _callCount;
+
+        internal IReadOnlyList<IReadOnlyList<ChatMessage>> ObservedCalls => _observedCalls;
+
+        internal int CallCount => _callCount;
+
+        Task<ChatResponse> IChatClient.GetResponseAsync(
+            IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken) =>
+            throw new NotSupportedException("Non-streaming execution is not required by this test client.");
+
+        IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
+            IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken)
+        {
+            var callIndex = Interlocked.Increment(ref _callCount);
+            var materialized = chatMessages.ToList();
+            _observedCalls.Add(materialized);
+
+            if (callIndex == 1)
+            {
+                // GetAsyncEnumerator() on this enumerable throws synchronously, triggering the
+                // closure-fixing guard in HarnessHybridCompactionChatClient.GetStreamingResponseAsync.
+                return new GetAsyncEnumeratorThrowingEnumerable();
+            }
+
+            return new SingleUpdateEnumerable();
+        }
+
+        object? IChatClient.GetService(Type serviceType, object? key) => null;
+
+        void IDisposable.Dispose()
+        {
+        }
+
+        /// <summary>
+        /// An <see cref="IAsyncEnumerable{T}"/> whose <see cref="GetAsyncEnumerator"/> throws
+        /// <see cref="InvalidOperationException"/> synchronously — exactly the failure mode the
+        /// enumerator-initialization guard in
+        /// <see cref="HarnessHybridCompactionChatClient.GetStreamingResponseAsync"/> must handle.
+        /// </summary>
+        private sealed class GetAsyncEnumeratorThrowingEnumerable : IAsyncEnumerable<ChatResponseUpdate>
+        {
+            public IAsyncEnumerator<ChatResponseUpdate> GetAsyncEnumerator(
+                CancellationToken cancellationToken = default) =>
+                throw new InvalidOperationException(
+                    "Simulated synchronous GetAsyncEnumerator initialization failure.");
+        }
+
+        /// <summary>
+        /// A plain single-update <see cref="IAsyncEnumerable{T}"/> used by the retry call to
+        /// confirm streaming succeeds once the first call's reservation has been released.
+        /// </summary>
+        private sealed class SingleUpdateEnumerable : IAsyncEnumerable<ChatResponseUpdate>
+        {
+            public IAsyncEnumerator<ChatResponseUpdate> GetAsyncEnumerator(
+                CancellationToken cancellationToken = default) =>
+                new SingleUpdateEnumerator();
+
+            private sealed class SingleUpdateEnumerator : IAsyncEnumerator<ChatResponseUpdate>
+            {
+                private int _position;
+
+                public ChatResponseUpdate Current { get; private set; } = default!;
+
+                public ValueTask<bool> MoveNextAsync()
+                {
+                    if (_position++ == 0)
+                    {
+                        Current = new ChatResponseUpdate(ChatRole.Assistant, "streamed");
+                        return new ValueTask<bool>(true);
+                    }
+
+                    return new ValueTask<bool>(false);
+                }
+
+                public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+            }
+        }
     }
 }

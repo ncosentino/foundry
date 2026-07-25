@@ -122,18 +122,31 @@ internal sealed class HarnessHybridCompactionChatClient(
         var assembly = await AssembleBoundedMessagesAsync(messages, cancellationToken).ConfigureAwait(false);
 
         var completedSuccessfully = false;
-        var enumerator = base
-            .GetStreamingResponseAsync(assembly.Messages, options, cancellationToken)
-            .WithCancellation(cancellationToken)
-            .GetAsyncEnumerator();
+
+        // Declared nullable before the try block so the finally can conditionally dispose only
+        // when construction succeeded. Both GetStreamingResponseAsync and GetAsyncEnumerator are
+        // placed inside the guarded region so that a synchronous throw from GetAsyncEnumerator —
+        // which would otherwise exit the state machine before the try block is entered — still
+        // allows the finally to release the rehydration lease. A try block containing `yield
+        // return` may not have a catch clause in C#, only finally. Any exception thrown from
+        // GetAsyncEnumerator (synchronously) or from MoveNextAsync (including cancellation)
+        // propagates past the loop without ever reaching the `completedSuccessfully = true` line
+        // below, so the finally block correctly releases rather than commits. Reaching the end of
+        // the loop normally — even after zero updates — still sets the flag, satisfying "commit
+        // on successful completion including zero updates".
+        // GetAsyncEnumerator is called directly on the IAsyncEnumerable (with the same
+        // cancellationToken that was already forwarded to GetStreamingResponseAsync) rather than
+        // via .WithCancellation().GetAsyncEnumerator(), because ConfiguredCancelableAsyncEnumerable
+        // <T>.Enumerator is a duck-typed struct that does not implement IAsyncEnumerator<T> and
+        // therefore cannot be assigned to an IAsyncEnumerator<T>? nullable local. The two call
+        // paths produce the same observable cancellation behavior.
+        IAsyncEnumerator<ChatResponseUpdate>? enumerator = null;
         try
         {
-            // A try block containing `yield return` may not have a catch clause in C#, only finally.
-            // Any exception thrown from MoveNextAsync (including cancellation) propagates past the loop
-            // without ever reaching the `completedSuccessfully = true` line below, so the finally block
-            // below correctly releases rather than commits. Reaching the end of the loop normally — even
-            // after zero updates — still sets the flag, satisfying "commit on successful completion
-            // including zero updates".
+            enumerator = base
+                .GetStreamingResponseAsync(assembly.Messages, options, cancellationToken)
+                .GetAsyncEnumerator(cancellationToken);
+
             while (await enumerator.MoveNextAsync())
             {
                 yield return enumerator.Current;
@@ -152,7 +165,10 @@ internal sealed class HarnessHybridCompactionChatClient(
                 _runCoordinator.Release(assembly.LeaseId);
             }
 
-            await enumerator.DisposeAsync();
+            if (enumerator is not null)
+            {
+                await enumerator.DisposeAsync();
+            }
         }
     }
 
