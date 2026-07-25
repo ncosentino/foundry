@@ -355,4 +355,17 @@ public sealed class IterativeLoopOptions
     /// </code>
     /// </example>
     public Microsoft.Extensions.AI.IChatReducer? ChatReducer { get; set; }
+
+    /// <summary>
+    /// Internal eager tool-result offload policy. When set, oversized tool
+    /// results (those whose <see cref="ToolResultSerializer.Serialize"/> output exceeds
+    /// <see cref="Tools.HarnessToolResultOffloadPolicy.MaximumInlineToolResultBytes"/>) are
+    /// content-addressed and offloaded to the workspace via the shared, caller-agnostic
+    /// <see cref="Tools.HarnessToolResultOffloadTransform"/> instead of being inlined verbatim into
+    /// tool-result messages. <see langword="null"/> (the default) preserves this loop's original,
+    /// unconditional <see cref="ToolResultSerializer"/> inlining behavior unchanged. Deliberately not
+    /// part of this class's public surface (no public setter/type leakage) — internal-only, visible
+    /// to the Tests project via <c>InternalsVisibleTo</c>.
+    /// </summary>
+    internal Tools.HarnessToolResultOffloadPolicy? OffloadPolicy { get; set; }
 }

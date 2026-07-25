@@ -4,6 +4,7 @@ using Microsoft.Extensions.AI;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 
@@ -305,6 +306,17 @@ internal sealed class HarnessProviderComposition
                 "The composed agent did not expose its function invocation loop.");
         }
 
+        // OffloadPlugin only carries the byte-threshold policy inputs; the actual policy reuses
+        // this composition request's own existing trusted ExecutionBinding/SessionId rather than
+        // minting a separate binding or session identity.
+        var offloadPolicy = request.OffloadPlugin is not null
+            ? HarnessToolResultOffloadPolicy.Create(
+                request.OffloadPlugin.MaximumInlineToolResultBytes,
+                request.SessionId,
+                request.OffloadPlugin.DescriptionStrategy,
+                request.OffloadPlugin.Checkpoint)
+            : null;
+
         functionInvokingChatClient.FunctionInvoker = async (
             context,
             cancellationToken) =>
@@ -314,9 +326,42 @@ internal sealed class HarnessProviderComposition
             request.ExecutionBinding.EnsureCurrent(
                 request.ExecutionContextAccessor,
                 request.SessionId);
-            return await context.Function.InvokeAsync(
+            var rawResult = await context.Function.InvokeAsync(
                 context.Arguments,
                 cancellationToken);
+
+            if (offloadPolicy is null)
+            {
+                return rawResult;
+            }
+
+            // Same shared, caller-agnostic transform IterativeAgentLoop uses.
+            // Inline -> pass the original raw object through unchanged (FICC's own passthrough
+            // check only special-cases an already-constructed FunctionResultContent with a
+            // matching CallId, so a plain raw object here still round-trips normally). Every
+            // other outcome constructs a matching-call-id FunctionResultContent directly so FICC's
+            // passthrough returns it unmodified instead of re-wrapping/re-serializing it.
+            var outcome = HarnessToolResultOffloadTransform.Transform(
+                new HarnessToolResultOffloadRequest(
+                    rawResult,
+                    context.CallContent.Name,
+                    context.CallContent.CallId,
+                    request.ExecutionBinding,
+                    request.ExecutionContextAccessor,
+                    offloadPolicy,
+                    DateTimeOffset.UtcNow,
+                    cancellationToken));
+
+            return outcome.Status switch
+            {
+                HarnessToolResultOffloadStatus.Inline => outcome.RawResult,
+                HarnessToolResultOffloadStatus.Offloaded or
+                HarnessToolResultOffloadStatus.ExistingReference =>
+                    new FunctionResultContent(context.CallContent.CallId, outcome.ReferenceText),
+                _ => new FunctionResultContent(
+                    context.CallContent.CallId,
+                    $"Error: {outcome.Evidence}"),
+            };
         };
 
         IHarnessMessageInjector? messageInjector = null;

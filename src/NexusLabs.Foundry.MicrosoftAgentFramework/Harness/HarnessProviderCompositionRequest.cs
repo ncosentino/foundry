@@ -27,4 +27,5 @@ internal sealed record HarnessProviderCompositionRequest(
     HarnessSkillsPlugin? SkillsPlugin,
     HarnessWebSearchPlugin? WebSearchPlugin,
     IAgentMetrics? Metrics,
-    IProgressReporterAccessor? ProgressAccessor);
+    IProgressReporterAccessor? ProgressAccessor,
+    HarnessToolResultOffloadPlugin? OffloadPlugin);
