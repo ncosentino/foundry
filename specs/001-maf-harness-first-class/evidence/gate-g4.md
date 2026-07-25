@@ -53,10 +53,10 @@ Cumulative history on top of the G3 foundation gate (`gate-g3.md`):
 | Workspace-backed `AgentFileStore` bridge | `67452df0` | [#93](https://github.com/ncosentino/foundry/pull/93) | 40 | 210 | 1,779 |
 | Artifact references and rehydration | `ded50c63` | [#94](https://github.com/ncosentino/foundry/pull/94) | 47 | 257 | 1,826 |
 | Eager tool-result offload | `ccc88654` | [#95](https://github.com/ncosentino/foundry/pull/95) | 19 | 276 | 1,845 |
-| **Offload/rehydration observability (current leaf)** | `a569c67f` | [#96](https://github.com/ncosentino/foundry/pull/96) | 29 | **305** | **1,874** |
+| **Offload/rehydration observability** | `17714623` | [#96](https://github.com/ncosentino/foundry/pull/96) | 29 | **305** | **1,874** |
 
-- Current leaf implementation head: `a569c67f` on
-  `harness/g4-observability`, based on `ccc88654` (PR #95).
+- Final reviewed G4 integration head: `17714623` on
+  `harness/g4-integration`.
 - Per-PR new-test counts above are measured from actual `dotnet test`
   cumulative Harness-filter deltas at each commit (using a disposable
   `git worktree` checkout per commit, discarded afterward), not counted from
@@ -503,11 +503,11 @@ the following fixes before this gate document was finalized:
 - GitHub PR review surface: no unresolved blocking comments on PR #96.
 - Hosted CI (build/test/package, standard NativeAOT, Harness NativeAOT,
   documentation): **passed**:
-  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30145916985/job/89647734367),
-  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30145916985/job/89647734348),
-  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30145916935/job/89647734178),
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30146605585/job/89649630744),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30146605585/job/89649630750),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30146605584/job/89649630748),
   and
-  [documentation](https://github.com/ncosentino/foundry/actions/runs/30145916964/job/89648406093).
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30146605588/job/89649630851).
   PRs #92-#95's own required hosted checks also passed at their respective
   merges.
 
