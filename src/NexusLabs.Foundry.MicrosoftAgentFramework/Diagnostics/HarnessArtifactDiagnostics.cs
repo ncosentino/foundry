@@ -71,7 +71,8 @@ public sealed record HarnessArtifactDiagnostics
         HarnessArtifactDecisionReason reason,
         int? observedUtf8ByteSize,
         int configuredThresholdOrBudget,
-        string? referenceId)
+        string? referenceId,
+        HarnessContextAttribution attribution)
     {
         Operation = operation;
         Outcome = outcome;
@@ -80,6 +81,7 @@ public sealed record HarnessArtifactDiagnostics
         ObservedUtf8ByteSize = observedUtf8ByteSize;
         ConfiguredThresholdOrBudget = configuredThresholdOrBudget;
         ReferenceId = referenceId;
+        Attribution = attribution;
     }
 
     /// <summary>Whether this snapshot describes an offload decision or a rehydration decision.</summary>
@@ -120,6 +122,14 @@ public sealed record HarnessArtifactDiagnostics
     /// every other offload outcome.
     /// </summary>
     public string? ReferenceId { get; }
+
+    /// <summary>
+    /// The privacy-safe UTF-8 byte attribution for this decision — how many bytes were observed
+    /// coming in, and how many bytes actually became model/history-facing context as a result. The
+    /// identical instance is also carried by the progress event and internal outcome/result this
+    /// snapshot is attached to, since it rides along on this shared <see cref="HarnessArtifactDiagnostics"/>.
+    /// </summary>
+    public HarnessContextAttribution Attribution { get; }
 
     /// <summary>
     /// Builds a snapshot for one offload decision.
@@ -184,7 +194,8 @@ public sealed record HarnessArtifactDiagnostics
             reason,
             observedUtf8ByteSize,
             configuredThresholdBytes,
-            referenceId);
+            referenceId,
+            HarnessContextAttribution.ForOffload(outcome, observedUtf8ByteSize, referenceId));
     }
 
     /// <summary>
@@ -238,7 +249,8 @@ public sealed record HarnessArtifactDiagnostics
             reason,
             observedUtf8ByteSize,
             configuredBudgetBytes,
-            referenceId);
+            referenceId,
+            HarnessContextAttribution.ForRehydration(outcome, referenceId, observedUtf8ByteSize));
     }
 
     private static void RequireOffloadOutcome(HarnessArtifactOutcomeCategory outcome)

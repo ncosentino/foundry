@@ -184,7 +184,7 @@ public sealed class HarnessCompactionSeamTests
                 classifier,
                 baselineEntries => new HarnessMutableContextSnapshotProvider(baselineEntries));
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             var messages = new List<ChatMessage> { new(ChatRole.System, "be helpful") };
 
@@ -250,7 +250,7 @@ public sealed class HarnessCompactionSeamTests
                     HarnessContextSnapshotAugmentation.WithRecoverableSegment(
                         baselineEntries, recoveredEntryId, segment)));
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             await compactionClient.GetResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken);
@@ -309,7 +309,7 @@ public sealed class HarnessCompactionSeamTests
                     HarnessContextSnapshotAugmentation.WithRecoverableSegment(
                         baselineEntries, recoveredEntryId, segment)));
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
             var outerRecorder = new HarnessRecordingPassthroughChatClient(compactionClient);
 
             await outerRecorder.GetResponseAsync(

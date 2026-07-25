@@ -251,7 +251,7 @@ public sealed class HarnessCompactionRunCoordinatorTests
             // agent run would.
             using var runScope = coordinator.BeginRun();
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
 
             await compactionClient.GetResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken);
@@ -371,7 +371,7 @@ public sealed class HarnessCompactionRunCoordinatorTests
             // No coordinator supplied at all — exactly how every seam/cancellation unit test in this
             // codebase constructs this node directly, outside any HarnessGuardedAgent.
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null, progressAccessor: null);
 
             await compactionClient.GetResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken);
@@ -424,7 +424,7 @@ public sealed class HarnessCompactionRunCoordinatorTests
 
             using var runScope = coordinator.BeginRun();
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
 
             await foreach (var _ in compactionClient.GetStreamingResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken))
@@ -655,9 +655,9 @@ public sealed class HarnessCompactionRunCoordinatorTests
             // two genuinely overlapping FICC tool rounds or message-injection-driven calls could.
             using var runScope = coordinator.BeginRun();
             var compactionClientA = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
             var compactionClientB = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
 
             var callA = compactionClientA.GetResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken);
@@ -716,7 +716,7 @@ public sealed class HarnessCompactionRunCoordinatorTests
             // exactly as a caller-level retry loop around one outer agent run would observe.
             using var runScope = coordinator.BeginRun();
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
 
             // The first call's real provider dispatch fails after assembly already reserved the
             // recoverable body's digest for that call's lease. The reservation must be released
@@ -799,7 +799,7 @@ public sealed class HarnessCompactionRunCoordinatorTests
             // exactly as a caller-level retry loop within one outer agent run would.
             using var runScope = coordinator.BeginRun();
             var compactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
 
             // The first streaming call's GetAsyncEnumerator() throws synchronously after assembly
             // already reserved the recoverable body's digest for that call's lease. The guarded

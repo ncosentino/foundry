@@ -208,7 +208,8 @@ public sealed class HarnessProviderCompositionCompactionTests
             // request.ChatClient. HarnessProviderComposition must fail closed here instead of ever
             // installing a second, duplicate compaction root beneath the existing one.
             var existingCompactionClient = new HarnessHybridCompactionChatClient(
-                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, runCoordinator: null);
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId,
+                runCoordinator: null, progressAccessor: null);
 
             var request = HarnessCompositionTestFixture.CreateRequest(
                 existingCompactionClient,

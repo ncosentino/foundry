@@ -31,7 +31,7 @@ internal sealed class HarnessCapabilityResolver
         Stable(HarnessCapability.Skills, MafPackage, true, HarnessCapabilityTrustBoundary.ExternalContent, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G3),
         ProviderDependent(HarnessCapability.WebSearch, MafPackage, true, HarnessProviderCapability.HostedWebSearch, HarnessCapabilityTrustBoundary.ExternalContent, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G3),
         Stable(HarnessCapability.OpenTelemetry, MafPackage, true, HarnessCapabilityTrustBoundary.None, HarnessCapabilityAotStatus.Compatible, HarnessCapabilityDiagnosticsStatus.Available, HarnessDeliveryPhase.G2),
-        Experimental(HarnessCapability.Compaction, MafPackage, false, HarnessCapabilityTrustBoundary.None, HarnessCapabilityAotStatus.Verified, HarnessCapabilityDiagnosticsStatus.Available, HarnessDeliveryPhase.G5),
+        Experimental(HarnessCapability.Compaction, MafPackage, false, HarnessCapabilityTrustBoundary.ExternalContent, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Available, HarnessDeliveryPhase.G5),
         Experimental(HarnessCapability.BackgroundAgents, MafPackage, false, HarnessCapabilityTrustBoundary.HostIdentity, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G6),
         Experimental(HarnessCapability.LoopEvaluation, MafPackage, false, HarnessCapabilityTrustBoundary.None, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G6),
     ];

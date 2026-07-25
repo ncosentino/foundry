@@ -141,7 +141,8 @@ internal sealed class HarnessCompactionComposition
             request.ExecutionBinding,
             request.ExecutionContextAccessor,
             request.SessionId,
-            runCoordinator);
+            runCoordinator,
+            request.ProgressAccessor);
 
         return new HarnessCompactionCompositionResult(
             HarnessCompactionCompositionStatus.Success,

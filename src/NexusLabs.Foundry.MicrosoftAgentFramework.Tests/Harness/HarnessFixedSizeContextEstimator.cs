@@ -1,3 +1,4 @@
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
@@ -16,6 +17,12 @@ internal sealed class HarnessFixedSizeContextEstimator : IHarnessContextSizeEsti
         ArgumentNullException.ThrowIfNull(sizesByEntryId);
         _sizesByEntryId = sizesByEntryId;
     }
+
+    /// <summary>
+    /// Always <see cref="HarnessContextMeasurementUnit.HostDefinedUnits"/>: this fixture's sizes are
+    /// arbitrary configured values with no byte or token meaning.
+    /// </summary>
+    public HarnessContextMeasurementUnit MeasurementUnit => HarnessContextMeasurementUnit.HostDefinedUnits;
 
     public int EstimateSize(HarnessContextEntry entry)
     {

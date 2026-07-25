@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
@@ -49,6 +51,28 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// assembled fresh from the caller-supplied session/snapshot integration, with no singleton mutable
 /// history retained by this node itself.
 /// </para>
+/// <para>
+/// <strong>Progress events.</strong> When constructed with a non-<see langword="null"/>
+/// <c>progressAccessor</c>, every call to <see cref="AssembleBoundedMessagesAsync"/> that reaches
+/// the assembly phase reports exactly one <see cref="HarnessContextCompactionStartedEvent"/> (emitted
+/// immediately before <c>AssembleAsync</c> is called, after message adaptation and snapshot
+/// construction have succeeded) followed by exactly one terminal event — either a
+/// <see cref="HarnessContextCompactionCompletedEvent"/> on success or a
+/// <see cref="HarnessContextCompactionTerminatedEvent"/> when assembly cannot converge — and, only on
+/// success and only once the post-assembly trust revalidation has also passed, a
+/// <see cref="HarnessContextComposedEvent"/> carrying the same <see cref="HarnessContextDiagnostics"/>
+/// instance as the preceding completed event. Every event reported for the same attempt — Started,
+/// whichever terminal event follows, and Composed on success — also carries an identical, opaque
+/// per-assembly <c>AssemblyId</c> (a <see cref="Guid"/> generated exactly once per attempt,
+/// immediately before Started is emitted), so two concurrently-running assemblies for the same
+/// agent/workflow remain pairable end-to-end despite their interleaved <c>SequenceNumber</c>s. A
+/// classifier or snapshot-construction exception propagates directly without emitting any event.
+/// Exceptional failures during assembly (cancellation, binding invalidation, reducer exception) also
+/// propagate without masquerading as Completed or Terminated. No event is ever reported when the
+/// accessor is <see langword="null"/>, and every reported diagnostics payload is built from the
+/// structured <see cref="HarnessContextAssemblyResult"/> and the estimator that governed the policy
+/// decision — never by parsing exception or evidence text.
+/// </para>
 /// </remarks>
 internal sealed class HarnessHybridCompactionChatClient(
     IChatClient innerClient,
@@ -56,7 +80,8 @@ internal sealed class HarnessHybridCompactionChatClient(
     HarnessExecutionBinding executionBinding,
     IAgentExecutionContextAccessor executionContextAccessor,
     string sessionId,
-    HarnessCompactionRunCoordinator? runCoordinator) : DelegatingChatClient(innerClient)
+    HarnessCompactionRunCoordinator? runCoordinator,
+    IProgressReporterAccessor? progressAccessor) : DelegatingChatClient(innerClient)
 {
     /// <summary>
     /// The non-retransmission coordinator for the active outer agent run. When a caller supplies
@@ -174,28 +199,48 @@ internal sealed class HarnessHybridCompactionChatClient(
 
     /// <summary>
     /// The outcome of one call's context assembly: the final bounded messages to dispatch, the lease
-    /// token that reserved every recoverable segment digest surviving into <see cref="Messages"/>, and
-    /// the set of digests this call's lease actually reserved and is about to forward to the real
-    /// provider — the set passed to <see cref="HarnessCompactionRunCoordinator.Complete"/> on success.
-    /// Pressure-evicted digests reserved during assembly but removed from <see cref="Messages"/> before
-    /// this record is constructed are not included here; <see cref="HarnessCompactionRunCoordinator.Complete"/>
-    /// releases those automatically alongside promoting the forwarded ones to Delivered.
+    /// token that reserved every recoverable segment digest surviving into <see cref="Messages"/>, the
+    /// set of digests this call's lease actually reserved and is about to forward to the real
+    /// provider — the set passed to <see cref="HarnessCompactionRunCoordinator.Complete"/> on success —
+    /// the diagnostics snapshot produced for this assembly, shared with the Completed and Composed
+    /// progress events emitted for the same attempt, and the same opaque per-assembly
+    /// <see cref="AssemblyId"/> correlation ID carried by every progress event emitted for this
+    /// attempt. Pressure-evicted digests reserved during assembly but removed from
+    /// <see cref="Messages"/> before this record is constructed are not included here;
+    /// <see cref="HarnessCompactionRunCoordinator.Complete"/> releases those automatically alongside
+    /// promoting the forwarded ones to Delivered.
     /// </summary>
     private sealed record HarnessBoundedMessageAssembly(
         IReadOnlyList<ChatMessage> Messages,
         Guid LeaseId,
-        IReadOnlyList<string> ForwardedDigests);
+        IReadOnlyList<string> ForwardedDigests,
+        HarnessContextDiagnostics Diagnostics,
+        Guid AssemblyId);
 
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
     /// <exception cref="InvalidOperationException">
     /// The execution binding is no longer current, whether checked before assembly begins or
-    /// revalidated immediately after assembly succeeds and before dispatch to the real provider.
+    /// revalidated immediately after assembly succeeds and before dispatch to the real provider; or the
+    /// configured <see cref="HarnessContextSnapshotIntegration"/> delegate returned
+    /// <see langword="null"/>.
     /// </exception>
     /// <exception cref="HarnessCompactionIrreducibleException">
     /// Assembly for this call terminated as <see cref="HarnessContextAssemblyOutcome.Irreducible"/> or
     /// <see cref="HarnessContextAssemblyOutcome.ConcurrentMutationLimit"/>.
     /// </exception>
     /// <remarks>
+    /// <strong>Event emission.</strong> A <see cref="HarnessContextCompactionStartedEvent"/> is emitted
+    /// only after message adaptation, snapshot integration, and assembler construction have all
+    /// succeeded — immediately before <c>AssembleAsync</c> is called. A classifier or
+    /// snapshot-construction failure propagates directly without emitting any progress event. Exactly
+    /// one terminal event follows the Started event (Completed on success, Terminated on termination);
+    /// exceptional failures (cancellation, binding invalidation, reducer exception) propagate without
+    /// masquerading as Completed or Terminated. A single opaque per-assembly <c>AssemblyId</c>
+    /// (a <see cref="Guid"/>) is generated exactly once for this attempt at that same success gate —
+    /// immediately before Started is emitted — and is threaded identically onto Started, whichever
+    /// terminal event follows, and Composed on success, so concurrent same-agent attempts remain
+    /// pairable despite interleaved <c>SequenceNumber</c>s.
+    /// <para>
     /// <strong>Non-retransmission — reserve here, commit/release around dispatch.</strong> This method
     /// never marks anything delivered. Every call generates its own fresh lease token and wraps the
     /// host's <see cref="HarnessContextSnapshotIntegration"/>-supplied snapshot provider in a
@@ -213,6 +258,7 @@ internal sealed class HarnessHybridCompactionChatClient(
     /// without promoting them — the caller (<see cref="GetResponseAsync"/> or
     /// <see cref="GetStreamingResponseAsync"/>) alone decides whether to complete or release, once it
     /// knows whether the real provider call actually completed successfully.
+    /// </para>
     /// </remarks>
     private async Task<HarnessBoundedMessageAssembly> AssembleBoundedMessagesAsync(
         IEnumerable<ChatMessage> messages, CancellationToken cancellationToken)
@@ -241,6 +287,19 @@ internal sealed class HarnessHybridCompactionChatClient(
             var reducer = new HarnessUpstreamChatReducerAdapter(profile.UpstreamReducer);
             var assembler = new HarnessContextAssembler(profile.Policy, filteringSnapshotProvider, reducer);
 
+            // Generated exactly once per assembly attempt, immediately after message adaptation,
+            // snapshot integration, and assembler construction have all succeeded — the same gate
+            // that governs whether Started is ever emitted — and threaded identically to every
+            // progress event emitted for this attempt (Started, whichever terminal event follows,
+            // and Composed on success). This is what lets two concurrently-running assemblies for
+            // the same agent/workflow remain pairable despite their SequenceNumbers interleaving.
+            var assemblyId = Guid.NewGuid();
+
+            // ReportStarted is emitted only after message adaptation, snapshot integration, and
+            // assembler construction have all succeeded — a classifier or snapshot-construction
+            // exception must not emit a dangling Started event for an assembly that never began.
+            ReportStarted(assemblyId);
+
             var result = await assembler.AssembleAsync(cancellationToken).ConfigureAwait(false);
 
             // Second checkpoint, deliberately distinct from the assembler's own internal checks: a
@@ -250,11 +309,20 @@ internal sealed class HarnessHybridCompactionChatClient(
             // regardless.
             cancellationToken.ThrowIfCancellationRequested();
 
+            var diagnostics = HarnessContextDiagnosticsFactory.Create(
+                result, profile.Policy.SizeEstimator, profile.Policy.TriggerThreshold);
+
             if (!result.IsSuccess)
             {
+                ReportTerminated(assemblyId, diagnostics);
                 throw new HarnessCompactionIrreducibleException(
                     result.Outcome, result.FinalEstimatedSize, result.HardLimit);
             }
+
+            // Reported immediately once the decision is known — deliberately before the trust
+            // revalidation below — so an already-successful compaction decision remains observable
+            // even if that later revalidation itself fails.
+            ReportCompleted(assemblyId, diagnostics);
 
             // Trust revalidation, immediately after successful assembly and immediately before dispatch
             // to the real provider: assembly can run for an observable duration (reducer/upstream work),
@@ -279,7 +347,13 @@ internal sealed class HarnessHybridCompactionChatClient(
 
             var boundedMessages = result.FinalEntries!.Select(entry => entry.Message).ToList();
             leaseOwned = true;
-            return new HarnessBoundedMessageAssembly(boundedMessages, leaseId, forwardedDigests);
+
+            // Reported only once binding revalidation has also passed, right before the bounded
+            // messages are returned for dispatch to the real provider — "ready for dispatch", never
+            // for a terminated attempt.
+            ReportComposed(assemblyId, diagnostics);
+
+            return new HarnessBoundedMessageAssembly(boundedMessages, leaseId, forwardedDigests, diagnostics, assemblyId);
         }
         finally
         {
@@ -288,5 +362,83 @@ internal sealed class HarnessHybridCompactionChatClient(
                 _runCoordinator.Release(leaseId);
             }
         }
+    }
+
+    private void ReportStarted(Guid assemblyId)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        reporter.Report(new HarnessContextCompactionStartedEvent(
+            Timestamp: DateTimeOffset.UtcNow,
+            WorkflowId: reporter.WorkflowId,
+            AgentId: reporter.AgentId,
+            ParentAgentId: (reporter as IProgressReporterContext)?.ParentAgentId,
+            Depth: reporter.Depth,
+            SequenceNumber: reporter.NextSequence(),
+            AssemblyId: assemblyId,
+            MeasurementUnit: profile.Policy.SizeEstimator.MeasurementUnit,
+            HardLimit: profile.Policy.HardLimit,
+            TriggerThreshold: profile.Policy.TriggerThreshold));
+    }
+
+    private void ReportCompleted(Guid assemblyId, HarnessContextDiagnostics diagnostics)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        reporter.Report(new HarnessContextCompactionCompletedEvent(
+            Timestamp: DateTimeOffset.UtcNow,
+            WorkflowId: reporter.WorkflowId,
+            AgentId: reporter.AgentId,
+            ParentAgentId: (reporter as IProgressReporterContext)?.ParentAgentId,
+            Depth: reporter.Depth,
+            SequenceNumber: reporter.NextSequence(),
+            AssemblyId: assemblyId,
+            Diagnostics: diagnostics));
+    }
+
+    private void ReportTerminated(Guid assemblyId, HarnessContextDiagnostics diagnostics)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        reporter.Report(new HarnessContextCompactionTerminatedEvent(
+            Timestamp: DateTimeOffset.UtcNow,
+            WorkflowId: reporter.WorkflowId,
+            AgentId: reporter.AgentId,
+            ParentAgentId: (reporter as IProgressReporterContext)?.ParentAgentId,
+            Depth: reporter.Depth,
+            SequenceNumber: reporter.NextSequence(),
+            AssemblyId: assemblyId,
+            Diagnostics: diagnostics));
+    }
+
+    private void ReportComposed(Guid assemblyId, HarnessContextDiagnostics diagnostics)
+    {
+        if (progressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = progressAccessor.Current;
+        reporter.Report(new HarnessContextComposedEvent(
+            Timestamp: DateTimeOffset.UtcNow,
+            WorkflowId: reporter.WorkflowId,
+            AgentId: reporter.AgentId,
+            ParentAgentId: (reporter as IProgressReporterContext)?.ParentAgentId,
+            Depth: reporter.Depth,
+            SequenceNumber: reporter.NextSequence(),
+            AssemblyId: assemblyId,
+            Diagnostics: diagnostics));
     }
 }
