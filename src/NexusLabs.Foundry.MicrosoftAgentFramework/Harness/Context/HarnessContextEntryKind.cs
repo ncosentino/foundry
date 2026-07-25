@@ -47,4 +47,29 @@ internal enum HarnessContextEntryKind
     /// or <see cref="ApprovalSecurityState"/> entry.
     /// </summary>
     Summary,
+
+    /// <summary>
+    /// A rehydrated artifact body, marked recoverable per <see cref="HarnessArtifactRecoverableContextSegment"/>.
+    /// Evicted ahead of any other reduction only when a durable <see cref="ArtifactReference"/> entry
+    /// for the same canonical digest exists in the same snapshot — that separate reference entry
+    /// remains independently preservable, so the body itself is safely droppable. When no such
+    /// reference exists, <see cref="HarnessHybridContextPolicy.SelectRequiredPreservation"/> requires
+    /// this entry instead of merely retaining it opportunistically: it is the only durable copy of that
+    /// content, and dropping it can make the context <see cref="HarnessContextAssemblyOutcome.Irreducible"/>
+    /// if it alone prevents the remaining entries from fitting the hard limit. Constructed only via
+    /// <see cref="HarnessContextEntry.CreateRecoverableSegment"/>; the generic
+    /// <see cref="HarnessContextEntry.Create"/> factory rejects this kind, because this kind's canonical
+    /// data model is the segment itself, never an arbitrary caller-supplied message.
+    /// </summary>
+    RecoverableContextSegment,
+
+    /// <summary>
+    /// Explicitly optional context. Never required by <see cref="HarnessHybridContextPolicy.SelectRequiredPreservation"/>
+    /// and never able to substitute for a required entry. A <see cref="HarnessContextAssembler"/>'s
+    /// deterministic fallback step is the one place this kind is treated specially: it is included
+    /// alongside the required entries in the assembler's first fallback attempt, and dropped — never in
+    /// place of anything required — only if that attempt still exceeds the hard limit, immediately before
+    /// the assembler would otherwise return an irreducible termination.
+    /// </summary>
+    OptionalContext,
 }

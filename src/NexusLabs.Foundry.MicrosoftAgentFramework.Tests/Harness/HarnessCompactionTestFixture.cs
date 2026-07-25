@@ -75,4 +75,41 @@ internal static class HarnessCompactionTestFixture
             .ToList();
         return HarnessContextEntry.Create(entryId, HarnessContextEntryKind.ToolExchange, new ChatMessage(ChatRole.Tool, contents));
     }
+
+    internal static HarnessContextEntry OptionalEntry(string entryId, string text) =>
+        HarnessContextEntry.Create(entryId, HarnessContextEntryKind.OptionalContext, new ChatMessage(ChatRole.Assistant, text));
+
+    /// <summary>
+    /// Builds a <see cref="HarnessArtifactReference"/> for <paramref name="content"/> via the untrusted
+    /// reconstruction path (no execution binding required), suitable for pairing with
+    /// <see cref="RecoverableSegmentEntry"/> and <see cref="ArtifactEntry"/> in assembler fixtures that
+    /// do not otherwise need a full <see cref="HarnessArtifactTestFixture"/>.
+    /// </summary>
+    internal static HarnessArtifactReference SampleReference(string content, DateTimeOffset createdAtUtc)
+    {
+        var digest = HarnessArtifactIdentity.ComputeDigest(content);
+        var byteSize = HarnessArtifactIdentity.ComputeUtf8ByteLength(content);
+        var workspacePath = HarnessArtifactIdentity.BuildPath(digest);
+
+        return HarnessArtifactReference.Reconstruct(
+            workspacePath,
+            digest,
+            byteSize,
+            "test artifact reference",
+            "assembler-fixture-user",
+            "assembler-fixture-orchestration",
+            "assembler-fixture-session",
+            "assembler-fixture-tool",
+            "assembler-fixture-call",
+            createdAtUtc);
+    }
+
+    /// <summary>
+    /// Builds a <see cref="HarnessContextEntryKind.RecoverableContextSegment"/> entry recovering
+    /// <paramref name="reference"/>'s content, via <see cref="HarnessContextEntry.CreateRecoverableSegment"/>.
+    /// </summary>
+    internal static HarnessContextEntry RecoverableSegmentEntry(
+        string entryId, HarnessArtifactReference reference, string body, DateTimeOffset rehydratedAtUtc) =>
+        HarnessContextEntry.CreateRecoverableSegment(
+            entryId, HarnessArtifactRecoverableContextSegment.Create(reference, body, rehydratedAtUtc));
 }
