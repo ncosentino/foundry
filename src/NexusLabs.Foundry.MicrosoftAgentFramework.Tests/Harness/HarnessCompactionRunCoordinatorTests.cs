@@ -677,6 +677,111 @@ public sealed class HarnessCompactionRunCoordinatorTests
         }
     }
 
+    /// <summary>
+    /// Reproduces, deterministically and without depending on any real thread scheduling, the exact
+    /// concurrency gap that <see cref="HarnessCompactionRunCoordinator.GetRevision"/> and
+    /// <see cref="HarnessDeliveredSegmentFilteringSnapshotProvider"/>'s own effective-version tracking
+    /// close: lease B's own capture filters the recoverable body out because lease A reserved it first;
+    /// A's own assembly attempt later discovers the body must be pressure-evicted (reserved during
+    /// assembly, then stripped from the final entries before dispatch) and its caller closes the lease
+    /// with an empty delivered set — Complete's atomic contract releases the reservation without ever
+    /// promoting it. Before this fix, the inner snapshot provider's own version never changed across any
+    /// of this (no new message was injected — only reservation/delivery state changed), so B's own
+    /// filtered snapshot would report the exact same version both before and after A released, B's
+    /// assembler would never restart to notice the digest became available again, and the raw body would
+    /// reach neither call: A never forwarded it and B never saw it available again (zero delivery). With
+    /// the fix, B's next capture (standing in for its finalization recheck) observes the digest's
+    /// coordinator revision changed and reports a new effective version even though the inner snapshot's
+    /// version is unchanged, so B is the one — and only one — call that ultimately forwards the raw body.
+    /// </summary>
+    [Fact]
+    public void SameOuterRun_LoserFiltersThenWinnerPressureEvictsAndReleases_LoserRestartsAndDeliversExactlyOnce()
+    {
+        const string rawBody = "SECRET-RAW-RECOVERED-BODY";
+        const string artifactContentSeed = "coordinator-revision-restart-artifact-content";
+        const string recoveredEntryId = "recovered-entry-id";
+        var digest = HarnessArtifactIdentity.ComputeDigest(artifactContentSeed);
+        var reference = HarnessCompactionTestFixture.SampleReference(artifactContentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, "be helpful"),
+            new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+            new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
+            new(ChatRole.User, "hello"),
+        };
+        var classifier = new HarnessScriptedMessageClassifier();
+        var baselineEntries = HarnessMafMessageContextAdapter.Adapt(messages, classifier);
+        var entriesWithSegment = HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+            baselineEntries, recoveredEntryId, segment);
+
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseA = Guid.NewGuid();
+        var leaseB = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        // Each call owns its own snapshot provider instance (as HarnessHybridCompactionChatClient's own
+        // per-call snapshotProvider does), both offering the identical entries — reservation/delivery
+        // filtering is the only thing that can ever differ between what each call's own capture reports.
+        var providerA = new HarnessMutableContextSnapshotProvider(entriesWithSegment);
+        var providerB = new HarnessMutableContextSnapshotProvider(entriesWithSegment);
+        var filteringA = new HarnessDeliveredSegmentFilteringSnapshotProvider(providerA, coordinator, leaseA);
+        var filteringB = new HarnessDeliveredSegmentFilteringSnapshotProvider(providerB, coordinator, leaseB);
+
+        // Call A captures first within this shared outer run scope and reserves the digest — its own
+        // snapshot keeps the raw recovered body.
+        var snapshotA1 = filteringA.CaptureSnapshot();
+        Assert.Contains(
+            snapshotA1.Entries, e => e.Kind == HarnessContextEntryKind.RecoverableContextSegment);
+
+        // Call B races within the very same run scope: the digest is already reserved by A, so B's own
+        // first capture must filter the recoverable body back out of what it would otherwise forward.
+        var snapshotB1 = filteringB.CaptureSnapshot();
+        Assert.DoesNotContain(
+            snapshotB1.Entries, e => e.Kind == HarnessContextEntryKind.RecoverableContextSegment);
+
+        // A's own assembly attempt discovers the body must be pressure-evicted before dispatch — its
+        // real provider call proceeds without the raw body, exactly like
+        // HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync computing ForwardedDigests from
+        // FinalEntries alone. Its caller then closes the lease with an empty delivered set: Complete's
+        // atomic contract releases the reservation without ever promoting it to Delivered.
+        coordinator.Complete(leaseA, []);
+
+        // B's own assembler now performs its finalization recapture — the same recheck that guards every
+        // success path in HarnessContextAssembler — sometime after A already released.
+        var snapshotB2 = filteringB.CaptureSnapshot();
+
+        // The fix: B's second capture reports a different effective version than its first, even though
+        // neither inner snapshot provider's own version ever changed — only the coordinator's tracked
+        // revision for this digest did, when Complete released it.
+        Assert.NotEqual(snapshotB1.Version, snapshotB2.Version);
+        var recoveredEntry = Assert.Single(
+            snapshotB2.Entries, e => e.Kind == HarnessContextEntryKind.RecoverableContextSegment);
+        Assert.Equal(rawBody, recoveredEntry.Message.Text);
+
+        // B's assembler, having observed the version change, restarts and re-evaluates from this newest
+        // snapshot; one more capture with nothing further racing in behind it confirms the result is
+        // stable — exactly the "own repeated capture" case that must never spuriously restart again.
+        var snapshotB3 = filteringB.CaptureSnapshot();
+        Assert.Equal(snapshotB2.Version, snapshotB3.Version);
+
+        // B's caller commits: the digest is the one, and only, forwarded body for the entire run.
+        coordinator.Complete(leaseB, [digest]);
+
+        // No later call — e.g. a third overlapping provider call — can ever reserve, and therefore never
+        // redeliver, the exact same digest again: it is now permanently Delivered for this run. Combined
+        // with the assertions above (B's second and third captures are the only ones ever observed
+        // carrying the raw body, and A's own capture never actually dispatched it), this proves both
+        // no-duplicate and no-zero-delivery for this run.
+        var leaseC = Guid.NewGuid();
+        Assert.False(
+            coordinator.TryReserve(digest, leaseC),
+            "The digest was already delivered by B; a later lease must never be able to reserve — and " +
+            "therefore never redeliver — the exact same body again within the same run.");
+    }
+
     [Fact]
     public async Task ProviderCallFails_ReservationReleased_RetryWithinSameRunRedeliversRawBody()
     {
@@ -930,6 +1035,247 @@ public sealed class HarnessCompactionRunCoordinatorTests
         var coordinator = new HarnessCompactionRunCoordinator();
         Assert.Throws<InvalidOperationException>(
             () => coordinator.Complete(Guid.NewGuid(), []));
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.GetRevision"/> must throw
+    /// <see cref="InvalidOperationException"/> when no run scope is active, for the same reason as
+    /// every other lease-lifecycle operation on this type.
+    /// </summary>
+    [Fact]
+    public void GetRevision_WithoutActiveRunScope_ThrowsInvalidOperationException()
+    {
+        var coordinator = new HarnessCompactionRunCoordinator();
+        Assert.Throws<InvalidOperationException>(
+            () => coordinator.GetRevision("any-non-empty-digest"));
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.GetRevision"/> reports <c>0</c> for a digest that has
+    /// never been reserved, delivered, or released in the active run — the closed-world default before
+    /// any state exists for it.
+    /// </summary>
+    [Fact]
+    public void GetRevision_BeforeAnyState_ReturnsZero()
+    {
+        var coordinator = new HarnessCompactionRunCoordinator();
+        using var runScope = coordinator.BeginRun();
+
+        Assert.Equal(0, coordinator.GetRevision("never-touched-digest"));
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.GetRevision"/> advances by exactly one on a digest's
+    /// first reservation, by exactly one more when <see cref="HarnessCompactionRunCoordinator.Complete"/>
+    /// promotes it to Delivered, and does not advance at all when the very same lease re-reserves the
+    /// digest it already holds — no externally-observable state changed in that case.
+    /// </summary>
+    [Fact]
+    public void GetRevision_FirstReservationThenPromotion_AdvancesOnlyOnRealStateChanges()
+    {
+        const string digest = "revision-tracking-digest";
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseId = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        Assert.Equal(0, coordinator.GetRevision(digest));
+
+        Assert.True(coordinator.TryReserve(digest, leaseId));
+        Assert.Equal(1, coordinator.GetRevision(digest));
+
+        // The same lease re-reserving its own digest observes no externally-visible state change.
+        Assert.True(coordinator.TryReserve(digest, leaseId));
+        Assert.Equal(1, coordinator.GetRevision(digest));
+
+        coordinator.Complete(leaseId, [digest]);
+        Assert.Equal(2, coordinator.GetRevision(digest));
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.GetRevision"/> advances when
+    /// <see cref="HarnessCompactionRunCoordinator.Complete"/> releases a reserved-but-not-delivered
+    /// digest (the pressure-eviction case), and again when a later lease's own
+    /// <see cref="HarnessCompactionRunCoordinator.Release"/> releases its own reservation — every
+    /// reserved-to-unclaimed transition is an externally-observable state change.
+    /// </summary>
+    [Fact]
+    public void GetRevision_CompleteReleaseAndExplicitRelease_BothAdvanceRevision()
+    {
+        const string digest = "revision-release-digest";
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseA = Guid.NewGuid();
+        var leaseB = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        Assert.True(coordinator.TryReserve(digest, leaseA));
+        var afterFirstReservation = coordinator.GetRevision(digest);
+
+        // Pressure-evicted: reserved but never forwarded — Complete releases it without promoting.
+        coordinator.Complete(leaseA, []);
+        var afterCompleteRelease = coordinator.GetRevision(digest);
+        Assert.True(afterCompleteRelease > afterFirstReservation);
+
+        Assert.True(coordinator.TryReserve(digest, leaseB));
+        var afterSecondReservation = coordinator.GetRevision(digest);
+        Assert.True(afterSecondReservation > afterCompleteRelease);
+
+        coordinator.Release(leaseB);
+        var afterExplicitRelease = coordinator.GetRevision(digest);
+        Assert.True(afterExplicitRelease > afterSecondReservation);
+    }
+
+    /// <summary>
+    /// A revision change to some other digest never present in a given
+    /// <see cref="HarnessDeliveredSegmentFilteringSnapshotProvider"/> instance's own captured entries can
+    /// never affect that instance's effective version: its signature only ever tracks the recoverable
+    /// digests its own inner snapshot actually reports, so it can never spuriously restart an assembly
+    /// attempt that never observed the unrelated digest in the first place.
+    /// </summary>
+    [Fact]
+    public void FilteringSnapshotProvider_UnrelatedDigestRevisionChange_EffectiveVersionUnaffected()
+    {
+        const string ownContentSeed = "unrelated-digest-test-own-artifact-content";
+        const string rawBody = "own-raw-body";
+        const string recoveredEntryId = "recovered-entry-id";
+        var ownDigest = HarnessArtifactIdentity.ComputeDigest(ownContentSeed);
+        var unrelatedDigest = HarnessArtifactIdentity.ComputeDigest("unrelated-digest-test-unrelated-content");
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var ownLease = Guid.NewGuid();
+        var unrelatedLease = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        var reference = HarnessCompactionTestFixture.SampleReference(ownContentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, "be helpful"),
+            new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+            new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(ownDigest))]),
+            new(ChatRole.User, "hello"),
+        };
+        var classifier = new HarnessScriptedMessageClassifier();
+        var baselineEntries = HarnessMafMessageContextAdapter.Adapt(messages, classifier);
+        var entriesWithOwnSegment = HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+            baselineEntries, recoveredEntryId, segment);
+
+        var innerProvider = new HarnessMutableContextSnapshotProvider(entriesWithOwnSegment);
+        var filteringProvider = new HarnessDeliveredSegmentFilteringSnapshotProvider(
+            innerProvider, coordinator, ownLease);
+
+        var firstCapture = filteringProvider.CaptureSnapshot();
+
+        // An entirely unrelated digest — never present in this provider's own entries — has its
+        // coordinator revision change via a completely separate lease.
+        Assert.True(coordinator.TryReserve(unrelatedDigest, unrelatedLease));
+        coordinator.Complete(unrelatedLease, []);
+
+        // The exact same entries, recaptured: this provider's own effective version must be unaffected
+        // by the unrelated digest's revision change.
+        var secondCapture = filteringProvider.CaptureSnapshot();
+        Assert.Equal(firstCapture.Version, secondCapture.Version);
+    }
+
+    /// <summary>
+    /// A <see cref="HarnessDeliveredSegmentFilteringSnapshotProvider"/> instance's own repeated captures
+    /// — the same lease observing the same entries and the same coordinator state every time, exactly
+    /// like an assembler's own first-capture/finalization-recapture pair when nothing raced in — must
+    /// report a perfectly stable effective version across every one of those captures.
+    /// </summary>
+    [Fact]
+    public void FilteringSnapshotProvider_OwnRepeatedCaptures_EffectiveVersionStable()
+    {
+        const string contentSeed = "stable-repeated-capture-artifact-content";
+        const string rawBody = "stable-raw-body";
+        const string recoveredEntryId = "recovered-entry-id";
+        var digest = HarnessArtifactIdentity.ComputeDigest(contentSeed);
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseId = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        var reference = HarnessCompactionTestFixture.SampleReference(contentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, "be helpful"),
+            new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+            new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
+            new(ChatRole.User, "hello"),
+        };
+        var classifier = new HarnessScriptedMessageClassifier();
+        var baselineEntries = HarnessMafMessageContextAdapter.Adapt(messages, classifier);
+        var entriesWithSegment = HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+            baselineEntries, recoveredEntryId, segment);
+
+        var innerProvider = new HarnessMutableContextSnapshotProvider(entriesWithSegment);
+        var filteringProvider = new HarnessDeliveredSegmentFilteringSnapshotProvider(
+            innerProvider, coordinator, leaseId);
+
+        var first = filteringProvider.CaptureSnapshot();
+        var second = filteringProvider.CaptureSnapshot();
+        var third = filteringProvider.CaptureSnapshot();
+
+        Assert.Equal(first.Version, second.Version);
+        Assert.Equal(second.Version, third.Version);
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.Complete"/> releasing a digest this provider's own
+    /// snapshot includes (the pressure-eviction case, where the releasing lease is a different,
+    /// concurrently-running call) advances this provider's effective version on its very next capture,
+    /// even when neither the inner snapshot's own version nor this provider's own reservation outcome
+    /// for the digest otherwise changed.
+    /// </summary>
+    [Fact]
+    public void FilteringSnapshotProvider_ConcurrentLeaseReleasesRelevantDigest_EffectiveVersionAdvances()
+    {
+        const string contentSeed = "release-relevant-digest-artifact-content";
+        const string rawBody = "release-raw-body";
+        const string recoveredEntryId = "recovered-entry-id";
+        var digest = HarnessArtifactIdentity.ComputeDigest(contentSeed);
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var observingLease = Guid.NewGuid();
+        var otherLease = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        var reference = HarnessCompactionTestFixture.SampleReference(contentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, "be helpful"),
+            new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+            new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
+            new(ChatRole.User, "hello"),
+        };
+        var classifier = new HarnessScriptedMessageClassifier();
+        var baselineEntries = HarnessMafMessageContextAdapter.Adapt(messages, classifier);
+        var entriesWithSegment = HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+            baselineEntries, recoveredEntryId, segment);
+
+        // A different, concurrently-running lease reserves the digest first — the observing provider's
+        // own first capture below therefore filters the body out, exactly like the losing side of the
+        // race in SameOuterRun_LoserFiltersThenWinnerPressureEvictsAndReleases_LoserRestartsAndDeliversExactlyOnce.
+        Assert.True(coordinator.TryReserve(digest, otherLease));
+
+        var innerProvider = new HarnessMutableContextSnapshotProvider(entriesWithSegment);
+        var filteringProvider = new HarnessDeliveredSegmentFilteringSnapshotProvider(
+            innerProvider, coordinator, observingLease);
+
+        var firstCapture = filteringProvider.CaptureSnapshot();
+        Assert.DoesNotContain(
+            firstCapture.Entries, e => e.Kind == HarnessContextEntryKind.RecoverableContextSegment);
+
+        // The other lease completes without forwarding — pressure-evicted — releasing the digest.
+        coordinator.Complete(otherLease, []);
+
+        var secondCapture = filteringProvider.CaptureSnapshot();
+        Assert.NotEqual(firstCapture.Version, secondCapture.Version);
+        Assert.Contains(
+            secondCapture.Entries, e => e.Kind == HarnessContextEntryKind.RecoverableContextSegment);
     }
 
     /// <summary>
