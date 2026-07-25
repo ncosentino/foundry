@@ -793,4 +793,74 @@ public sealed class HarnessCompactionPreservationTests
         Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
         Assert.Contains("result-ab", result.MissingRequiredEntryIds);
     }
+
+    // --- Reference-less RecoverableContextSegment entries are required, not opportunistic ---
+
+    [Fact]
+    public void SelectRequiredPreservation_RecoverableSegmentWithNoMatchingArtifactReference_IsRequired()
+    {
+        // No ArtifactReference entry shares this recoverable segment's digest, so the segment is
+        // the only copy of its content in the context — it must be required, not merely retained
+        // opportunistically by the recency window.
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var reference = HarnessCompactionTestFixture.SampleReference("orphaned body content", DateTimeOffset.UnixEpoch);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.RecoverableSegmentEntry(
+                "orphaned-recoverable", reference, "orphaned body content", DateTimeOffset.UnixEpoch),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent message"),
+        };
+
+        var selection = policy.SelectRequiredPreservation(original, CancellationToken.None);
+
+        Assert.Contains("orphaned-recoverable", selection.RequiredEntryIds);
+    }
+
+    [Fact]
+    public void SelectRequiredPreservation_RecoverableSegmentWithMatchingArtifactReference_IsNotRequired()
+    {
+        // A durable ArtifactReference entry with the same digest exists elsewhere in the context,
+        // so the recoverable segment's content remains reconstructible even if the segment itself
+        // is dropped — it is not required by this rule (though other rules, e.g. recency, may
+        // still retain it).
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var reference = HarnessCompactionTestFixture.SampleReference("referenced body content", DateTimeOffset.UnixEpoch);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ArtifactEntry("artifact-ref", reference.ContentDigest),
+            HarnessCompactionTestFixture.RecoverableSegmentEntry(
+                "referenced-recoverable", reference, "referenced body content", DateTimeOffset.UnixEpoch),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent message"),
+        };
+
+        var selection = policy.SelectRequiredPreservation(original, CancellationToken.None);
+
+        Assert.DoesNotContain("referenced-recoverable", selection.RequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_ProposalDropsRequiredReferenceLessRecoverableSegment_RejectedAsMissingRequiredEntry()
+    {
+        // A proposal that drops the reference-less recoverable segment must be rejected: without a
+        // durable reference, the segment is the sole copy of its content and dropping it is
+        // unrecoverable data loss, not a legitimate reduction.
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var reference = HarnessCompactionTestFixture.SampleReference("orphaned body content", DateTimeOffset.UnixEpoch);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.RecoverableSegmentEntry(
+                "orphaned-recoverable", reference, "orphaned body content", DateTimeOffset.UnixEpoch),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent message"),
+        };
+        var proposed = new[] { original[0], original[2] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
+        Assert.Contains("orphaned-recoverable", result.MissingRequiredEntryIds);
+    }
 }

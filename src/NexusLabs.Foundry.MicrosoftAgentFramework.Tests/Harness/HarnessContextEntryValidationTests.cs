@@ -150,6 +150,28 @@ public sealed class HarnessContextEntryValidationTests
         Assert.Throws<NotSupportedException>(() => HarnessContextEntry.NormalizeValue(new UnsupportedPayload()));
     }
 
+    // --- Unsupported AIContent shapes fail closed, never passed through by reference ----------
+
+    private sealed class UnsupportedContent : AIContent;
+
+    [Fact]
+    public void Create_ConversationalMessageWithUnsupportedContentType_ThrowsNotSupportedException()
+    {
+        var message = new ChatMessage(ChatRole.Assistant, new List<AIContent> { new UnsupportedContent() });
+
+        Assert.Throws<NotSupportedException>(() =>
+            HarnessContextEntry.Create("conv", HarnessContextEntryKind.ConversationalMessage, message));
+    }
+
+    [Fact]
+    public void Create_SystemInstructionWithUnsupportedContentType_ThrowsNotSupportedException()
+    {
+        var message = new ChatMessage(ChatRole.System, new List<AIContent> { new UnsupportedContent() });
+
+        Assert.Throws<NotSupportedException>(() =>
+            HarnessContextEntry.Create("system", HarnessContextEntryKind.SystemInstruction, message));
+    }
+
     // --- Nested dictionary/list/JsonElement values are still deep-copied and disposal-safe ----
 
     [Fact]

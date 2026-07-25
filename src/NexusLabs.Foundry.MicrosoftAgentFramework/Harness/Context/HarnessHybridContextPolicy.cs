@@ -28,6 +28,17 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// <see cref="HarnessContextEntryKind.Summary"/> entries are never required.
 /// </para>
 /// <para>
+/// <strong>Reference-less recoverable segments are required, not merely retained.</strong> A
+/// <see cref="HarnessContextEntryKind.RecoverableContextSegment"/> is also required whenever this
+/// same <c>originalEntries</c> set does not contain a <see cref="HarnessContextEntryKind.ArtifactReference"/>
+/// entry sharing its canonical digest: with no independently preservable reference pointer, the
+/// rehydrated body itself is the only durable copy of that content, so it must never be treated as
+/// opportunistically droppable. This is independent of — and evaluated in addition to —
+/// <see cref="HarnessContextAssembler"/>'s own eviction-eligibility check, so both
+/// <see cref="HarnessCompactionVerifier"/> and the deterministic fallback also honor it. A recoverable
+/// segment backed by a matching digest reference remains unrequired and evictable as before.
+/// </para>
+/// <para>
 /// <strong>Incomplete tool exchanges are never silently reducible.</strong> Independent of the
 /// recency-unit retention boundary above, <see cref="SelectRequiredPreservation"/> always requires
 /// every entry <see cref="HarnessToolExchangeAnalysis"/> flags as part of an incomplete exchange: an
@@ -246,12 +257,33 @@ internal sealed class HarnessHybridContextPolicy
             }
         }
 
+        // Every canonical digest backed by a durable ArtifactReference entry in this same snapshot.
+        // A RecoverableContextSegment whose digest is not in this set has no independently
+        // preservable reference pointer, so it must be required rather than merely retained
+        // opportunistically — dropping it would lose content no other entry can reconstruct.
+        var durableReferenceDigests = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var entry in originalEntries)
+        {
+            if (entry.Kind == HarnessContextEntryKind.ArtifactReference && entry.ArtifactReferenceDigest is not null)
+            {
+                durableReferenceDigests.Add(entry.ArtifactReferenceDigest);
+            }
+        }
+
         foreach (var entry in originalEntries)
         {
             if (entry.Kind is HarnessContextEntryKind.SystemInstruction
                 or HarnessContextEntryKind.AuthoritativeSessionState
                 or HarnessContextEntryKind.ApprovalSecurityState
                 or HarnessContextEntryKind.ArtifactReference)
+            {
+                Require(entry.EntryId);
+                continue;
+            }
+
+            if (entry.Kind == HarnessContextEntryKind.RecoverableContextSegment
+                && (entry.ArtifactReferenceDigest is null
+                    || !durableReferenceDigests.Contains(entry.ArtifactReferenceDigest)))
             {
                 Require(entry.EntryId);
             }
