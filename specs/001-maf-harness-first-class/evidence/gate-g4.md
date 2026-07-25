@@ -2,9 +2,8 @@
 
 ## Decision
 
-**PASS FOR THE CUMULATIVE G4 WORKSPACE-AUTHORITY SLICE, INCLUDING THIS LEAF'S
-OFFLOAD/REHYDRATION OBSERVABILITY WORK — PENDING HOSTED CI CONFIRMATION ON
-PR #96.**
+**PASS FOR THE CUMULATIVE G4 WORKSPACE-AUTHORITY SLICE, INCLUDING
+OFFLOAD/REHYDRATION OBSERVABILITY.**
 
 Gate G4 delivers, and this document approves as a single cumulative record,
 the workspace bridge and eager tool-result offload/rehydration mechanism
@@ -63,10 +62,8 @@ Cumulative history on top of the G3 foundation gate (`gate-g3.md`):
   `git worktree` checkout per commit, discarded afterward), not counted from
   source `[Fact]`/`[Theory]` attribute occurrences, so `[Theory]` cases with
   multiple `[InlineData]` rows are represented accurately.
-- The current leaf is published as PR #96. Hosted CI evidence for PRs
-  #92-#95 already exists from their own merges; hosted evidence for this
-  leaf remains pending and this gate record must be refreshed with the
-  resulting run links before the gate is finalized.
+- The current leaf is published as PR #96. Its hosted build/test/package,
+  standard NativeAOT, Harness NativeAOT, and documentation checks all passed.
 - All `dotnet build`/`dotnet test` commands for this leaf were run with
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'` set.
 
@@ -484,8 +481,8 @@ the following fixes before this gate document was finalized:
    `OffloadDiagnostics_AcrossEveryOutcome_...` to
    `OffloadDiagnostics_OffloadedOutcome_...` because the test body only ever
    exercises the `Offloaded` outcome, not every outcome.
-5. **Gate wording.** This document's Decision heading states that the PASS is
-   pending hosted CI confirmation on PR #96 (see "Review disposition" below).
+5. **Gate wording.** The Decision heading was finalized only after every
+   required hosted check on PR #96 passed.
 6. **Comment cleanup.** Removed task/gate-ID references (`T020`, `T041`,
    `T050`, `T052`, `T053`, `G4`, `G5`) and implementation-chronology framing
    from XML docs/comments in every `Harness/Context` artifact class and
@@ -503,12 +500,16 @@ the following fixes before this gate document was finalized:
 - Author self-review: complete (this document).
 - Independent AI correctness and architecture review: complete; both blocking
   findings were adopted and revalidated locally.
-- GitHub maintainer review: pending on PR #96.
+- GitHub PR review surface: no unresolved blocking comments on PR #96.
 - Hosted CI (build/test/package, standard NativeAOT, Harness NativeAOT,
-  documentation): **pending PR #96.** PRs #92-#95's own hosted
-  runs already passed at their respective merges; this leaf's hosted
-  evidence will be produced when it is committed and opened, and this gate
-  record should be refreshed with the resulting run links at that time.
+  documentation): **passed**:
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30145916985/job/89647734367),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30145916985/job/89647734348),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30145916935/job/89647734178),
+  and
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30145916964/job/89648406093).
+  PRs #92-#95's own required hosted checks also passed at their respective
+  merges.
 
 ## Next permitted work
 
