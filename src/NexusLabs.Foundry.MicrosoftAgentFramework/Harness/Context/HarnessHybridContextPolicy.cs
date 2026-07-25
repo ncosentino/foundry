@@ -39,6 +39,15 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// segment backed by a matching digest reference remains unrequired and evictable as before.
 /// </para>
 /// <para>
+/// <strong>A reference-bearing complete tool exchange is required atomically.</strong> When a complete
+/// <see cref="HarnessToolExchangeGroup"/>'s result entry structurally carries a canonical artifact
+/// reference in its <see cref="FunctionResultContent.Result"/> payload (see
+/// <see cref="HarnessContextEntry.ArtifactReferenceDigests"/>), <see cref="SelectRequiredPreservation"/>
+/// requires every entry id in that group — its call entry and every result entry, never the result alone
+/// — regardless of the trailing recency window. The correlated call can never be silently dropped out
+/// from under a preserved, reference-bearing result.
+/// </para>
+/// <para>
 /// <strong>Incomplete tool exchanges are never silently reducible.</strong> Independent of the
 /// recency-unit retention boundary above, <see cref="SelectRequiredPreservation"/> always requires
 /// every entry <see cref="HarnessToolExchangeAnalysis"/> flags as part of an incomplete exchange: an
@@ -246,6 +255,12 @@ internal sealed class HarnessHybridContextPolicy
         var analysis = HarnessToolExchangeAnalysis.Build(originalEntries);
         cancellationToken.ThrowIfCancellationRequested();
 
+        var entriesById = new Dictionary<string, HarnessContextEntry>(StringComparer.Ordinal);
+        foreach (var entry in originalEntries)
+        {
+            entriesById[entry.EntryId] = entry;
+        }
+
         var requiredIds = new List<string>();
         var requiredIdSet = new HashSet<string>(StringComparer.Ordinal);
 
@@ -257,18 +272,12 @@ internal sealed class HarnessHybridContextPolicy
             }
         }
 
-        // Every canonical digest backed by a durable ArtifactReference entry in this same snapshot.
-        // A RecoverableContextSegment whose digest is not in this set has no independently
-        // preservable reference pointer, so it must be required rather than merely retained
-        // opportunistically — dropping it would lose content no other entry can reconstruct.
-        var durableReferenceDigests = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var entry in originalEntries)
-        {
-            if (entry.Kind == HarnessContextEntryKind.ArtifactReference && entry.ArtifactReferenceDigest is not null)
-            {
-                durableReferenceDigests.Add(entry.ArtifactReferenceDigest);
-            }
-        }
+        // Every canonical digest backed by a durable ArtifactReference entry, or by a ToolExchange
+        // result entry whose payload structurally carries a canonical reference, in this same snapshot.
+        // A RecoverableContextSegment whose digest is not in this set has no independently preservable
+        // reference pointer, so it must be required rather than merely retained opportunistically —
+        // dropping it would lose content no other entry can reconstruct.
+        var durableReferenceDigests = HarnessContextEntry.CollectDurableArtifactReferenceDigests(originalEntries);
 
         foreach (var entry in originalEntries)
         {
@@ -286,6 +295,31 @@ internal sealed class HarnessHybridContextPolicy
                     || !durableReferenceDigests.Contains(entry.ArtifactReferenceDigest)))
             {
                 Require(entry.EntryId);
+            }
+        }
+
+        // A complete tool exchange whose result carries an artifact reference is reference-bearing
+        // durable context in its own right: the whole call/result group is required atomically — never
+        // just the result entry alone, and regardless of how far outside the trailing recency window it
+        // falls — so the correlated call can never be silently dropped out from under a preserved result.
+        foreach (var group in analysis.Groups)
+        {
+            if (!group.IsComplete)
+            {
+                continue;
+            }
+
+            var isReferenceBearing = group.ResultEntryIds
+                .Select(resultEntryId => entriesById[resultEntryId])
+                .Any(resultEntry => resultEntry.ArtifactReferenceDigests.Count > 0);
+            if (!isReferenceBearing)
+            {
+                continue;
+            }
+
+            foreach (var entryId in group.AllEntryIds)
+            {
+                Require(entryId);
             }
         }
 

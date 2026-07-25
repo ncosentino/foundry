@@ -747,27 +747,21 @@ internal sealed class HarnessContextAssembler
 
     /// <summary>
     /// Every entry in <paramref name="entries"/> except <see cref="HarnessContextEntryKind.RecoverableContextSegment"/>
-    /// bodies that have a durable <see cref="HarnessContextEntryKind.ArtifactReference"/> entry with the
-    /// same canonical digest in the same snapshot. A recoverable body whose digest has no matching
-    /// durable reference is kept as-is: silently discarding it would lose content for which no
-    /// independently preservable reference pointer exists.
+    /// bodies that have a durable reference with the same canonical digest in the same snapshot — either
+    /// a standalone <see cref="HarnessContextEntryKind.ArtifactReference"/> entry, or a
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> entry whose result payload structurally carries
+    /// the reference. A recoverable body whose digest has no matching durable reference is kept as-is:
+    /// silently discarding it would lose content for which no independently preservable reference
+    /// pointer exists.
     /// Records a <see cref="HarnessContextAssemblyStage.RecoverableBodyEviction"/> stage only when at
     /// least one body was actually evicted.
     /// </summary>
     private static List<HarnessContextEntry> EvictRecoverableBodies(
         IReadOnlyList<HarnessContextEntry> entries, List<HarnessContextAssemblyStage> stages)
     {
-        // Collect every canonical digest backed by a durable ArtifactReference entry so the eviction
-        // loop below can confirm a reference exists before removing the corresponding body.
-        var durableReferenceDigests = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var entry in entries)
-        {
-            if (entry.Kind == HarnessContextEntryKind.ArtifactReference
-                && entry.ArtifactReferenceDigest is not null)
-            {
-                durableReferenceDigests.Add(entry.ArtifactReferenceDigest);
-            }
-        }
+        // Collect every canonical digest backed by a durable reference so the eviction loop below can
+        // confirm a reference exists before removing the corresponding body.
+        var durableReferenceDigests = HarnessContextEntry.CollectDurableArtifactReferenceDigests(entries);
 
         var evictedAny = false;
         var result = new List<HarnessContextEntry>(entries.Count);

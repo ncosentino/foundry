@@ -116,6 +116,82 @@ public sealed class HarnessContextEntryValidationTests
             HarnessContextEntry.Create("mixed", HarnessContextEntryKind.ToolExchange, message));
     }
 
+    // --- ToolExchange role coherence: calls must be Assistant, results must be Tool -------------
+
+    [Theory]
+    [InlineData("user")]
+    [InlineData("system")]
+    [InlineData("tool")]
+    public void Create_ToolExchangeCallBearingWithNonAssistantRole_ThrowsArgumentException(string roleName)
+    {
+        var role = new ChatRole(roleName);
+        var message = new ChatMessage(role, new List<AIContent> { new FunctionCallContent("call-1", "lookup") });
+
+        Assert.Throws<ArgumentException>(() =>
+            HarnessContextEntry.Create("call", HarnessContextEntryKind.ToolExchange, message));
+    }
+
+    [Theory]
+    [InlineData("user")]
+    [InlineData("system")]
+    [InlineData("assistant")]
+    public void Create_ToolExchangeResultBearingWithNonToolRole_ThrowsArgumentException(string roleName)
+    {
+        var role = new ChatRole(roleName);
+        var message = new ChatMessage(role, new List<AIContent> { new FunctionResultContent("call-1", "ok") });
+
+        Assert.Throws<ArgumentException>(() =>
+            HarnessContextEntry.Create("result", HarnessContextEntryKind.ToolExchange, message));
+    }
+
+    [Fact]
+    public void Create_ToolExchangeCallBearingWithAssistantRole_Succeeds()
+    {
+        var message = new ChatMessage(
+            ChatRole.Assistant, new List<AIContent> { new FunctionCallContent("call-1", "lookup") });
+
+        var entry = HarnessContextEntry.Create("call", HarnessContextEntryKind.ToolExchange, message);
+
+        Assert.Equal(HarnessContextEntryKind.ToolExchange, entry.Kind);
+        Assert.Equal(ChatRole.Assistant, entry.Message.Role);
+    }
+
+    [Fact]
+    public void Create_ToolExchangeResultBearingWithToolRole_Succeeds()
+    {
+        var message = new ChatMessage(
+            ChatRole.Tool, new List<AIContent> { new FunctionResultContent("call-1", "ok") });
+
+        var entry = HarnessContextEntry.Create("result", HarnessContextEntryKind.ToolExchange, message);
+
+        Assert.Equal(HarnessContextEntryKind.ToolExchange, entry.Kind);
+        Assert.Equal(ChatRole.Tool, entry.Message.Role);
+    }
+
+    // --- CreateRecoverableSegment: no orphan ChatRole.Tool message for transient recovered body -
+
+    [Fact]
+    public void CreateRecoverableSegment_NeverProducesOrphanToolRoleMessage_UsesChatRoleUser()
+    {
+        var rehydratedAtUtc = DateTimeOffset.UtcNow;
+        const string body = "recovered artifact body text";
+        var reference = HarnessCompactionTestFixture.SampleReference(body, rehydratedAtUtc.AddMinutes(-5));
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, body, rehydratedAtUtc);
+
+        var entry = HarnessContextEntry.CreateRecoverableSegment("recoverable-1", segment);
+
+        Assert.Equal(HarnessContextEntryKind.RecoverableContextSegment, entry.Kind);
+        Assert.NotEqual(ChatRole.Tool, entry.Message.Role);
+        Assert.NotEqual(ChatRole.System, entry.Message.Role);
+        Assert.Equal(ChatRole.User, entry.Message.Role);
+
+        // Raw recovered body must still be available exactly as given, just dispatched under a
+        // provider-valid, non-privileged role rather than an orphan tool-role message with no
+        // correlating FunctionCallContent/FunctionResultContent pair.
+        Assert.Equal(body, entry.Message.Text);
+        Assert.DoesNotContain(entry.Message.Contents, content => content is FunctionCallContent or FunctionResultContent);
+    }
+
     // --- NormalizeValue: no reflection-based fallback for an unsupported type ------------------
 
     private sealed class UnsupportedPayload
@@ -210,5 +286,71 @@ public sealed class HarnessContextEntryValidationTests
 
         var element = Assert.IsType<JsonElement>(cloned);
         Assert.Equal("value", element.GetProperty("key").GetString());
+    }
+
+    // --- ArtifactReferenceDigests: defensive copy — never a mutable List<string> ----------------
+
+    /// <summary>
+    /// <see cref="HarnessContextEntry.ArtifactReferenceDigests"/> must never expose the mutable
+    /// <see cref="List{T}"/> that <c>ExtractResultReferenceDigests</c> builds internally for a
+    /// tool-exchange result entry. The private constructor must store a defensive copy (an independently
+    /// allocated array) so a caller who casts the returned property back to a mutable collection cannot
+    /// alter this entry's own authoritative state.
+    /// </summary>
+    [Fact]
+    public void ToolExchangeResult_ArtifactReferenceDigests_IsNotMutableList()
+    {
+        var digest = HarnessArtifactIdentity.ComputeDigest("mutation-test-content");
+        var result = new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest));
+        var message = new ChatMessage(ChatRole.Tool, new List<AIContent> { result });
+        var entry = HarnessContextEntry.Create("result", HarnessContextEntryKind.ToolExchange, message);
+
+        // Precondition: the entry must have actually extracted a digest so the test is non-vacuous.
+        Assert.NotEmpty(entry.ArtifactReferenceDigests);
+
+        // The stored collection is a defensive copy (string[]), not the internal List<string> that
+        // ExtractResultReferenceDigests builds; casting must not yield a List<string>.
+        Assert.IsNotType<List<string>>(entry.ArtifactReferenceDigests);
+    }
+
+    /// <summary>
+    /// <see cref="HarnessContextEntry.ArtifactReferenceDigests"/> on an
+    /// <see cref="HarnessContextEntryKind.ArtifactReference"/> entry must not be castable to a mutable
+    /// collection — the single-element array built by <see cref="HarnessContextEntry.Create"/> must be
+    /// stored as an independent defensive copy, never the caller's original collection.
+    /// </summary>
+    [Fact]
+    public void ArtifactReferenceEntry_ArtifactReferenceDigests_IsNotMutableList()
+    {
+        var digest = HarnessArtifactIdentity.ComputeDigest("artifact-ref-immutability-test");
+        var message = new ChatMessage(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest));
+        var entry = HarnessContextEntry.Create("entry", HarnessContextEntryKind.ArtifactReference, message);
+
+        Assert.NotEmpty(entry.ArtifactReferenceDigests);
+        Assert.IsNotType<List<string>>(entry.ArtifactReferenceDigests);
+    }
+
+    /// <summary>
+    /// <see cref="HarnessContextEntry.Copy"/> must produce an entry whose
+    /// <see cref="HarnessContextEntry.ArtifactReferenceDigests"/> is a separately allocated collection,
+    /// not the same object reference as the source entry's collection, so a consumer mutating one
+    /// boundary copy cannot affect any other boundary copy.
+    /// </summary>
+    [Fact]
+    public void Copy_ArtifactReferenceDigests_IsIndependentInstance_NotSameReference()
+    {
+        var digest = HarnessArtifactIdentity.ComputeDigest("copy-independence-test-content");
+        var message = new ChatMessage(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest));
+        var entry = HarnessContextEntry.Create("entry", HarnessContextEntryKind.ArtifactReference, message);
+        var copy = entry.Copy();
+
+        // Each entry holds its own independently allocated array — not the same reference.
+        Assert.False(
+            ReferenceEquals(entry.ArtifactReferenceDigests, copy.ArtifactReferenceDigests),
+            "Expected Copy() to produce a new ArtifactReferenceDigests instance, not the same reference.");
+
+        // Content must still be equal.
+        Assert.Equal(entry.ArtifactReferenceDigests.Count, copy.ArtifactReferenceDigests.Count);
+        Assert.Equal(entry.ArtifactReferenceDigests[0], copy.ArtifactReferenceDigests[0]);
     }
 }

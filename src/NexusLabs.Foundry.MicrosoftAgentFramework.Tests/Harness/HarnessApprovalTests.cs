@@ -1567,7 +1567,8 @@ public sealed class HarnessApprovalTests
                 : [],
             toolAutoApprovalEnabled,
             approvalHostValidator,
-            progressAccessor);
+            progressAccessor,
+            compactionRunCoordinator: null);
     }
 
     private sealed class CollectorSink(List<IProgressEvent> events) : IProgressSink

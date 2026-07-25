@@ -35,4 +35,8 @@ internal enum HarnessProviderCompositionStatus
     WebSearchPluginRequired,
     WebSearchToolNameCollision,
     WebSearchToolTypeCollision,
+    CompactionCapabilityEnabledWithoutProfile,
+    CompactionProfileSuppliedWithoutCapabilityEnabled,
+    CompactionProfileNotExecutable,
+    CompactionExistingComponent,
 }

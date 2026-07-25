@@ -65,13 +65,16 @@ internal sealed record HarnessContextEntry
         string entryId,
         HarnessContextEntryKind kind,
         ChatMessage message,
-        string? artifactReferenceDigest,
+        IReadOnlyList<string> artifactReferenceDigests,
         HarnessArtifactRecoverableContextSegment? recoverableSegment)
     {
         EntryId = entryId;
         Kind = kind;
         _message = message;
-        ArtifactReferenceDigest = artifactReferenceDigest;
+        // Defensive copy: always store an independently allocated array so callers cannot mutate
+        // this entry's ArtifactReferenceDigests via a cast to IList<string> or ICollection<string>,
+        // regardless of what concrete collection the caller supplied.
+        ArtifactReferenceDigests = [.. artifactReferenceDigests];
         RecoverableSegment = recoverableSegment;
     }
 
@@ -96,12 +99,30 @@ internal sealed record HarnessContextEntry
     internal ChatMessage Message => CloneMessage(_message);
 
     /// <summary>
-    /// The lowercase hex SHA-256 digest identifying this entry's artifact. Non-<see langword="null"/>
-    /// only when <see cref="Kind"/> is <see cref="HarnessContextEntryKind.ArtifactReference"/> (parsed
-    /// from the message's canonical reference text) or <see cref="HarnessContextEntryKind.RecoverableContextSegment"/>
-    /// (taken directly from <see cref="RecoverableSegment"/>'s reference).
+    /// Every canonical lowercase hex SHA-256 artifact-reference digest this entry structurally carries,
+    /// defensively copied and never empty-but-null. Populated as follows: exactly one digest (parsed
+    /// from the message's canonical reference text) when <see cref="Kind"/> is
+    /// <see cref="HarnessContextEntryKind.ArtifactReference"/>; exactly one digest (taken directly from
+    /// <see cref="RecoverableSegment"/>'s reference) when <see cref="Kind"/> is
+    /// <see cref="HarnessContextEntryKind.RecoverableContextSegment"/>; zero or more digests — one per
+    /// <see cref="FunctionResultContent.Result"/> that structurally is a canonical
+    /// <c>artifact://sha256/{64 lowercase hex}</c> reference (a bare <see cref="string"/> or a
+    /// string-valued <see cref="JsonElement"/> in exactly that shape — never inferred from surrounding
+    /// prose) — when <see cref="Kind"/> is <see cref="HarnessContextEntryKind.ToolExchange"/> and this
+    /// entry carries one or more <see cref="FunctionResultContent"/> items; and empty for every other
+    /// kind.
     /// </summary>
-    internal string? ArtifactReferenceDigest { get; }
+    internal IReadOnlyList<string> ArtifactReferenceDigests { get; }
+
+    /// <summary>
+    /// A single convenience digest, non-<see langword="null"/> only when <see cref="ArtifactReferenceDigests"/>
+    /// carries exactly one coherent digest. A <see cref="HarnessContextEntryKind.ToolExchange"/> result
+    /// entry whose payload structurally carries more than one canonical reference (or none at all)
+    /// reports <see langword="null"/> here — callers that need every carried digest must read
+    /// <see cref="ArtifactReferenceDigests"/> directly rather than assume a single-digest shape.
+    /// </summary>
+    internal string? ArtifactReferenceDigest =>
+        ArtifactReferenceDigests.Count == 1 ? ArtifactReferenceDigests[0] : null;
 
     /// <summary>
     /// The marked recoverable rehydration segment — the canonical artifact reference identity it came
@@ -120,10 +141,13 @@ internal sealed record HarnessContextEntry
     /// not exactly one canonical <c>artifact://sha256/{64 lowercase hex}</c> reference;
     /// <paramref name="kind"/> is <see cref="HarnessContextEntryKind.ToolExchange"/> and
     /// <paramref name="message"/> carries no <see cref="FunctionCallContent"/> or
-    /// <see cref="FunctionResultContent"/>, or carries both a call and a result; or
-    /// <paramref name="kind"/> is not <see cref="HarnessContextEntryKind.ToolExchange"/> and
-    /// <paramref name="message"/> carries any <see cref="FunctionCallContent"/> or
-    /// <see cref="FunctionResultContent"/>.
+    /// <see cref="FunctionResultContent"/>, or carries both a call and a result; a call-bearing
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> entry's message role is not
+    /// <see cref="ChatRole.Assistant"/>; a result-bearing
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> entry's message role is not
+    /// <see cref="ChatRole.Tool"/>; or <paramref name="kind"/> is not
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> and <paramref name="message"/> carries any
+    /// <see cref="FunctionCallContent"/> or <see cref="FunctionResultContent"/>.
     /// </exception>
     /// <exception cref="NotSupportedException">
     /// A <see cref="FunctionCallContent.Arguments"/> value or a <see cref="FunctionResultContent.Result"/>
@@ -157,7 +181,7 @@ internal sealed record HarnessContextEntry
             }
         }
 
-        string? artifactReferenceDigest = null;
+        IReadOnlyList<string> artifactReferenceDigests = [];
 
         switch (kind)
         {
@@ -171,7 +195,7 @@ internal sealed record HarnessContextEntry
                         nameof(message));
                 }
 
-                artifactReferenceDigest = digest;
+                artifactReferenceDigests = [digest];
                 break;
 
             case HarnessContextEntryKind.ToolExchange:
@@ -192,6 +216,34 @@ internal sealed record HarnessContextEntry
                         nameof(message));
                 }
 
+                if (hasCall && copiedMessage.Role != ChatRole.Assistant)
+                {
+                    throw new ArgumentException(
+                        "A call-bearing tool-exchange entry's message must use ChatRole.Assistant " +
+                        $"to maintain MEAI role coherence; received ChatRole '{copiedMessage.Role}'. " +
+                        "User-role and system-role messages may never carry function-call content.",
+                        nameof(message));
+                }
+
+                if (hasResult && copiedMessage.Role != ChatRole.Tool)
+                {
+                    throw new ArgumentException(
+                        "A result-bearing tool-exchange entry's message must use ChatRole.Tool " +
+                        $"to maintain MEAI role coherence; received ChatRole '{copiedMessage.Role}'. " +
+                        "User-role and system-role messages may never carry function-result content.",
+                        nameof(message));
+                }
+
+                if (hasResult)
+                {
+                    // A real-shape eager-offloaded tool result carries the canonical
+                    // 'artifact://sha256/{digest}' reference string as FunctionResultContent.Result — the
+                    // message stays ToolExchange for sequence validation, while these digests let the
+                    // preservation policy and eviction logic treat it as durable, reference-bearing
+                    // context too. Structural inspection only, never prose parsing.
+                    artifactReferenceDigests = ExtractResultReferenceDigests(copiedMessage);
+                }
+
                 break;
 
             case HarnessContextEntryKind.RecoverableContextSegment:
@@ -203,12 +255,65 @@ internal sealed record HarnessContextEntry
                     nameof(kind));
         }
 
-        return new HarnessContextEntry(entryId, kind, copiedMessage, artifactReferenceDigest, recoverableSegment: null);
+        return new HarnessContextEntry(entryId, kind, copiedMessage, artifactReferenceDigests, recoverableSegment: null);
+    }
+
+    /// <summary>
+    /// Every canonical artifact-reference digest structurally carried by <paramref name="message"/>'s
+    /// <see cref="FunctionResultContent"/> items, in declaration order. Only the exact shapes a real
+    /// eager-offload result actually emits are recognized: a bare <see cref="string"/>
+    /// <see cref="FunctionResultContent.Result"/> that is itself one canonical reference, or a
+    /// string-valued <see cref="JsonElement"/> carrying the same. Anything else — including a bare
+    /// workspace path, an arbitrary URI, or a non-string payload — is never treated as a reference.
+    /// </summary>
+    private static IReadOnlyList<string> ExtractResultReferenceDigests(ChatMessage message)
+    {
+        List<string>? digests = null;
+        foreach (var result in message.Contents.OfType<FunctionResultContent>())
+        {
+            if (TryGetReferenceDigestFromResult(result.Result, out var digest))
+            {
+                digests ??= [];
+                digests.Add(digest);
+            }
+        }
+
+        return digests ?? (IReadOnlyList<string>)[];
+    }
+
+    /// <summary>
+    /// Structurally recognizes a canonical artifact reference carried by a <see cref="FunctionResultContent.Result"/>
+    /// payload: either a bare <see cref="string"/>, or a string-valued <see cref="JsonElement"/> (the
+    /// shape <see cref="NormalizeValue"/> stores a result's string payload as after a round trip through
+    /// source-generated JSON serialization). Never attempts to infer intent from surrounding prose or
+    /// from a non-string payload shape.
+    /// </summary>
+    private static bool TryGetReferenceDigestFromResult(object? result, out string digest)
+    {
+        switch (result)
+        {
+            case string text:
+                return HarnessArtifactIdentity.TryParseReferenceId(text, out digest);
+
+            case JsonElement { ValueKind: JsonValueKind.String } element:
+                var elementText = element.GetString();
+                if (elementText is not null)
+                {
+                    return HarnessArtifactIdentity.TryParseReferenceId(elementText, out digest);
+                }
+
+                digest = string.Empty;
+                return false;
+
+            default:
+                digest = string.Empty;
+                return false;
+        }
     }
 
     /// <summary>
     /// Constructs a <see cref="HarnessContextEntryKind.RecoverableContextSegment"/> entry directly from
-    /// a G4 rehydration primitive's marked recoverable segment. This is the only path that can construct
+    /// a recoverable rehydration segment. This is the only path that can construct
     /// this kind — the generic <see cref="Create"/> factory rejects it, because this kind's canonical
     /// data model is <paramref name="segment"/> itself (the exact artifact reference identity plus its
     /// resolved body, already carried in <see cref="HarnessArtifactRecoverableContextSegment"/>'s own
@@ -232,19 +337,25 @@ internal sealed record HarnessContextEntry
             throw new ArgumentException("A non-empty, non-whitespace entry id is required.", nameof(entryId));
         }
 
-        var message = new ChatMessage(ChatRole.Tool, segment.Body);
+        // ChatRole.User, never ChatRole.Tool and never ChatRole.System: a transient recovered body has
+        // no correlating FunctionCallContent/FunctionResultContent pair of its own, so dispatching it
+        // under ChatRole.Tool would be an orphan tool-role message a real provider can validly reject.
+        // ChatRole.User is the non-privileged, always provider-valid role for arbitrary transient
+        // context; ChatRole.System is never used here because this content is neither pinned nor
+        // authoritative instruction. The body is preserved exactly, unwrapped.
+        var message = new ChatMessage(ChatRole.User, segment.Body);
 
         return new HarnessContextEntry(
             entryId,
             HarnessContextEntryKind.RecoverableContextSegment,
             message,
-            segment.Reference.ContentDigest,
+            [segment.Reference.ContentDigest],
             segment);
     }
 
     /// <summary>
     /// Returns a new entry sharing this entry's exact <see cref="EntryId"/>, <see cref="Kind"/>,
-    /// <see cref="ArtifactReferenceDigest"/>, and <see cref="RecoverableSegment"/> (already
+    /// <see cref="ArtifactReferenceDigests"/>, and <see cref="RecoverableSegment"/> (already
     /// immutable value data), but with an independently, deeply defensively-copied
     /// <see cref="Message"/> — never the same underlying <see cref="ChatMessage"/> instance or
     /// content list as this entry or as any other <see cref="Copy"/> result. Used to seal every
@@ -256,7 +367,39 @@ internal sealed record HarnessContextEntry
     /// authoritative copy, including the assembler's own snapshot-derived entries.
     /// </summary>
     internal HarnessContextEntry Copy() =>
-        new HarnessContextEntry(EntryId, Kind, CloneMessage(_message), ArtifactReferenceDigest, RecoverableSegment);
+        new HarnessContextEntry(EntryId, Kind, CloneMessage(_message), ArtifactReferenceDigests, RecoverableSegment);
+
+    /// <summary>
+    /// Every canonical artifact-reference digest treated as durable — independently preservable by some
+    /// entry other than a <see cref="HarnessContextEntryKind.RecoverableContextSegment"/> itself — across
+    /// <paramref name="entries"/>: every <see cref="ArtifactReferenceDigests"/> value of a standalone
+    /// <see cref="HarnessContextEntryKind.ArtifactReference"/> entry, plus every
+    /// <see cref="ArtifactReferenceDigests"/> value of a <see cref="HarnessContextEntryKind.ToolExchange"/>
+    /// entry whose <see cref="FunctionResultContent.Result"/> payload structurally carries one or more
+    /// canonical references. A <see cref="HarnessContextEntryKind.RecoverableContextSegment"/> entry's
+    /// own digest is deliberately never included: this set exists to answer whether some other,
+    /// non-recoverable entry already durably carries a given digest, not to make a recoverable segment
+    /// durable with itself.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="entries"/> is <see langword="null"/>.</exception>
+    internal static HashSet<string> CollectDurableArtifactReferenceDigests(IReadOnlyList<HarnessContextEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+
+        var digests = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var entry in entries)
+        {
+            if (entry.Kind is HarnessContextEntryKind.ArtifactReference or HarnessContextEntryKind.ToolExchange)
+            {
+                foreach (var digest in entry.ArtifactReferenceDigests)
+                {
+                    digests.Add(digest);
+                }
+            }
+        }
+
+        return digests;
+    }
 
     /// <summary>
     /// Builds a fresh <see cref="ChatMessage"/> with its own independently-copied

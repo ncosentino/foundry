@@ -268,6 +268,31 @@ internal static class HarnessCompositionTestFixture
         HarnessGeneratedToolResolution tools,
         HarnessExecutionBinding binding,
         IAgentExecutionContextAccessor accessor,
+        HarnessHybridProfile? hybridProfile) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics: null,
+            historyProvider: null,
+            planningProviders: null,
+            approvalPlugin: null,
+            skillsPlugin: null,
+            progressAccessor: null,
+            webSearchPlugin: null,
+            offloadPlugin: null,
+            hybridProfile);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
         IAgentMetrics? metrics) =>
         CreateRequest(
             chatClient,
@@ -444,6 +469,39 @@ internal static class HarnessCompositionTestFixture
         IProgressReporterAccessor? progressAccessor,
         HarnessWebSearchPlugin? webSearchPlugin,
         HarnessToolResultOffloadPlugin? offloadPlugin) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders,
+            approvalPlugin,
+            skillsPlugin,
+            progressAccessor,
+            webSearchPlugin,
+            offloadPlugin,
+            hybridProfile: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin,
+        HarnessSkillsPlugin? skillsPlugin,
+        IProgressReporterAccessor? progressAccessor,
+        HarnessWebSearchPlugin? webSearchPlugin,
+        HarnessToolResultOffloadPlugin? offloadPlugin,
+        HarnessHybridProfile? hybridProfile) =>
         new(
             ChatClient: chatClient,
             Services: services,
@@ -452,6 +510,7 @@ internal static class HarnessCompositionTestFixture
             Description: "G2 composition test agent",
             Instructions: "Use the supplied tool.",
             Profile: profile,
+            HybridProfile: hybridProfile,
             GeneratedTools: tools,
             ExecutionBinding: binding,
             ExecutionContextAccessor: accessor,
