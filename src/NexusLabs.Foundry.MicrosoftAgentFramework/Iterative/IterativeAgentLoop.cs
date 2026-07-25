@@ -123,6 +123,22 @@ internal sealed class IterativeAgentLoop : IIterativeAgentLoop
             executionContextScope = _executionContextAccessor.BeginScope(executionContext);
         }
 
+        // When an eager tool-result offload policy is configured, capture a trusted execution
+        // binding now (immediately after the scope above is established) so the shared
+        // HarnessToolResultOffloadTransform can later revalidate it before touching the workspace.
+        // requireWorkspace:false mirrors the general contract: the transform itself still inlines
+        // small values with no binding/workspace present, but fails closed (never
+        // inlines/truncates/discards) on oversized values in that case.
+        Harness.HarnessExecutionBinding? offloadBinding = null;
+        if (options.OffloadPolicy is { } offloadPolicyForCapture && _executionContextAccessor is not null)
+        {
+            var captureResult = Harness.HarnessExecutionBinding.Capture(
+                _executionContextAccessor,
+                offloadPolicyForCapture.OffloadSessionId,
+                requireWorkspace: false);
+            offloadBinding = captureResult.Binding;
+        }
+
         // Track in-progress iteration state so catch handlers can record
         // partial IterationRecords when interrupted mid-iteration.
         var currentIterationIndex = -1;
@@ -373,9 +389,40 @@ internal sealed class IterativeAgentLoop : IIterativeAgentLoop
                     // Add tool result messages
                     foreach (var (fc, result) in functionCalls.Zip(roundResults))
                     {
-                        var resultContent = result.Succeeded
-                            ? ToolResultSerializer.Serialize(result.Result)
-                            : $"Error: {result.ErrorMessage}";
+                        string resultContent;
+                        if (!result.Succeeded)
+                        {
+                            resultContent = $"Error: {result.ErrorMessage}";
+                        }
+                        else if (options.OffloadPolicy is { } offloadPolicy)
+                        {
+                            // Route successful results through the shared, caller-agnostic transform.
+                            // Raw oversized payloads must never enter FunctionResultContent/messages
+                            // — only bounded inline text, a bounded reference string, or bounded
+                            // Error: evidence ever does.
+                            var outcome = Tools.HarnessToolResultOffloadTransform.Transform(
+                                new Tools.HarnessToolResultOffloadRequest(
+                                    result.Result,
+                                    fc.Name,
+                                    fc.CallId,
+                                    offloadBinding,
+                                    _executionContextAccessor,
+                                    offloadPolicy,
+                                    DateTimeOffset.UtcNow,
+                                    cancellationToken));
+
+                            resultContent = outcome.Status switch
+                            {
+                                Tools.HarnessToolResultOffloadStatus.Inline => outcome.InlineText!,
+                                Tools.HarnessToolResultOffloadStatus.Offloaded or
+                                Tools.HarnessToolResultOffloadStatus.ExistingReference => outcome.ReferenceText!,
+                                _ => $"Error: {outcome.Evidence}",
+                            };
+                        }
+                        else
+                        {
+                            resultContent = ToolResultSerializer.Serialize(result.Result);
+                        }
 
                         messages.Add(new ChatMessage(ChatRole.Tool,
                             [new FunctionResultContent(fc.CallId, resultContent)]));

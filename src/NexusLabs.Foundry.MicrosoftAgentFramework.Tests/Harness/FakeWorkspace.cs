@@ -52,6 +52,14 @@ internal sealed class FakeWorkspace : IWorkspace
     /// </summary>
     internal Func<string, WorkspaceResult<ReadFileResult>>? ReadFileOverride { get; set; }
 
+    /// <summary>
+    /// When set, replaces the result of <see cref="TryWriteFile"/> entirely (bypassing the inner
+    /// workspace, so nothing is actually persisted). Used to simulate a write failure so
+    /// <c>HarnessToolResultOffloadTransform</c>'s fail-closed <c>WorkspaceWriteFailed</c> path can
+    /// be exercised deterministically without a real I/O fault.
+    /// </summary>
+    internal Func<string, string, WorkspaceResult<WriteFileResult>>? WriteFileOverride { get; set; }
+
     public WorkspaceResult<ReadFileResult> TryReadFile(string path)
     {
         Interlocked.Increment(ref _readFileCallCount);
@@ -63,7 +71,9 @@ internal sealed class FakeWorkspace : IWorkspace
     public WorkspaceResult<WriteFileResult> TryWriteFile(string path, string content)
     {
         Interlocked.Increment(ref _writeFileCallCount);
-        return _inner.TryWriteFile(path, content);
+        return WriteFileOverride is not null
+            ? WriteFileOverride(path, content)
+            : _inner.TryWriteFile(path, content);
     }
 
     public bool FileExists(string path)

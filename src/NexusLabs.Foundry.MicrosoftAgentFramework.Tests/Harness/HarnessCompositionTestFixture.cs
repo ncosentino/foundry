@@ -9,6 +9,7 @@ using NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
@@ -412,6 +413,37 @@ internal static class HarnessCompositionTestFixture
         HarnessSkillsPlugin? skillsPlugin,
         IProgressReporterAccessor? progressAccessor,
         HarnessWebSearchPlugin? webSearchPlugin) =>
+        CreateRequest(
+            chatClient,
+            services,
+            profile,
+            tools,
+            binding,
+            accessor,
+            metrics,
+            historyProvider,
+            planningProviders,
+            approvalPlugin,
+            skillsPlugin,
+            progressAccessor,
+            webSearchPlugin,
+            offloadPlugin: null);
+
+    internal static HarnessProviderCompositionRequest CreateRequest(
+        IChatClient chatClient,
+        IServiceProvider services,
+        HarnessCapabilityProfile profile,
+        HarnessGeneratedToolResolution tools,
+        HarnessExecutionBinding binding,
+        IAgentExecutionContextAccessor accessor,
+        IAgentMetrics? metrics,
+        HarnessHistoryProviderPlugin? historyProvider,
+        HarnessPlanningProvidersPlugin? planningProviders,
+        HarnessApprovalPlugin? approvalPlugin,
+        HarnessSkillsPlugin? skillsPlugin,
+        IProgressReporterAccessor? progressAccessor,
+        HarnessWebSearchPlugin? webSearchPlugin,
+        HarnessToolResultOffloadPlugin? offloadPlugin) =>
         new(
             ChatClient: chatClient,
             Services: services,
@@ -430,7 +462,8 @@ internal static class HarnessCompositionTestFixture
             SkillsPlugin: skillsPlugin,
             WebSearchPlugin: webSearchPlugin,
             Metrics: metrics,
-            ProgressAccessor: progressAccessor);
+            ProgressAccessor: progressAccessor,
+            OffloadPlugin: offloadPlugin);
 
     internal static ServiceProvider CreateServices() =>
         new ServiceCollection().BuildServiceProvider();
