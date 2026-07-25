@@ -1,19 +1,25 @@
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
+
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
-/// Explicit, structured result of one <see cref="HarnessArtifactRehydration.Rehydrate"/> call
-/// (T052). Always carries the full <see cref="HarnessArtifactResolution"/> evidence; only carries a
-/// non-<see langword="null"/> <see cref="Segment"/> when <see cref="Status"/> is
+/// Explicit, structured result of one <see cref="HarnessArtifactRehydration.Rehydrate"/> call.
+/// Always carries the full <see cref="HarnessArtifactResolution"/> evidence and a matching
+/// <see cref="Diagnostics"/> snapshot; only carries a non-<see langword="null"/>
+/// <see cref="Segment"/> when <see cref="Status"/> is
 /// <see cref="HarnessArtifactResolutionStatus.Resolved"/>.
 /// </summary>
 internal sealed record HarnessArtifactRehydrationResult
 {
     private HarnessArtifactRehydrationResult(
         HarnessArtifactResolution resolution,
-        HarnessArtifactRecoverableContextSegment? segment)
+        HarnessArtifactRecoverableContextSegment? segment,
+        HarnessArtifactDiagnostics diagnostics)
     {
         Resolution = resolution;
         Segment = segment;
+        Diagnostics = diagnostics;
     }
 
     /// <summary>The full resolution evidence backing this rehydration outcome.</summary>
@@ -29,13 +35,25 @@ internal sealed record HarnessArtifactRehydrationResult
     /// </summary>
     internal HarnessArtifactRecoverableContextSegment? Segment { get; }
 
-    /// <exception cref="ArgumentNullException"><paramref name="resolution"/> is <see langword="null"/>.</exception>
+    /// <summary>
+    /// The privacy-safe, structured evidence for this decision. The identical instance is also
+    /// attached to the <see cref="HarnessArtifactRehydrationDecisionEvent"/> emitted for this
+    /// decision.
+    /// </summary>
+    internal HarnessArtifactDiagnostics Diagnostics { get; }
+
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="resolution"/> or <paramref name="diagnostics"/> is <see langword="null"/>.
+    /// </exception>
     /// <exception cref="ArgumentException">
     /// <paramref name="resolution"/>'s status is <see cref="HarnessArtifactResolutionStatus.Resolved"/>.
     /// </exception>
-    internal static HarnessArtifactRehydrationResult NotResolved(HarnessArtifactResolution resolution)
+    internal static HarnessArtifactRehydrationResult NotResolved(
+        HarnessArtifactResolution resolution,
+        HarnessArtifactDiagnostics diagnostics)
     {
         ArgumentNullException.ThrowIfNull(resolution);
+        ArgumentNullException.ThrowIfNull(diagnostics);
 
         if (resolution.Status == HarnessArtifactResolutionStatus.Resolved)
         {
@@ -44,21 +62,24 @@ internal sealed record HarnessArtifactRehydrationResult
                 nameof(resolution));
         }
 
-        return new HarnessArtifactRehydrationResult(resolution, null);
+        return new HarnessArtifactRehydrationResult(resolution, null, diagnostics);
     }
 
     /// <exception cref="ArgumentNullException">
-    /// <paramref name="resolution"/> or <paramref name="segment"/> is <see langword="null"/>.
+    /// <paramref name="resolution"/>, <paramref name="segment"/>, or <paramref name="diagnostics"/>
+    /// is <see langword="null"/>.
     /// </exception>
     /// <exception cref="ArgumentException">
     /// <paramref name="resolution"/>'s status is not <see cref="HarnessArtifactResolutionStatus.Resolved"/>.
     /// </exception>
     internal static HarnessArtifactRehydrationResult Resolved(
         HarnessArtifactResolution resolution,
-        HarnessArtifactRecoverableContextSegment segment)
+        HarnessArtifactRecoverableContextSegment segment,
+        HarnessArtifactDiagnostics diagnostics)
     {
         ArgumentNullException.ThrowIfNull(resolution);
         ArgumentNullException.ThrowIfNull(segment);
+        ArgumentNullException.ThrowIfNull(diagnostics);
 
         if (resolution.Status != HarnessArtifactResolutionStatus.Resolved)
         {
@@ -67,6 +88,6 @@ internal sealed record HarnessArtifactRehydrationResult
                 nameof(resolution));
         }
 
-        return new HarnessArtifactRehydrationResult(resolution, segment);
+        return new HarnessArtifactRehydrationResult(resolution, segment, diagnostics);
     }
 }

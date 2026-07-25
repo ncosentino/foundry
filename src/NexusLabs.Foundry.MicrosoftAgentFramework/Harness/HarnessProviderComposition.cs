@@ -350,7 +350,8 @@ internal sealed class HarnessProviderComposition
                     request.ExecutionContextAccessor,
                     offloadPolicy,
                     DateTimeOffset.UtcNow,
-                    cancellationToken));
+                    cancellationToken,
+                    request.ProgressAccessor));
 
             return outcome.Status switch
             {

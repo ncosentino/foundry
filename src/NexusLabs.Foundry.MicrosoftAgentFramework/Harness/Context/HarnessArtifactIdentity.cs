@@ -7,8 +7,8 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
 /// Single shared utility for the deterministic digest and content-addressed workspace path used
-/// by every G4 workspace artifact (<c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c>,
-/// T041, Decision 4 and "Content-addressed path format"). Every offloaded artifact's identity is a
+/// by every workspace artifact (<c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c>'s
+/// Decision 4 and "Content-addressed path format"). Every offloaded artifact's identity is a
 /// pure function of the exact UTF-8 bytes of its serialized content — the same string the
 /// byte-threshold offload decision was measured against — so retrying a write or reconstructing a
 /// reference from recorded metadata always reproduces the identical digest and path.
@@ -16,7 +16,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 internal static class HarnessArtifactIdentity
 {
     /// <summary>
-    /// The default workspace-relative root segment artifacts are sharded under, matching the T041
+    /// The default workspace-relative root segment artifacts are sharded under, matching the
     /// evidence's illustrative sharded form (<c>.foundry/artifacts/&lt;2 hex&gt;/&lt;2 hex&gt;/&lt;64-char hex digest&gt;</c>).
     /// </summary>
     internal const string DefaultArtifactRoot = ".foundry/artifacts";
@@ -74,7 +74,8 @@ internal static class HarnessArtifactIdentity
     /// <see cref="DefaultArtifactRoot"/>:
     /// <c>{DefaultArtifactRoot}/{digest[..2]}/{digest[2..4]}/{digest}</c>.
     /// Sharding two levels deep keeps any single directory listing bounded, matching the
-    /// <c>IWorkspace.GetFilePaths()</c> flat-enumeration cost concern recorded by T041 Decision 5.
+    /// <c>IWorkspace.GetFilePaths()</c> flat-enumeration cost concern recorded in the
+    /// harness-lifecycle-feasibility evidence.
     /// </summary>
     /// <exception cref="ArgumentException">
     /// <paramref name="digest"/> is not a well-formed digest per <see cref="IsWellFormedDigest"/>.

@@ -1,5 +1,6 @@
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 
@@ -30,6 +31,13 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 /// <param name="Policy">The required, explicit offload policy driving this decision.</param>
 /// <param name="CreatedAtUtc">The timestamp to record if a fresh artifact reference is constructed.</param>
 /// <param name="CancellationToken">The cancellation token for this transform call.</param>
+/// <param name="ProgressAccessor">
+/// The required, explicit accessor used to report exactly one
+/// <see cref="HarnessArtifactOffloadDecisionEvent"/> for this decision, or <see langword="null"/>
+/// when no progress reporting is wired for this caller. When non-null but no scope is currently
+/// active, resolving <see cref="IProgressReporterAccessor.Current"/> safely yields a no-op reporter
+/// — no exception, no event.
+/// </param>
 internal sealed record HarnessToolResultOffloadRequest(
     object? RawResult,
     string ToolName,
@@ -38,4 +46,5 @@ internal sealed record HarnessToolResultOffloadRequest(
     IAgentExecutionContextAccessor? ExecutionContextAccessor,
     HarnessToolResultOffloadPolicy Policy,
     DateTimeOffset CreatedAtUtc,
-    CancellationToken CancellationToken);
+    CancellationToken CancellationToken,
+    IProgressReporterAccessor? ProgressAccessor);

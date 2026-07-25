@@ -1,5 +1,7 @@
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
@@ -22,22 +24,32 @@ internal static class HarnessToolResultOffloadTransform
 
     /// <summary>
     /// Decides whether <paramref name="request"/>'s raw tool result should be inlined or offloaded,
-    /// performing at most one content-addressed workspace write.
+    /// performing at most one content-addressed workspace write, then reports exactly one
+    /// <see cref="HarnessArtifactOffloadDecisionEvent"/> for the resulting decision.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="request"/> is <see langword="null"/>.</exception>
     /// <exception cref="OperationCanceledException">
     /// <see cref="HarnessToolResultOffloadRequest.CancellationToken"/> was canceled before any
-    /// workspace access was attempted. No side effect (no write) occurs in this case.
+    /// workspace access was attempted. No side effect (no write) occurs in this case, and no event
+    /// is reported, because no decision was made.
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// <see cref="HarnessToolResultOffloadRequest.ExecutionBinding"/> no longer matches the current
     /// ambient execution context at revalidation time (mirrors every other Harness binding
-    /// revalidation call site — never silently reclassified as a <c>Failed</c> outcome).
+    /// revalidation call site — never silently reclassified as a <c>Failed</c> outcome). No event
+    /// is reported in this case either.
     /// </exception>
     internal static HarnessToolResultOffloadOutcome Transform(HarnessToolResultOffloadRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var outcome = Decide(request);
+        Report(request, outcome);
+        return outcome;
+    }
+
+    private static HarnessToolResultOffloadOutcome Decide(HarnessToolResultOffloadRequest request)
+    {
         request.CancellationToken.ThrowIfCancellationRequested();
 
         // A rehydrated recoverable context segment always bypasses the byte-threshold check and is
@@ -46,19 +58,51 @@ internal static class HarnessToolResultOffloadTransform
         if (request.RawResult is HarnessArtifactRecoverableContextSegment segment)
         {
             // Forward only the recovered body so FICC does not serialize the segment metadata.
-            return HarnessToolResultOffloadOutcome.Inline(segment.Body, segment.Body);
+            var segmentByteSize = HarnessArtifactIdentity.ComputeUtf8ByteLength(segment.Body);
+            return HarnessToolResultOffloadOutcome.Inline(
+                segment.Body,
+                segment.Body,
+                HarnessArtifactContentCategory.RecoverableContextSegment,
+                HarnessArtifactDecisionReason.RecoverableSegmentBypass,
+                segmentByteSize,
+                request.Policy.MaximumInlineToolResultBytes);
         }
 
         var serializedText = ToolResultSerializer.Serialize(request.RawResult);
         var observedByteSize = HarnessArtifactIdentity.ComputeUtf8ByteLength(serializedText);
+        var threshold = request.Policy.MaximumInlineToolResultBytes;
 
         // Exactly-at-threshold inlines; only strictly-over-threshold offloads.
-        if (observedByteSize <= request.Policy.MaximumInlineToolResultBytes)
+        if (observedByteSize <= threshold)
         {
-            return HarnessToolResultOffloadOutcome.Inline(request.RawResult, serializedText);
+            return HarnessToolResultOffloadOutcome.Inline(
+                request.RawResult,
+                serializedText,
+                HarnessArtifactContentCategory.ToolResult,
+                HarnessArtifactDecisionReason.BelowThreshold,
+                observedByteSize,
+                threshold);
         }
 
         return OffloadOversized(request, serializedText, observedByteSize);
+    }
+
+    private static void Report(HarnessToolResultOffloadRequest request, HarnessToolResultOffloadOutcome outcome)
+    {
+        if (request.ProgressAccessor is null)
+        {
+            return;
+        }
+
+        var reporter = request.ProgressAccessor.Current;
+        reporter.Report(new HarnessArtifactOffloadDecisionEvent(
+            Timestamp: request.CreatedAtUtc,
+            WorkflowId: reporter.WorkflowId,
+            AgentId: reporter.AgentId,
+            ParentAgentId: (reporter as IProgressReporterContext)?.ParentAgentId,
+            Depth: reporter.Depth,
+            SequenceNumber: reporter.NextSequence(),
+            Diagnostics: outcome.Diagnostics));
     }
 
     private static HarnessToolResultOffloadOutcome OffloadOversized(
@@ -75,14 +119,20 @@ internal static class HarnessToolResultOffloadTransform
         {
             return HarnessToolResultOffloadOutcome.Failed(
                 $"NoAuthorizedWorkspace: NoBinding; " +
-                $"tool='{toolId}' callId='{callId}' bytes={observedByteSize} threshold={threshold}.");
+                $"tool='{toolId}' callId='{callId}' bytes={observedByteSize} threshold={threshold}.",
+                HarnessArtifactDecisionReason.NoAuthorizedWorkspace,
+                observedByteSize,
+                threshold);
         }
 
         if (binding.Workspace is null)
         {
             return HarnessToolResultOffloadOutcome.Failed(
                 $"NoAuthorizedWorkspace: NoWorkspace; " +
-                $"tool='{toolId}' callId='{callId}' bytes={observedByteSize} threshold={threshold}.");
+                $"tool='{toolId}' callId='{callId}' bytes={observedByteSize} threshold={threshold}.",
+                HarnessArtifactDecisionReason.NoAuthorizedWorkspace,
+                observedByteSize,
+                threshold);
         }
 
         var accessor = request.ExecutionContextAccessor;
@@ -90,7 +140,10 @@ internal static class HarnessToolResultOffloadTransform
         {
             return HarnessToolResultOffloadOutcome.Failed(
                 $"NoAuthorizedWorkspace: NoContextAccessor; " +
-                $"tool='{toolId}' callId='{callId}' bytes={observedByteSize} threshold={threshold}.");
+                $"tool='{toolId}' callId='{callId}' bytes={observedByteSize} threshold={threshold}.",
+                HarnessArtifactDecisionReason.NoAuthorizedWorkspace,
+                observedByteSize,
+                threshold);
         }
 
         binding.EnsureCurrent(accessor, request.Policy.OffloadSessionId);
@@ -108,7 +161,8 @@ internal static class HarnessToolResultOffloadTransform
                 binding,
                 path,
                 digest,
-                observedByteSize);
+                observedByteSize,
+                threshold);
         }
 
         return WriteFresh(
@@ -116,7 +170,9 @@ internal static class HarnessToolResultOffloadTransform
             binding,
             serializedText,
             path,
-            digest);
+            digest,
+            observedByteSize,
+            threshold);
     }
 
     private static HarnessToolResultOffloadOutcome ResolveExistingPath(
@@ -124,7 +180,8 @@ internal static class HarnessToolResultOffloadTransform
         HarnessExecutionBinding binding,
         string path,
         string expectedDigest,
-        int observedByteSize)
+        int observedByteSize,
+        int threshold)
     {
         var readResult = binding.Workspace!.TryReadFile(path);
         request.CancellationToken.ThrowIfCancellationRequested();
@@ -133,7 +190,10 @@ internal static class HarnessToolResultOffloadTransform
         {
             return HarnessToolResultOffloadOutcome.Failed(
                 $"WorkspaceReadFailed: reading existing artifact path '{path}' failed with " +
-                $"'{readResult.Exception?.GetType().Name}'; no reference committed, existing content left untouched.");
+                $"'{readResult.Exception?.GetType().Name}'; no reference committed, existing content left untouched.",
+                HarnessArtifactDecisionReason.WorkspaceReadFailed,
+                observedByteSize,
+                threshold);
         }
 
         var existingDigest = HarnessArtifactIdentity.ComputeDigest(readResult.Value.Content);
@@ -142,7 +202,10 @@ internal static class HarnessToolResultOffloadTransform
             return HarnessToolResultOffloadOutcome.Failed(
                 $"ContentAddressMismatch: existing content at path '{path}' has digest " +
                 $"'{existingDigest}' but expected '{expectedDigest}'; possible corruption — the existing " +
-                "content is never overwritten.");
+                "content is never overwritten.",
+                HarnessArtifactDecisionReason.ContentAddressMismatch,
+                observedByteSize,
+                threshold);
         }
 
         var description = BoundedDescription(request);
@@ -158,7 +221,7 @@ internal static class HarnessToolResultOffloadTransform
             request.CallId,
             request.CreatedAtUtc);
 
-        return HarnessToolResultOffloadOutcome.ExistingReference(reference);
+        return HarnessToolResultOffloadOutcome.ExistingReference(reference, observedByteSize, threshold);
     }
 
     private static HarnessToolResultOffloadOutcome WriteFresh(
@@ -166,7 +229,9 @@ internal static class HarnessToolResultOffloadTransform
         HarnessExecutionBinding binding,
         string serializedText,
         string path,
-        string digest)
+        string digest,
+        int observedByteSize,
+        int threshold)
     {
         request.CancellationToken.ThrowIfCancellationRequested();
 
@@ -175,7 +240,10 @@ internal static class HarnessToolResultOffloadTransform
         {
             return HarnessToolResultOffloadOutcome.Failed(
                 $"WorkspaceWriteFailed: writing artifact path '{path}' (digest '{digest}') failed with " +
-                $"'{writeResult.Exception?.GetType().Name}'; no reference committed.");
+                $"'{writeResult.Exception?.GetType().Name}'; no reference committed.",
+                HarnessArtifactDecisionReason.WorkspaceWriteFailed,
+                observedByteSize,
+                threshold);
         }
 
         // The write succeeded, so its side effect has already occurred. If the token became
@@ -189,7 +257,10 @@ internal static class HarnessToolResultOffloadTransform
                 "successfully but the request token became canceled before the reference could be " +
                 "committed; retrying with a non-canceled token will resolve the existing artifact.",
                 path,
-                digest);
+                digest,
+                HarnessArtifactDecisionReason.CanceledAfterWrite,
+                observedByteSize,
+                threshold);
         }
 
         // Run the deterministic checkpoint seam in the pre-reference window: after write
@@ -210,7 +281,10 @@ internal static class HarnessToolResultOffloadTransform
                     $"checkpoint failed with '{ex.GetType().Name}' before its reference was committed; " +
                     "retrying will resolve the same artifact without re-writing.",
                     path,
-                    digest);
+                    digest,
+                    HarnessArtifactDecisionReason.CheckpointFailed,
+                    observedByteSize,
+                    threshold);
             }
         }
 
@@ -224,7 +298,7 @@ internal static class HarnessToolResultOffloadTransform
             request.CallId,
             request.CreatedAtUtc);
 
-        return HarnessToolResultOffloadOutcome.Offloaded(reference);
+        return HarnessToolResultOffloadOutcome.Offloaded(reference, observedByteSize, threshold);
     }
 
     private static string BoundedDescription(HarnessToolResultOffloadRequest request)

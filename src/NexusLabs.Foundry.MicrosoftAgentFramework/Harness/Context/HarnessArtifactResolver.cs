@@ -5,8 +5,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
 /// Resolves a <see cref="HarnessArtifactReference"/> against the workspace authorized by a captured
-/// <see cref="HarnessExecutionBinding"/>. This is the mechanism behind T053's explicit outcomes and
-/// the sole path T052's <see cref="HarnessArtifactRehydration"/> uses to ever obtain artifact
+/// <see cref="HarnessExecutionBinding"/>. This is the mechanism behind
+/// <see cref="HarnessArtifactResolutionStatus"/>'s explicit outcomes and the sole path
+/// <see cref="HarnessArtifactRehydration"/> uses to ever obtain artifact
 /// content — it never injects non-<see cref="HarnessArtifactResolutionStatus.Resolved"/> content.
 /// </summary>
 /// <remarks>
@@ -29,13 +30,13 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// return <see cref="HarnessArtifactResolutionStatus.Resolved"/> with the exact content.
 /// </para>
 /// <para>
-/// <strong>No synthetic expiry status in G4.</strong> <c>Expired</c> is deliberately deferred until a
+/// <strong>No synthetic expiry status.</strong> <c>Expired</c> is deliberately deferred until a
 /// real retention policy exists. Without an authoritative TTL/retention source, resolution can only
 /// prove current binding mismatch, absence, digest drift, or budget excess.
 /// </para>
 /// <para>
 /// Uses the bound <see cref="IWorkspace"/> directly (the same primitive the eager-offload
-/// write path uses per T041 Decision 4), not the <c>WorkspaceAgentFileStore</c>
+/// write path uses), not the <c>WorkspaceAgentFileStore</c>
 /// <c>AgentFileStore</c> bridge — this mechanism is an internal Foundry-to-Foundry concern, not an
 /// upstream MAF surface.
 /// </para>
@@ -135,9 +136,9 @@ internal sealed class HarnessArtifactResolver
 
         if (!readResult.Success)
         {
-            // Not one of the explicit G4 outcomes — a workspace that reported the file existed but
-            // then failed to read it is an unexpected internal error, so it is surfaced unchanged
-            // rather than silently reclassified as Missing (fail closed, never a guess).
+            // Not one of the explicit outcomes above — a workspace that reported the file existed
+            // but then failed to read it is an unexpected internal error, so it is surfaced
+            // unchanged rather than silently reclassified as Missing (fail closed, never a guess).
             throw readResult.Exception!;
         }
 

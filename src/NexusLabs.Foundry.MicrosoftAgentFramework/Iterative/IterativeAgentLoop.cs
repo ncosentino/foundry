@@ -409,7 +409,8 @@ internal sealed class IterativeAgentLoop : IIterativeAgentLoop
                                     _executionContextAccessor,
                                     offloadPolicy,
                                     DateTimeOffset.UtcNow,
-                                    cancellationToken));
+                                    cancellationToken,
+                                    _progressReporterAccessor));
 
                             resultContent = outcome.Status switch
                             {

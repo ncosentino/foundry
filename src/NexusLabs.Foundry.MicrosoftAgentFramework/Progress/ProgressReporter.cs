@@ -5,7 +5,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 /// Sink exceptions are surfaced via an <see cref="IProgressReporterErrorHandler"/> instead
 /// of being silently swallowed.
 /// </summary>
-internal sealed class ProgressReporter : IProgressReporter
+internal sealed class ProgressReporter : IProgressReporter, IProgressReporterContext
 {
     private readonly IReadOnlyList<IProgressSink> _sinks;
     private readonly IProgressSequence _sequence;
@@ -38,6 +38,9 @@ internal sealed class ProgressReporter : IProgressReporter
 
     /// <inheritdoc />
     public int Depth { get; }
+
+    /// <inheritdoc />
+    string? IProgressReporterContext.ParentAgentId => _parentAgentId;
 
     /// <inheritdoc />
     public long NextSequence() => _sequence.Next();

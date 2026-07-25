@@ -23,12 +23,13 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 /// the background consumer.
 /// </para>
 /// </remarks>
-public sealed class ChannelProgressReporter : IProgressReporter, IAsyncDisposable
+public sealed class ChannelProgressReporter : IProgressReporter, IProgressReporterContext, IAsyncDisposable
 {
     private readonly Channel<IProgressEvent> _channel;
     private readonly IProgressSequence _sequence;
     private readonly IProgressReporterErrorHandler _errorHandler;
     private readonly Task _consumer;
+    private readonly string? _parentAgentId;
 
     /// <summary>
     /// Creates a channel-based reporter with the given sinks.
@@ -48,6 +49,7 @@ public sealed class ChannelProgressReporter : IProgressReporter, IAsyncDisposabl
         _sequence = sequence;
         _errorHandler = errorHandler ?? new NullProgressReporterErrorHandler();
         AgentId = agentId;
+        _parentAgentId = parentAgentId;
         Depth = depth;
 
         _channel = Channel.CreateBounded<IProgressEvent>(new BoundedChannelOptions(capacity)
@@ -70,6 +72,9 @@ public sealed class ChannelProgressReporter : IProgressReporter, IAsyncDisposabl
     public int Depth { get; }
 
     /// <inheritdoc />
+    string? IProgressReporterContext.ParentAgentId => _parentAgentId;
+
+    /// <inheritdoc />
     public long NextSequence() => _sequence.Next();
 
     /// <inheritdoc />
@@ -80,7 +85,7 @@ public sealed class ChannelProgressReporter : IProgressReporter, IAsyncDisposabl
 
     /// <inheritdoc />
     public IProgressReporter CreateChild(string agentId) =>
-        new ChannelChildReporter(this, agentId);
+        new ChannelChildReporter(this, agentId, parentAgentId: AgentId, depth: Depth + 1);
 
     /// <summary>
     /// Completes the channel and waits for the background consumer to drain
@@ -121,20 +126,26 @@ public sealed class ChannelProgressReporter : IProgressReporter, IAsyncDisposabl
     /// Lightweight child reporter that shares the parent's channel.
     /// No background task — writes go directly to the parent's channel.
     /// </summary>
-    private sealed class ChannelChildReporter : IProgressReporter
+    private sealed class ChannelChildReporter : IProgressReporter, IProgressReporterContext
     {
         private readonly ChannelProgressReporter _root;
 
-        internal ChannelChildReporter(ChannelProgressReporter root, string agentId)
+        internal ChannelChildReporter(
+            ChannelProgressReporter root,
+            string agentId,
+            string? parentAgentId,
+            int depth)
         {
             _root = root;
             WorkflowId = root.WorkflowId;
             AgentId = agentId;
-            Depth = root.Depth + 1;
+            ParentAgentId = parentAgentId;
+            Depth = depth;
         }
 
         public string WorkflowId { get; }
         public string? AgentId { get; }
+        public string? ParentAgentId { get; }
         public int Depth { get; }
 
         public long NextSequence() => _root.NextSequence();
@@ -143,6 +154,6 @@ public sealed class ChannelProgressReporter : IProgressReporter, IAsyncDisposabl
             _root.Report(progressEvent);
 
         public IProgressReporter CreateChild(string agentId) =>
-            new ChannelChildReporter(_root, agentId);
+            new ChannelChildReporter(_root, agentId, parentAgentId: AgentId, depth: Depth + 1);
     }
 }

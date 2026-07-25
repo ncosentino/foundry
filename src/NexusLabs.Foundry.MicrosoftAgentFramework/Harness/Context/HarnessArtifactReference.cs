@@ -5,11 +5,11 @@ using WorkspacePathUtil = NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.Wo
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
-/// Immutable, digest-backed record describing one G4 workspace artifact reference (T050) — a
+/// Immutable, digest-backed record describing one workspace artifact reference — a
 /// bounded conversational handle to bulk content already persisted to the Foundry workspace,
 /// matching <c>data-model.md</c>'s "Artifact Reference" entity and the concrete field set settled
-/// by <c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c> (T041,
-/// "Recorded metadata").
+/// by <c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c>'s
+/// "Recorded metadata".
 /// </summary>
 /// <remarks>
 /// <para>
@@ -28,7 +28,8 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// <see cref="OwnerSessionId"/> from it directly — never from model input or restored session
 /// state. <see cref="Reconstruct"/> still accepts recorded owner fields because it is the
 /// untrusted deserialize/echo path. These fields are audit identity, not an authorization
-/// decision by themselves (T020's "UserId is an audit identity" note);
+/// decision by themselves ("UserId is an audit identity" — see
+/// <c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c>);
 /// <see cref="HarnessArtifactResolver"/> is what actually re-derives and compares ownership
 /// against the <em>current</em> trusted binding at resolution time.
 /// </para>

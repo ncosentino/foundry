@@ -122,7 +122,8 @@ public sealed class HarnessEagerOffloadTests
             ExecutionContextAccessor: null,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var outcome = HarnessToolResultOffloadTransform.Transform(request);
 
@@ -156,7 +157,8 @@ public sealed class HarnessEagerOffloadTests
             ExecutionContextAccessor: null,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var outcome = HarnessToolResultOffloadTransform.Transform(request);
 
@@ -197,7 +199,8 @@ public sealed class HarnessEagerOffloadTests
             accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var outcome = HarnessToolResultOffloadTransform.Transform(request);
 
@@ -533,5 +536,6 @@ public sealed class HarnessEagerOffloadTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 }

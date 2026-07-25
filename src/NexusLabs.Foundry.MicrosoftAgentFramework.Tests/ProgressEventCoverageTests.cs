@@ -72,6 +72,8 @@ public class ProgressEventCoverageTests
             nameof(HarnessApprovalApprovedEvent),
             nameof(HarnessApprovalRejectedEvent),
             nameof(HarnessApprovalStandingReauthorizedEvent),
+            nameof(HarnessArtifactOffloadDecisionEvent),
+            nameof(HarnessArtifactRehydrationDecisionEvent),
         };
 
         var actual = GetConcreteProgressEventTypes().Select(t => t.Name).ToHashSet();

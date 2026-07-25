@@ -1,7 +1,7 @@
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
-/// An explicit, deterministic-caller-driven request to rehydrate one artifact reference (T052).
+/// An explicit, deterministic-caller-driven request to rehydrate one artifact reference.
 /// There is no implicit/ambient way to trigger rehydration — a
 /// <see cref="HarnessArtifactRehydration"/> only ever acts on an instance of this type, and every
 /// instance requires an explicit, required maximum rehydrated UTF-8 byte budget (no optional

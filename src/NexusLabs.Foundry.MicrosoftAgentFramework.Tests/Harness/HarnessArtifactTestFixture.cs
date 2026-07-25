@@ -1,6 +1,7 @@
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
 
@@ -56,22 +57,28 @@ internal sealed class HarnessArtifactTestFixture : IDisposable
     internal HarnessArtifactRehydration Rehydration { get; }
 
     internal static HarnessArtifactTestFixture Create() =>
-        Create(new FakeWorkspace());
+        Create(new FakeWorkspace(), progressAccessor: null);
 
     internal static HarnessArtifactTestFixture Create(FakeWorkspace workspace) =>
+        Create(workspace, progressAccessor: null);
+
+    internal static HarnessArtifactTestFixture Create(
+        FakeWorkspace workspace, IProgressReporterAccessor? progressAccessor) =>
         Create(
             new AgentExecutionContextAccessor(),
             DefaultUserId,
             DefaultOrchestrationId,
             DefaultSessionId,
-            workspace);
+            workspace,
+            progressAccessor);
 
     internal static HarnessArtifactTestFixture Create(
         IAgentExecutionContextAccessor accessor,
         string userId,
         string orchestrationId,
         string sessionId,
-        FakeWorkspace workspace)
+        FakeWorkspace workspace,
+        IProgressReporterAccessor? progressAccessor)
     {
         ArgumentNullException.ThrowIfNull(accessor);
         ArgumentNullException.ThrowIfNull(workspace);
@@ -91,7 +98,7 @@ internal sealed class HarnessArtifactTestFixture : IDisposable
         }
 
         var resolver = new HarnessArtifactResolver(capture.Binding, accessor, sessionId);
-        var rehydration = new HarnessArtifactRehydration(resolver);
+        var rehydration = new HarnessArtifactRehydration(resolver, progressAccessor);
 
         return new HarnessArtifactTestFixture(
             accessor,
