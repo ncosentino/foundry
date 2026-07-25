@@ -130,12 +130,67 @@ internal sealed class HarnessCompactionRunCoordinator
 
             if (state.Reserved.TryGetValue(digest, out var owner))
             {
+                // A repeated capture within the same caller's own assembly attempt observes its
+                // own reservation again: no externally-observable state changed, so the digest's
+                // revision is deliberately left untouched.
                 return owner == leaseId;
             }
 
             state.Reserved[digest] = leaseId;
+
+            // First reservation: unclaimed -> reserved is an externally-observable state change a
+            // concurrent observer's own prior snapshot signature could have captured as "unclaimed",
+            // so the digest's revision advances.
+            BumpRevision(state, digest);
             return true;
         }
+    }
+
+    /// <summary>
+    /// Returns <paramref name="digest"/>'s current monotonic revision within the currently active run
+    /// scope: <c>0</c> if the digest has never been reserved, delivered, or released in this run, and a
+    /// strictly greater value every time <see cref="TryReserve"/> first claims it, <see cref="Complete"/>
+    /// promotes or releases it, or <see cref="Release"/> releases it. <see cref="Harness.Context.HarnessDeliveredSegmentFilteringSnapshotProvider"/>
+    /// reads this after each capture's reservation decisions to detect exactly the case a bare delivered
+    /// flag cannot: a digest this call's own snapshot filtered out because a concurrent lease held it,
+    /// where that concurrent lease later completed without forwarding it and released it — a state
+    /// change this call must restart to observe, even though neither <see cref="TryReserve"/> nor the
+    /// snapshot's own <see cref="HarnessContextSnapshot.Version"/> reports it directly. Throws when no
+    /// run scope is active on this call flow, for the same reason as every other lease-lifecycle
+    /// operation on this type.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="digest"/> is empty or whitespace-only.</exception>
+    /// <exception cref="InvalidOperationException">No run scope is active on this call flow.</exception>
+    internal long GetRevision(string digest)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(digest);
+        var state = _current.Value;
+        if (state is null)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(GetRevision)} requires an active run scope. Establish one via " +
+                $"{nameof(EnsureRunScope)} or {nameof(BeginRun)} before invoking any lease-lifecycle " +
+                "operation. Every legitimate path through this coordinator always establishes a scope " +
+                "first; the absence of a scope is a caller contract violation.");
+        }
+
+        lock (state.Sync)
+        {
+            return state.Revisions.TryGetValue(digest, out var revision) ? revision : 0;
+        }
+    }
+
+    /// <summary>
+    /// Advances <paramref name="digest"/>'s revision by exactly one within <paramref name="state"/>.
+    /// Must always be called while already holding <paramref name="state"/>'s <see cref="RunState.Sync"/>
+    /// lock — a checked (never wrapping) increment, since a run's lifetime is bounded and this coordinator
+    /// never persists across runs.
+    /// </summary>
+    private static void BumpRevision(RunState state, string digest)
+    {
+        state.Revisions[digest] = state.Revisions.TryGetValue(digest, out var current)
+            ? checked(current + 1)
+            : 1;
     }
 
     /// <summary>
@@ -196,6 +251,11 @@ internal sealed class HarnessCompactionRunCoordinator
                 }
                 // else: not forwarded (pressure-evicted or filtered out); released without promotion so a
                 // later call in the same run scope can still reserve and deliver it.
+
+                // Either branch above is an externally-observable state change — reserved -> delivered,
+                // or reserved -> unclaimed — so the digest's revision always advances here, regardless
+                // of which branch was taken.
+                BumpRevision(state, digest);
             }
         }
     }
@@ -236,6 +296,10 @@ internal sealed class HarnessCompactionRunCoordinator
             foreach (var digest in ownedDigests)
             {
                 state.Reserved.Remove(digest);
+
+                // Externally-observable state change — reserved -> unclaimed — so the digest's
+                // revision always advances here.
+                BumpRevision(state, digest);
             }
         }
     }
@@ -247,6 +311,13 @@ internal sealed class HarnessCompactionRunCoordinator
         internal HashSet<string> Delivered { get; } = new(StringComparer.Ordinal);
 
         internal Dictionary<string, Guid> Reserved { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>
+        /// Per-digest monotonic revision counter: absent means revision 0 (never reserved, delivered,
+        /// or released in this run). <see cref="BumpRevision"/> is the only writer, always called while
+        /// holding <see cref="Sync"/>; <see cref="GetRevision"/> is the only external reader.
+        /// </summary>
+        internal Dictionary<string, long> Revisions { get; } = new(StringComparer.Ordinal);
     }
 
     private sealed class RunScope(HarnessCompactionRunCoordinator owner, RunState? previous) : IDisposable
