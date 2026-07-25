@@ -3,6 +3,7 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 
@@ -103,12 +104,44 @@ internal sealed class HarnessProviderComposition
                 bindingValidation.Detail);
         }
 
+        // This is the one coherent capability profile/composition request: the narrow compaction
+        // composer is invoked here, internally, against the exact same request.Profile,
+        // request.ChatClient, execution binding/accessor/session this method itself received — never
+        // a second, independently-resolved profile. Its statuses are mapped into this method's own
+        // HarnessProviderCompositionStatus, and every later step in this method builds the rest of the
+        // pipeline from the chat client it returns rather than request.ChatClient directly, so the
+        // hybrid compaction node (when installed) always ends up at the innermost, real-provider-facing
+        // position beneath every other Foundry-owned middleware layered on below.
+        var compactionResult = new HarnessCompactionComposition().Compose(
+            new HarnessCompactionCompositionRequest(
+                request.ChatClient,
+                request.Profile,
+                request.HybridProfile,
+                request.ExecutionBinding,
+                request.ExecutionContextAccessor,
+                request.SessionId));
+        if (compactionResult.Status is not (
+            HarnessCompactionCompositionStatus.Disabled or HarnessCompactionCompositionStatus.Success))
+        {
+            return Failure(
+                MapCompactionStatus(compactionResult.Status),
+                request.Profile,
+                compactionResult.Detail);
+        }
+        var effectiveChatClient = compactionResult.ChatClient!;
+        // Non-null only when compaction was actually installed above: this is the exact same
+        // coordinator instance HarnessHybridCompactionChatClient reads/marks against, so HarnessGuardedAgent
+        // begins the one outer-run scope every nested provider call within this composed agent's run
+        // observes and contributes to.
+        var compactionRunCoordinator = compactionResult.Coordinator;
+
         var supportedCapabilities = BuildSupportedCapabilities(
             request.HistoryProvider,
             request.PlanningProviders,
             request.ApprovalPlugin,
             request.SkillsPlugin,
-            request.WebSearchPlugin);
+            request.WebSearchPlugin,
+            hybridProfileSupplied: request.HybridProfile is not null);
         var enabledCapabilities = request.Profile.Capabilities.Values
             .Where(evidence =>
                 evidence.EffectiveState == HarnessCapabilityState.Enabled)
@@ -117,10 +150,10 @@ internal sealed class HarnessProviderComposition
             .ToArray();
         var guard = supportedCapabilities.SetEquals(HarnessCompositionGuard.G2SupportedCapabilities)
             ? HarnessCompositionGuard.Validate(
-                request.ChatClient,
+                effectiveChatClient,
                 request.Profile)
             : HarnessCompositionGuard.Validate(
-                request.ChatClient,
+                effectiveChatClient,
                 request.Profile,
                 supportedCapabilities);
         if (guard.Status != HarnessCompositionGuardStatus.Valid)
@@ -177,7 +210,7 @@ internal sealed class HarnessProviderComposition
             request.Profile.TelemetryOwner == HarnessTelemetryOwner.Foundry
                 ? request.Metrics
                 : null;
-        var builder = request.ChatClient.AsBuilder();
+        var builder = effectiveChatClient.AsBuilder();
 
         if (request.ApprovalPlugin is not null)
         {
@@ -434,7 +467,8 @@ internal sealed class HarnessProviderComposition
                 enabledCapabilities,
                 request.ApprovalPlugin?.ToolApprovalOptions is not null,
                 request.ApprovalPlugin?.HostValidator,
-                request.ProgressAccessor),
+                request.ProgressAccessor,
+                compactionRunCoordinator),
             request.Profile,
             null);
     }
@@ -444,10 +478,19 @@ internal sealed class HarnessProviderComposition
         HarnessPlanningProvidersPlugin? planningProviders,
         HarnessApprovalPlugin? approvalPlugin,
         HarnessSkillsPlugin? skillsPlugin,
-        HarnessWebSearchPlugin? webSearchPlugin)
+        HarnessWebSearchPlugin? webSearchPlugin,
+        bool hybridProfileSupplied)
     {
         var capabilities = new HashSet<HarnessCapability>(
             HarnessCompositionGuard.G2SupportedCapabilities);
+        if (hybridProfileSupplied)
+        {
+            // Compaction is included in the supported set only when a HybridProfile was actually
+            // supplied for this composition, keeping capability/profile symmetry fail-closed: a
+            // profile that enables Compaction without a HybridProfile is still rejected below by the
+            // compaction composer itself, never silently tolerated here.
+            capabilities.Add(HarnessCapability.Compaction);
+        }
         if (historyProvider is not null)
         {
             capabilities.Add(HarnessCapability.PerServiceHistory);
@@ -600,6 +643,21 @@ internal sealed class HarnessProviderComposition
                 HarnessProviderCompositionStatus.WebSearchToolNameCollision,
             HarnessWebSearchCompositionGuardStatus.WebSearchToolTypeCollision =>
                 HarnessProviderCompositionStatus.WebSearchToolTypeCollision,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
+
+    private static HarnessProviderCompositionStatus MapCompactionStatus(
+        HarnessCompactionCompositionStatus status) =>
+        status switch
+        {
+            HarnessCompactionCompositionStatus.CapabilityEnabledWithoutProfile =>
+                HarnessProviderCompositionStatus.CompactionCapabilityEnabledWithoutProfile,
+            HarnessCompactionCompositionStatus.ProfileSuppliedWithoutCapabilityEnabled =>
+                HarnessProviderCompositionStatus.CompactionProfileSuppliedWithoutCapabilityEnabled,
+            HarnessCompactionCompositionStatus.ProfileNotExecutable =>
+                HarnessProviderCompositionStatus.CompactionProfileNotExecutable,
+            HarnessCompactionCompositionStatus.ExistingCompactionComponent =>
+                HarnessProviderCompositionStatus.CompactionExistingComponent,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
 

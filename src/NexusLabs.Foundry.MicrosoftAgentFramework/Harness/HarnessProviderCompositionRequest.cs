@@ -17,6 +17,7 @@ internal sealed record HarnessProviderCompositionRequest(
     string Description,
     string Instructions,
     HarnessCapabilityProfile Profile,
+    HarnessHybridProfile? HybridProfile,
     HarnessGeneratedToolResolution GeneratedTools,
     HarnessExecutionBinding ExecutionBinding,
     IAgentExecutionContextAccessor ExecutionContextAccessor,

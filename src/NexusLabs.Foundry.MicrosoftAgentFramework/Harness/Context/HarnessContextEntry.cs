@@ -120,10 +120,13 @@ internal sealed record HarnessContextEntry
     /// not exactly one canonical <c>artifact://sha256/{64 lowercase hex}</c> reference;
     /// <paramref name="kind"/> is <see cref="HarnessContextEntryKind.ToolExchange"/> and
     /// <paramref name="message"/> carries no <see cref="FunctionCallContent"/> or
-    /// <see cref="FunctionResultContent"/>, or carries both a call and a result; or
-    /// <paramref name="kind"/> is not <see cref="HarnessContextEntryKind.ToolExchange"/> and
-    /// <paramref name="message"/> carries any <see cref="FunctionCallContent"/> or
-    /// <see cref="FunctionResultContent"/>.
+    /// <see cref="FunctionResultContent"/>, or carries both a call and a result; a call-bearing
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> entry's message role is not
+    /// <see cref="ChatRole.Assistant"/>; a result-bearing
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> entry's message role is not
+    /// <see cref="ChatRole.Tool"/>; or <paramref name="kind"/> is not
+    /// <see cref="HarnessContextEntryKind.ToolExchange"/> and <paramref name="message"/> carries any
+    /// <see cref="FunctionCallContent"/> or <see cref="FunctionResultContent"/>.
     /// </exception>
     /// <exception cref="NotSupportedException">
     /// A <see cref="FunctionCallContent.Arguments"/> value or a <see cref="FunctionResultContent.Result"/>
@@ -192,6 +195,24 @@ internal sealed record HarnessContextEntry
                         nameof(message));
                 }
 
+                if (hasCall && copiedMessage.Role != ChatRole.Assistant)
+                {
+                    throw new ArgumentException(
+                        "A call-bearing tool-exchange entry's message must use ChatRole.Assistant " +
+                        $"to maintain MEAI role coherence; received ChatRole '{copiedMessage.Role}'. " +
+                        "User-role and system-role messages may never carry function-call content.",
+                        nameof(message));
+                }
+
+                if (hasResult && copiedMessage.Role != ChatRole.Tool)
+                {
+                    throw new ArgumentException(
+                        "A result-bearing tool-exchange entry's message must use ChatRole.Tool " +
+                        $"to maintain MEAI role coherence; received ChatRole '{copiedMessage.Role}'. " +
+                        "User-role and system-role messages may never carry function-result content.",
+                        nameof(message));
+                }
+
                 break;
 
             case HarnessContextEntryKind.RecoverableContextSegment:
@@ -208,7 +229,7 @@ internal sealed record HarnessContextEntry
 
     /// <summary>
     /// Constructs a <see cref="HarnessContextEntryKind.RecoverableContextSegment"/> entry directly from
-    /// a G4 rehydration primitive's marked recoverable segment. This is the only path that can construct
+    /// a recoverable rehydration segment. This is the only path that can construct
     /// this kind — the generic <see cref="Create"/> factory rejects it, because this kind's canonical
     /// data model is <paramref name="segment"/> itself (the exact artifact reference identity plus its
     /// resolved body, already carried in <see cref="HarnessArtifactRecoverableContextSegment"/>'s own

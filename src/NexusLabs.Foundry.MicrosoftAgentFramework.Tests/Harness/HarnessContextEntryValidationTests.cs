@@ -116,6 +116,58 @@ public sealed class HarnessContextEntryValidationTests
             HarnessContextEntry.Create("mixed", HarnessContextEntryKind.ToolExchange, message));
     }
 
+    // --- ToolExchange role coherence: calls must be Assistant, results must be Tool -------------
+
+    [Theory]
+    [InlineData("user")]
+    [InlineData("system")]
+    [InlineData("tool")]
+    public void Create_ToolExchangeCallBearingWithNonAssistantRole_ThrowsArgumentException(string roleName)
+    {
+        var role = new ChatRole(roleName);
+        var message = new ChatMessage(role, new List<AIContent> { new FunctionCallContent("call-1", "lookup") });
+
+        Assert.Throws<ArgumentException>(() =>
+            HarnessContextEntry.Create("call", HarnessContextEntryKind.ToolExchange, message));
+    }
+
+    [Theory]
+    [InlineData("user")]
+    [InlineData("system")]
+    [InlineData("assistant")]
+    public void Create_ToolExchangeResultBearingWithNonToolRole_ThrowsArgumentException(string roleName)
+    {
+        var role = new ChatRole(roleName);
+        var message = new ChatMessage(role, new List<AIContent> { new FunctionResultContent("call-1", "ok") });
+
+        Assert.Throws<ArgumentException>(() =>
+            HarnessContextEntry.Create("result", HarnessContextEntryKind.ToolExchange, message));
+    }
+
+    [Fact]
+    public void Create_ToolExchangeCallBearingWithAssistantRole_Succeeds()
+    {
+        var message = new ChatMessage(
+            ChatRole.Assistant, new List<AIContent> { new FunctionCallContent("call-1", "lookup") });
+
+        var entry = HarnessContextEntry.Create("call", HarnessContextEntryKind.ToolExchange, message);
+
+        Assert.Equal(HarnessContextEntryKind.ToolExchange, entry.Kind);
+        Assert.Equal(ChatRole.Assistant, entry.Message.Role);
+    }
+
+    [Fact]
+    public void Create_ToolExchangeResultBearingWithToolRole_Succeeds()
+    {
+        var message = new ChatMessage(
+            ChatRole.Tool, new List<AIContent> { new FunctionResultContent("call-1", "ok") });
+
+        var entry = HarnessContextEntry.Create("result", HarnessContextEntryKind.ToolExchange, message);
+
+        Assert.Equal(HarnessContextEntryKind.ToolExchange, entry.Kind);
+        Assert.Equal(ChatRole.Tool, entry.Message.Role);
+    }
+
     // --- NormalizeValue: no reflection-based fallback for an unsupported type ------------------
 
     private sealed class UnsupportedPayload
