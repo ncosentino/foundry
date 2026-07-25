@@ -16,14 +16,18 @@ internal sealed record HarnessToolExchangeAnalysis
         IReadOnlyList<string> orphanedCallEntryIds,
         IReadOnlyList<string> orphanResultEntryIds,
         IReadOnlyList<string> duplicateCallIds,
+        IReadOnlyList<string> duplicateCallEntryIds,
         IReadOnlyList<string> duplicateResultCallIds,
+        IReadOnlyList<string> duplicateResultEntryIds,
         IReadOnlyList<string> reorderedCallEntryIds)
     {
         Groups = groups;
         OrphanedCallEntryIds = orphanedCallEntryIds;
         OrphanResultEntryIds = orphanResultEntryIds;
         DuplicateCallIds = duplicateCallIds;
+        DuplicateCallEntryIds = duplicateCallEntryIds;
         DuplicateResultCallIds = duplicateResultCallIds;
+        DuplicateResultEntryIds = duplicateResultEntryIds;
         ReorderedCallEntryIds = reorderedCallEntryIds;
     }
 
@@ -45,8 +49,21 @@ internal sealed record HarnessToolExchangeAnalysis
     /// <summary>Function call ids declared by more than one call-bearing entry.</summary>
     internal IReadOnlyList<string> DuplicateCallIds { get; }
 
+    /// <summary>
+    /// Entry ids of every call-bearing message that declared at least one id in
+    /// <see cref="DuplicateCallIds"/> — every offending owner, not just the first, so a caller never
+    /// has to re-derive which entries share a duplicated call id.
+    /// </summary>
+    internal IReadOnlyList<string> DuplicateCallEntryIds { get; }
+
     /// <summary>Function call ids whose result was declared by more than one result-bearing entry.</summary>
     internal IReadOnlyList<string> DuplicateResultCallIds { get; }
+
+    /// <summary>
+    /// Entry ids of every result-bearing message that declared a result for an id in
+    /// <see cref="DuplicateResultCallIds"/> — every offending owner, not just the first.
+    /// </summary>
+    internal IReadOnlyList<string> DuplicateResultEntryIds { get; }
 
     /// <summary>
     /// Entry ids of call-bearing messages whose matching result(s) all exist but appear at or before
@@ -115,9 +132,22 @@ internal sealed record HarnessToolExchangeAnalysis
             }
         }
 
+        var duplicateCallIdSet = new HashSet<string>(duplicateCallIds, StringComparer.Ordinal);
+        var duplicateCallEntryIds = callEntries
+            .Where(callEntry => callEntry.CallIds.Any(duplicateCallIdSet.Contains))
+            .Select(callEntry => callEntry.EntryId)
+            .Distinct()
+            .ToList();
+
         var duplicateResultCallIds = resultOwners
             .Where(pair => pair.Value.Count > 1)
             .Select(pair => pair.Key)
+            .ToList();
+
+        var duplicateResultEntryIds = resultOwners
+            .Where(pair => pair.Value.Count > 1)
+            .SelectMany(pair => pair.Value)
+            .Distinct()
             .ToList();
 
         var orphanResultEntryIds = resultOwners
@@ -180,7 +210,9 @@ internal sealed record HarnessToolExchangeAnalysis
             orphanedCallEntryIds,
             orphanResultEntryIds,
             [.. duplicateCallIds.Distinct()],
+            duplicateCallEntryIds,
             duplicateResultCallIds,
+            duplicateResultEntryIds,
             reorderedCallEntryIds);
     }
 }

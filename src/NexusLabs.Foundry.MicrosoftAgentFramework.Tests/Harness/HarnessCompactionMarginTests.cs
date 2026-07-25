@@ -17,7 +17,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
 /// </summary>
 public sealed class HarnessCompactionMarginTests
 {
-    private static readonly HarnessUtf8TextSizeEstimator DefaultEstimator = new();
+    private static readonly HarnessUtf8ContextSizeEstimator DefaultEstimator = new();
 
     // --- Required, explicitly validated construction parameters ---------------------------
 

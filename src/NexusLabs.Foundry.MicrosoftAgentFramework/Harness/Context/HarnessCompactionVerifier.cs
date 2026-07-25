@@ -229,11 +229,19 @@ internal static class HarnessCompactionVerifier
         if (proposedAnalysis.DuplicateCallIds.Count > 0)
         {
             reasons.Add(HarnessCompactionRejectionReason.DuplicateToolCall);
+            foreach (var id in proposedAnalysis.DuplicateCallEntryIds)
+            {
+                invalidEntryIds.Add(id);
+            }
         }
 
         if (proposedAnalysis.DuplicateResultCallIds.Count > 0)
         {
             reasons.Add(HarnessCompactionRejectionReason.DuplicateToolResult);
+            foreach (var id in proposedAnalysis.DuplicateResultEntryIds)
+            {
+                invalidEntryIds.Add(id);
+            }
         }
 
         if (proposedAnalysis.ReorderedCallEntryIds.Count > 0)

@@ -21,24 +21,32 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// </para>
 /// <para>
 /// <strong>Argument and result normalization.</strong> <see cref="FunctionCallContent.Arguments"/>
-/// values and <see cref="FunctionResultContent.Result"/> are normalized to an immutable snapshot by
-/// <see cref="NormalizeValue"/> before storage. Supported value types — <see langword="null"/>,
-/// <see cref="string"/>, common primitive value types, <see cref="JsonElement"/>, and
-/// <see cref="IDictionary{TKey,TValue}"/> of string to <see langword="object"/> — are deep-copied
-/// recursively so a caller mutating a nested dictionary or list after <see cref="Create"/> returns
-/// cannot change what this entry reports. Any other object graph is serialized to a UTF-8 JSON
-/// snapshot and parsed back as an owned <see cref="JsonElement"/>; types that cannot be serialized
-/// by <see cref="JsonSerializer"/> will propagate the serializer's own exception, and NativeAOT
-/// callers must ensure the relevant type metadata is registered.
+/// values and <see cref="FunctionResultContent.Result"/> are normalized to an immutable, explicitly
+/// AOT-safe snapshot by <see cref="NormalizeValue"/> before storage. Only the shapes it documents are
+/// supported: <see langword="null"/>, <see cref="string"/>, common primitive value types,
+/// <see cref="JsonElement"/> (cloned), and string-keyed dictionaries or object lists/arrays of any of
+/// these, normalized recursively. There is no reflection-based fallback for an unrecognized object
+/// graph — <see cref="NormalizeValue"/> throws <see cref="NotSupportedException"/> instead of silently
+/// admitting an arbitrary type into preserved context.
 /// </para>
 /// <para>
 /// <strong>Structural validation, not prose parsing.</strong> <see cref="HarnessContextEntryKind.ArtifactReference"/>
 /// and <see cref="HarnessContextEntryKind.ToolExchange"/> are the two kinds with a verifiable structural
 /// shape, so <see cref="Create"/> enforces that shape directly: an artifact-reference entry's exact text
 /// must be one canonical <c>artifact://sha256/{64 lowercase hex}</c> reference (never a bare path or an
-/// arbitrary URI), and a tool-exchange entry's message must carry at least one <see cref="FunctionCallContent"/>
-/// or <see cref="FunctionResultContent"/>. Every other kind is an explicit caller label with no further
-/// shape requirement.
+/// arbitrary URI), and a tool-exchange entry's message must carry exactly one of a
+/// <see cref="FunctionCallContent"/> or a <see cref="FunctionResultContent"/> — never both in the same
+/// entry, so a downstream reader is never left to guess whether a mixed entry represents a call or a
+/// result first. Conversely, every non-<see cref="HarnessContextEntryKind.ToolExchange"/> kind
+/// (<see cref="HarnessContextEntryKind.SystemInstruction"/>,
+/// <see cref="HarnessContextEntryKind.AuthoritativeSessionState"/>,
+/// <see cref="HarnessContextEntryKind.ApprovalSecurityState"/>,
+/// <see cref="HarnessContextEntryKind.ArtifactReference"/>,
+/// <see cref="HarnessContextEntryKind.ConversationalMessage"/>, and
+/// <see cref="HarnessContextEntryKind.Summary"/>) fails closed if its message carries any
+/// <see cref="FunctionCallContent"/> or <see cref="FunctionResultContent"/> at all — tool content can
+/// never be smuggled into preserved context under a label the reducer or verifier does not treat as a
+/// tool exchange.
 /// </para>
 /// </remarks>
 internal sealed record HarnessContextEntry
@@ -84,10 +92,17 @@ internal sealed record HarnessContextEntry
     /// <exception cref="ArgumentException">
     /// <paramref name="entryId"/> is empty or whitespace-only; <paramref name="kind"/> is
     /// <see cref="HarnessContextEntryKind.ArtifactReference"/> and <paramref name="message"/>'s text is
-    /// not exactly one canonical <c>artifact://sha256/{64 lowercase hex}</c> reference; or
+    /// not exactly one canonical <c>artifact://sha256/{64 lowercase hex}</c> reference;
     /// <paramref name="kind"/> is <see cref="HarnessContextEntryKind.ToolExchange"/> and
     /// <paramref name="message"/> carries no <see cref="FunctionCallContent"/> or
+    /// <see cref="FunctionResultContent"/>, or carries both a call and a result; or
+    /// <paramref name="kind"/> is not <see cref="HarnessContextEntryKind.ToolExchange"/> and
+    /// <paramref name="message"/> carries any <see cref="FunctionCallContent"/> or
     /// <see cref="FunctionResultContent"/>.
+    /// </exception>
+    /// <exception cref="NotSupportedException">
+    /// A <see cref="FunctionCallContent.Arguments"/> value or a <see cref="FunctionResultContent.Result"/>
+    /// value has a type <see cref="NormalizeValue"/> does not support. See its documented shapes.
     /// </exception>
     internal static HarnessContextEntry Create(string entryId, HarnessContextEntryKind kind, ChatMessage message)
     {
@@ -107,6 +122,22 @@ internal sealed record HarnessContextEntry
             CreatedAt = message.CreatedAt,
         };
 
+        var hasCall = copiedMessage.Contents.Any(content => content is FunctionCallContent);
+        var hasResult = copiedMessage.Contents.Any(content => content is FunctionResultContent);
+
+        if (kind != HarnessContextEntryKind.ToolExchange)
+        {
+            if (hasCall || hasResult)
+            {
+                throw new ArgumentException(
+                    $"A '{kind}' entry's message must not contain any FunctionCallContent or " +
+                    "FunctionResultContent. Tool call/result content is only permitted in a " +
+                    $"{nameof(HarnessContextEntryKind.ToolExchange)} entry, never smuggled in under " +
+                    "another label.",
+                    nameof(message));
+            }
+        }
+
         string? artifactReferenceDigest = null;
 
         switch (kind)
@@ -125,13 +156,20 @@ internal sealed record HarnessContextEntry
                 break;
 
             case HarnessContextEntryKind.ToolExchange:
-                var hasCallOrResult = copiedMessage.Contents
-                    .Any(content => content is FunctionCallContent or FunctionResultContent);
-                if (!hasCallOrResult)
+                if (!hasCall && !hasResult)
                 {
                     throw new ArgumentException(
                         "A tool-exchange entry's message must contain at least one FunctionCallContent " +
                         "or FunctionResultContent.",
+                        nameof(message));
+                }
+
+                if (hasCall && hasResult)
+                {
+                    throw new ArgumentException(
+                        "A tool-exchange entry's message must contain either FunctionCallContent or " +
+                        "FunctionResultContent, never both in the same entry, so a downstream reader is " +
+                        "never left to guess whether the entry represents a call or a result first.",
                         nameof(message));
                 }
 
@@ -185,6 +223,11 @@ internal sealed record HarnessContextEntry
     /// <summary>
     /// Returns an immutable normalized snapshot of <paramref name="value"/> so a caller mutating
     /// the original object after <see cref="Create"/> returns cannot change what this entry stores.
+    /// There is no reflection-based fallback: an unsupported type throws
+    /// <see cref="NotSupportedException"/> rather than being serialized by
+    /// <see cref="JsonSerializer.SerializeToUtf8Bytes(object?, Type, JsonSerializerOptions?)"/>'s
+    /// reflection-based (and NativeAOT-unsafe) unknown-object overload, so an unrecognized type can
+    /// never enter preserved context under an unverifiable shape.
     /// </summary>
     /// <remarks>
     /// Supported types, in matching order:
@@ -193,10 +236,16 @@ internal sealed record HarnessContextEntry
     ///   <item><see cref="string"/> and common primitive value types — returned as-is (already immutable).</item>
     ///   <item><see cref="JsonElement"/> — cloned via <see cref="JsonElement.Clone"/> to own its backing document.</item>
     ///   <item><see cref="IDictionary{TKey,TValue}"/> of string to <see langword="object"/> — each value is normalized recursively into a new <see cref="Dictionary{TKey,TValue}"/>.</item>
-    ///   <item><see cref="IList{T}"/> of <see langword="object"/> — each element is normalized recursively into a new <see cref="List{T}"/>.</item>
-    ///   <item>Anything else — serialized to a UTF-8 JSON snapshot and parsed back as an owned <see cref="JsonElement"/>. NativeAOT callers must ensure the type's metadata is registered with the serializer.</item>
+    ///   <item><see cref="IList{T}"/> of <see langword="object"/> (including arrays) — each element is normalized recursively into a new <see cref="List{T}"/>.</item>
     /// </list>
+    /// Anything else — including an arbitrary custom object graph — is unsupported and throws
+    /// <see cref="NotSupportedException"/> before entering preserved context. Callers must convert such
+    /// a value to one of the explicit shapes above (for example a <see cref="JsonElement"/> obtained
+    /// from a type-safe, source-generated serialization) before calling <see cref="Create"/>.
     /// </remarks>
+    /// <exception cref="NotSupportedException">
+    /// <paramref name="value"/>'s runtime type is not one of the documented supported shapes.
+    /// </exception>
     internal static object? NormalizeValue(object? value)
     {
         if (value is null) return null;
@@ -228,9 +277,11 @@ internal sealed record HarnessContextEntry
             return copy;
         }
 
-        var json = JsonSerializer.SerializeToUtf8Bytes(value, value.GetType());
-        using var doc = JsonDocument.Parse(json);
-        return doc.RootElement.Clone();
+        throw new NotSupportedException(
+            $"Type '{value.GetType()}' is not a supported normalized value shape. Supported shapes are: " +
+            "null, string, common primitive value types, JsonElement, IDictionary<string, object?>, and " +
+            "IList<object?> (including arrays), normalized recursively. Convert the value to one of these " +
+            "explicit, AOT-safe shapes before it is stored in preserved context.");
     }
 
     private static Dictionary<string, object?> NormalizeArgumentDictionary(IDictionary<string, object?> source)

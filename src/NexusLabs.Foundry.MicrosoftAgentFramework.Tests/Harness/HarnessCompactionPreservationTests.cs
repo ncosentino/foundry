@@ -20,7 +20,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
 /// </summary>
 public sealed class HarnessCompactionPreservationTests
 {
-    private static readonly HarnessUtf8TextSizeEstimator DefaultEstimator = new();
+    private static readonly HarnessUtf8ContextSizeEstimator DefaultEstimator = new();
 
     // --- Labeled preservation set: required kinds + trailing recency units retained --------
 
@@ -125,6 +125,139 @@ public sealed class HarnessCompactionPreservationTests
         Assert.False(result.IsAccepted);
         Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
         Assert.Contains("tool-call", result.MissingRequiredEntryIds);
+    }
+
+    // --- Incomplete tool exchanges are never silently reducible, even old and out of window -----
+
+    [Fact]
+    public void SelectRequiredPreservation_OldUnmatchedCallOutsideRecentWindow_IsRequired()
+    {
+        // Retention count of 1 keeps only the trailing "recent" unit; without the incomplete-group
+        // rule, "orphaned-call" (which never has a matching result anywhere) would age out and be
+        // silently droppable.
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("orphaned-call", ("orphan-call-id", "lookup")),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-1", ChatRole.User, "one"),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-2", ChatRole.Assistant, "two"),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent"),
+        };
+
+        var selection = policy.SelectRequiredPreservation(original, CancellationToken.None);
+
+        Assert.Contains("orphaned-call", selection.RequiredEntryIds);
+        Assert.DoesNotContain("filler-1", selection.RequiredEntryIds);
+        Assert.DoesNotContain("filler-2", selection.RequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_DroppingOldUnmatchedCall_RejectedAsMissingRequiredEntry()
+    {
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("orphaned-call", ("orphan-call-id", "lookup")),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-1", ChatRole.User, "one"),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-2", ChatRole.Assistant, "two"),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent"),
+        };
+        var proposed = new[] { original[0], original[4] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
+        Assert.Contains("orphaned-call", result.MissingRequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_PreservingOldUnmatchedCall_StillRejectedAsOrphanedToolCall_IrreducibleTermination()
+    {
+        // The exchange is irreparably broken in the original entries themselves (no result ever
+        // existed), so requiring it does not make a passing reduction possible: preserving it still
+        // fails the proposed entries' own tool-exchange self-consistency check. Dropping it fails the
+        // required-preservation check above instead — there is no proposed set that can pass both.
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("orphaned-call", ("orphan-call-id", "lookup")),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-1", ChatRole.User, "one"),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-2", ChatRole.Assistant, "two"),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent"),
+        };
+        var proposed = new[] { original[0], original[1], original[4] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.OrphanedToolCall, result.RejectionReasons);
+        Assert.Contains("orphaned-call", result.InvalidEntryIds);
+        Assert.DoesNotContain(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
+    }
+
+    [Fact]
+    public void SelectRequiredPreservation_OldOrphanedResultOutsideRecentWindow_IsRequired()
+    {
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolResultEntry("orphaned-result", ("never-called-id", "value")),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-1", ChatRole.User, "one"),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-2", ChatRole.Assistant, "two"),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent"),
+        };
+
+        var selection = policy.SelectRequiredPreservation(original, CancellationToken.None);
+
+        Assert.Contains("orphaned-result", selection.RequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_DroppingOldOrphanedResult_RejectedAsMissingRequiredEntry()
+    {
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolResultEntry("orphaned-result", ("never-called-id", "value")),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-1", ChatRole.User, "one"),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-2", ChatRole.Assistant, "two"),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent"),
+        };
+        var proposed = new[] { original[0], original[4] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
+        Assert.Contains("orphaned-result", result.MissingRequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_PreservingOldOrphanedResult_StillRejectedAsOrphanedToolResult_IrreducibleTermination()
+    {
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolResultEntry("orphaned-result", ("never-called-id", "value")),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-1", ChatRole.User, "one"),
+            HarnessCompactionTestFixture.ConversationalEntry("filler-2", ChatRole.Assistant, "two"),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent"),
+        };
+        var proposed = new[] { original[0], original[1], original[4] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.OrphanedToolResult, result.RejectionReasons);
+        Assert.Contains("orphaned-result", result.InvalidEntryIds);
+        Assert.DoesNotContain(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
     }
 
     // --- Structured authoritative state wins over a contradictory summary ------------------

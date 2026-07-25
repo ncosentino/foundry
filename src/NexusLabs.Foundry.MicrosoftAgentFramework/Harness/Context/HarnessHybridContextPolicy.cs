@@ -1,3 +1,5 @@
+using Microsoft.Extensions.AI;
+
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
@@ -24,6 +26,22 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// <see cref="HarnessToolExchangeGroup"/> — counting a whole tool exchange as a single unit is the one
 /// documented rule that guarantees the retention boundary can never split a required tool exchange.
 /// <see cref="HarnessContextEntryKind.Summary"/> entries are never required.
+/// </para>
+/// <para>
+/// <strong>Incomplete tool exchanges are never silently reducible.</strong> Independent of the
+/// recency-unit retention boundary above, <see cref="SelectRequiredPreservation"/> always requires
+/// every entry <see cref="HarnessToolExchangeAnalysis"/> flags as part of an incomplete exchange: an
+/// orphaned call, an orphaned result, a duplicated call or result id, or a call whose result was
+/// reordered ahead of it. This holds even when every entry in the offending group falls entirely
+/// outside the trailing retention window — an old, still-unmatched exchange can never simply age out
+/// of the required set. Because <see cref="HarnessCompactionVerifier"/> re-checks the same structural
+/// consistency on the proposed entries, an exchange that is irreparably broken in the original entries
+/// (for example an orphaned call whose result never existed at all) stays required yet can never pass
+/// verification either way: dropping the required entry rejects with
+/// <see cref="HarnessCompactionRejectionReason.MissingRequiredEntry"/>, and preserving it still rejects
+/// with <see cref="HarnessCompactionRejectionReason.OrphanedToolCall"/> (or the matching orphan/duplicate/
+/// reorder reason) — an irreducible termination by design, rather than a silent drop of the broken
+/// exchange.
 /// </para>
 /// </remarks>
 internal sealed class HarnessHybridContextPolicy
@@ -239,6 +257,11 @@ internal sealed class HarnessHybridContextPolicy
             }
         }
 
+        foreach (var entryId in ComputeIncompleteToolExchangeEntryIds(originalEntries, analysis))
+        {
+            Require(entryId);
+        }
+
         var recencyUnits = BuildRecencyUnits(originalEntries, analysis);
         var retainedUnits = recencyUnits.Count <= RecentMessageRetentionCount
             ? recencyUnits
@@ -311,6 +334,62 @@ internal sealed class HarnessHybridContextPolicy
         }
 
         return units;
+    }
+
+    /// <summary>
+    /// Every entry id <see cref="HarnessToolExchangeAnalysis"/> flags as part of an incomplete tool
+    /// exchange: the call entry and matched result entries of an incomplete
+    /// <see cref="HarnessToolExchangeGroup"/> (orphaned call, reordered result, or a duplicate call/
+    /// result id shared with another group), every orphaned result entry (which is never itself part
+    /// of a group), and every result entry beyond the first that declares a duplicated call id's
+    /// result (only the first such entry is ever captured by a group's <see cref="HarnessToolExchangeGroup.ResultEntryIds"/>).
+    /// Computed independent of recency so <see cref="SelectRequiredPreservation"/> can require these
+    /// entries regardless of how far outside the trailing retention window they fall.
+    /// </summary>
+    private static HashSet<string> ComputeIncompleteToolExchangeEntryIds(
+        IReadOnlyList<HarnessContextEntry> entries, HarnessToolExchangeAnalysis analysis)
+    {
+        var requiredEntryIds = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var group in analysis.Groups)
+        {
+            if (group.IsComplete)
+            {
+                continue;
+            }
+
+            foreach (var entryId in group.AllEntryIds)
+            {
+                requiredEntryIds.Add(entryId);
+            }
+        }
+
+        foreach (var entryId in analysis.OrphanResultEntryIds)
+        {
+            requiredEntryIds.Add(entryId);
+        }
+
+        if (analysis.DuplicateResultCallIds.Count > 0)
+        {
+            var duplicateResultCallIds = new HashSet<string>(analysis.DuplicateResultCallIds, StringComparer.Ordinal);
+            foreach (var entry in entries)
+            {
+                if (entry.Kind != HarnessContextEntryKind.ToolExchange)
+                {
+                    continue;
+                }
+
+                foreach (var result in entry.Message.Contents.OfType<FunctionResultContent>())
+                {
+                    if (duplicateResultCallIds.Contains(result.CallId))
+                    {
+                        requiredEntryIds.Add(entry.EntryId);
+                    }
+                }
+            }
+        }
+
+        return requiredEntryIds;
     }
 
     private static void EnsureUniqueEntryIds(IReadOnlyList<HarnessContextEntry> entries)

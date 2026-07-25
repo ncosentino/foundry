@@ -17,7 +17,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests.Harness;
 /// </summary>
 public sealed class HarnessCompactionSequenceTests
 {
-    private static readonly HarnessUtf8TextSizeEstimator DefaultEstimator = new();
+    private static readonly HarnessUtf8ContextSizeEstimator DefaultEstimator = new();
 
     [Fact]
     public void Verify_UnchangedSingleCallGroup_Accepted()
@@ -208,6 +208,8 @@ public sealed class HarnessCompactionSequenceTests
 
         Assert.False(result.IsAccepted);
         Assert.Contains(HarnessCompactionRejectionReason.DuplicateToolCall, result.RejectionReasons);
+        Assert.Contains("call-1", result.InvalidEntryIds);
+        Assert.Contains("call-2", result.InvalidEntryIds);
     }
 
     [Fact]
@@ -226,6 +228,8 @@ public sealed class HarnessCompactionSequenceTests
 
         Assert.False(result.IsAccepted);
         Assert.Contains(HarnessCompactionRejectionReason.DuplicateToolResult, result.RejectionReasons);
+        Assert.Contains("result-1", result.InvalidEntryIds);
+        Assert.Contains("result-2", result.InvalidEntryIds);
     }
 
     [Fact]
