@@ -76,6 +76,29 @@ internal static class HarnessCompactionTestFixture
         return HarnessContextEntry.Create(entryId, HarnessContextEntryKind.ToolExchange, new ChatMessage(ChatRole.Tool, contents));
     }
 
+    /// <summary>
+    /// Builds a real-shape <see cref="HarnessContextEntryKind.ToolExchange"/> result entry whose
+    /// <see cref="FunctionResultContent.Result"/> is the exact canonical <c>artifact://sha256/{digest}</c>
+    /// reference string a real eager-offload tool result actually emits (a bare <see cref="string"/>
+    /// payload), simulating G4 offloaded references surfacing inside tool-call history.
+    /// </summary>
+    internal static HarnessContextEntry ToolResultReferenceEntry(string entryId, string callId, string digest) =>
+        ToolResultEntry(entryId, (callId, HarnessArtifactIdentity.BuildReferenceId(digest)));
+
+    /// <summary>
+    /// Builds a real-shape <see cref="HarnessContextEntryKind.ToolExchange"/> result entry whose
+    /// <see cref="FunctionResultContent.Result"/> is a string-valued <see cref="System.Text.Json.JsonElement"/>
+    /// carrying the canonical <c>artifact://sha256/{digest}</c> reference — the shape
+    /// <see cref="HarnessContextEntry.NormalizeValue"/> stores a result's string payload as after a
+    /// round trip through source-generated JSON serialization.
+    /// </summary>
+    internal static HarnessContextEntry ToolResultReferenceEntryFromJsonElement(string entryId, string callId, string digest)
+    {
+        var referenceId = HarnessArtifactIdentity.BuildReferenceId(digest);
+        var element = System.Text.Json.JsonSerializer.SerializeToElement(referenceId);
+        return ToolResultEntry(entryId, (callId, element));
+    }
+
     internal static HarnessContextEntry OptionalEntry(string entryId, string text) =>
         HarnessContextEntry.Create(entryId, HarnessContextEntryKind.OptionalContext, new ChatMessage(ChatRole.Assistant, text));
 

@@ -224,8 +224,10 @@ public sealed class HarnessCompactionRunCoordinatorTests
             var messages = new List<ChatMessage>
             {
                 new(ChatRole.System, "be helpful"),
-                new(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest1)),
-                new(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest2)),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest1))]),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-2", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-2", HarnessArtifactIdentity.BuildReferenceId(digest2))]),
                 new(ChatRole.User, "hello"),
             };
             var classifier = new HarnessScriptedMessageClassifier();
@@ -351,7 +353,8 @@ public sealed class HarnessCompactionRunCoordinatorTests
             var messages = new List<ChatMessage>
             {
                 new(ChatRole.System, "be helpful"),
-                new(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest)),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
                 new(ChatRole.User, "hello"),
             };
             var classifier = new HarnessScriptedMessageClassifier();
@@ -403,7 +406,8 @@ public sealed class HarnessCompactionRunCoordinatorTests
             var messages = new List<ChatMessage>
             {
                 new(ChatRole.System, "be helpful"),
-                new(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest)),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
                 new(ChatRole.User, "hello"),
             };
             var classifier = new HarnessScriptedMessageClassifier();
@@ -596,13 +600,272 @@ public sealed class HarnessCompactionRunCoordinatorTests
         // Two simultaneous outer runs on the very same composed agent (same HarnessGuardedAgent, same
         // HarnessHybridCompactionChatClient, same HarnessCompactionRunCoordinator instance): if the
         // coordinator's AsyncLocal state were shared incorrectly across these two independent runs, the
-        // second run to reach HarnessCompactionRunCoordinator.MarkDelivered would incorrectly find the
-        // digest already delivered and the raw body would reach the real provider only once in total,
+        // second run to reach HarnessCompactionRunCoordinator.Commit would incorrectly find the digest
+        // already delivered and the raw body would reach the real provider only once in total,
         // instead of once per run.
         await Task.WhenAll(RunOnceAsync(), RunOnceAsync());
 
         Assert.Equal(2, leaf.CallCount);
         Assert.Equal(2, leaf.ObservedCalls.Count(call => call.Any(message => message.Text == rawBody)));
+    }
+
+    [Fact]
+    public async Task SameOuterRun_ConcurrentProviderCalls_ExactlyOneForwardsRawBody()
+    {
+        const string rawBody = "SECRET-RAW-RECOVERED-BODY";
+        const string artifactContentSeed = "coordinator-same-run-concurrent-artifact-content";
+        const string recoveredEntryId = "recovered-entry-id";
+        var digest = HarnessArtifactIdentity.ComputeDigest(artifactContentSeed);
+        var reference = HarnessCompactionTestFixture.SampleReference(artifactContentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+
+        using var services = HarnessCompositionTestFixture.CreateServices();
+        var accessor = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(accessor, out var scope);
+        using (scope)
+        {
+            var messages = new List<ChatMessage>
+            {
+                new(ChatRole.System, "be helpful"),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
+                new(ChatRole.User, "hello"),
+            };
+
+            // A classifier deliberately free of any shared mutable state, since it is invoked
+            // concurrently by two provider calls racing within the very same run scope below.
+            var classifier = new NoOverrideMessageClassifier();
+            var hybridProfile = HarnessHybridProfile.Create(
+                HarnessCompactionTestFixture.CreatePolicy(
+                    1000, 1, 5, 3, new HarnessConstantSizeContextEstimator(1)),
+                HarnessScriptedUpstreamChatReducer.Echo(),
+                classifier,
+                baselineEntries => new HarnessMutableContextSnapshotProvider(
+                    HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+                        baselineEntries, recoveredEntryId, segment)));
+
+            // Forces genuinely overlapping execution: both provider calls below must actually arrive
+            // concurrently before either is allowed to complete, so this test cannot pass merely
+            // because the two calls happened to run sequentially.
+            var leaf = new BarrierObservingChatClient(expectedConcurrentCalls: 2);
+            var coordinator = new HarnessCompactionRunCoordinator();
+
+            // One shared outer run scope, exactly as HarnessGuardedAgent.RunCoreAsync begins around an
+            // entire outer run: two nested provider calls below race concurrently within it, exactly as
+            // two genuinely overlapping FICC tool rounds or message-injection-driven calls could.
+            using var runScope = coordinator.BeginRun();
+            var compactionClientA = new HarnessHybridCompactionChatClient(
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+            var compactionClientB = new HarnessHybridCompactionChatClient(
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+
+            var callA = compactionClientA.GetResponseAsync(
+                messages, cancellationToken: TestContext.Current.CancellationToken);
+            var callB = compactionClientB.GetResponseAsync(
+                messages, cancellationToken: TestContext.Current.CancellationToken);
+
+            await Task.WhenAll(callA, callB);
+
+            Assert.Equal(2, leaf.CallCount);
+
+            // Both calls genuinely overlapped inside the real provider (the barrier only releases once
+            // both arrivals are observed), yet exactly one of them ever forwarded the raw recovered
+            // body: the atomic reservation/lease protocol — not incidental sequencing — is what
+            // prevents the other concurrent call from also forwarding it.
+            var callsWithRawBody = leaf.ObservedCalls.Count(call => call.Any(message => message.Text == rawBody));
+            Assert.Equal(1, callsWithRawBody);
+        }
+    }
+
+    [Fact]
+    public async Task ProviderCallFails_ReservationReleased_RetryWithinSameRunRedeliversRawBody()
+    {
+        const string rawBody = "SECRET-RAW-RECOVERED-BODY";
+        const string artifactContentSeed = "coordinator-fail-then-retry-artifact-content";
+        const string recoveredEntryId = "recovered-entry-id";
+        var digest = HarnessArtifactIdentity.ComputeDigest(artifactContentSeed);
+        var reference = HarnessCompactionTestFixture.SampleReference(artifactContentSeed, DateTimeOffset.UtcNow);
+        var segment = HarnessArtifactRecoverableContextSegment.Create(reference, rawBody, DateTimeOffset.UtcNow);
+
+        using var services = HarnessCompositionTestFixture.CreateServices();
+        var accessor = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(accessor, out var scope);
+        using (scope)
+        {
+            var messages = new List<ChatMessage>
+            {
+                new(ChatRole.System, "be helpful"),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G4Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
+                new(ChatRole.User, "hello"),
+            };
+            var classifier = new HarnessScriptedMessageClassifier();
+            var hybridProfile = HarnessHybridProfile.Create(
+                HarnessCompactionTestFixture.CreatePolicy(
+                    1000, 1, 5, 3, new HarnessConstantSizeContextEstimator(1)),
+                HarnessScriptedUpstreamChatReducer.Echo(),
+                classifier,
+                baselineEntries => new HarnessMutableContextSnapshotProvider(
+                    HarnessContextSnapshotAugmentation.WithRecoverableSegment(
+                        baselineEntries, recoveredEntryId, segment)));
+
+            var leaf = new FailFirstCallThenSucceedChatClient();
+            var coordinator = new HarnessCompactionRunCoordinator();
+
+            // One shared outer run scope: the failed first call and its retry both nest inside it,
+            // exactly as a caller-level retry loop around one outer agent run would observe.
+            using var runScope = coordinator.BeginRun();
+            var compactionClient = new HarnessHybridCompactionChatClient(
+                leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator);
+
+            // The first call's real provider dispatch fails after assembly already reserved the
+            // recoverable body's digest for that call's lease. The reservation must be released
+            // rather than left stranded, so this exact digest can be reserved — and delivered — again
+            // by the retry below.
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => compactionClient.GetResponseAsync(
+                    messages, cancellationToken: TestContext.Current.CancellationToken));
+
+            await compactionClient.GetResponseAsync(
+                messages, cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.Equal(2, leaf.CallCount);
+
+            // The failed attempt still assembled and forwarded the raw body to the real provider
+            // (proving the failure occurred at dispatch, not before assembly ever selected it) ...
+            Assert.Contains(leaf.ObservedCalls[0], message => message.Text == rawBody);
+
+            // ... and the retry, within the very same run scope, still receives the exact same body:
+            // had the reservation not been released on failure, this second call's fresh lease would
+            // have found the digest still reserved by the failed call's lease and filtered it out.
+            Assert.Contains(leaf.ObservedCalls[1], message => message.Text == rawBody);
+        }
+    }
+
+    // ── Direct coordinator unit tests ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// A successful call whose selected recoverable segment was pressure-evicted during assembly
+    /// (reserved via <see cref="HarnessCompactionRunCoordinator.TryReserve"/> but stripped from
+    /// <c>FinalEntries</c> before dispatch) must not leave that digest stranded as reserved after
+    /// <see cref="HarnessCompactionRunCoordinator.Complete"/> closes the lease. A later call in the
+    /// same run scope must be able to reserve the exact same digest again so that, if a later snapshot
+    /// or policy would forward it, it can still be delivered.
+    /// </summary>
+    [Fact]
+    public void Complete_PressureEvictedDigestNotInDeliveredSet_IsReleasedAtomically_LaterLeaseCanReserve()
+    {
+        // Any non-empty, non-whitespace string is valid as a digest key in the coordinator;
+        // this test exercises the reservation/release bookkeeping, not the artifact identity format.
+        const string digest = "pressure-eviction-test-digest-placeholder";
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseA = Guid.NewGuid();
+        var leaseB = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        // Lease A reserves the digest — simulating what HarnessDeliveredSegmentFilteringSnapshotProvider
+        // does during assembly when the recoverable segment is first observed.
+        Assert.True(coordinator.TryReserve(digest, leaseA));
+
+        // The segment is pressure-evicted before dispatch: it was reserved but is NOT in the
+        // forwarded set.  Complete closes lease A with an empty delivered set.
+        coordinator.Complete(leaseA, []);
+
+        // The evicted segment's reservation must have been released atomically by Complete,
+        // even though it was never delivered.  Lease B — representing a later provider call
+        // within the same outer run — must now be able to reserve the exact same digest.
+        Assert.True(
+            coordinator.TryReserve(digest, leaseB),
+            "Expected the pressure-evicted digest to be reservable again after Complete released it, " +
+            "but TryReserve returned false — the reservation was stranded.");
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.Complete"/> closes a lease atomically: digests in the
+    /// delivered set are promoted, and ALL remaining reservations owned by the lease — including those
+    /// not supplied to Complete — are released in the same lock acquisition, never stranded.
+    /// </summary>
+    [Fact]
+    public void Complete_MultipleLeasedDigests_OnlyDeliveredOnesPromoted_RestReleased()
+    {
+        const string digestA = "delivered-digest-a";
+        const string digestB = "evicted-digest-b";
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseA = Guid.NewGuid();
+        var leaseC = Guid.NewGuid();
+
+        using var runScope = coordinator.BeginRun();
+
+        // Lease A reserves both digests — A survives assembly, B is pressure-evicted.
+        Assert.True(coordinator.TryReserve(digestA, leaseA));
+        Assert.True(coordinator.TryReserve(digestB, leaseA));
+
+        // Complete with only the forwarded digest.
+        coordinator.Complete(leaseA, [digestA]);
+
+        // digestA was promoted to Delivered: lease C cannot reserve it.
+        Assert.False(
+            coordinator.TryReserve(digestA, leaseC),
+            "digestA must be Delivered after Complete — a new lease must not be able to reserve it.");
+
+        // digestB was NOT delivered and must have been released: lease C can now reserve it.
+        Assert.True(
+            coordinator.TryReserve(digestB, leaseC),
+            "digestB must be released by Complete (not stranded) — a new lease must be able to reserve it.");
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.TryReserve"/> must throw
+    /// <see cref="InvalidOperationException"/> when no run scope is active. Every legitimate path
+    /// establishes a scope via <see cref="HarnessCompactionRunCoordinator.EnsureRunScope"/> or
+    /// <see cref="HarnessCompactionRunCoordinator.BeginRun"/> before invoking any lease-lifecycle
+    /// operation; the absence of a scope is a contract violation, not a recoverable condition.
+    /// </summary>
+    [Fact]
+    public void TryReserve_WithoutActiveRunScope_ThrowsInvalidOperationException()
+    {
+        var coordinator = new HarnessCompactionRunCoordinator();
+        Assert.Throws<InvalidOperationException>(
+            () => coordinator.TryReserve("any-non-empty-digest", Guid.NewGuid()));
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.Complete"/> must throw
+    /// <see cref="InvalidOperationException"/> when no run scope is active, for the same reason
+    /// as <see cref="TryReserve_WithoutActiveRunScope_ThrowsInvalidOperationException"/>.
+    /// </summary>
+    [Fact]
+    public void Complete_WithoutActiveRunScope_ThrowsInvalidOperationException()
+    {
+        var coordinator = new HarnessCompactionRunCoordinator();
+        Assert.Throws<InvalidOperationException>(
+            () => coordinator.Complete(Guid.NewGuid(), []));
+    }
+
+    /// <summary>
+    /// <see cref="HarnessCompactionRunCoordinator.EnsureRunScope"/> must keep direct compaction
+    /// paths working: when no outer run is active, it begins a call-local scope, and any
+    /// <see cref="HarnessCompactionRunCoordinator.TryReserve"/> calls within that scope succeed
+    /// without throwing.
+    /// </summary>
+    [Fact]
+    public void EnsureRunScope_WhenNoOuterRunActive_BeginsFreshScope_TryReserveSucceeds()
+    {
+        var coordinator = new HarnessCompactionRunCoordinator();
+        var leaseId = Guid.NewGuid();
+
+        using (coordinator.EnsureRunScope())
+        {
+            // Must not throw — the scope established by EnsureRunScope satisfies the
+            // fail-closed contract on TryReserve.
+            var reserved = coordinator.TryReserve("any-non-empty-digest", leaseId);
+            Assert.True(reserved);
+        }
+
+        // After the scope is disposed, TryReserve must again throw — the scope was transient.
+        Assert.Throws<InvalidOperationException>(
+            () => coordinator.TryReserve("any-non-empty-digest", leaseId));
     }
 
     /// <summary>
@@ -733,6 +996,46 @@ public sealed class HarnessCompactionRunCoordinatorTests
             }
 
             await _allArrived.Task.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken).ConfigureAwait(false);
+
+            return new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok"));
+        }
+
+        IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
+            IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken) =>
+            throw new NotSupportedException("Streaming is not required by this test client.");
+
+        object? IChatClient.GetService(Type serviceType, object? key) => null;
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    /// Test-only leaf <see cref="IChatClient"/> recording the exact materialized message list observed
+    /// on every call, throwing <see cref="InvalidOperationException"/> on its first call (simulating a
+    /// transient real-provider dispatch failure after assembly already reserved a recoverable body's
+    /// digest) and succeeding with a plain assistant response on every subsequent call.
+    /// </summary>
+    private sealed class FailFirstCallThenSucceedChatClient : IChatClient
+    {
+        private readonly List<IReadOnlyList<ChatMessage>> _observedCalls = [];
+
+        internal IReadOnlyList<IReadOnlyList<ChatMessage>> ObservedCalls => _observedCalls;
+
+        internal int CallCount => _observedCalls.Count;
+
+        async Task<ChatResponse> IChatClient.GetResponseAsync(
+            IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken)
+        {
+            var materialized = chatMessages.ToList();
+            _observedCalls.Add(materialized);
+            await Task.Yield();
+
+            if (_observedCalls.Count == 1)
+            {
+                throw new InvalidOperationException("Simulated transient real-provider dispatch failure.");
+            }
 
             return new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok"));
         }

@@ -14,12 +14,14 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// Enforces, before ever handing the result to <see cref="HarnessContextSnapshot.Create"/>: (1) the
 /// augmented entry's id is not already present among the supplied baseline entries — a
 /// <see cref="HarnessContextSnapshotIntegration"/> delegate must never silently replace an existing
-/// baseline entry; and (2) a durable <see cref="HarnessContextEntryKind.ArtifactReference"/> entry with the
-/// exact same canonical digest as the augmented segment's <see cref="HarnessArtifactReference.ContentDigest"/>
-/// already exists among the supplied baseline entries — the assembler's own eviction-before-reducer
-/// rule (<see cref="HarnessContextAssembler"/>) only ever evicts a recoverable body backed by such a
-/// matching durable reference, so augmenting one without a matching reference would silently defeat that
-/// rule and leave the transient body permanently un-evictable.
+/// baseline entry; and (2) some other entry among the supplied baseline entries — a durable
+/// <see cref="HarnessContextEntryKind.ArtifactReference"/> entry, or a
+/// <see cref="HarnessContextEntryKind.ToolExchange"/> entry whose result payload structurally carries a
+/// canonical reference — already carries the exact same canonical digest as the augmented segment's
+/// <see cref="HarnessArtifactReference.ContentDigest"/>. The assembler's own eviction-before-reducer rule
+/// (<see cref="HarnessContextAssembler"/>) only ever evicts a recoverable body backed by such a matching
+/// durable reference, so augmenting one without a matching reference would silently defeat that rule and
+/// leave the transient body permanently un-evictable.
 /// </remarks>
 internal static class HarnessContextSnapshotAugmentation
 {
@@ -29,9 +31,10 @@ internal static class HarnessContextSnapshotAugmentation
     /// </exception>
     /// <exception cref="ArgumentException">
     /// <paramref name="entryId"/> is empty or whitespace-only; <paramref name="entryId"/> already
-    /// identifies an entry in <paramref name="baselineEntries"/>; or no
-    /// <see cref="HarnessContextEntryKind.ArtifactReference"/> entry in <paramref name="baselineEntries"/>
-    /// carries the same canonical digest as <paramref name="segment"/>'s
+    /// identifies an entry in <paramref name="baselineEntries"/>; or no entry in
+    /// <paramref name="baselineEntries"/> — neither a <see cref="HarnessContextEntryKind.ArtifactReference"/>
+    /// entry nor a <see cref="HarnessContextEntryKind.ToolExchange"/> result entry — structurally carries
+    /// the same canonical digest as <paramref name="segment"/>'s
     /// <see cref="HarnessArtifactReference.ContentDigest"/>.
     /// </exception>
     internal static IReadOnlyList<HarnessContextEntry> WithRecoverableSegment(
@@ -44,8 +47,6 @@ internal static class HarnessContextSnapshotAugmentation
         ArgumentNullException.ThrowIfNull(segment);
         ArgumentException.ThrowIfNullOrWhiteSpace(entryId);
 
-        var digest = segment.Reference.ContentDigest;
-        var hasMatchingDurableReference = false;
         foreach (var baselineEntry in baselineEntries)
         {
             if (string.Equals(baselineEntry.EntryId, entryId, StringComparison.Ordinal))
@@ -56,21 +57,22 @@ internal static class HarnessContextSnapshotAugmentation
                     "an existing baseline entry with an augmented recoverable segment.",
                     nameof(entryId));
             }
-
-            if (baselineEntry.Kind == HarnessContextEntryKind.ArtifactReference
-                && string.Equals(baselineEntry.ArtifactReferenceDigest, digest, StringComparison.Ordinal))
-            {
-                hasMatchingDurableReference = true;
-            }
         }
+
+        var digest = segment.Reference.ContentDigest;
+        var hasMatchingDurableReference = HarnessContextEntry
+            .CollectDurableArtifactReferenceDigests(baselineEntries)
+            .Contains(digest);
 
         if (!hasMatchingDurableReference)
         {
             throw new ArgumentException(
-                $"No {nameof(HarnessContextEntryKind.ArtifactReference)} entry among the baseline entries " +
-                $"carries digest '{digest}'. Augmenting a recoverable segment requires a matching durable " +
-                "reference already present in the baseline so the assembler's eviction-before-reducer rule " +
-                "can ever evict the transient body back down to that reference.",
+                $"No {nameof(HarnessContextEntryKind.ArtifactReference)} entry, and no " +
+                $"{nameof(HarnessContextEntryKind.ToolExchange)} result entry structurally carrying a " +
+                $"reference, among the baseline entries carries digest '{digest}'. Augmenting a " +
+                "recoverable segment requires a matching durable reference already present in the " +
+                "baseline so the assembler's eviction-before-reducer rule can ever evict the transient " +
+                "body back down to that reference.",
                 nameof(segment));
         }
 

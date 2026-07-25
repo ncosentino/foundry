@@ -214,12 +214,16 @@ public sealed class HarnessCompactionSeamTests
             var segment = HarnessArtifactRecoverableContextSegment.Create(
                 reference, rawBody, DateTimeOffset.UtcNow);
 
-            // The incoming request messages carry only the durable artifact reference — never the raw
-            // recovered body. The body is added only inside the SnapshotIntegration seam below.
+            // The incoming request messages carry the durable artifact reference as a real-shape,
+            // eager-offloaded tool result (assistant FunctionCallContent + tool FunctionResultContent
+            // whose Result is the canonical reference string) — never the raw recovered body, and never
+            // a bare ChatRole.Tool text message. The body is added only inside the SnapshotIntegration
+            // seam below.
             var messages = new List<ChatMessage>
             {
                 new(ChatRole.System, "be helpful"),
-                new(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest)),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G2Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
                 new(ChatRole.User, "hello"),
             };
 
@@ -232,13 +236,14 @@ public sealed class HarnessCompactionSeamTests
                 [classifier.ResolveEntryId(messages[0], 0, messages)] = 10,
                 [classifier.ResolveEntryId(messages[1], 1, messages)] = 10,
                 [classifier.ResolveEntryId(messages[2], 2, messages)] = 10,
+                [classifier.ResolveEntryId(messages[3], 3, messages)] = 10,
                 [recoveredEntryId] = 50,
             };
 
             var leaf = new HarnessCompactionObservingChatClient("unused");
             var hybridProfile = HarnessHybridProfile.Create(
                 HarnessCompactionTestFixture.CreatePolicy(
-                    80, 20, 1, 3, new HarnessFixedSizeContextEstimator(sizesById)),
+                    100, 20, 1, 3, new HarnessFixedSizeContextEstimator(sizesById)),
                 HarnessScriptedUpstreamChatReducer.Echo(),
                 classifier,
                 baselineEntries => new HarnessMutableContextSnapshotProvider(
@@ -275,12 +280,15 @@ public sealed class HarnessCompactionSeamTests
                 reference, rawBody, DateTimeOffset.UtcNow);
 
             // The incoming request messages — the exact ones an outer per-service history decorator
-            // would already have observed and persisted — carry only the durable reference, never the
-            // raw body.
+            // would already have observed and persisted — carry the durable reference as a real-shape
+            // eager-offloaded tool result (assistant FunctionCallContent + tool FunctionResultContent
+            // whose Result is the canonical reference string), never a bare ChatRole.Tool text message,
+            // and never the raw body.
             var messages = new List<ChatMessage>
             {
                 new(ChatRole.System, "be helpful"),
-                new(ChatRole.Tool, HarnessArtifactIdentity.BuildReferenceId(digest)),
+                new(ChatRole.Assistant, [new FunctionCallContent("call-1", "G2Tool", new Dictionary<string, object?>())]),
+                new(ChatRole.Tool, [new FunctionResultContent("call-1", HarnessArtifactIdentity.BuildReferenceId(digest))]),
                 new(ChatRole.User, "hello"),
             };
 
@@ -308,12 +316,15 @@ public sealed class HarnessCompactionSeamTests
                 messages, cancellationToken: TestContext.Current.CancellationToken);
 
             // The outer, persistence-facing position (proxy for an outer per-service history decorator)
-            // observes only the actual incoming request messages: the reference, never the raw body —
-            // because the raw body is never part of the incoming message list at all.
+            // observes only the actual incoming request messages: the tool-call/tool-result reference
+            // history, never the raw body — because the raw body is never part of the incoming message
+            // list at all.
             var recordedCall = Assert.Single(outerRecorder.ObservedCalls);
             Assert.DoesNotContain(recordedCall, message => message.Text == rawBody);
             Assert.Contains(
-                recordedCall, message => message.Text == HarnessArtifactIdentity.BuildReferenceId(digest));
+                recordedCall,
+                message => message.Contents.OfType<FunctionResultContent>()
+                    .Any(result => Equals(result.Result, HarnessArtifactIdentity.BuildReferenceId(digest))));
 
             // The real provider, inner to compaction, receives the transient recovered body: added only
             // at the SnapshotIntegration seam, after the outer position already observed the
