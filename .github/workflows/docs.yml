@@ -60,9 +60,11 @@ jobs:
 
       - name: Build release assemblies
         env:
-          GITHUB_ENV: /tmp/discard-docs-build-env
-          GITHUB_OUTPUT: /tmp/discard-docs-build-output
-        run: dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore
+          GITHUB_ENV: ${{ runner.temp }}/discard-docs-build-env-${{ github.run_id }}-${{ github.run_attempt }}
+          GITHUB_OUTPUT: ${{ runner.temp }}/discard-docs-build-output-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          rm -f "$GITHUB_ENV" "$GITHUB_OUTPUT"
+          dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore
 
       - name: Restore documentation tools
         run: dotnet tool restore

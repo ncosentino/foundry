@@ -3,8 +3,7 @@
 ## Decision
 
 **PASS for the cumulative G5 experimental hybrid context compaction slice,
-including this leaf's observability contract — pending independent review
-and hosted CI.**
+including its observability contract.**
 
 Gate G5 delivers, and this document approves as a single cumulative record,
 the experimental per-provider-call hybrid context compaction mechanism
@@ -71,6 +70,9 @@ Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
   this branch's history; this leaf's own +32 Harness / +34 project deltas were
   measured directly against the current working tree via `dotnet test`, not
   estimated from source occurrences.
+- Final reviewed G5 integration head: `0435b89f` on
+  `harness/g5-integration`; the observability/gate leaf merged through
+  [PR #102](https://github.com/ncosentino/foundry/pull/102).
 - This leaf's 32 new Harness tests break down as:
   - 14 in `HarnessContextObservabilityTests.cs`, covering success/termination
     event families, explicit measurement units, absent-profile behavior,
@@ -715,59 +717,34 @@ dotnet build src\NexusLabs.Foundry.slnx -c Debug
 Results (final measurement against the complete cumulative leaf, including
 this isolated-review follow-up pass):
 
-- `ChannelProgressReporterTests` in isolation: **8 passed, 0 failed** (+2 over
-  this pass's own prior baseline of 6, for the new no-silent-drop and
-  enqueue-after-dispose tests). Also re-run 80 consecutive times in a loop
-  with no failures, to confirm the fix is not merely occasionally correct.
+- `ChannelProgressReporterTests` in isolation: **8 passed, 0 failed**.
 - New/modified test classes in isolation
   (`HarnessContextObservabilityTests` + `HarnessContextDiagnosticsValidationTests`):
-  **27 passed, 0 failed.** (14 observability tests, +1 over this pass's own
-  prior baseline of 13 for the new concurrent-`AssemblyId` test, + 13
-  diagnostics-validation tests, unchanged.) The new concurrency test was
-  additionally re-run 80 consecutive times in a loop (across two rounds, one
-  before and one after fixing a genuine test-harness race in the shared event
-  collector — see note below) with zero failures in the final round.
+  **27 passed, 0 failed** (14 observability and 13 diagnostics-validation
+  tests).
 - Full Harness filter (`FullyQualifiedName~Harness`): **601 passed, 0 failed**
-  (+1 over this document's prior recorded baseline of 600; no regressions).
+  (no regressions).
 - Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,172
-  passed, 0 failed** (+3 over this document's prior recorded baseline of
-  2,169 — the 2 new `ChannelProgressReporterTests` plus the 1 new
-  `AssemblyId` concurrency test; no regressions).
+  passed, 0 failed** (no regressions).
 - Full `src` solution build (`dotnet build src\NexusLabs.Foundry.slnx -c Debug`):
   succeeded, 0 errors; pre-existing generated-code `CS0162` warnings in
   unrelated example apps (`DagRoutingApp.Agents`,
   `GeneratorCoexistenceApp`, `DevUIApp` twice) not touched by any change in
   this gate or this follow-up pass.
 
-**Test-harness race found and fixed during this pass (not a product defect).**
-The new two-concurrent-assemblies test initially failed intermittently
-(roughly 1 run in 10–15) with a lower-than-expected Completed/Composed event
-count and no exception — never a hang, never the barrier-timeout path. Root
-cause: the test's own `CollectorSink` helper (private to
-`HarnessContextObservabilityTests.cs`) added incoming events to a plain
-`List<IProgressEvent>` with no synchronization, and `ProgressReporter.Report`
-dispatches to sinks synchronously on whichever thread calls `Report` — it does
-not itself serialize concurrent callers into one sink. Two genuinely
-concurrent `Task.Run`-based provider calls therefore raced on `List<T>.Add`
-from two real OS threads, occasionally losing an event with no exception,
-exactly matching the observed symptom. Fixed by adding a private lock around
-`events.Add` inside `CollectorSink` — a test-only change with no effect on
-any production type, and no effect on any other (sequential) test using the
-same helper. Confirmed via 80 consecutive loop runs of the full
-`HarnessContextObservabilityTests` class post-fix with zero failures, versus
-6 failures out of 60 pre-fix runs of the same loop.
-
 ## Validation status and next permitted gates
 
 - **Local:** complete — targeted new-test filters, full Harness filter, full
-  project test suite, and full solution build all pass with zero regressions,
-  including this isolated-review follow-up pass's fixes.
-- **Review:** pending independent review.
-- **Hosted CI:** pending PR — hosted build/test/package, NativeAOT, Harness
-  NativeAOT, and documentation checks have not yet run.
+  project test suite, and full solution build all pass with zero regressions.
+- **Review:** independent correctness, MAF-order, and architecture review
+  completed; all blocking findings were adopted and revalidated.
+- **Hosted CI:** passed:
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30172506501/job/89715857468),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30172506501/job/89715857423),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30172506498/job/89715857331),
+  and
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30172506492/job/89715857562).
 - **Next permitted gates:** G6 (background agents, loop evaluation) and G7
   (test/AOT hardening, including the completed-run diagnostics aggregation
   this leaf explicitly deferred) per the dependency graph in `tasks.md`; G5
-  itself remains cumulatively complete pending review and hosted CI — this
-  follow-up pass changes only the evidence and wording above, not the gate's
-  provisional disposition.
+  is cumulatively complete.
