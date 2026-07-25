@@ -3,7 +3,11 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// <summary>Explicit, categorical outcome of one <see cref="HarnessContextAssembler.AssembleAsync"/> call.</summary>
 internal enum HarnessContextAssemblyOutcome
 {
-    /// <summary>The captured entries already fit the hard limit; no reduction of any kind was necessary.</summary>
+    /// <summary>
+    /// The verified entries fit the hard limit without accepting a size-reducing proposal or using
+    /// deterministic fallback. A reducer attempt may still have been made after the trigger margin
+    /// was reached and found unnecessary or non-progressing.
+    /// </summary>
     WithinLimit,
 
     /// <summary>
