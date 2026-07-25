@@ -31,6 +31,13 @@ internal enum HarnessCompactionRejectionReason
     ReorderedToolGroup,
 
     /// <summary>
+    /// A result-bearing entry contains function results for call ids owned by two or more distinct
+    /// call-bearing entries. This ambiguous layout creates overlapping tool-exchange groups and is
+    /// rejected categorically rather than attempting to merge the groups.
+    /// </summary>
+    CrossGroupToolResult,
+
+    /// <summary>
     /// A proposed entry id that never existed in the original entries claims a structural kind
     /// (<see cref="HarnessContextEntryKind.SystemInstruction"/>,
     /// <see cref="HarnessContextEntryKind.AuthoritativeSessionState"/>,

@@ -19,7 +19,8 @@ internal sealed record HarnessToolExchangeAnalysis
         IReadOnlyList<string> duplicateCallEntryIds,
         IReadOnlyList<string> duplicateResultCallIds,
         IReadOnlyList<string> duplicateResultEntryIds,
-        IReadOnlyList<string> reorderedCallEntryIds)
+        IReadOnlyList<string> reorderedCallEntryIds,
+        IReadOnlyList<string> crossGroupResultEntryIds)
     {
         Groups = groups;
         OrphanedCallEntryIds = orphanedCallEntryIds;
@@ -29,6 +30,7 @@ internal sealed record HarnessToolExchangeAnalysis
         DuplicateResultCallIds = duplicateResultCallIds;
         DuplicateResultEntryIds = duplicateResultEntryIds;
         ReorderedCallEntryIds = reorderedCallEntryIds;
+        CrossGroupResultEntryIds = crossGroupResultEntryIds;
     }
 
     /// <summary>Every tool-exchange group discovered, one per distinct call-bearing entry.</summary>
@@ -70,6 +72,13 @@ internal sealed record HarnessToolExchangeAnalysis
     /// the call in the analyzed entry order.
     /// </summary>
     internal IReadOnlyList<string> ReorderedCallEntryIds { get; }
+
+    /// <summary>
+    /// Entry ids of result-bearing messages that carry results for call ids owned by two or more
+    /// distinct call-bearing entries. Such an entry's results span multiple tool-exchange groups,
+    /// creating overlapping groups that cannot be split cleanly and are therefore categorically rejected.
+    /// </summary>
+    internal IReadOnlyList<string> CrossGroupResultEntryIds { get; }
 
     /// <exception cref="ArgumentNullException"><paramref name="entries"/> is <see langword="null"/>.</exception>
     internal static HarnessToolExchangeAnalysis Build(IReadOnlyList<HarnessContextEntry> entries)
@@ -156,6 +165,41 @@ internal sealed record HarnessToolExchangeAnalysis
             .Distinct()
             .ToList();
 
+        // Detect cross-group result entries: result-bearing entries whose results span more than one
+        // distinct call-owner entry. Such an entry creates overlapping groups — one per call-bearing
+        // entry that owns a matching call id — and is rejected categorically.
+        var crossGroupResultEntryIds = new List<string>();
+        var crossGroupResultEntrySet = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var entry in entries)
+        {
+            if (entry.Kind != HarnessContextEntryKind.ToolExchange)
+            {
+                continue;
+            }
+
+            var resultContents = entry.Message.Contents.OfType<FunctionResultContent>().ToList();
+            if (resultContents.Count == 0)
+            {
+                continue;
+            }
+
+            var ownerEntryIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var result in resultContents)
+            {
+                if (callOwner.TryGetValue(result.CallId, out var ownerEntryId))
+                {
+                    ownerEntryIds.Add(ownerEntryId);
+                }
+            }
+
+            if (ownerEntryIds.Count > 1)
+            {
+                crossGroupResultEntryIds.Add(entry.EntryId);
+                crossGroupResultEntrySet.Add(entry.EntryId);
+            }
+        }
+
         var groups = new List<HarnessToolExchangeGroup>();
         var orphanedCallEntryIds = new List<string>();
         var reorderedCallEntryIds = new List<string>();
@@ -192,6 +236,8 @@ internal sealed record HarnessToolExchangeAnalysis
             var hasDuplicateIssue = callIds.Any(duplicateCallIds.Contains) ||
                 callIds.Any(id => resultOwners.TryGetValue(id, out var owners) && owners.Count > 1);
 
+            var hasCrossGroupResult = resultEntryIds.Any(crossGroupResultEntrySet.Contains);
+
             if (!allMatched)
             {
                 orphanedCallEntryIds.Add(callEntryId);
@@ -201,7 +247,7 @@ internal sealed record HarnessToolExchangeAnalysis
                 reorderedCallEntryIds.Add(callEntryId);
             }
 
-            var isComplete = allMatched && allInOrder && !hasDuplicateIssue;
+            var isComplete = allMatched && allInOrder && !hasDuplicateIssue && !hasCrossGroupResult;
             groups.Add(HarnessToolExchangeGroup.Create(callEntryId, callIds, resultEntryIds, isComplete));
         }
 
@@ -213,6 +259,7 @@ internal sealed record HarnessToolExchangeAnalysis
             duplicateCallEntryIds,
             duplicateResultCallIds,
             duplicateResultEntryIds,
-            reorderedCallEntryIds);
+            reorderedCallEntryIds,
+            crossGroupResultEntryIds);
     }
 }

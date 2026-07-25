@@ -701,4 +701,96 @@ public sealed class HarnessCompactionPreservationTests
         Assert.False(result.IsAccepted);
         Assert.Equal(expectedFallback, result.PreservationOnlyFallbackEntryIds);
     }
+
+    // --- Cross-group result entries are categorically rejected -----------------------
+
+    [Fact]
+    public void SelectRequiredPreservation_CrossGroupResult_RequiresBothCallEntriesAndResultEntryEvenOutsideRecency()
+    {
+        // Retention count of 1 keeps only the trailing "recent" unit; without the cross-group /
+        // incomplete-group rule, "call-a" and "call-b" (both outside the window) could age out.
+        // The cross-group result entry makes both groups incomplete, so all three entries are required
+        // regardless of how far outside the trailing retention window they fall.
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("call-a", ("call-a-id", "lookup-a")),
+            HarnessCompactionTestFixture.ToolCallEntry("call-b", ("call-b-id", "lookup-b")),
+            HarnessCompactionTestFixture.ToolResultEntry("result-ab", ("call-a-id", "ok-a"), ("call-b-id", "ok-b")),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent message"),
+        };
+
+        var selection = policy.SelectRequiredPreservation(original, CancellationToken.None);
+
+        Assert.Contains("call-a", selection.RequiredEntryIds);
+        Assert.Contains("call-b", selection.RequiredEntryIds);
+        Assert.Contains("result-ab", selection.RequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_CrossGroupResult_Unchanged_RejectedAsCrossGroupToolResult()
+    {
+        // Passing the original entries unchanged as the proposed set still rejects: the shape
+        // itself — one result entry spanning two distinct call-bearing entries — is categorically
+        // invalid regardless of whether any entries were dropped.
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 5, 1, DefaultEstimator);
+        HarnessContextEntry[] Build() =>
+        [
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("call-a", ("call-a-id", "lookup-a")),
+            HarnessCompactionTestFixture.ToolCallEntry("call-b", ("call-b-id", "lookup-b")),
+            HarnessCompactionTestFixture.ToolResultEntry("result-ab", ("call-a-id", "ok-a"), ("call-b-id", "ok-b")),
+        ];
+
+        var result = HarnessCompactionVerifier.Verify(Build(), Build(), policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.CrossGroupToolResult, result.RejectionReasons);
+        Assert.Contains("result-ab", result.InvalidEntryIds);
+    }
+
+    [Fact]
+    public void Verify_CrossGroupResult_DroppingOneCallEntry_RejectedAsMissingRequiredEntry()
+    {
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("call-a", ("call-a-id", "lookup-a")),
+            HarnessCompactionTestFixture.ToolCallEntry("call-b", ("call-b-id", "lookup-b")),
+            HarnessCompactionTestFixture.ToolResultEntry("result-ab", ("call-a-id", "ok-a"), ("call-b-id", "ok-b")),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent message"),
+        };
+        // Drop call-a; call-b and result-ab remain, but call-a is required via the incomplete-group rule.
+        var proposed = new[] { original[0], original[2], original[3], original[4] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
+        Assert.Contains("call-a", result.MissingRequiredEntryIds);
+    }
+
+    [Fact]
+    public void Verify_CrossGroupResult_DroppingSharedResultEntry_RejectedAsMissingRequiredEntry()
+    {
+        var policy = HarnessCompactionTestFixture.CreatePolicy(1_000, 100, 1, 1, DefaultEstimator);
+        var original = new[]
+        {
+            HarnessCompactionTestFixture.SystemEntry("system", "instructions"),
+            HarnessCompactionTestFixture.ToolCallEntry("call-a", ("call-a-id", "lookup-a")),
+            HarnessCompactionTestFixture.ToolCallEntry("call-b", ("call-b-id", "lookup-b")),
+            HarnessCompactionTestFixture.ToolResultEntry("result-ab", ("call-a-id", "ok-a"), ("call-b-id", "ok-b")),
+            HarnessCompactionTestFixture.ConversationalEntry("recent", ChatRole.User, "recent message"),
+        };
+        // Drop result-ab; both calls remain, but result-ab is required via the incomplete-group rule.
+        var proposed = new[] { original[0], original[1], original[2], original[4] };
+
+        var result = HarnessCompactionVerifier.Verify(original, proposed, policy, CancellationToken.None);
+
+        Assert.False(result.IsAccepted);
+        Assert.Contains(HarnessCompactionRejectionReason.MissingRequiredEntry, result.RejectionReasons);
+        Assert.Contains("result-ab", result.MissingRequiredEntryIds);
+    }
 }

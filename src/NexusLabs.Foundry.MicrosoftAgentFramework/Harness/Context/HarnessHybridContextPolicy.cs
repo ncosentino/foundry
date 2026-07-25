@@ -325,9 +325,10 @@ internal sealed class HarnessHybridContextPolicy
                 }
                 else
                 {
-                    // Structurally unreachable for entries built through HarnessContextEntry.Create
-                    // (which requires a call or result content item), kept only as a defensive,
-                    // never-split fallback unit rather than silently dropping the entry.
+                    // Reachable for orphaned result entries (ToolExchange entries whose every result
+                    // call id has no matching call anywhere in the analyzed entries): orphan result
+                    // entries are not captured in any group, so they fall here. Kept as a single-entry
+                    // fallback unit rather than silently dropping the entry.
                     units.Add([entry.EntryId]);
                 }
             }

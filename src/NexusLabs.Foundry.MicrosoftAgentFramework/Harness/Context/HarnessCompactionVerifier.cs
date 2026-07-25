@@ -252,6 +252,15 @@ internal static class HarnessCompactionVerifier
                 invalidEntryIds.Add(id);
             }
         }
+
+        if (proposedAnalysis.CrossGroupResultEntryIds.Count > 0)
+        {
+            reasons.Add(HarnessCompactionRejectionReason.CrossGroupToolResult);
+            foreach (var id in proposedAnalysis.CrossGroupResultEntryIds)
+            {
+                invalidEntryIds.Add(id);
+            }
+        }
     }
 
     private static Dictionary<string, HarnessContextEntry> BuildUniqueIndex(
