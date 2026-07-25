@@ -64,16 +64,19 @@ Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
 | #99 | 420 | 1,989 | +115 | +115 |
 | #100 | 480 | 2,049 | +60 | +60 |
 | #101 | 569 | 2,138 | +89 | +89 |
-| **Compaction/context-composition observability (this leaf)** | **601** | **2,172** | **+32** | **+34** |
+| Compaction/context-composition observability | 601 | 2,172 | +32 | +34 |
+| **Concurrency blocker fix (this leaf — final evidence pass)** | **609** | **2,180** | **+8** | **+8** |
 
 - Cumulative counts through #101 were supplied as known prior measurements for
-  this branch's history; this leaf's own +32 Harness / +34 project deltas were
+  this branch's history; the observability leaf's own +32 Harness / +34
+  project deltas, and this final evidence pass's own +8 / +8 deltas, were each
   measured directly against the current working tree via `dotnet test`, not
   estimated from source occurrences.
 - Final reviewed G5 integration head: `0435b89f` on
   `harness/g5-integration`; the observability/gate leaf merged through
   [PR #102](https://github.com/ncosentino/foundry/pull/102).
-- This leaf's 32 new Harness tests break down as:
+- The compaction/context-composition observability leaf's 32 new Harness tests
+  break down as:
   - 14 in `HarnessContextObservabilityTests.cs`, covering success/termination
     event families, explicit measurement units, absent-profile behavior,
     privacy, classifier/snapshot pre-start failures, nested reporter
@@ -87,14 +90,23 @@ Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
   - 2 in `HarnessArtifactObservabilityTests.cs`, proving multibyte offload and
     rehydration attribution uses UTF-8 byte counts rather than UTF-16 length.
 - Two additional project-only tests in `ChannelProgressReporterTests.cs`
-  prove bounded-channel backpressure queues rather than drops events and that
-  enqueue failures after completion are surfaced through the configured error
-  handler, producing the project delta's additional two tests.
+  prove the bounded channel performs asynchronous saturation queueing —
+  pending events are queued and eventually delivered rather than dropped when
+  momentarily full, while the producer-facing `Report` call remains
+  non-blocking — and that enqueue failures after completion are surfaced
+  through the configured error handler, producing the project delta's
+  additional two tests. Pending writes can still grow unbounded ahead of a
+  slow sink under sustained load; genuine flow-control back on the producer is
+  explicitly not implemented here and is left as a possible G7 follow-up.
 - The 10 pre-existing offload/rehydration outcome tests in
   `HarnessArtifactObservabilityTests.cs` were each extended in place with new
   `Attribution` assertions rather than duplicated into new test methods, so
   they contribute no additional count here despite carrying new coverage.
-- All `dotnet build`/`dotnet test` commands for this leaf were run with
+- This final evidence pass's own +8 Harness tests (also +8 project, since all
+  eight live in the Harness test tree) are documented in the "G5 concurrency
+  blocker and fix" section below.
+- All `dotnet build`/`dotnet test` commands for this leaf, and for this final
+  evidence pass, were run with
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'` set.
 
 ## Files changed (current leaf — compaction/context-composition observability)
@@ -112,7 +124,7 @@ New files:
 - `src/NexusLabs.Foundry.MicrosoftAgentFramework/Progress/HarnessContextCompactionCompletedEvent.cs`
 - `src/NexusLabs.Foundry.MicrosoftAgentFramework/Progress/HarnessContextCompactionTerminatedEvent.cs`
 - `src/NexusLabs.Foundry.MicrosoftAgentFramework/Progress/HarnessContextComposedEvent.cs`
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessContextObservabilityTests.cs` (13 tests)
+- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessContextObservabilityTests.cs` (14 tests)
 - `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessContextDiagnosticsValidationTests.cs` (13 tests)
 - `docs/adr/adr-0007-experimental-hybrid-context-compaction.md`
 - `specs/001-maf-harness-first-class/evidence/gate-g5.md` (this file)
@@ -197,11 +209,11 @@ and `HarnessCompactionCompositionRequest` outside this leaf's own new test
 file passes an explicit `progressAccessor`/`ProgressAccessor` value — no call
 site was left uncompiled or defaulted.
 
-## Isolated-review follow-up (this pass)
+## Isolated-review follow-up
 
 An independent isolated review of the cumulative leaf above raised five
 findings, all addressed in this same pass without any change to the gate's
-`PASS ... pending independent review and hosted CI` disposition:
+`PASS` disposition:
 
 1. **Per-assembly correlation (`AssemblyId`).** Added a public `Guid
    AssemblyId` to all four progress events
@@ -265,12 +277,119 @@ findings, all addressed in this same pass without any change to the gate's
    capability itself is activated. Activation remains governed by
    `Stability: Experimental` / `DefaultEnabledInBundle: false`, and any change
    to activation is a separate, later public API decision.
-5. **Gate remains provisional; test counts re-measured.** No completed-run
-   aggregation and no public runtime configuration were added by this pass —
-   both remain explicitly out of scope, as recorded elsewhere in this
-   document. The "Local validation" results below were re-run after all four
-   fixes above and reflect the final, current counts; the gate's disposition
-   is unchanged: **PASS pending independent review and hosted CI.**
+5. **Test counts re-measured.** No completed-run aggregation and no public
+   runtime configuration were added by this pass — both remain explicitly out
+   of scope, as recorded elsewhere in this document. The "Local validation"
+   results below were re-run after all four fixes above and reflect the
+   final, current counts.
+
+## G5 concurrency blocker and fix (final evidence pass)
+
+Independent review of the cumulative leaf above surfaced one remaining
+runtime blocker in the one-shot rehydration delivery coordinator itself,
+found before staging and fixed in this same pass, before any hosted rerun.
+
+**Bug.** Within one outer run, two overlapping provider calls (leases A and
+B) can race for the same reservable digest:
+
+1. A reserves the digest first; B's own snapshot capture loses the race and
+   filters the recoverable body back out of what it would otherwise forward.
+2. A's own assembly attempt later discovers the body must be pressure-evicted
+   before dispatch (e.g. a size-triggered eviction, or any other path that
+   ends without forwarding it) and its caller closes the lease with an empty
+   delivered set. `Complete`'s atomic contract correctly releases A's
+   reservation without promoting it to Delivered — the digest becomes
+   reservable again.
+3. B's next capture (its own finalization recheck) previously reported the
+   exact same `HarnessContextSnapshot.Version` as before, because the
+   *inner* snapshot provider's own version only changes when a new message is
+   injected — never when purely coordinator-internal reservation/delivery
+   state changes. `HarnessContextAssembler` only ever restarts an assembly
+   attempt on an observed version change, so B never restarted, never saw the
+   digest become available again, and never forwarded the body. Neither A
+   (never dispatched it) nor B (never saw it available again) ever delivered
+   it: zero delivery for the entire run, despite the body being definitely
+   recoverable and definitely available.
+
+**Fix.** Two seams close the gap, both scoped to the existing one-shot
+delivery mechanism and requiring no change to `HarnessContextAssembler` or
+`HarnessHybridCompactionChatClient`:
+
+1. `HarnessCompactionRunCoordinator` now tracks a monotonic per-digest
+   revision inside the active run's state, incremented on every
+   externally-observable reservation/delivery state change for that digest:
+   a digest's first reservation (unclaimed → reserved by anyone), every
+   digest `Complete` processes for its owning lease (whether promoted to
+   Delivered or released unpromoted), and every digest `Release` releases.
+   The same lease re-reserving a digest it already holds, and a failed
+   reservation attempt, both bump nothing — neither is an externally-visible
+   state change. A new closed-world, lock-protected internal
+   `GetRevision(string digest)` method — requiring the same active run scope
+   every other lease-lifecycle method requires — returns a digest's current
+   revision, `0` before any state exists for it.
+2. `HarnessDeliveredSegmentFilteringSnapshotProvider` no longer forwards the
+   inner snapshot's own version unchanged. It now maintains its own effective
+   monotonic version, computed from a previous-capture signature consisting
+   of the inner snapshot's version plus the sorted `(digest, coordinator
+   revision)` pairs for every recoverable segment present in the *inner*
+   snapshot before filtering (only digests this provider's own inner
+   snapshot actually reports — an unrelated digest's revision change can
+   never appear in this signature and can therefore never affect this
+   instance's effective version). On each `CaptureSnapshot`, after this
+   call's own reservation attempts are resolved, it re-reads every relevant
+   digest's current revision, and reports a strictly greater effective
+   version whenever the inner version or this signature differs from the
+   previous capture — even when the inner snapshot's own version is
+   unchanged. The very first capture always reports effective version `0`.
+
+With both seams in place, A's release becomes visible to B: B's next
+finalization capture observes the digest's coordinator revision changed,
+retries reservation, includes the body, and returns a new effective version;
+`HarnessContextAssembler`'s existing version-comparison restart logic — wholly
+unmodified — then restarts B's assembly from that snapshot and B becomes the
+one call that forwards the raw body.
+
+**Files changed:**
+- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessCompactionRunCoordinator.cs`
+  — per-digest `Revisions` tracking in `RunState`, revision bumps wired into
+  `TryReserve`/`Complete`/`Release`, new internal `GetRevision(string digest)`.
+- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessDeliveredSegmentFilteringSnapshotProvider.cs`
+  — converted from stateless to stateful; computes its own independent
+  effective monotonic version from the inner version plus the coordinator's
+  per-digest revisions instead of passing the inner version through
+  unchanged.
+- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessCompactionRunCoordinatorTests.cs`
+  (+8 tests): one deterministic, single-threaded, explicitly-sequenced test
+  reproducing the exact bug end to end —
+  `SameOuterRun_LoserFiltersThenWinnerPressureEvictsAndReleases_LoserRestartsAndDeliversExactlyOnce`
+  — asserting B's filtered first capture, A's release-without-forwarding, B's
+  version-changed second capture with the body restored, a stable third
+  capture, and that a later lease can never re-reserve (and therefore never
+  redeliver) the digest once B delivers it: no duplicate and no zero-delivery
+  for the run. The pre-existing
+  `SameOuterRun_ConcurrentProviderCalls_ExactlyOneForwardsRawBody` test (real
+  genuinely-overlapping concurrent calls through a barrier-gated leaf client)
+  is preserved unmodified. Seven further direct unit tests cover the new
+  surface in isolation: `GetRevision` throwing without an active run scope,
+  returning `0` before any state, advancing only on real state changes (not
+  on a same-lease re-reservation) across first reservation and `Complete`
+  promotion, and advancing on both a `Complete`-driven release and an
+  explicit `Release`; and three
+  `HarnessDeliveredSegmentFilteringSnapshotProvider` tests proving an
+  unrelated digest's revision change never affects this provider's own
+  effective version, its own repeated captures with nothing racing in report
+  a stable effective version, and a concurrently-releasing lease's relevant
+  digest does advance it.
+
+**Wording correction (unrelated to this bug, carried in this same pass).**
+The bounded progress-event channel's behavior under a full channel, described
+above as "backpressure," is more precisely asynchronous saturation queueing:
+the channel writer queues a pending write and the fire-and-forget observer
+eventually delivers it rather than dropping it, but the producer-facing
+`Report` call itself never blocks waiting for capacity, and pending writes
+can grow unboundedly ahead of a slow sink under sustained load. Genuine
+producer-side flow control is not implemented and remains a possible G7
+follow-up if ever needed.
 
 ## One-top-level-type-per-file disposition
 
@@ -709,42 +828,58 @@ dotnet build src\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.Mic
 dotnet build src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~ChannelProgressReporterTests"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~HarnessContextObservabilityTests|FullyQualifiedName~HarnessContextDiagnosticsValidationTests"
+dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~HarnessCompactionRunCoordinatorTests|FullyQualifiedName~HarnessContextAssembler|FullyQualifiedName~ConcurrentProviderCalls|FullyQualifiedName~Concurrent"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~Harness"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug
 dotnet build src\NexusLabs.Foundry.slnx -c Debug
 ```
 
 Results (final measurement against the complete cumulative leaf, including
-this isolated-review follow-up pass):
+the isolated-review follow-up pass and this final concurrency-blocker-fix
+evidence pass):
 
 - `ChannelProgressReporterTests` in isolation: **8 passed, 0 failed**.
 - New/modified test classes in isolation
   (`HarnessContextObservabilityTests` + `HarnessContextDiagnosticsValidationTests`):
   **27 passed, 0 failed** (14 observability and 13 diagnostics-validation
   tests).
-- Full Harness filter (`FullyQualifiedName~Harness`): **601 passed, 0 failed**
-  (no regressions).
-- Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,172
-  passed, 0 failed** (no regressions).
+- Coordinator/concurrency/assembly filter
+  (`HarnessCompactionRunCoordinatorTests` + `HarnessContextAssembler` +
+  `ConcurrentProviderCalls` + `Concurrent`): **44 passed, 0 failed**, run
+  **10 consecutive times** with identical, stable results each time — no
+  flakiness in either the new bug-reproduction test or the pre-existing
+  `SameOuterRun_ConcurrentProviderCalls_ExactlyOneForwardsRawBody` test.
+- Full Harness filter (`FullyQualifiedName~Harness`): **609 passed, 0
+  failed** (no regressions; +8 over the prior 601, all from this final
+  evidence pass).
+- Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,180
+  passed, 0 failed** (no regressions; +8 over the prior 2,172), re-run
+  **3 consecutive times** with identical, stable results each time.
 - Full `src` solution build (`dotnet build src\NexusLabs.Foundry.slnx -c Debug`):
   succeeded, 0 errors; pre-existing generated-code `CS0162` warnings in
   unrelated example apps (`DagRoutingApp.Agents`,
   `GeneratorCoexistenceApp`, `DevUIApp` twice) not touched by any change in
-  this gate or this follow-up pass.
+  this gate, the follow-up pass, or this final evidence pass.
 
 ## Validation status and next permitted gates
 
-- **Local:** complete — targeted new-test filters, full Harness filter, full
-  project test suite, and full solution build all pass with zero regressions.
+- **Local:** complete — targeted new-test filters, a 10x-repeated
+  coordinator/concurrency/assembly filter, a 3x-repeated full project test
+  suite, and a full solution build all pass with zero regressions and zero
+  observed flakiness.
 - **Review:** independent correctness, MAF-order, and architecture review
-  completed; all blocking findings were adopted and revalidated.
+  completed; all blocking findings — including the concurrency blocker
+  documented above — were adopted and revalidated.
 - **Hosted CI:** passed:
   [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30172506501/job/89715857468),
   [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30172506501/job/89715857423),
   [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30172506498/job/89715857331),
   and
   [documentation](https://github.com/ncosentino/foundry/actions/runs/30172506492/job/89715857562).
+  These hosted runs predate this final concurrency-blocker-fix evidence pass
+  and will be replaced only if this PR reruns hosted CI.
 - **Next permitted gates:** G6 (background agents, loop evaluation) and G7
   (test/AOT hardening, including the completed-run diagnostics aggregation
-  this leaf explicitly deferred) per the dependency graph in `tasks.md`; G5
-  is cumulatively complete.
+  this leaf explicitly deferred, and optionally genuine producer-side flow
+  control for the progress-event channel) per the dependency graph in
+  `tasks.md`; G5 is cumulatively complete.
