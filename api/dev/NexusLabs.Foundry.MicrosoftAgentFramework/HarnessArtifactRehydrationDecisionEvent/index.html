@@ -12,7 +12,7 @@
         <meta name="author" content="Nick Cosentino">
       
       
-        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/NexusLabs.Foundry.MicrosoftAgentFramework.Progress/">
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessArtifactRehydrationDecisionEvent/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>NexusLabs.Foundry.MicrosoftAgentFramework.Progress - Foundry</title>
+        <title>HarnessArtifactRehydrationDecisionEvent - Foundry</title>
       
     
     
@@ -60,12 +60,12 @@
   
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="NexusLabs.Foundry.MicrosoftAgentFramework.Progress – Foundry" />
+  <meta property="og:title" content="HarnessArtifactRehydrationDecisionEvent – Foundry" />
   <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
-  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/NexusLabs.Foundry.MicrosoftAgentFramework.Progress/" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessArtifactRehydrationDecisionEvent/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="NexusLabs.Foundry.MicrosoftAgentFramework.Progress – Foundry" />
+  <meta name="twitter:title" content="HarnessArtifactRehydrationDecisionEvent – Foundry" />
   <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              NexusLabs.Foundry.MicrosoftAgentFramework.Progress
+              HarnessArtifactRehydrationDecisionEvent
             
           </span>
         </div>
@@ -2813,170 +2813,110 @@
   
 
 
-  <h1>NexusLabs.Foundry.MicrosoftAgentFramework.Progress</h1>
+  <h1>HarnessArtifactRehydrationDecisionEvent</h1>
 
 <h4 id="nexuslabsfoundrymicrosoftagentframework"><a href="../" title="index">NexusLabs.Foundry.MicrosoftAgentFramework</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframework" title="Permanent link">&para;</a></h4>
-<h2 id="nexuslabsfoundrymicrosoftagentframeworkprogress-namespace">NexusLabs.Foundry.MicrosoftAgentFramework.Progress Namespace<a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkprogress-namespace" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Classes</th>
-<th style="text-align: left;"></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><a href="../AgentCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentCompletedEvent">AgentCompletedEvent</a></td>
-<td style="text-align: left;">An agent has completed its turn.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../AgentFailedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentFailedEvent">AgentFailedEvent</a></td>
-<td style="text-align: left;">An agent run failed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../AgentHandoffEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentHandoffEvent">AgentHandoffEvent</a></td>
-<td style="text-align: left;">An agent handed off to another agent.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../AgentInvokedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentInvokedEvent">AgentInvokedEvent</a></td>
-<td style="text-align: left;">An agent has been invoked (turn started).</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../AgentResponseChunkEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.AgentResponseChunkEvent">AgentResponseChunkEvent</a></td>
-<td style="text-align: left;">A chunk of streaming response text from an agent.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../BudgetExceededEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.BudgetExceededEvent">BudgetExceededEvent</a></td>
-<td style="text-align: left;">A token budget limit has been exceeded.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../BudgetUpdatedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.BudgetUpdatedEvent">BudgetUpdatedEvent</a></td>
-<td style="text-align: left;">Token budget usage has been updated.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../ChannelProgressReporter/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ChannelProgressReporter">ChannelProgressReporter</a></td>
-<td style="text-align: left;">Non-blocking <a href="../IProgressReporter/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporter">IProgressReporter</a> that pushes events to a <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.channels.channel-1" title="System.Threading.Channels.Channel`1">System.Threading.Channels.Channel&lt;&gt;</a> and drains them to sinks on a background task. Use this when sinks do I/O (database, network) and you don't want to block the agent pipeline.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../CompositeDisposable/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.CompositeDisposable">CompositeDisposable</a></td>
-<td style="text-align: left;">Composite <a href="https://learn.microsoft.com/en-us/dotnet/api/system.idisposable" title="System.IDisposable">System.IDisposable</a> that owns a fixed set of child disposables and releases them in reverse order on <a href="../">NexusLabs.Foundry.MicrosoftAgentFramework.Progress.CompositeDisposable.Dispose</a>.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../HarnessApprovalApprovedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalApprovedEvent">HarnessApprovalApprovedEvent</a></td>
-<td style="text-align: left;">An ordinary (non-standing) tool-approval response approved the pending request. Emitted once per approved request; a standing ("always approve") response is reported via <a href="../HarnessApprovalStandingReauthorizedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalStandingReauthorizedEvent">HarnessApprovalStandingReauthorizedEvent</a> instead, never both.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../HarnessApprovalRejectedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRejectedEvent">HarnessApprovalRejectedEvent</a></td>
-<td style="text-align: left;">An ordinary (non-standing) tool-approval response rejected the pending request. Emitted once per rejected request. A rejected request results in zero invocations of the underlying tool.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../HarnessApprovalRequestedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalRequestedEvent">HarnessApprovalRequestedEvent</a></td>
-<td style="text-align: left;">A tool-approval request surfaced to the caller. Emitted once per distinct request identifier when the composed agent's response contains a <code>ToolApprovalRequestContent</code> item (MAF's approval-required tool-call surface). The MAF content type itself is never exposed; only stable identifiers are carried.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../HarnessApprovalStandingReauthorizedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessApprovalStandingReauthorizedEvent">HarnessApprovalStandingReauthorizedEvent</a></td>
-<td style="text-align: left;">A standing ("always approve") tool approval -- newly supplied this run, or implied by continuing a session that could carry one from a prior turn -- was submitted for the required host reauthorization check. Emitted exactly once per reauthorization attempt, whether the host granted or declined it; a declined reauthorization fails the run closed with zero tool invocations.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../HarnessArtifactOffloadDecisionEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactOffloadDecisionEvent">HarnessArtifactOffloadDecisionEvent</a></td>
-<td style="text-align: left;">One explicit tool-result offload decision made by the shared, caller-agnostic offload transform. Emitted exactly once per <code>Transform</code> call that produces a decision — including an <a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Inline" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Inline">Inline</a> decision, so threshold behavior remains inspectable even when nothing is written to the workspace. Never emitted when the transform throws before reaching a decision (for example a pre-canceled token or a stale execution binding), because no decision was made in that case.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../HarnessArtifactRehydrationDecisionEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent">HarnessArtifactRehydrationDecisionEvent</a></td>
-<td style="text-align: left;">One explicit artifact rehydration decision made by resolving a caller-supplied artifact reference. Emitted exactly once per explicit rehydration request/outcome — every resolution status, not only <a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Resolved" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Resolved">Resolved</a>. Never emitted when resolution throws before reaching a decision (for example a pre-canceled token or a stale execution binding), because no decision was made in that case.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../LlmCallCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallCompletedEvent">LlmCallCompletedEvent</a></td>
-<td style="text-align: left;">An LLM response has been received.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../LlmCallFailedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallFailedEvent">LlmCallFailedEvent</a></td>
-<td style="text-align: left;">An LLM call failed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../LlmCallStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.LlmCallStartedEvent">LlmCallStartedEvent</a></td>
-<td style="text-align: left;">An LLM request has been sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../PhaseCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.PhaseCompletedEvent">PhaseCompletedEvent</a></td>
-<td style="text-align: left;">A pipeline phase has completed execution.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../PhaseStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.PhaseStartedEvent">PhaseStartedEvent</a></td>
-<td style="text-align: left;">A pipeline phase has started execution.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../ReducerNodeInvokedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ReducerNodeInvokedEvent">ReducerNodeInvokedEvent</a></td>
-<td style="text-align: left;">A reducer node in a DAG workflow was invoked. Reducer nodes are deterministic functions (no LLM calls) that aggregate branch outputs during fan-in convergence.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../SuperStepCompletedProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.SuperStepCompletedProgressEvent">SuperStepCompletedProgressEvent</a></td>
-<td style="text-align: left;">A workflow control-flow step (SuperStep) has completed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../SuperStepStartedProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.SuperStepStartedProgressEvent">SuperStepStartedProgressEvent</a></td>
-<td style="text-align: left;">A workflow control-flow step (SuperStep) has started. Represents one             cycle of the orchestration loop: send work to agents → collect results → decide next.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../ToolCallCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ToolCallCompletedEvent">ToolCallCompletedEvent</a></td>
-<td style="text-align: left;">A tool invocation has completed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../ToolCallFailedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ToolCallFailedEvent">ToolCallFailedEvent</a></td>
-<td style="text-align: left;">A tool invocation failed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../ToolCallStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.ToolCallStartedEvent">ToolCallStartedEvent</a></td>
-<td style="text-align: left;">A tool invocation has started.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../WorkflowCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.WorkflowCompletedEvent">WorkflowCompletedEvent</a></td>
-<td style="text-align: left;">Workflow execution has completed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../WorkflowStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.WorkflowStartedEvent">WorkflowStartedEvent</a></td>
-<td style="text-align: left;">Workflow execution has started.</td>
-</tr>
-</tbody>
-</table>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Interfaces</th>
-<th style="text-align: left;"></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><a href="../IProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent">IProgressEvent</a></td>
-<td style="text-align: left;">Base interface for all progress events emitted during agent/workflow execution. Every event carries correlation context enabling hierarchical trace reconstruction.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../IProgressReporter/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporter">IProgressReporter</a></td>
-<td style="text-align: left;">Emits progress events to registered sinks. Carries hierarchical context (workflow ID, agent ID, depth) so events are automatically correlated.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../IProgressReporterAccessor/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporterAccessor">IProgressReporterAccessor</a></td>
-<td style="text-align: left;">Provides ambient access to the <a href="../IProgressReporter/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporter">IProgressReporter</a> for the current async flow. Follows the <code>IHttpContextAccessor</code> pattern — backed by <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1" title="System.Threading.AsyncLocal`1">System.Threading.AsyncLocal&lt;&gt;</a> so concurrent orchestrations see their own reporters.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../IProgressReporterErrorHandler/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporterErrorHandler">IProgressReporterErrorHandler</a></td>
-<td style="text-align: left;">Receives callbacks when an <a href="../IProgressSink/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressSink">IProgressSink</a> throws while handling an event. Without a handler, sink exceptions would be silently swallowed.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../IProgressReporterFactory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporterFactory">IProgressReporterFactory</a></td>
-<td style="text-align: left;">Creates <a href="../IProgressReporter/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporter">IProgressReporter</a> instances scoped to a specific orchestration run.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../IProgressSequence/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressSequence">IProgressSequence</a></td>
-<td style="text-align: left;">Provides globally-ordered sequence numbers for progress events across all concurrent orchestrations. Registered as a singleton in DI so all <a href="../IProgressReporter/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporter">IProgressReporter</a> instances share a single monotonic counter.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><a href="../IProgressSink/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressSink">IProgressSink</a></td>
-<td style="text-align: left;">Receives progress events as they occur during agent/workflow execution. Implement this interface to build SSE streams, console displays, trace diagrams, etc.</td>
-</tr>
-</tbody>
-</table>
+<h3 id="nexuslabsfoundrymicrosoftagentframeworkprogress"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Progress/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress">NexusLabs.Foundry.MicrosoftAgentFramework.Progress</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkprogress" title="Permanent link">&para;</a></h3>
+<h2 id="harnessartifactrehydrationdecisionevent-class">HarnessArtifactRehydrationDecisionEvent Class<a class="headerlink" href="#harnessartifactrehydrationdecisionevent-class" title="Permanent link">&para;</a></h2>
+<p>One explicit artifact rehydration decision made by resolving a caller-supplied artifact
+reference. Emitted exactly once per explicit rehydration request/outcome — every resolution
+status, not only <a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Resolved" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Resolved">Resolved</a>. Never emitted when
+resolution throws before reaching a decision (for example a pre-canceled token or a stale
+execution binding), because no decision was made in that case.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">record</span><span class="w"> </span><span class="n">HarnessArtifactRehydrationDecisionEvent</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">IProgressEvent</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">IEquatable</span><span class="o">&lt;</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">HarnessArtifactRehydrationDecisionEvent</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; HarnessArtifactRehydrationDecisionEvent</p>
+<p>Implements <a href="../IProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent">IProgressEvent</a>, <a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">System.IEquatable&lt;</a><a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent">HarnessArtifactRehydrationDecisionEvent</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">&gt;</a></p>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics)'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventdatetimeoffset-string-string-string-int-long-harnessartifactdiagnostics-constructor">HarnessArtifactRehydrationDecisionEvent(DateTimeOffset, string, string, string, int, long, HarnessArtifactDiagnostics) Constructor<a class="headerlink" href="#harnessartifactrehydrationdecisioneventdatetimeoffset-string-string-string-int-long-harnessartifactdiagnostics-constructor" title="Permanent link">&para;</a></h2>
+<p>One explicit artifact rehydration decision made by resolving a caller-supplied artifact
+reference. Emitted exactly once per explicit rehydration request/outcome — every resolution
+status, not only <a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Resolved" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Resolved">Resolved</a>. Never emitted when
+resolution throws before reaching a decision (for example a pre-canceled token or a stale
+execution binding), because no decision was made in that case.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="nf">HarnessArtifactRehydrationDecisionEvent</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="p">,</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactDiagnostics</span><span class="w"> </span><span class="n">Diagnostics</span><span class="p">);</span>
+</code></pre></div>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).Timestamp'></a></p>
+<p><code>Timestamp</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
+<p>When the decision was made.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).WorkflowId'></a></p>
+<p><code>WorkflowId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Top-level workflow correlation ID.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).AgentId'></a></p>
+<p><code>AgentId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Which agent emitted this event, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for workflow-level events.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).ParentAgentId'></a></p>
+<p><code>ParentAgentId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Parent agent ID for sub-agent runs, enabling tree reconstruction.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).Depth'></a></p>
+<p><code>Depth</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
+<p>Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).SequenceNumber'></a></p>
+<p><code>SequenceNumber</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
+<p>Globally ordered sequence number for event ordering.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.HarnessArtifactRehydrationDecisionEvent(System.DateTimeOffset,string,string,string,int,long,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics).Diagnostics'></a></p>
+<p><code>Diagnostics</code> <a href="../HarnessArtifactDiagnostics/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics">HarnessArtifactDiagnostics</a></p>
+<p>The privacy-safe, structured evidence for this decision. The identical instance is also
+attached to the internal rehydration result this decision produced.</p>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.AgentId'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventagentid-property">HarnessArtifactRehydrationDecisionEvent.AgentId Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventagentid-property" title="Permanent link">&para;</a></h2>
+<p>Which agent emitted this event, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for workflow-level events.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId">AgentId</a></p>
+<h4 id="property-value">Property Value<a class="headerlink" href="#property-value" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.Depth'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventdepth-property">HarnessArtifactRehydrationDecisionEvent.Depth Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventdepth-property" title="Permanent link">&para;</a></h2>
+<p>Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth">Depth</a></p>
+<h4 id="property-value_1">Property Value<a class="headerlink" href="#property-value_1" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.Diagnostics'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventdiagnostics-property">HarnessArtifactRehydrationDecisionEvent.Diagnostics Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventdiagnostics-property" title="Permanent link">&para;</a></h2>
+<p>The privacy-safe, structured evidence for this decision. The identical instance is also
+attached to the internal rehydration result this decision produced.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactDiagnostics</span><span class="w"> </span><span class="n">Diagnostics</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h4 id="property-value_2">Property Value<a class="headerlink" href="#property-value_2" title="Permanent link">&para;</a></h4>
+<p><a href="../HarnessArtifactDiagnostics/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics">HarnessArtifactDiagnostics</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.ParentAgentId'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventparentagentid-property">HarnessArtifactRehydrationDecisionEvent.ParentAgentId Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventparentagentid-property" title="Permanent link">&para;</a></h2>
+<p>Parent agent ID for sub-agent runs, enabling tree reconstruction.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId">ParentAgentId</a></p>
+<h4 id="property-value_3">Property Value<a class="headerlink" href="#property-value_3" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.SequenceNumber'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventsequencenumber-property">HarnessArtifactRehydrationDecisionEvent.SequenceNumber Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventsequencenumber-property" title="Permanent link">&para;</a></h2>
+<p>Globally ordered sequence number for event ordering.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber">SequenceNumber</a></p>
+<h4 id="property-value_4">Property Value<a class="headerlink" href="#property-value_4" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.Timestamp'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventtimestamp-property">HarnessArtifactRehydrationDecisionEvent.Timestamp Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventtimestamp-property" title="Permanent link">&para;</a></h2>
+<p>When the decision was made.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp">Timestamp</a></p>
+<h4 id="property-value_5">Property Value<a class="headerlink" href="#property-value_5" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessArtifactRehydrationDecisionEvent.WorkflowId'></a></p>
+<h2 id="harnessartifactrehydrationdecisioneventworkflowid-property">HarnessArtifactRehydrationDecisionEvent.WorkflowId Property<a class="headerlink" href="#harnessartifactrehydrationdecisioneventworkflowid-property" title="Permanent link">&para;</a></h2>
+<p>Top-level workflow correlation ID.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId">WorkflowId</a></p>
+<h4 id="property-value_6">Property Value<a class="headerlink" href="#property-value_6" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 
 
 
