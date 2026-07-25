@@ -1,7 +1,7 @@
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
-/// Stable, distinguishable data carrier for a resolved rehydration payload (T052) — a "marked
+/// Stable, distinguishable data carrier for a resolved rehydration payload — a "marked
 /// recoverable context segment" per <c>data-model.md</c>'s "Rehydration Decision" field "Delivery
 /// mode: marked recoverable context segment". Positioned conceptually after the eager-offload
 /// boundary: unlike an ordinary (never-offloaded) tool result, this carrier is always
@@ -11,11 +11,11 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// </summary>
 /// <remarks>
 /// <see cref="SkipEagerOffload"/> is always <see langword="true"/> and cannot be constructed
-/// otherwise — this is the explicit, immutable invariant required so that a future eager-offload
-/// transform (T051) never re-offloads a rehydrated body within the same active request, even if
-/// that body is again over the ordinary inline-result byte threshold. G4 builds only this
-/// primitive; it does not build the automatic trigger that decides when to rehydrate, nor any
-/// compaction/eviction policy layered on top (G5's "hybrid context" responsibility).
+/// otherwise — this is the explicit, immutable invariant required so that the eager-offload
+/// transform never re-offloads a rehydrated body within the same active request, even if
+/// that body is again over the ordinary inline-result byte threshold. This type is only the
+/// recoverable-context-segment data carrier; it does not build the automatic trigger that decides
+/// when to rehydrate, nor any compaction/eviction policy layered on top.
 /// </remarks>
 internal sealed record HarnessArtifactRecoverableContextSegment
 {

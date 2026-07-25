@@ -1,4 +1,6 @@
+using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 
@@ -10,7 +12,8 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tools;
 /// <see cref="HarnessToolResultOffloadStatus.Failed"/>, or
 /// <see cref="HarnessToolResultOffloadStatus.RecoveryRequired"/>. No permissive public constructor
 /// — every instance is created through one of the static factories below, each of which populates
-/// only the members meaningful for that outcome.
+/// only the members meaningful for that outcome and builds the matching
+/// <see cref="HarnessArtifactDiagnostics"/> snapshot for that decision.
 /// </summary>
 internal sealed record HarnessToolResultOffloadOutcome
 {
@@ -21,7 +24,8 @@ internal sealed record HarnessToolResultOffloadOutcome
         HarnessArtifactReference? reference,
         string? evidence,
         string? recoveryWorkspacePath,
-        string? recoveryContentDigest)
+        string? recoveryContentDigest,
+        HarnessArtifactDiagnostics diagnostics)
     {
         Status = status;
         RawResult = rawResult;
@@ -30,6 +34,7 @@ internal sealed record HarnessToolResultOffloadOutcome
         Evidence = evidence;
         RecoveryWorkspacePath = recoveryWorkspacePath;
         RecoveryContentDigest = recoveryContentDigest;
+        Diagnostics = diagnostics;
     }
 
     /// <summary>Which of the five explicit outcomes this instance represents.</summary>
@@ -94,8 +99,20 @@ internal sealed record HarnessToolResultOffloadOutcome
     /// </summary>
     internal string? RecoveryContentDigest { get; }
 
+    /// <summary>
+    /// The privacy-safe, structured evidence for this decision. The identical instance is also
+    /// attached to the <see cref="HarnessArtifactOffloadDecisionEvent"/> emitted for this decision.
+    /// </summary>
+    internal HarnessArtifactDiagnostics Diagnostics { get; }
+
     /// <summary>Small (at-or-under-threshold) result: the original value is used unchanged.</summary>
-    internal static HarnessToolResultOffloadOutcome Inline(object? rawResult, string serializedText)
+    internal static HarnessToolResultOffloadOutcome Inline(
+        object? rawResult,
+        string serializedText,
+        HarnessArtifactContentCategory content,
+        HarnessArtifactDecisionReason reason,
+        int observedUtf8ByteSize,
+        int configuredThresholdBytes)
     {
         ArgumentNullException.ThrowIfNull(serializedText);
         return new HarnessToolResultOffloadOutcome(
@@ -105,11 +122,21 @@ internal sealed record HarnessToolResultOffloadOutcome
             reference: null,
             evidence: null,
             recoveryWorkspacePath: null,
-            recoveryContentDigest: null);
+            recoveryContentDigest: null,
+            HarnessArtifactDiagnostics.ForOffload(
+                HarnessArtifactOutcomeCategory.Inline,
+                content,
+                reason,
+                observedUtf8ByteSize,
+                configuredThresholdBytes,
+                referenceId: null));
     }
 
     /// <summary>Oversized result freshly persisted to the workspace this call.</summary>
-    internal static HarnessToolResultOffloadOutcome Offloaded(HarnessArtifactReference reference)
+    internal static HarnessToolResultOffloadOutcome Offloaded(
+        HarnessArtifactReference reference,
+        int observedUtf8ByteSize,
+        int configuredThresholdBytes)
     {
         ArgumentNullException.ThrowIfNull(reference);
         return new HarnessToolResultOffloadOutcome(
@@ -119,14 +146,24 @@ internal sealed record HarnessToolResultOffloadOutcome
             reference,
             evidence: null,
             recoveryWorkspacePath: null,
-            recoveryContentDigest: null);
+            recoveryContentDigest: null,
+            HarnessArtifactDiagnostics.ForOffload(
+                HarnessArtifactOutcomeCategory.Offloaded,
+                HarnessArtifactContentCategory.ToolResult,
+                HarnessArtifactDecisionReason.ThresholdExceeded,
+                observedUtf8ByteSize,
+                configuredThresholdBytes,
+                reference.ReferenceId));
     }
 
     /// <summary>
     /// Oversized result whose content-addressed path already held matching content — no write
     /// performed this call.
     /// </summary>
-    internal static HarnessToolResultOffloadOutcome ExistingReference(HarnessArtifactReference reference)
+    internal static HarnessToolResultOffloadOutcome ExistingReference(
+        HarnessArtifactReference reference,
+        int observedUtf8ByteSize,
+        int configuredThresholdBytes)
     {
         ArgumentNullException.ThrowIfNull(reference);
         return new HarnessToolResultOffloadOutcome(
@@ -136,13 +173,24 @@ internal sealed record HarnessToolResultOffloadOutcome
             reference,
             evidence: null,
             recoveryWorkspacePath: null,
-            recoveryContentDigest: null);
+            recoveryContentDigest: null,
+            HarnessArtifactDiagnostics.ForOffload(
+                HarnessArtifactOutcomeCategory.ExistingReference,
+                HarnessArtifactContentCategory.ToolResult,
+                HarnessArtifactDecisionReason.ExistingContentMatch,
+                observedUtf8ByteSize,
+                configuredThresholdBytes,
+                reference.ReferenceId));
     }
 
     /// <summary>
     /// Fail-closed outcome: no reference was committed and nothing was inlined/truncated/discarded.
     /// </summary>
-    internal static HarnessToolResultOffloadOutcome Failed(string evidence)
+    internal static HarnessToolResultOffloadOutcome Failed(
+        string evidence,
+        HarnessArtifactDecisionReason reason,
+        int observedUtf8ByteSize,
+        int configuredThresholdBytes)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(evidence);
         return new HarnessToolResultOffloadOutcome(
@@ -152,7 +200,14 @@ internal sealed record HarnessToolResultOffloadOutcome
             reference: null,
             evidence,
             recoveryWorkspacePath: null,
-            recoveryContentDigest: null);
+            recoveryContentDigest: null,
+            HarnessArtifactDiagnostics.ForOffload(
+                HarnessArtifactOutcomeCategory.Failed,
+                HarnessArtifactContentCategory.ToolResult,
+                reason,
+                observedUtf8ByteSize,
+                configuredThresholdBytes,
+                referenceId: null));
     }
 
     /// <summary>
@@ -168,7 +223,10 @@ internal sealed record HarnessToolResultOffloadOutcome
     internal static HarnessToolResultOffloadOutcome RecoveryRequired(
         string evidence,
         string workspacePath,
-        string contentDigest)
+        string contentDigest,
+        HarnessArtifactDecisionReason reason,
+        int observedUtf8ByteSize,
+        int configuredThresholdBytes)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(evidence);
         ArgumentException.ThrowIfNullOrWhiteSpace(workspacePath);
@@ -180,6 +238,13 @@ internal sealed record HarnessToolResultOffloadOutcome
             reference: null,
             evidence,
             recoveryWorkspacePath: workspacePath,
-            recoveryContentDigest: contentDigest);
+            recoveryContentDigest: contentDigest,
+            HarnessArtifactDiagnostics.ForOffload(
+                HarnessArtifactOutcomeCategory.RecoveryRequired,
+                HarnessArtifactContentCategory.ToolResult,
+                reason,
+                observedUtf8ByteSize,
+                configuredThresholdBytes,
+                referenceId: null));
     }
 }

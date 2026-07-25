@@ -1,7 +1,7 @@
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
-/// Explicit, structured result of resolving one <see cref="HarnessArtifactReference"/> (T053).
+/// Explicit, structured result of resolving one <see cref="HarnessArtifactReference"/>.
 /// Carries exactly the evidence needed to distinguish every outcome without ever exposing raw
 /// artifact content except through the dedicated <see cref="Resolved"/> factory. No public
 /// constructor exists — every instance is produced by one of the status-specific factory methods

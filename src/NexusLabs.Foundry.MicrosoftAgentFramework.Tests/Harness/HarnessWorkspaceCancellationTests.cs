@@ -40,7 +40,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            cancellationSource.Token);
+            cancellationSource.Token,
+            ProgressAccessor: null);
 
         var writesBefore = fixture.Workspace.WriteFileCallCount;
         var fileExistsBefore = fixture.Workspace.FileExistsCallCount;
@@ -89,7 +90,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            cts.Token);
+            cts.Token,
+            ProgressAccessor: null);
 
         var firstOutcome = HarnessToolResultOffloadTransform.Transform(firstRequest);
 
@@ -115,7 +117,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var retryOutcome = HarnessToolResultOffloadTransform.Transform(retryRequest);
 
@@ -154,7 +157,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var firstOutcome = HarnessToolResultOffloadTransform.Transform(request);
 
@@ -204,7 +208,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var firstOutcome = HarnessToolResultOffloadTransform.Transform(request);
 
@@ -243,7 +248,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var firstOutcome = HarnessToolResultOffloadTransform.Transform(request);
         Assert.Equal(HarnessToolResultOffloadStatus.Offloaded, firstOutcome.Status);
@@ -314,7 +320,8 @@ public sealed class HarnessWorkspaceCancellationTests
             fixture.Accessor,
             policy,
             CreatedAtUtc,
-            CancellationToken.None);
+            CancellationToken.None,
+            ProgressAccessor: null);
 
         var outcome = HarnessToolResultOffloadTransform.Transform(request);
 
