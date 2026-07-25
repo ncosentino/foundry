@@ -1,3 +1,5 @@
+using System.Threading.Channels;
+
 using Moq;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
@@ -191,6 +193,103 @@ public class ChannelProgressReporterTests
 
         Assert.Equal(3, goodSinkReceived.Count);
         Assert.Equal(new long[] { 0, 1, 2 }, goodSinkReceived.Select(e => e.SequenceNumber));
+    }
+
+    // ================================================================================
+    // Full-channel enqueue: WriteAsync (Wait mode) must queue rather than silently drop via
+    // TryWrite, deliver every event in channel order once capacity frees, and DisposeAsync must
+    // wait for in-flight enqueues to resolve rather than racing the channel's completion against
+    // a still-blocked write.
+    // ================================================================================
+
+    [Fact]
+    public async Task Report_ChannelMomentarilyFull_QueuesRatherThanDrops_AllEventsDeliveredExactlyOnceInOrder()
+    {
+        var firstCallStarted = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseFirstCall = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var received = new List<long>();
+        var isFirstCall = 0;
+
+        var sink = new Mock<IProgressSink>();
+        sink.Setup(s => s.OnEventAsync(It.IsAny<IProgressEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(async (IProgressEvent evt, CancellationToken _) =>
+            {
+                if (Interlocked.Exchange(ref isFirstCall, 1) == 0)
+                {
+                    // Only the very first delivered event blocks the consumer loop — long enough
+                    // for capacity=1 to force every subsequently-reported event through the
+                    // pending-enqueue (WriteAsync) path instead of completing synchronously.
+                    firstCallStarted.TrySetResult(true);
+                    await releaseFirstCall.Task;
+                }
+
+                lock (received)
+                {
+                    received.Add(evt.SequenceNumber);
+                }
+            });
+
+        var reporter = new ChannelProgressReporter(
+            "wf-1", [sink.Object], new ProgressSequenceProvider(), capacity: 1);
+
+        // Event 0 fills the sole buffer slot; the consumer immediately dequeues it (freeing the
+        // slot) and then blocks inside the sink call above.
+        reporter.Report(new WorkflowStartedEvent(DateTimeOffset.UtcNow, "wf-1", null, null, 0, 0));
+        await firstCallStarted.Task.WaitAsync(
+            TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        // The buffer is free again (event 0 was already dequeued), so event 1 enqueues
+        // synchronously and re-fills the sole slot.
+        reporter.Report(new WorkflowStartedEvent(DateTimeOffset.UtcNow, "wf-1", null, null, 0, 1));
+
+        // Events 2..4 each find the channel full: with the old TryWrite-based Report, these would
+        // have been silently dropped. They must instead be queued (via the async enqueue
+        // observer) and eventually delivered, in order, once capacity frees.
+        for (long seq = 2; seq <= 4; seq++)
+        {
+            reporter.Report(new WorkflowStartedEvent(DateTimeOffset.UtcNow, "wf-1", null, null, 0, seq));
+        }
+
+        releaseFirstCall.TrySetResult(true);
+
+        await reporter.DisposeAsync();
+
+        Assert.Equal(new long[] { 0, 1, 2, 3, 4 }, received);
+    }
+
+    [Fact]
+    public async Task Report_AfterDisposeAsync_SurfacesEnqueueFailureThroughErrorHandler_DoesNotThrowSynchronously()
+    {
+        var handler = new RecordingChannelErrorHandler();
+        var sink = new Mock<IProgressSink>();
+        sink.Setup(s => s.OnEventAsync(It.IsAny<IProgressEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
+
+        var reporter = new ChannelProgressReporter(
+            "wf-1", [sink.Object], new ProgressSequenceProvider(), handler);
+
+        await reporter.DisposeAsync();
+
+        var lateEvent = new WorkflowStartedEvent(DateTimeOffset.UtcNow, "wf-1", null, null, 0, 99);
+
+        // Enqueuing after the channel has been completed must never throw synchronously out of
+        // Report — the failure is surfaced asynchronously through the error handler instead.
+        var thrown = Record.Exception(() => reporter.Report(lateEvent));
+        Assert.Null(thrown);
+
+        // Poll briefly for the fire-and-forget continuation to observe the failed write.
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (handler.Records.Count == 0 && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        var record = Assert.Single(handler.Records);
+        Assert.Same(sink.Object, record.Sink);
+        Assert.Same(lateEvent, record.Event);
+        Assert.IsType<ChannelClosedException>(record.Exception);
     }
 
     private sealed class RecordingChannelErrorHandler : IProgressReporterErrorHandler

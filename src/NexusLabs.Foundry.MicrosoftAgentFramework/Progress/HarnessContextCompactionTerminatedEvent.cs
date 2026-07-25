@@ -20,6 +20,12 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 /// <param name="ParentAgentId">Parent agent ID for sub-agent runs, enabling tree reconstruction.</param>
 /// <param name="Depth">Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</param>
 /// <param name="SequenceNumber">Globally ordered sequence number for event ordering.</param>
+/// <param name="AssemblyId">
+/// The identical opaque per-assembly correlation ID carried by the preceding
+/// <see cref="HarnessContextCompactionStartedEvent"/> for this same attempt, so this Terminated
+/// event is pairable with its Started event even when other concurrently-running assemblies on the
+/// same agent interleave their own events' <see cref="SequenceNumber"/>s in between.
+/// </param>
 /// <param name="Diagnostics">The privacy-safe, structured evidence for this termination.</param>
 public sealed record HarnessContextCompactionTerminatedEvent(
     DateTimeOffset Timestamp,
@@ -28,4 +34,5 @@ public sealed record HarnessContextCompactionTerminatedEvent(
     string? ParentAgentId,
     int Depth,
     long SequenceNumber,
+    Guid AssemblyId,
     HarnessContextDiagnostics Diagnostics) : IProgressEvent;

@@ -18,6 +18,17 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 /// <param name="ParentAgentId">Parent agent ID for sub-agent runs, enabling tree reconstruction.</param>
 /// <param name="Depth">Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</param>
 /// <param name="SequenceNumber">Globally ordered sequence number for event ordering.</param>
+/// <param name="AssemblyId">
+/// A privacy-safe, opaque per-assembly correlation ID generated exactly once for this attempt,
+/// immediately after message adaptation, snapshot integration, and assembler construction have all
+/// succeeded — the same instant this Started event is emitted — and threaded identically to
+/// whichever terminal event (<see cref="HarnessContextCompactionCompletedEvent"/> or
+/// <see cref="HarnessContextCompactionTerminatedEvent"/>) and, on success, the subsequent
+/// <see cref="HarnessContextComposedEvent"/> follow for this same attempt. Never reused across two
+/// different assembly attempts, even for the same agent within the same workflow, so two
+/// concurrently-running provider calls on the same agent remain pairable despite their
+/// <see cref="SequenceNumber"/>s being interleaved.
+/// </param>
 /// <param name="MeasurementUnit">The explicit unit every size on the eventual terminal event is expressed in.</param>
 /// <param name="HardLimit">The hard limit in force for this assembly, in <paramref name="MeasurementUnit"/>.</param>
 /// <param name="TriggerThreshold">
@@ -31,6 +42,7 @@ public sealed record HarnessContextCompactionStartedEvent(
     string? ParentAgentId,
     int Depth,
     long SequenceNumber,
+    Guid AssemblyId,
     HarnessContextMeasurementUnit MeasurementUnit,
     int HardLimit,
     int TriggerThreshold) : IProgressEvent;

@@ -59,46 +59,35 @@ policy, and status type — including the estimator interface itself — remains
 
 Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
 
-| Item | Cumulative Harness tests | Cumulative project tests | Delta |
-|---|---|---|---|
-| G4 final (baseline) | 305 | 1,874 | — |
-| #99 | 420 | 1,989 | +115 |
-| #100 | 480 | 2,049 | +60 |
-| #101 | 569 | 2,138 | +89 |
-| **Compaction/context-composition observability (this leaf)** | **600** | **2,169** | **+31** |
+| Item | Cumulative Harness tests | Cumulative project tests | Harness delta | Project delta |
+|---|---|---|---|---|
+| G4 final (baseline) | 305 | 1,874 | — | — |
+| #99 | 420 | 1,989 | +115 | +115 |
+| #100 | 480 | 2,049 | +60 | +60 |
+| #101 | 569 | 2,138 | +89 | +89 |
+| **Compaction/context-composition observability (this leaf)** | **601** | **2,172** | **+32** | **+34** |
 
 - Cumulative counts through #101 were supplied as known prior measurements for
-  this branch's history; this leaf's own +31 delta was measured directly
-  against the current working tree via `dotnet test`, not estimated from
-  source occurrences.
-- This leaf's 31 new tests break down as: 8 in the new
-  `HarnessContextObservabilityTests.cs` covering exactly-once Started/Completed/
-  Terminated/Composed emission per outcome, measurement-unit correctness, the
-  absent-profile no-op case, and the privacy sweep for raw message text; 3 in
-  `HarnessCapabilityProfileTests.cs` asserting the Compaction capability's
-  exact requested+accepted/deferred/disabled resolution matrix and evidence
-  field values; 2 in `HarnessArtifactObservabilityTests.cs` proving UTF-8 byte
-  counts (never UTF-16 char/code-unit counts) are reported for multibyte
-  offload/rehydration content; 13 in the new
-  `HarnessContextDiagnosticsValidationTests.cs` covering negative-estimator
-  rejection, checked-sum overflow, duplicate-category rejection,
-  non-positive-entry-count/negative-size rejection, undefined-`HarnessContextMeasurementUnit`
-  rejection on both `ForSuccess` and `ForTermination`, undefined-`HarnessContextCategory`
-  rejection on `HarnessContextCategoryContribution.Create`, and `ForSuccess`'s
-  own defensive rejection of an undefined category on a contribution
-  constructed by bypassing `Create` via reflection; a classifier exception and
-  a null snapshot-integration result before assembly begins must each emit no
-  progress event (2 more in `HarnessContextObservabilityTests.cs`); and a
-  root→child→grandchild nested `IProgressReporter` scope carries
-  `WorkflowId`/`AgentId`/`ParentAgentId`/`Depth` and a strictly increasing
-  shared `SequenceNumber` across Started/Completed/Composed for a successful
-  assembly and across Started/Terminated for an irreducible one (2 more in
-  `HarnessContextObservabilityTests.cs`), plus one test pinning that a binding
-  invalidated between the successful-assembly decision and the post-assembly
-  trust revalidation still leaves Completed observable while Composed and
-  Terminated are both never emitted and `InvalidOperationException`
-  propagates directly (1 more in `HarnessContextObservabilityTests.cs`) — for
-  a total of 13 tests in `HarnessContextObservabilityTests.cs`.
+  this branch's history; this leaf's own +32 Harness / +34 project deltas were
+  measured directly against the current working tree via `dotnet test`, not
+  estimated from source occurrences.
+- This leaf's 32 new Harness tests break down as:
+  - 14 in `HarnessContextObservabilityTests.cs`, covering success/termination
+    event families, explicit measurement units, absent-profile behavior,
+    privacy, classifier/snapshot pre-start failures, nested reporter
+    correlation, trust-revalidation ordering, and concurrent per-assembly
+    correlation IDs;
+  - 13 in `HarnessContextDiagnosticsValidationTests.cs`, covering invalid
+    contribution values/categories, negative estimator output, checked
+    overflow, duplicate categories, and undefined measurement units;
+  - 3 in `HarnessCapabilityProfileTests.cs`, covering the exact Compaction
+    capability state/evidence matrix; and
+  - 2 in `HarnessArtifactObservabilityTests.cs`, proving multibyte offload and
+    rehydration attribution uses UTF-8 byte counts rather than UTF-16 length.
+- Two additional project-only tests in `ChannelProgressReporterTests.cs`
+  prove bounded-channel backpressure queues rather than drops events and that
+  enqueue failures after completion are surfaced through the configured error
+  handler, producing the project delta's additional two tests.
 - The 10 pre-existing offload/rehydration outcome tests in
   `HarnessArtifactObservabilityTests.cs` were each extended in place with new
   `Attribution` assertions rather than duplicated into new test methods, so
@@ -206,6 +195,81 @@ and `HarnessCompactionCompositionRequest` outside this leaf's own new test
 file passes an explicit `progressAccessor`/`ProgressAccessor` value — no call
 site was left uncompiled or defaulted.
 
+## Isolated-review follow-up (this pass)
+
+An independent isolated review of the cumulative leaf above raised five
+findings, all addressed in this same pass without any change to the gate's
+`PASS ... pending independent review and hosted CI` disposition:
+
+1. **Per-assembly correlation (`AssemblyId`).** Added a public `Guid
+   AssemblyId` to all four progress events
+   (`HarnessContextCompactionStartedEvent`, `HarnessContextCompactionCompletedEvent`,
+   `HarnessContextCompactionTerminatedEvent`, `HarnessContextComposedEvent`)
+   and to the internal `HarnessBoundedMessageAssembly` dispatch result.
+   `HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync` generates
+   the ID exactly once per attempt, immediately after adapter/snapshot/
+   assembler setup succeeds and immediately before Started is emitted, and
+   threads the identical value onto every event that attempt goes on to
+   report. See the "Per-assembly correlation (`AssemblyId`)" bullet above for
+   the full test list, including a dedicated `Task.Run`-based concurrency
+   test proving two genuinely concurrent same-agent assemblies produce two
+   distinct, non-empty IDs whose own lifecycles remain pairable despite
+   interleaved `SequenceNumber`s. Files:
+   `Progress/HarnessContextCompactionStartedEvent.cs`,
+   `Progress/HarnessContextCompactionCompletedEvent.cs`,
+   `Progress/HarnessContextCompactionTerminatedEvent.cs`,
+   `Progress/HarnessContextComposedEvent.cs`,
+   `Harness/Context/HarnessHybridCompactionChatClient.cs`,
+   `Harness/HarnessContextObservabilityTests.cs` (+1 test, 13 → 14).
+2. **`ChannelProgressReporter` no longer silently drops on a full channel.**
+   `Report` now calls the channel writer's `WriteAsync` (Wait mode) instead of
+   `TryWrite`; if the returned `ValueTask` completes synchronously (capacity
+   immediately available), `Report` returns exactly as before — still
+   non-blocking. When it does not complete synchronously, `Report` hands the
+   pending write to a private fire-and-forget observer that awaits it and
+   surfaces any failure through the existing `IProgressReporterErrorHandler`
+   (once per affected sink/event), never swallowing it. `DisposeAsync` now
+   drains every in-flight pending write before completing the channel writer,
+   so a write merely waiting for capacity is never itself turned into a
+   spurious `ChannelClosedException` by disposal, while still preserving the
+   original drain-then-complete semantics. File:
+   `Progress/ChannelProgressReporter.cs`. Tests added to
+   `ChannelProgressReporterTests.cs` (+2, 6 → 8): a deterministic
+   capacity-1/slow-sink test proving every one of several sequenced events is
+   delivered exactly once, in order, with none silently lost while the
+   channel was momentarily full; and an enqueue-after-`DisposeAsync` test
+   proving a late `Report` neither throws synchronously nor is silently
+   dropped, instead surfacing `ChannelClosedException` through the recorded
+   error handler.
+3. **ADR-0007 identity wording corrected.** The ADR previously stated, in its
+   Consequences section, that "the identical instance is observable from both
+   the internal result and the corresponding progress event" for **both**
+   success and termination. That overclaimed identity for termination: only
+   the success path shares one `HarnessContextDiagnostics` instance across
+   the internal dispatch result (`HarnessBoundedMessageAssembly.Diagnostics`),
+   the completed event, and the composed event. On termination, the
+   diagnostics snapshot is built from the internal terminating assembly
+   result and carried by the terminated event, but no caller-visible internal
+   result escapes to compare it against — `HarnessCompactionIrreducibleException`
+   carries only the outcome, final estimated size, and hard limit, never the
+   diagnostics instance. The ADR's Decision and Consequences sections were
+   corrected to state this precisely; `HarnessContextDiagnostics`'s own XML
+   doc remarks already scoped the shared-instance claim correctly to
+   Completed/Composed only and needed no change.
+4. **Gate capability footnote for `DiagnosticsStatus`.** Added a footnote
+   directly under the capability disposition table (below) clarifying that
+   `DiagnosticsStatus.Available` records only that the progress/diagnostics
+   *contract* is implemented for the `Compaction` capability — not that the
+   capability itself is activated. Activation remains governed by
+   `Stability: Experimental` / `DefaultEnabledInBundle: false`, and any change
+   to activation is a separate, later public API decision.
+5. **Gate remains provisional; test counts re-measured.** No completed-run
+   aggregation and no public runtime configuration were added by this pass —
+   both remain explicitly out of scope, as recorded elsewhere in this
+   document. The "Local validation" results below were re-run after all four
+   fixes above and reflect the final, current counts; the gate's disposition
+   is unchanged: **PASS pending independent review and hosted CI.**
+
 ## One-top-level-type-per-file disposition
 
 The issue names a single plural file, `Progress/HarnessContextProgressEvents.cs`,
@@ -277,6 +341,11 @@ reported in whatever `HarnessContextMeasurementUnit` the configured
 Event sequencing (per assembly attempt, enforced by
 `HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync`):
 
+0. A single opaque `AssemblyId` (`Guid`) is generated exactly once for this
+   attempt, at the same success gate as the Started event below (immediately
+   after message adaptation, snapshot integration, and assembler construction
+   all succeed), and is threaded identically onto every event this attempt
+   goes on to report.
 1. `HarnessContextCompactionStartedEvent` — emitted after message adaptation,
    snapshot integration, and assembler construction have all succeeded,
    immediately before `AssembleAsync` is called. A classifier or
@@ -290,7 +359,10 @@ Event sequencing (per assembly attempt, enforced by
      if that later revalidation fails; or
    - `HarnessContextCompactionTerminatedEvent` — reported immediately before
      `HarnessCompactionIrreducibleException` is thrown for either termination
-     outcome (`Irreducible` or `ConcurrentMutationLimit`).
+     outcome (`Irreducible` or `ConcurrentMutationLimit`). The exception
+     itself carries only the outcome, final estimated size, and hard limit —
+     never the diagnostics instance — so the Terminated event is the only
+     caller-observable surface for that instance on termination.
    Exceptional failures during assembly (cancellation, binding invalidation,
    or reducer exception) propagate directly without masquerading as Completed
    or Terminated — no Terminated event is emitted for a non-structured failure.
@@ -300,6 +372,12 @@ Event sequencing (per assembly attempt, enforced by
    carries the identical `HarnessContextDiagnostics` instance as the
    preceding completed event and the `HarnessBoundedMessageAssembly`
    dispatch result. Never reported for a terminated attempt.
+
+Every event above carries the same `AssemblyId` generated in step 0 for this
+attempt, so two concurrently-running assemblies for the same agent/workflow
+remain independently pairable by `AssemblyId` despite their `SequenceNumber`s
+interleaving — see the "Per-assembly correlation (`AssemblyId`)" bullet below
+for the dedicated concurrency proof.
 
 No event of any kind is reported when the chat client was constructed with a
 `null` progress accessor — every `Report*` helper is a no-op in that case, and
@@ -429,6 +507,28 @@ genuine retry.
   irreducible attempt) event shares one strictly increasing `SequenceNumber`
   across all three reporter instances rather than each restarting its own
   counter.
+- **Per-assembly correlation (`AssemblyId`).** All four progress events also
+  carry a public `Guid AssemblyId`, generated exactly once per assembly
+  attempt at the same success gate that governs Started (immediately after
+  message adaptation, snapshot integration, and assembler construction all
+  succeed, immediately before Started is emitted) and threaded identically
+  onto every event this attempt ever reports — Started, whichever terminal
+  event follows, and Composed on success. `HarnessBoundedMessageAssembly`
+  (the internal dispatch result) also carries the same `AssemblyId` for the
+  successful attempt it describes. `WorkflowId`/`AgentId`/`SequenceNumber`
+  alone cannot pair events from two concurrently-running assemblies on the
+  same agent/workflow, because their `SequenceNumber`s can interleave;
+  `AssemblyId` is the opaque, privacy-safe correlation key that makes each
+  attempt's own lifecycle recoverable regardless of interleaving. Proven by:
+  normal-success tests (Started/Completed/Composed share one non-empty ID),
+  termination tests (Started/Terminated share one non-empty ID), the nested
+  root/child/grandchild tests (each of the three attempts keeps its own
+  distinct ID across all three reporter levels), and a dedicated concurrency
+  test in which two genuinely concurrent same-agent assemblies (run via
+  `Task.Run`, rendezvousing inside a shared upstream reducer so their
+  `SequenceNumber`s are provably interleaved) each produce their own distinct,
+  non-empty `AssemblyId` and each attempt's own Started/Completed/Composed
+  trio remains internally pairable and sequence-ordered.
 - **Binding-revalidation ordering.** A dedicated test pins the intentional
   split between Completed and Composed: when the trusted execution binding is
   invalidated in the window between a successful assembly decision and the
@@ -526,6 +626,17 @@ avoid a duplicate writer for the same underlying decision.
 | Diagnostics status | `Available` (this leaf) |
 | Delivery phase | `G5` |
 
+> **Diagnostics status footnote.** `DiagnosticsStatus.Available` records that
+> the progress/diagnostics *contract* is fully implemented for this
+> capability — the four progress events, the `HarnessContextDiagnostics`
+> snapshot, and the `HarnessContextAttribution` byte accounting all exist,
+> are wired through the existing accessor seam, and are covered by this
+> gate's tests. It does **not** assert that the `Compaction` capability
+> itself is activated, enabled by default, or ready for general use — that
+> remains governed independently by `Stability: Experimental` and
+> `DefaultEnabledInBundle: false` above, and any change to activation is a
+> separate, later public API decision, not implied by `DiagnosticsStatus`.
+
 Resolution matrix (`HarnessCapabilityProfileTests.cs`):
 
 | Requested | Accepted | Evidence through `G5`? | Resolved state |
@@ -594,6 +705,7 @@ for this specific capability — `Compatible` would overstate current evidence.
 $env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'
 dotnet build src\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj -c Debug
 dotnet build src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug
+dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~ChannelProgressReporterTests"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~HarnessContextObservabilityTests|FullyQualifiedName~HarnessContextDiagnosticsValidationTests"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~Harness"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug
@@ -601,27 +713,61 @@ dotnet build src\NexusLabs.Foundry.slnx -c Debug
 ```
 
 Results (final measurement against the complete cumulative leaf, including
-this direct-review pass):
+this isolated-review follow-up pass):
 
-- New/modified test classes in isolation: **26 passed, 0 failed.**
-  (13 observability tests + 13 diagnostics-validation tests)
-- Full Harness filter (`FullyQualifiedName~Harness`): **600 passed, 0 failed**
-  (+31 over the #101 baseline of 569; no regressions).
-- Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,169
-  passed, 0 failed** (+31 over the #101 baseline of 2,138; no regressions).
+- `ChannelProgressReporterTests` in isolation: **8 passed, 0 failed** (+2 over
+  this pass's own prior baseline of 6, for the new no-silent-drop and
+  enqueue-after-dispose tests). Also re-run 80 consecutive times in a loop
+  with no failures, to confirm the fix is not merely occasionally correct.
+- New/modified test classes in isolation
+  (`HarnessContextObservabilityTests` + `HarnessContextDiagnosticsValidationTests`):
+  **27 passed, 0 failed.** (14 observability tests, +1 over this pass's own
+  prior baseline of 13 for the new concurrent-`AssemblyId` test, + 13
+  diagnostics-validation tests, unchanged.) The new concurrency test was
+  additionally re-run 80 consecutive times in a loop (across two rounds, one
+  before and one after fixing a genuine test-harness race in the shared event
+  collector — see note below) with zero failures in the final round.
+- Full Harness filter (`FullyQualifiedName~Harness`): **601 passed, 0 failed**
+  (+1 over this document's prior recorded baseline of 600; no regressions).
+- Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,172
+  passed, 0 failed** (+3 over this document's prior recorded baseline of
+  2,169 — the 2 new `ChannelProgressReporterTests` plus the 1 new
+  `AssemblyId` concurrency test; no regressions).
 - Full `src` solution build (`dotnet build src\NexusLabs.Foundry.slnx -c Debug`):
-  succeeded, 0 errors, 4 pre-existing `CS0162` unreachable-code warnings in
-  unrelated example apps (`DagRoutingApp.Agents`, `GeneratorCoexistenceApp`,
-  `DevUIApp` twice) not touched by any change in this gate.
+  succeeded, 0 errors; pre-existing generated-code `CS0162` warnings in
+  unrelated example apps (`DagRoutingApp.Agents`,
+  `GeneratorCoexistenceApp`, `DevUIApp` twice) not touched by any change in
+  this gate or this follow-up pass.
+
+**Test-harness race found and fixed during this pass (not a product defect).**
+The new two-concurrent-assemblies test initially failed intermittently
+(roughly 1 run in 10–15) with a lower-than-expected Completed/Composed event
+count and no exception — never a hang, never the barrier-timeout path. Root
+cause: the test's own `CollectorSink` helper (private to
+`HarnessContextObservabilityTests.cs`) added incoming events to a plain
+`List<IProgressEvent>` with no synchronization, and `ProgressReporter.Report`
+dispatches to sinks synchronously on whichever thread calls `Report` — it does
+not itself serialize concurrent callers into one sink. Two genuinely
+concurrent `Task.Run`-based provider calls therefore raced on `List<T>.Add`
+from two real OS threads, occasionally losing an event with no exception,
+exactly matching the observed symptom. Fixed by adding a private lock around
+`events.Add` inside `CollectorSink` — a test-only change with no effect on
+any production type, and no effect on any other (sequential) test using the
+same helper. Confirmed via 80 consecutive loop runs of the full
+`HarnessContextObservabilityTests` class post-fix with zero failures, versus
+6 failures out of 60 pre-fix runs of the same loop.
 
 ## Validation status and next permitted gates
 
 - **Local:** complete — targeted new-test filters, full Harness filter, full
-  project test suite, and full solution build all pass with zero regressions.
+  project test suite, and full solution build all pass with zero regressions,
+  including this isolated-review follow-up pass's fixes.
 - **Review:** pending independent review.
 - **Hosted CI:** pending PR — hosted build/test/package, NativeAOT, Harness
   NativeAOT, and documentation checks have not yet run.
 - **Next permitted gates:** G6 (background agents, loop evaluation) and G7
   (test/AOT hardening, including the completed-run diagnostics aggregation
   this leaf explicitly deferred) per the dependency graph in `tasks.md`; G5
-  itself is now cumulatively complete pending review and hosted CI.
+  itself remains cumulatively complete pending review and hosted CI — this
+  follow-up pass changes only the evidence and wording above, not the gate's
+  provisional disposition.

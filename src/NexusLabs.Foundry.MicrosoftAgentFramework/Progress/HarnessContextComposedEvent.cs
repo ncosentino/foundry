@@ -18,6 +18,14 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 /// <param name="ParentAgentId">Parent agent ID for sub-agent runs, enabling tree reconstruction.</param>
 /// <param name="Depth">Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</param>
 /// <param name="SequenceNumber">Globally ordered sequence number for event ordering.</param>
+/// <param name="AssemblyId">
+/// The identical opaque per-assembly correlation ID carried by both the
+/// <see cref="HarnessContextCompactionStartedEvent"/> and the preceding
+/// <see cref="HarnessContextCompactionCompletedEvent"/> for this same attempt, so this Composed
+/// event remains pairable with the rest of its lifecycle even when other concurrently-running
+/// assemblies on the same agent interleave their own events' <see cref="SequenceNumber"/>s in
+/// between.
+/// </param>
 /// <param name="Diagnostics">
 /// The privacy-safe, structured evidence for this decision, identical to the instance carried by the
 /// preceding <see cref="HarnessContextCompactionCompletedEvent"/> for the same attempt.
@@ -29,4 +37,5 @@ public sealed record HarnessContextComposedEvent(
     string? ParentAgentId,
     int Depth,
     long SequenceNumber,
+    Guid AssemblyId,
     HarnessContextDiagnostics Diagnostics) : IProgressEvent;

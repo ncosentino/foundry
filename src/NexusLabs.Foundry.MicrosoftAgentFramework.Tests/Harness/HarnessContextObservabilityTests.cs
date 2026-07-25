@@ -53,6 +53,12 @@ public sealed class HarnessContextObservabilityTests
         Assert.Equal(HarnessContextMeasurementUnit.HostDefinedUnits, started.MeasurementUnit);
         Assert.Equal(1000, started.HardLimit);
         Assert.Equal(500, started.TriggerThreshold);
+
+        // Per-assembly correlation: all three events for one successful attempt share one
+        // non-empty AssemblyId.
+        Assert.NotEqual(Guid.Empty, started.AssemblyId);
+        Assert.Equal(started.AssemblyId, completed.AssemblyId);
+        Assert.Equal(started.AssemblyId, composed.AssemblyId);
     }
 
     [Fact]
@@ -152,6 +158,11 @@ public sealed class HarnessContextObservabilityTests
         Assert.Null(terminated.Diagnostics.FinalSequenceValid);
         Assert.Empty(terminated.Diagnostics.CategoryContributions);
         Assert.True(started.SequenceNumber < terminated.SequenceNumber);
+
+        // Per-assembly correlation: Started and Terminated for one terminated attempt share one
+        // non-empty AssemblyId.
+        Assert.NotEqual(Guid.Empty, started.AssemblyId);
+        Assert.Equal(started.AssemblyId, terminated.AssemblyId);
     }
 
     [Fact]
@@ -320,6 +331,19 @@ public sealed class HarnessContextObservabilityTests
         AssertRootChildGrandchildCorrelation(completedEvents);
         AssertRootChildGrandchildCorrelation(composedEvents);
 
+        // Nested correlation remains: each of the three independent, sequential attempts
+        // (root/child/grandchild) keeps its own AssemblyId consistent across its own
+        // Started/Completed/Composed, and no two of the three attempts ever share one.
+        for (var i = 0; i < 3; i++)
+        {
+            Assert.Equal(startedEvents[i].AssemblyId, completedEvents[i].AssemblyId);
+            Assert.Equal(startedEvents[i].AssemblyId, composedEvents[i].AssemblyId);
+        }
+
+        var distinctAssemblyIds = startedEvents.Select(e => e.AssemblyId).Distinct().ToList();
+        Assert.Equal(3, distinctAssemblyIds.Count);
+        Assert.DoesNotContain(Guid.Empty, distinctAssemblyIds);
+
         // Global sequence: every event across all three runs and all three event types shares one
         // monotonically increasing sequence, because every reporter (root/child/grandchild) shares
         // the same underlying ProgressSequenceProvider instance rather than each restarting its own
@@ -361,10 +385,130 @@ public sealed class HarnessContextObservabilityTests
         AssertRootChildGrandchildCorrelation(startedEvents);
         AssertRootChildGrandchildCorrelation(terminatedEvents);
 
+        // Nested correlation remains for terminated attempts too: each attempt's Started and
+        // Terminated share one AssemblyId, and the three attempts never share one with each other.
+        for (var i = 0; i < 3; i++)
+        {
+            Assert.Equal(startedEvents[i].AssemblyId, terminatedEvents[i].AssemblyId);
+        }
+
+        var distinctAssemblyIds = startedEvents.Select(e => e.AssemblyId).Distinct().ToList();
+        Assert.Equal(3, distinctAssemblyIds.Count);
+        Assert.DoesNotContain(Guid.Empty, distinctAssemblyIds);
+
         var sequenceNumbers = events.Select(e => e.SequenceNumber).ToList();
         Assert.Equal(sequenceNumbers.OrderBy(s => s), sequenceNumbers);
         Assert.Equal(sequenceNumbers.Distinct().Count(), sequenceNumbers.Count);
         Assert.All(events, e => Assert.Equal(rootReporter.WorkflowId, e.WorkflowId));
+    }
+
+    // ================================================================================
+    // Concurrency: two overlapping provider calls on the same agent/workflow must remain
+    // independently pairable via AssemblyId despite their SequenceNumbers interleaving.
+    // ================================================================================
+
+    [Fact]
+    public async Task TwoConcurrentSameAgentAssemblies_ProduceTwoDistinctAssemblyIds_EachLifecyclePairsCorrectlyDespiteInterleavedSequence()
+    {
+        var classifier = new HarnessScriptedMessageClassifier();
+
+        var call1Messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, "instructions call1"),
+            new(ChatRole.User, "old filler message call1"),
+            new(ChatRole.User, "recent message call1"),
+        };
+        var call2Messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, "instructions call2"),
+            new(ChatRole.User, "old filler message call2"),
+            new(ChatRole.User, "recent message call2"),
+        };
+
+        var sizes = new Dictionary<string, int>();
+        foreach (var messages in new[] { call1Messages, call2Messages })
+        {
+            sizes[classifier.ResolveEntryId(messages[0], 0, messages)] = 30;
+            sizes[classifier.ResolveEntryId(messages[1], 1, messages)] = 90;
+            sizes[classifier.ResolveEntryId(messages[2], 2, messages)] = 20;
+        }
+
+        var policy = HarnessCompactionTestFixture.CreatePolicy(100, 10, 1, 2, new HarnessFixedSizeContextEstimator(sizes));
+
+        // Both concurrent calls' reducer invocations rendezvous here before either is allowed to
+        // return, guaranteeing that call 2's Started event is reported (which happens before its
+        // reducer ever runs) while call 1 is still mid-attempt — i.e. genuinely interleaved
+        // SequenceNumbers, not two assemblies that merely happen to run back-to-back.
+        var reducerRendezvous = new Barrier(2);
+        var reducer = new HarnessScriptedUpstreamChatReducer((msgs, _) =>
+        {
+            reducerRendezvous.SignalAndWait(TimeSpan.FromSeconds(10));
+            return Task.FromResult(msgs.Where(m => m.Text?.Contains("old filler message") != true));
+        });
+
+        var (accessor, reporter, events) = CreateProgressHarness();
+        var hybridProfile = HarnessHybridProfile.Create(
+            policy,
+            reducer,
+            classifier,
+            baselineEntries => new HarnessMutableContextSnapshotProvider(baselineEntries));
+
+        var leaf = new HarnessCompactionObservingChatClient("unused");
+        var accessorCtx = new AgentExecutionContextAccessor();
+        var binding = HarnessCompositionTestFixture.CaptureBinding(accessorCtx, out var scope);
+        using (scope)
+        {
+            var client = new HarnessHybridCompactionChatClient(
+                leaf, hybridProfile, binding, accessorCtx, HarnessCompositionTestFixture.SessionId,
+                runCoordinator: null, accessor);
+
+            using (accessor.BeginScope(reporter))
+            {
+                var task1 = Task.Run(() => client.GetResponseAsync(
+                    call1Messages, cancellationToken: TestContext.Current.CancellationToken));
+                var task2 = Task.Run(() => client.GetResponseAsync(
+                    call2Messages, cancellationToken: TestContext.Current.CancellationToken));
+
+                await Task.WhenAll(task1, task2);
+            }
+        }
+
+        var startedEvents = events.OfType<HarnessContextCompactionStartedEvent>().ToList();
+        var completedEvents = events.OfType<HarnessContextCompactionCompletedEvent>().ToList();
+        var composedEvents = events.OfType<HarnessContextComposedEvent>().ToList();
+        Assert.Equal(2, startedEvents.Count);
+        Assert.Equal(2, completedEvents.Count);
+        Assert.Equal(2, composedEvents.Count);
+        Assert.Empty(events.OfType<HarnessContextCompactionTerminatedEvent>());
+
+        // Two distinct, non-empty AssemblyIds — one per concurrent attempt.
+        var assemblyIds = startedEvents.Select(e => e.AssemblyId).ToList();
+        Assert.Equal(2, assemblyIds.Distinct().Count());
+        Assert.DoesNotContain(Guid.Empty, assemblyIds);
+
+        // Each attempt's own Started/Completed/Composed trio shares its own AssemblyId.
+        foreach (var assemblyId in assemblyIds)
+        {
+            var ownStarted = Assert.Single(startedEvents, e => e.AssemblyId == assemblyId);
+            var ownCompleted = Assert.Single(completedEvents, e => e.AssemblyId == assemblyId);
+            var ownComposed = Assert.Single(composedEvents, e => e.AssemblyId == assemblyId);
+
+            Assert.True(ownStarted.SequenceNumber < ownCompleted.SequenceNumber);
+            Assert.True(ownCompleted.SequenceNumber < ownComposed.SequenceNumber);
+        }
+
+        // Genuine interleaving, not two back-to-back attempts: the later-starting attempt's
+        // Started event has a SequenceNumber that falls strictly between the earlier attempt's own
+        // Started and Completed — proving the two lifecycles actually overlapped in time — while
+        // each attempt's AssemblyId still correctly pairs its own three events despite that
+        // interleaving.
+        var orderedByStart = startedEvents.OrderBy(e => e.SequenceNumber).ToList();
+        var earlierStarted = orderedByStart[0];
+        var laterStarted = orderedByStart[1];
+        var earlierCompleted = Assert.Single(completedEvents, e => e.AssemblyId == earlierStarted.AssemblyId);
+
+        Assert.True(earlierStarted.SequenceNumber < laterStarted.SequenceNumber);
+        Assert.True(laterStarted.SequenceNumber < earlierCompleted.SequenceNumber);
     }
 
     private static void AssertRootChildGrandchildCorrelation(IReadOnlyList<IProgressEvent> orderedEvents)
@@ -760,9 +904,22 @@ public sealed class HarnessContextObservabilityTests
 
     private sealed class CollectorSink(List<IProgressEvent> events) : IProgressSink
     {
+        // Genuinely concurrent provider calls (see
+        // TwoConcurrentSameAgentAssemblies_...) invoke Report from multiple threads at once, and
+        // ProgressReporter.Report dispatches to sinks synchronously on whichever thread called it —
+        // it does not itself serialize concurrent calls into a single sink. A plain List<T>.Add is
+        // not thread-safe, so without this lock, concurrent adds can silently lose events (no
+        // exception, just a shorter list), which is a test-harness race, not a product defect. The
+        // lock only ever guards this in-memory test collector, never anything under test.
+        private readonly object gate = new();
+
         public ValueTask OnEventAsync(IProgressEvent progressEvent, CancellationToken cancellationToken)
         {
-            events.Add(progressEvent);
+            lock (gate)
+            {
+                events.Add(progressEvent);
+            }
+
             return ValueTask.CompletedTask;
         }
     }

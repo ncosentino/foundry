@@ -147,7 +147,14 @@ success, or a terminated event on termination, never both) are reported; a
 context-composed/ready-for-dispatch event, carrying the identical diagnostics
 instance as the completed event, is reported only on success and only after
 the same post-assembly trust revalidation that already guards every dispatch —
-never for a terminated attempt. Exceptional failures before assembly begins
+never for a terminated attempt. A single opaque `AssemblyId` (a `Guid`) is
+generated exactly once per attempt, at that same success gate immediately
+before the started event is emitted, and is threaded identically onto the
+started event, whichever terminal event follows, and the composed event on
+success — so every event this attempt ever reports carries the same
+`AssemblyId`, letting two concurrently-running assemblies for the same
+agent/workflow remain pairable by that ID despite their `SequenceNumber`s
+interleaving. Exceptional failures before assembly begins
 (classifier exception, snapshot-construction failure) propagate directly
 without emitting any event; exceptional failures during assembly (cancellation,
 binding invalidation, reducer exception) propagate without masquerading as
@@ -251,8 +258,18 @@ provider on every subsequent nested call within the same run.
   silently discarded.
 - Every assembly decision — success or termination — is inspectable through
   a categorical, privacy-safe snapshot without ever exposing conversation
-  content, and the identical instance is observable from both the internal
-  result and the corresponding progress event.
+  content. On success, the identical diagnostics instance is shared by the
+  internal dispatch result (`HarnessBoundedMessageAssembly.Diagnostics`), the
+  completed event, and the composed event. On termination, the diagnostics
+  snapshot is built from the internal terminating assembly result and carried
+  by the terminated event, but no caller-visible internal result exists to
+  compare it against — the thrown `HarnessCompactionIrreducibleException`
+  carries only the outcome, final estimated size, and hard limit, never the
+  diagnostics instance itself. Every attempt's four possible progress events
+  (started, and whichever of completed/composed or terminated follow) also
+  carry one opaque `AssemblyId` generated once per attempt, so two
+  concurrently-running assemblies for the same agent/workflow remain
+  independently pairable despite their `SequenceNumber`s interleaving.
 - The observability contract adds no ambient singleton, optional parameter,
   or public runtime configuration, consistent with ADR-0006's precedent.
 
