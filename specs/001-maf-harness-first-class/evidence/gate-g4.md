@@ -3,8 +3,8 @@
 ## Decision
 
 **PASS FOR THE CUMULATIVE G4 WORKSPACE-AUTHORITY SLICE, INCLUDING THIS LEAF'S
-OFFLOAD/REHYDRATION OBSERVABILITY WORK — PENDING HOSTED CI CONFIRMATION, AS
-NO PR EXISTS YET FOR THIS LEAF.**
+OFFLOAD/REHYDRATION OBSERVABILITY WORK — PENDING HOSTED CI CONFIRMATION ON
+PR #96.**
 
 Gate G4 delivers, and this document approves as a single cumulative record,
 the workspace bridge and eager tool-result offload/rehydration mechanism
@@ -54,22 +54,19 @@ Cumulative history on top of the G3 foundation gate (`gate-g3.md`):
 | Workspace-backed `AgentFileStore` bridge | `67452df0` | [#93](https://github.com/ncosentino/foundry/pull/93) | 40 | 210 | 1,779 |
 | Artifact references and rehydration | `ded50c63` | [#94](https://github.com/ncosentino/foundry/pull/94) | 47 | 257 | 1,826 |
 | Eager tool-result offload | `ccc88654` | [#95](https://github.com/ncosentino/foundry/pull/95) | 19 | 276 | 1,845 |
-| **Offload/rehydration observability (current leaf)** | *(uncommitted)* | *(none yet)* | 29 | **305** | **1,874** |
+| **Offload/rehydration observability (current leaf)** | `a569c67f` | [#96](https://github.com/ncosentino/foundry/pull/96) | 29 | **305** | **1,874** |
 
-- Current leaf implementation head: uncommitted working-tree changes on
+- Current leaf implementation head: `a569c67f` on
   `harness/g4-observability`, based on `ccc88654` (PR #95).
 - Per-PR new-test counts above are measured from actual `dotnet test`
   cumulative Harness-filter deltas at each commit (using a disposable
   `git worktree` checkout per commit, discarded afterward), not counted from
   source `[Fact]`/`[Theory]` attribute occurrences, so `[Theory]` cases with
   multiple `[InlineData]` rows are represented accurately.
-- **No commit, push, or pull request has been made for the current leaf**,
-  per explicit instruction. All of this leaf's changes remain local and
-  uncommitted on `harness/g4-observability`. Hosted CI evidence for PRs
+- The current leaf is published as PR #96. Hosted CI evidence for PRs
   #92-#95 already exists from their own merges; hosted evidence for this
-  leaf is necessarily pending until it is committed and opened as its own
-  PR, at which point the parent gate record should be refreshed with the
-  resulting run links.
+  leaf remains pending and this gate record must be refreshed with the
+  resulting run links before the gate is finalized.
 - All `dotnet build`/`dotnet test` commands for this leaf were run with
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'` set.
 
@@ -448,8 +445,8 @@ Results:
 Per-PR new-test and cumulative counts in the "Evidence identity" table above
 were independently re-measured for this gate document via disposable `git
 worktree` checkouts of `25d6e581`, `67452df0`, `ded50c63`, and `ccc88654`
-(each removed immediately after measurement; the primary working tree and its
-uncommitted current-leaf changes were never touched by this process).
+(each removed immediately after measurement; the primary working tree was
+never used for those historical measurements).
 
 ## Accepted review fixes applied to this leaf
 
@@ -487,9 +484,8 @@ the following fixes before this gate document was finalized:
    `OffloadDiagnostics_AcrossEveryOutcome_...` to
    `OffloadDiagnostics_OffloadedOutcome_...` because the test body only ever
    exercises the `Offloaded` outcome, not every outcome.
-5. **Gate wording.** This document's Decision heading now states the PASS is
-   pending hosted CI confirmation, since no PR/hosted run exists yet for this
-   leaf (see "Review disposition" below).
+5. **Gate wording.** This document's Decision heading states that the PASS is
+   pending hosted CI confirmation on PR #96 (see "Review disposition" below).
 6. **Comment cleanup.** Removed task/gate-ID references (`T020`, `T041`,
    `T050`, `T052`, `T053`, `G4`, `G5`) and implementation-chronology framing
    from XML docs/comments in every `Harness/Context` artifact class and
@@ -505,9 +501,11 @@ the following fixes before this gate document was finalized:
 ## Review disposition
 
 - Author self-review: complete (this document).
-- Peer/maintainer review: **pending** — no PR exists yet for this leaf.
+- Independent AI correctness and architecture review: complete; both blocking
+  findings were adopted and revalidated locally.
+- GitHub maintainer review: pending on PR #96.
 - Hosted CI (build/test/package, standard NativeAOT, Harness NativeAOT,
-  documentation): **pending this leaf's own PR.** PRs #92-#95's own hosted
+  documentation): **pending PR #96.** PRs #92-#95's own hosted
   runs already passed at their respective merges; this leaf's hosted
   evidence will be produced when it is committed and opened, and this gate
   record should be refreshed with the resulting run links at that time.
