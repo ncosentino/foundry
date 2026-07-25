@@ -72,9 +72,12 @@ Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
   project deltas, and this final evidence pass's own +8 / +8 deltas, were each
   measured directly against the current working tree via `dotnet test`, not
   estimated from source occurrences.
-- Final reviewed G5 integration head: `0435b89f` on
+- Final reviewed G5 integration head: `c0240a1c` on
   `harness/g5-integration`; the observability/gate leaf merged through
-  [PR #102](https://github.com/ncosentino/foundry/pull/102).
+  [PR #102](https://github.com/ncosentino/foundry/pull/102), the initial final
+  evidence refresh through [PR #104](https://github.com/ncosentino/foundry/pull/104),
+  and the concurrency-blocker fix through
+  [PR #106](https://github.com/ncosentino/foundry/pull/106).
 - The compaction/context-composition observability leaf's 32 new Harness tests
   break down as:
   - 14 in `HarnessContextObservabilityTests.cs`, covering success/termination
@@ -871,13 +874,11 @@ evidence pass):
   completed; all blocking findings — including the concurrency blocker
   documented above — were adopted and revalidated.
 - **Hosted CI:** passed:
-  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30172506501/job/89715857468),
-  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30172506501/job/89715857423),
-  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30172506498/job/89715857331),
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30174782948/job/89721699167),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30174782948/job/89721699193),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30174782929/job/89721699143),
   and
-  [documentation](https://github.com/ncosentino/foundry/actions/runs/30172506492/job/89715857562).
-  These hosted runs predate this final concurrency-blocker-fix evidence pass
-  and will be replaced only if this PR reruns hosted CI.
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30174782947/job/89721699383).
 - **Next permitted gates:** G6 (background agents, loop evaluation) and G7
   (test/AOT hardening, including the completed-run diagnostics aggregation
   this leaf explicitly deferred, and optionally genuine producer-side flow
