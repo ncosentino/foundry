@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Optional Microsoft Agent Framework Harness bundle integration for NexusLabs.Foundry.MicrosoftAgentFramework. Constructs the official upstream complete-bundle HarnessAgent pipeline (Microsoft.Agents.AI.Harness) from explicit Foundry configuration, and reports requested-versus-effective bundle defaults. This package is optional: the core NexusLabs.Foundry.MicrosoftAgentFramework package never references it, and no other Foundry package gains it transitively.</PackageDescription>
+    <!-- Microsoft.Agents.AI.Harness 1.15.0 marks the entire HarnessAgentOptions/AgentFileStore
+         surface as experimental (MAAI001). This package's entire purpose is to compose the
+         official upstream complete-bundle pipeline, so consuming that surface is intentional and
+         load-bearing rather than incidental. -->
+    <NoWarn>$(NoWarn);MAAI001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI.Harness" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+  </ItemGroup>
+
+</Project>

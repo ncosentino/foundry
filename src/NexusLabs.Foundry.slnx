@@ -51,6 +51,8 @@
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Generators.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Generators.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Generators/NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests.csproj" />
+  <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Harness/NexusLabs.Foundry.MicrosoftAgentFramework.Harness.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Testing/NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows/NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
