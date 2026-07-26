@@ -101,7 +101,8 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <remarks>
     /// <para>
     /// Required (together with <see cref="MaxOutputTokens"/>) when
-    /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/>.
+    /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/> and
+    /// <see cref="CompactionStrategy"/> is <see langword="null"/>. Must be positive when provided.
     /// </para>
     /// <para>
     /// Must be <see langword="null"/> when <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/>
@@ -109,6 +110,8 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <c>HarnessAgentOptions.DisableCompaction</c> is <see langword="true"/>. Foundry rejects that
     /// no-op configuration so an explicitly supplied context-window budget is never silently
     /// discarded.
+    /// Must also be <see langword="null"/> when <see cref="CompactionStrategy"/> is supplied because
+    /// upstream uses that strategy directly and ignores this budget.
     /// <see cref="MaxOutputTokens"/> alone is still permitted as an independent per-response
     /// output cap when compaction is disabled; it does not trigger the reducer.
     /// </para>
@@ -121,8 +124,10 @@ public sealed record FoundryHarnessAgentConfiguration
     /// </summary>
     /// <remarks>
     /// Required (together with <see cref="MaxContextWindowTokens"/>) when
-    /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/>.
-    /// May also be supplied when compaction is disabled as a standalone per-response output cap.
+    /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/> and
+    /// <see cref="CompactionStrategy"/> is <see langword="null"/>. Must be non-negative when
+    /// provided. May also be supplied when compaction is disabled or an explicit strategy is used
+    /// as a standalone per-response output cap.
     /// Upstream propagates this value to <c>ChatOptions.MaxOutputTokens</c> while
     /// <c>DisableCompaction</c> prevents chat reduction.
     /// </remarks>
@@ -205,9 +210,9 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <c>HarnessAgentOptions.CompactionStrategy</c>), or <see langword="null"/> to let the upstream
     /// bundle construct a default <c>ContextWindowCompactionStrategy</c> from
     /// <see cref="MaxContextWindowTokens"/> and <see cref="MaxOutputTokens"/>. When a strategy is
-    /// supplied here, those two token budgets are no longer required for compaction purposes (the
-    /// strategy is used directly), though <see cref="MaxOutputTokens"/> may still separately apply
-    /// as the chat options' default output-token cap. Only meaningful when
+    /// supplied here, <see cref="MaxContextWindowTokens"/> must be <see langword="null"/> because
+    /// upstream ignores it. <see cref="MaxOutputTokens"/> may still separately apply as the chat
+    /// options' default output-token cap. Only meaningful when
     /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/>; the
     /// factory fails closed if this is supplied while that feature is disabled.
     /// </summary>

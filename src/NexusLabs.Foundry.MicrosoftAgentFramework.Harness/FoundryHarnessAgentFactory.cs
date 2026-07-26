@@ -197,23 +197,12 @@ public sealed class FoundryHarnessAgentFactory
                 "FoundryHarnessAgentConfiguration.MaxContextWindowTokens must be positive when provided.");
         }
 
-        if (configuration.MaxOutputTokens is { } maxOut && maxOut <= 0)
+        if (configuration.MaxOutputTokens is { } maxOut && maxOut < 0)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(configuration),
                 configuration.MaxOutputTokens,
-                "FoundryHarnessAgentConfiguration.MaxOutputTokens must be positive when provided.");
-        }
-
-        if (configuration.MaxContextWindowTokens is { } ctx &&
-            configuration.MaxOutputTokens is { } output &&
-            output >= ctx)
-        {
-            throw new ArgumentException(
-                "FoundryHarnessAgentConfiguration.MaxContextWindowTokens must be greater than " +
-                "MaxOutputTokens. The upstream bundle requires MaxOutputTokens < " +
-                "MaxContextWindowTokens to reserve context space for the function-invocation loop.",
-                nameof(configuration));
+                "FoundryHarnessAgentConfiguration.MaxOutputTokens must be non-negative when provided.");
         }
 
         // Reject a compaction-only input that upstream would silently ignore.
@@ -225,6 +214,30 @@ public sealed class FoundryHarnessAgentFactory
                 "compaction-specific budget when DisableCompaction is true. Pass null for " +
                 "MaxContextWindowTokens when compaction is disabled. MaxOutputTokens alone may " +
                 "still be supplied as a standalone per-response output cap.",
+                nameof(configuration));
+        }
+
+        if (configuration.CompactionStrategy is not null &&
+            configuration.MaxContextWindowTokens is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.MaxContextWindowTokens was supplied together " +
+                "with CompactionStrategy. The upstream bundle uses the explicit strategy directly " +
+                "and ignores this context-window budget. Pass null for MaxContextWindowTokens when " +
+                "supplying CompactionStrategy. MaxOutputTokens may still be supplied separately as " +
+                "a per-response output cap.",
+                nameof(configuration));
+        }
+
+        if (configuration.CompactionStrategy is null &&
+            configuration.MaxContextWindowTokens is { } ctx &&
+            configuration.MaxOutputTokens is { } output &&
+            output >= ctx)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.MaxContextWindowTokens must be greater than " +
+                "MaxOutputTokens. The upstream bundle requires MaxOutputTokens < " +
+                "MaxContextWindowTokens to reserve context space for the function-invocation loop.",
                 nameof(configuration));
         }
 

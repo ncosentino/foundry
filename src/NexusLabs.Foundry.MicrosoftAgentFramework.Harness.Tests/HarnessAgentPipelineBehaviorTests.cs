@@ -300,14 +300,17 @@ public sealed class HarnessAgentPipelineBehaviorTests
         Assert.Equal(GetExpectedBuiltInToolNames(feature), actualToolNames);
     }
 
-    [Fact]
-    public async Task Run_MaxOutputTokensOnly_PropagatesToProviderChatOptions()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1_234)]
+    public async Task Run_MaxOutputTokensOnly_PropagatesToProviderChatOptions(
+        int maxOutputTokens)
     {
         var chatClient = new FakeHarnessChatClient();
         var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
         {
             ChatClient = chatClient,
-            MaxOutputTokens = 1_234,
+            MaxOutputTokens = maxOutputTokens,
         };
         var agent = Factory.Create(configuration);
 
@@ -315,7 +318,7 @@ public sealed class HarnessAgentPipelineBehaviorTests
             "run",
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(1_234, chatClient.LastOptions?.MaxOutputTokens);
+        Assert.Equal(maxOutputTokens, chatClient.LastOptions?.MaxOutputTokens);
     }
 
     private static IReadOnlyList<string> GetExpectedBuiltInToolNames(

@@ -76,11 +76,11 @@ public sealed record FoundryHarnessFeatureSelections
     public required bool EnableAgentModeProvider { get; init; }
 
     /// <summary>
-    /// Gets whether in-loop context-window compaction is enabled. Upstream default: <b>disabled</b>
-    /// (this dimension is opt-in, unlike every other property on this type). When <see langword="true"/>,
-    /// <see cref="FoundryHarnessAgentConfiguration.MaxContextWindowTokens"/> and
-    /// <see cref="FoundryHarnessAgentConfiguration.MaxOutputTokens"/> must both be supplied; the
-    /// factory fails closed otherwise rather than silently leaving compaction disabled.
+    /// Gets whether in-loop context-window compaction is enabled. The upstream disable flag defaults
+    /// to <see langword="false"/>, but compaction is effectively inert until either an explicit
+    /// <see cref="FoundryHarnessAgentConfiguration.CompactionStrategy"/> or both token budgets are
+    /// supplied. Foundry therefore treats this dimension as explicit opt-in and fails closed when an
+    /// enabled configuration supplies neither valid backing form.
     /// </summary>
     public required bool EnableCompaction { get; init; }
 }

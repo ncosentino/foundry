@@ -109,6 +109,23 @@ public sealed class FoundryHarnessAgentFactoryTests
     }
 
     [Fact]
+    public void Create_CompactionStrategyWithMaxContextWindowTokens_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableCompaction = true }) with
+        {
+            MaxContextWindowTokens = 8_000,
+            CompactionStrategy = new Microsoft.Agents.AI.Compaction.ContextWindowCompactionStrategy(
+                8_000, 1_000),
+        };
+
+        var exception = Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+
+        Assert.Contains("MaxContextWindowTokens", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("CompactionStrategy", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Create_WebSearchEnabledWithCollidingToolName_ThrowsArgumentException()
     {
         var configuration = HarnessBundleTestsHelpers.CreateBaseline(
@@ -535,14 +552,12 @@ public sealed class FoundryHarnessAgentFactoryTests
         Assert.Throws<ArgumentOutOfRangeException>(() => Factory.Create(configuration));
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Create_MaxOutputTokensNotPositive_ThrowsArgumentOutOfRangeException(int value)
+    [Fact]
+    public void Create_MaxOutputTokensNegative_ThrowsArgumentOutOfRangeException()
     {
         var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
         {
-            MaxOutputTokens = value,
+            MaxOutputTokens = -1,
         };
 
         Assert.Throws<ArgumentOutOfRangeException>(() => Factory.Create(configuration));
@@ -564,7 +579,8 @@ public sealed class FoundryHarnessAgentFactoryTests
     [Fact]
     public void Create_MaxOutputTokensEqualToMaxContextWindowTokens_ThrowsArgumentException()
     {
-        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableCompaction = true }) with
         {
             MaxContextWindowTokens = 1_000,
             MaxOutputTokens = 1_000,
@@ -576,7 +592,8 @@ public sealed class FoundryHarnessAgentFactoryTests
     [Fact]
     public void Create_MaxOutputTokensGreaterThanMaxContextWindowTokens_ThrowsArgumentException()
     {
-        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableCompaction = true }) with
         {
             MaxContextWindowTokens = 1_000,
             MaxOutputTokens = 2_000,
