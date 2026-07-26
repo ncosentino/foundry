@@ -22,6 +22,7 @@ $expectedPackageIds = @(
     'NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers',
     'NexusLabs.Foundry.MicrosoftAgentFramework.DevUI',
     'NexusLabs.Foundry.MicrosoftAgentFramework.Generators',
+    'NexusLabs.Foundry.MicrosoftAgentFramework.Harness',
     'NexusLabs.Foundry.MicrosoftAgentFramework.Testing',
     'NexusLabs.Foundry.MicrosoftAgentFramework.Workflows',
     'NexusLabs.Foundry.Needlr.MicrosoftAgentFramework',
@@ -242,6 +243,9 @@ Assert-Dependency $packagesById `
 Assert-Dependency $packagesById `
     'NexusLabs.Foundry.MicrosoftAgentFramework' `
     'OpenTelemetry.Api'
+Assert-Dependency $packagesById `
+    'NexusLabs.Foundry.MicrosoftAgentFramework.Harness' `
+    'Microsoft.Agents.AI.Harness'
 
 if ($failures.Count -gt 0) {
     Write-Host 'Package validation failed:' -ForegroundColor Red
