@@ -126,3 +126,44 @@ jobs:
         with:
           name: foundry-aot-linux-x64
           path: artifacts/aot/AotAgentFrameworkApp
+
+  aot-harness:
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install NativeAOT dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev file
+
+      - name: Publish generated-tool Harness NativeAOT app
+        env:
+          GITHUB_ENV: /tmp/discard-aot-harness-env
+          GITHUB_OUTPUT: /tmp/discard-aot-harness-output
+          GITHUB_STEP_SUMMARY: /tmp/discard-aot-harness-summary
+        run: |
+          dotnet publish src/Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained \
+            --output artifacts/aot-harness
+
+      - name: Execute generated-tool Harness NativeAOT app
+        run: |
+          test -f artifacts/aot-harness/AotHarnessApp
+          file artifacts/aot-harness/AotHarnessApp
+          artifacts/aot-harness/AotHarnessApp
+
+      - name: Upload Harness NativeAOT artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-aot-harness-linux-x64
+          path: artifacts/aot-harness/AotHarnessApp
