@@ -25,6 +25,10 @@
     <lastmod>2026-07-26</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/</loc>
     <lastmod>2026-07-26</lastmod>
   </url>
@@ -1650,6 +1654,46 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/StageTermination.MaxIterationsReached/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessEffectiveDefaults/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessFeatureEffectiveState/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessFeatureRequestedState/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessFeature/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessFeatureDisposition/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessAgentConfiguration/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessFeatureSelections/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessAgentFactory/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/FoundryHarnessFeatureBackingSelection/</loc>
+    <lastmod>2026-07-26</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework.Harness/NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle/</loc>
     <lastmod>2026-07-26</lastmod>
   </url>
   <url>
