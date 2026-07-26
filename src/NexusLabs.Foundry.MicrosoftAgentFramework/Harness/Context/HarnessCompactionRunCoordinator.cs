@@ -57,6 +57,25 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// <see cref="Harness.HarnessSessionEnvelope"/>, never persisted through any workspace or session store,
 /// and always resets to empty for every new outer run started via <see cref="BeginRun"/>.
 /// </para>
+/// <para>
+/// <strong>Same-run provider-call admission gate.</strong> Beyond the reservation/lease protocol above
+/// — which decides <em>which</em> caller may forward a given digest — <see cref="EnterProviderCallAsync"/>
+/// admits at most one nested provider call, from assembly through real provider dispatch, per outer run
+/// scope at a time. <see cref="Harness.Context.HarnessHybridCompactionChatClient"/> acquires this gate
+/// immediately after establishing its run scope and holds it until the real provider call (or stream) it
+/// gates has itself finished and this node's own commit/release decision has been made, so a second
+/// nested call within the very same outer run can never even begin assembling — let alone dispatching —
+/// while a sibling reservation from an earlier call in that run remains unresolved. This closes the
+/// narrow window the reservation/lease protocol alone cannot: two calls racing arbitrarily far into
+/// their own assembly before either reserves anything. The per-digest revision logic
+/// (<see cref="GetRevision"/>) remains in place as defense-in-depth for legitimate state changes observed
+/// across sequential captures within one still-gated call, or by direct/standalone callers of this
+/// coordinator that bypass <see cref="Harness.Context.HarnessHybridCompactionChatClient"/> entirely (as
+/// several tests in this codebase deliberately do to prove that logic in isolation). The gate lives on
+/// <see cref="RunState"/> exactly like every other piece of tracked state, so two different outer runs —
+/// distinct <see cref="AsyncLocal{T}"/>-scoped <see cref="RunState"/> instances — always have their own,
+/// entirely independent gate and therefore remain fully concurrent with each other.
+/// </para>
 /// </remarks>
 internal sealed class HarnessCompactionRunCoordinator
 {
@@ -91,6 +110,48 @@ internal sealed class HarnessCompactionRunCoordinator
         _current.Value is not null
             ? NoOpScope.Instance
             : BeginRun();
+
+    /// <summary>
+    /// Admits the caller into the single same-run provider-call slot, asynchronously waiting if another
+    /// nested call within the currently active run scope is already admitted. Returns a disposable
+    /// releaser that must be disposed exactly once — typically via <see langword="using"/> — to vacate
+    /// the slot for the next waiter, only once assembly, the real provider call/stream, and this node's
+    /// own commit/release decision have all finished. Because the gate lives on the run-scoped
+    /// <see cref="RunState"/>, two different outer runs (distinct <see cref="AsyncLocal{T}"/>-scoped
+    /// <see cref="RunState"/> instances) always have independent gates and therefore never block one
+    /// another; only nested calls sharing the exact same run scope are ever serialized here. Throws when
+    /// no run scope is active on this call flow, for the same reason as every other lease-lifecycle
+    /// operation on this type.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">No run scope is active on this call flow.</exception>
+    /// <exception cref="OperationCanceledException">
+    /// <paramref name="cancellationToken"/> was canceled while waiting for the slot. No reservation is
+    /// created and the slot is left exactly as if this call had never been made — a canceled waiter never
+    /// acquires, and therefore never needs to release, the gate.
+    /// </exception>
+    internal async Task<IDisposable> EnterProviderCallAsync(CancellationToken cancellationToken)
+    {
+        // Checked before touching any state, exactly like the entry-point checkpoint in
+        // HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync: a pre-canceled token must
+        // throw the exact same OperationCanceledException type a mid-wait cancellation does (rather
+        // than the TaskCanceledException a pre-canceled SemaphoreSlim.WaitAsync would otherwise
+        // surface), so callers observe one consistent cancellation exception type regardless of
+        // whether the token was already canceled or was canceled while this call was waiting.
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var state = _current.Value;
+        if (state is null)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(EnterProviderCallAsync)} requires an active run scope. Establish one via " +
+                $"{nameof(EnsureRunScope)} or {nameof(BeginRun)} before invoking any lease-lifecycle " +
+                "operation. Every legitimate path through this coordinator always establishes a scope " +
+                "first; the absence of a scope is a caller contract violation.");
+        }
+
+        await state.ProviderCallGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        return new ProviderCallReleaser(state.ProviderCallGate);
+    }
 
     /// <summary>
     /// Atomically reserves <paramref name="digest"/> for <paramref name="leaseId"/> within the currently
@@ -318,6 +379,34 @@ internal sealed class HarnessCompactionRunCoordinator
         /// holding <see cref="Sync"/>; <see cref="GetRevision"/> is the only external reader.
         /// </summary>
         internal Dictionary<string, long> Revisions { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>
+        /// Admits exactly one nested provider call — assembly through real provider dispatch — at a
+        /// time within this run. <see cref="EnterProviderCallAsync"/> is the sole acquirer;
+        /// <see cref="ProviderCallReleaser"/> is the sole releaser. Scoped to this <see cref="RunState"/>
+        /// instance (never static, never shared across runs) so two different outer runs never
+        /// contend with one another.
+        /// </summary>
+        internal SemaphoreSlim ProviderCallGate { get; } = new(1, 1);
+    }
+
+    /// <summary>
+    /// Disposable releaser returned by <see cref="EnterProviderCallAsync"/>. Releases
+    /// <paramref name="gate"/> exactly once, no matter how many times <see cref="Dispose"/> is called,
+    /// so a defensive double-dispose (e.g. an explicit call followed by a <see langword="using"/>
+    /// block's implicit one) never over-releases the semaphore.
+    /// </summary>
+    private sealed class ProviderCallReleaser(SemaphoreSlim gate) : IDisposable
+    {
+        private int _released;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _released, 1) == 0)
+            {
+                gate.Release();
+            }
+        }
     }
 
     private sealed class RunScope(HarnessCompactionRunCoordinator owner, RunState? previous) : IDisposable

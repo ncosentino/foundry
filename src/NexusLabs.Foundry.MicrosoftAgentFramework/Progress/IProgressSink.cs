@@ -24,8 +24,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 /// </para>
 /// <para>
 /// <strong>Performance:</strong> Implementations should be fast — a slow sink delays
-/// the agent pipeline. Use <c>ChannelProgressReporter</c> for non-blocking delivery
-/// when sinks perform I/O.
+/// the agent pipeline. Use <c>ChannelProgressReporter</c> to decouple production from
+/// consumption while channel capacity is available; under sustained saturation it applies
+/// bounded backpressure to the caller rather than buffering unboundedly.
 /// </para>
 /// </remarks>
 /// <example>
@@ -45,7 +46,8 @@ public interface IProgressSink
 {
     /// <summary>
     /// Called for each progress event. Implementations should be fast — a slow sink
-    /// delays the agent pipeline (use <c>ChannelProgressReporter</c> for non-blocking delivery).
+    /// delays the agent pipeline (use <c>ChannelProgressReporter</c> to decouple production from
+    /// consumption while capacity is available; it backpressures the caller once saturated).
     /// </summary>
     ValueTask OnEventAsync(IProgressEvent progressEvent, CancellationToken cancellationToken);
 }
