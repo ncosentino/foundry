@@ -44,6 +44,13 @@ Add the workflow, generator, analyzer, provider, or Needlr integration packages
 that match your application. See [Getting Started](docs/getting-started.md) for
 the recommended package combinations.
 
+Use the optional complete Microsoft Agent Framework Harness bundle only when
+you want its batteries-included pipeline:
+
+```powershell
+dotnet add package NexusLabs.Foundry.MicrosoftAgentFramework.Harness --version 0.1.0-alpha-0001
+```
+
 ## Why Foundry?
 
 AI prototypes are easy to start and difficult to operate. Foundry focuses on
@@ -67,6 +74,7 @@ the parts that become important after the first successful prompt:
 | Package | Purpose |
 |---|---|
 | `NexusLabs.Foundry.MicrosoftAgentFramework` | Agent construction, context, diagnostics, progress, workspace, and topology declarations |
+| `NexusLabs.Foundry.MicrosoftAgentFramework.Harness` | Optional official MAF Harness bundle with explicit defaults, generated-tool ingress, and Foundry progress |
 | `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` | Sequential, handoff, group-chat, and graph workflow execution |
 | `NexusLabs.Foundry.MicrosoftAgentFramework.Testing` | Deterministic agent and workflow testing |
 | `NexusLabs.Foundry.MicrosoftAgentFramework.DevUI` | Microsoft Agent Framework DevUI integration |
@@ -121,6 +129,7 @@ NativeAOT.
 
 - [Documentation source](docs/index.md)
 - [Agent Framework integrations and workflows](docs/ai-integrations.md)
+- [Microsoft Agent Framework Harness](docs/maf-harness.md)
 - [Provider-neutral experiment runner](docs/experiment-runner.md)
 - [Langfuse integration](docs/langfuse.md)
 - [Testing tools](docs/testing-tools.md)
@@ -132,7 +141,7 @@ The public documentation target is
 
 ## Examples
 
-The solution includes 30 compile-validated example projects under
+The solution includes 33 compile-validated example projects under
 [`src/Examples`](src/Examples):
 
 - generated agents and functions;
@@ -140,7 +149,8 @@ The solution includes 30 compile-validated example projects under
 - iterative loops, progress dashboards, diagnostics, and token metrics;
 - provider-neutral experiments, MEAI Reporting, and Langfuse;
 - GitHub Copilot and Semantic Kernel integrations;
-- NativeAOT and generator-coexistence checks.
+- complete-bundle and selected-provider Harness examples;
+- NativeAOT publish-and-execute and generator-coexistence checks.
 
 ## Build from source
 

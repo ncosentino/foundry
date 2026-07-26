@@ -53,6 +53,7 @@ nav:
       - Overview: guides/index.md
   - Agent Framework:
       - Integrations and Workflows: ai-integrations.md
+      - MAF Harness: maf-harness.md
       - Agent Functions: agent-functions.md
       - Iterative Agent Loop: iterative-agent-loop.md
       - Workspace: workspace.md
@@ -114,6 +115,9 @@ nav:
       - ADR-0003 Provider-Neutral Experiment Runner: adr/adr-0003-provider-neutral-experiment-runner.md
       - ADR-0004 Extract AI Platform from Needlr: adr/adr-0004-extract-ai-platform-from-needlr.md
       - ADR-0005 First-Class MAF Harness Integration: adr/adr-0005-first-class-maf-harness-integration.md
+      - ADR-0006 Hybrid Context and Workspace Authority: adr/adr-0006-hybrid-context-and-workspace-authority.md
+      - ADR-0007 Experimental Hybrid Context Compaction: adr/adr-0007-experimental-hybrid-context-compaction.md
+      - ADR-0008 Optional Harness Bundle: adr/adr-0008-optional-harness-bundle.md
 
 plugins:
   - search
