@@ -29,7 +29,6 @@ public sealed class HarnessScenarioRunnerTests
     {
         using var services = CreateServices();
         var accessor = services.GetRequiredService<IAgentExecutionContextAccessor>();
-        var capture = services.GetRequiredService<HarnessBundleGeneratedToolCapture>();
         var runner = new HarnessScenarioRunner(services, accessor);
         var scenario = new HarnessRunnerTestScenario(
             [typeof(HarnessBundleGeneratedTool)],
@@ -45,7 +44,7 @@ public sealed class HarnessScenarioRunnerTests
         Assert.Equal("bundle-complete", result.ResponseText);
         Assert.Equal(["Record"], result.ResolvedGeneratedToolNames);
         Assert.Equal(["Record"], result.ExecutedToolNames);
-        Assert.Equal("generated-value", capture.Value);
+        Assert.Equal("generated-value", scenario.ScopedCapture?.Value);
         Assert.True(result.Workspace.FileExists("seed.txt"));
         Assert.Equal(1, scenario.CreateAgentCallCount);
         Assert.NotNull(scenario.AgentContext);
@@ -98,6 +97,54 @@ public sealed class HarnessScenarioRunnerTests
         Assert.Equal(0, scenario.CreateAgentCallCount);
     }
 
+    [Fact]
+    public async Task RunAsync_RepeatedGeneratedType_IsResolvedOnce()
+    {
+        using var services = CreateServices();
+        var runner = new HarnessScenarioRunner(
+            services,
+            services.GetRequiredService<IAgentExecutionContextAccessor>());
+        var scenario = new HarnessRunnerTestScenario(
+            [
+                typeof(HarnessBundleGeneratedTool),
+                typeof(HarnessBundleGeneratedTool),
+            ],
+            failBaseVerification: false,
+            failHarnessVerification: false);
+
+        var result = await runner.RunAsync(
+            scenario,
+            TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(["Record"], result.ResolvedGeneratedToolNames);
+        Assert.Equal(["Record"], result.ExecutedToolNames);
+    }
+
+    [Fact]
+    public async Task RunAsync_UsesPerRunServiceScopeForGeneratedTools()
+    {
+        using var services = CreateServices();
+        var rootCapture = services.GetRequiredService<HarnessBundleGeneratedToolCapture>();
+        rootCapture.Value = "root-poison";
+        var runner = new HarnessScenarioRunner(
+            services,
+            services.GetRequiredService<IAgentExecutionContextAccessor>());
+        var scenario = new HarnessRunnerTestScenario(
+            [typeof(HarnessBundleGeneratedTool)],
+            failBaseVerification: false,
+            failHarnessVerification: false);
+
+        var result = await runner.RunAsync(
+            scenario,
+            TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal("root-poison", rootCapture.Value);
+        Assert.NotSame(rootCapture, scenario.ScopedCapture);
+        Assert.Equal("generated-value", scenario.ScopedCapture?.Value);
+    }
+
     [Theory]
     [InlineData(true, false)]
     [InlineData(false, true)]
@@ -126,7 +173,7 @@ public sealed class HarnessScenarioRunnerTests
     private static ServiceProvider CreateServices() =>
         new ServiceCollection()
             .AddFoundryAgentFramework()
-            .AddSingleton<HarnessBundleGeneratedToolCapture>()
+            .AddScoped<HarnessBundleGeneratedToolCapture>()
             .AddTransient<HarnessBundleGeneratedTool>()
             .AddTransient<HarnessBundleDuplicateGeneratedTool>()
             .BuildServiceProvider();

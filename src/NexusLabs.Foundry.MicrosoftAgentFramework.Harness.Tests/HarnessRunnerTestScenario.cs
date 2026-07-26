@@ -23,6 +23,8 @@ internal sealed class HarnessRunnerTestScenario(
 
     internal HarnessScenarioVerificationContext? VerificationContext { get; private set; }
 
+    internal HarnessBundleGeneratedToolCapture? ScopedCapture { get; private set; }
+
     public string Name => "runner-test";
 
     public string Description => "Exercises the reusable Harness scenario runner.";
@@ -42,6 +44,7 @@ internal sealed class HarnessRunnerTestScenario(
     {
         CreateAgentCallCount++;
         AgentContext = context;
+        ScopedCapture = context.Services.GetRequiredService<HarnessBundleGeneratedToolCapture>();
         var accessor = context.Services.GetRequiredService<IAgentExecutionContextAccessor>();
         var current = accessor.Current
             ?? throw new InvalidOperationException("The execution context was not active during agent creation.");

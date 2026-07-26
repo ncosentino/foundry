@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workspace;
@@ -58,6 +59,11 @@ public sealed class HarnessScenarioRunner
     /// <exception cref="HarnessScenarioToolResolutionException">
     /// Generated functions are unavailable, missing, or duplicated.
     /// </exception>
+    /// <remarks>
+    /// Construction, session, execution, and cancellation exceptions are captured in
+    /// <see cref="HarnessScenarioRunResult.ExecutionError"/> so verification receives the same
+    /// failure evidence as the existing <see cref="AgentScenarioRunner"/>.
+    /// </remarks>
     public async Task<HarnessScenarioRunResult> RunAsync(
         IHarnessScenario scenario,
         CancellationToken cancellationToken)
@@ -66,9 +72,20 @@ public sealed class HarnessScenarioRunner
         ArgumentException.ThrowIfNullOrWhiteSpace(scenario.Name);
         ArgumentNullException.ThrowIfNull(scenario.GeneratedFunctionTypes);
 
-        var generatedTools = ResolveGeneratedTools(scenario.GeneratedFunctionTypes);
+        using var serviceScope = _services.GetService<IServiceScopeFactory>()?.CreateScope();
+        var runServices = serviceScope?.ServiceProvider ?? _services;
+        var generatedTools = ResolveGeneratedTools(
+            scenario.GeneratedFunctionTypes,
+            runServices);
         var resolvedToolNames = generatedTools
             .Select(function => function.Name)
+            .ToArray();
+        var executedToolNames = new ConcurrentQueue<string>();
+        var trackingTools = generatedTools
+            .Select(function => new HarnessScenarioTrackingAIFunction(
+                function,
+                executedToolNames))
+            .Cast<AIFunction>()
             .ToArray();
         var workspace = new InMemoryWorkspace();
         scenario.SeedWorkspace(workspace);
@@ -86,7 +103,6 @@ public sealed class HarnessScenarioRunner
         AgentSession? session = null;
         string? responseText = null;
         Exception? executionError = null;
-        var executedToolNames = new ConcurrentQueue<string>();
         AIAgent? agent = null;
 
         using (_contextAccessor.BeginScope(executionContext))
@@ -98,16 +114,15 @@ public sealed class HarnessScenarioRunner
                     userId,
                     orchestrationId,
                     sessionId,
-                    _services,
+                    runServices,
                     workspace,
-                    generatedTools));
+                    trackingTools));
                 if (agent is null)
                 {
                     throw new InvalidOperationException(
                         $"Harness scenario '{scenario.Name}' returned a null agent.");
                 }
 
-                ChainToolExecutionCapture(agent, executedToolNames);
                 session = await agent
                     .CreateSessionAsync(cancellationToken)
                     .ConfigureAwait(false);
@@ -181,7 +196,8 @@ public sealed class HarnessScenarioRunner
     }
 
     private IReadOnlyList<AIFunction> ResolveGeneratedTools(
-        IReadOnlyList<Type> functionTypes)
+        IReadOnlyList<Type> functionTypes,
+        IServiceProvider resolutionServices)
     {
         if (!AgentFrameworkGeneratedBootstrap.TryGetAIFunctionProvider(out var provider))
         {
@@ -192,11 +208,14 @@ public sealed class HarnessScenarioRunner
                 duplicateToolNames: []);
         }
 
+        var distinctFunctionTypes = functionTypes
+            .Distinct()
+            .ToArray();
         var functions = new List<AIFunction>();
         var missingTypes = new List<Type>();
-        for (int index = 0; index < functionTypes.Count; index++)
+        for (int index = 0; index < distinctFunctionTypes.Length; index++)
         {
-            var functionType = functionTypes[index];
+            var functionType = distinctFunctionTypes[index];
             if (functionType is null)
             {
                 throw new ArgumentException(
@@ -206,7 +225,7 @@ public sealed class HarnessScenarioRunner
 
             if (!provider.TryGetFunctions(
                 functionType,
-                _services,
+                resolutionServices,
                 out var resolvedFunctions))
             {
                 missingTypes.Add(functionType);
@@ -241,30 +260,5 @@ public sealed class HarnessScenarioRunner
         }
 
         return functions.AsReadOnly();
-    }
-
-    private static void ChainToolExecutionCapture(
-        AIAgent agent,
-        ConcurrentQueue<string> executedToolNames)
-    {
-        var functionInvokingChatClient = agent.GetService<FunctionInvokingChatClient>();
-        if (functionInvokingChatClient is null)
-        {
-            throw new InvalidOperationException(
-                "The scenario agent did not expose a FunctionInvokingChatClient. " +
-                "Harness tool execution cannot be observed without taking loop ownership.");
-        }
-
-        var existingFunctionInvoker = functionInvokingChatClient.FunctionInvoker;
-        functionInvokingChatClient.FunctionInvoker = async (context, cancellationToken) =>
-        {
-            executedToolNames.Enqueue(context.Function.Name);
-            return existingFunctionInvoker is null
-                ? await context.Function
-                    .InvokeAsync(context.Arguments, cancellationToken)
-                    .ConfigureAwait(false)
-                : await existingFunctionInvoker(context, cancellationToken)
-                    .ConfigureAwait(false);
-        };
     }
 }
