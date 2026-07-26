@@ -216,18 +216,15 @@ public sealed class FoundryHarnessAgentFactory
                 nameof(configuration));
         }
 
-        // Reserve the context-window budget for enabled compaction so the disabled disposition
-        // cannot approach the upstream history provider's independent reducer activation path.
+        // Reject a compaction-only input that upstream would silently ignore.
         if (!configuration.Features.EnableCompaction && configuration.MaxContextWindowTokens is not null)
         {
             throw new ArgumentException(
                 "FoundryHarnessAgentConfiguration.MaxContextWindowTokens was supplied while " +
-                "Features.EnableCompaction is false. This context-window budget is reserved for " +
-                "enabled compaction because the upstream default InMemoryChatHistoryProvider " +
-                "constructs a reducer when both token budgets are present, independently of " +
-                "DisableCompaction. Pass null for MaxContextWindowTokens when compaction is " +
-                "disabled. MaxOutputTokens alone may still be supplied as a standalone " +
-                "per-response output cap.",
+                "Features.EnableCompaction is false. The upstream bundle ignores this " +
+                "compaction-specific budget when DisableCompaction is true. Pass null for " +
+                "MaxContextWindowTokens when compaction is disabled. MaxOutputTokens alone may " +
+                "still be supplied as a standalone per-response output cap.",
                 nameof(configuration));
         }
 
@@ -273,15 +270,22 @@ public sealed class FoundryHarnessAgentFactory
                 nameof(configuration));
         }
 
-        if (configuration.Features.EnableWebSearch &&
-            configuration.Tools.Any(tool => string.Equals(tool.Name, WebSearchToolName, StringComparison.Ordinal)))
+        var callerToolNames = configuration.Tools
+            .Select(tool => tool.Name)
+            .ToHashSet(StringComparer.Ordinal);
+        var builtInToolNameCollisions = EnumerateEnabledBuiltInToolNames(configuration)
+            .Where(callerToolNames.Contains)
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+        if (builtInToolNameCollisions.Count > 0)
         {
             throw new ArgumentException(
-                "FoundryHarnessAgentConfiguration.Tools contains a tool named " +
-                $"'{WebSearchToolName}' while FoundryHarnessFeatureSelections.EnableWebSearch is true. " +
-                "The upstream bundle adds its own hosted web search tool under this exact name when " +
-                "web search is enabled, and a caller-supplied tool with the same name would collide " +
-                "with it. Either rename the caller-supplied tool or set EnableWebSearch to false.",
+                "FoundryHarnessAgentConfiguration.Tools collides with enabled upstream built-in " +
+                $"provider tool names: {string.Join(", ", builtInToolNameCollisions)}. " +
+                "Caller tools would silently shadow the built-in implementations because upstream " +
+                "tool dispatch uses the first matching name. Rename the caller tools or disable " +
+                "the corresponding built-in providers.",
                 nameof(configuration));
         }
 
@@ -405,6 +409,59 @@ public sealed class FoundryHarnessAgentFactory
                 "FoundryHarnessFeatureSelections.EnableOpenTelemetry: if true it would duplicate " +
                 "telemetry; if false the requested disabled state would be ineffective because " +
                 "the pre-existing instrumentation remains active.");
+        }
+    }
+
+    private static IEnumerable<string> EnumerateEnabledBuiltInToolNames(
+        FoundryHarnessAgentConfiguration configuration)
+    {
+        if (configuration.Features.EnableWebSearch)
+        {
+            yield return WebSearchToolName;
+        }
+
+        if (configuration.Features.EnableTodoProvider)
+        {
+            yield return "todos_add";
+            yield return "todos_complete";
+            yield return "todos_remove";
+            yield return "todos_get_remaining";
+            yield return "todos_get_all";
+        }
+
+        if (configuration.Features.EnableAgentModeProvider)
+        {
+            yield return "mode_set";
+            yield return "mode_get";
+        }
+
+        if (configuration.Features.EnableFileMemory)
+        {
+            yield return "file_memory_write";
+            yield return "file_memory_read";
+            yield return "file_memory_delete";
+            yield return "file_memory_ls";
+            yield return "file_memory_grep";
+            yield return "file_memory_replace";
+            yield return "file_memory_replace_lines";
+        }
+
+        if (configuration.FileAccessStore is not null)
+        {
+            yield return "file_access_read";
+            yield return "file_access_ls";
+            yield return "file_access_grep";
+            yield return "file_access_write";
+            yield return "file_access_delete";
+            yield return "file_access_replace";
+            yield return "file_access_replace_lines";
+        }
+
+        if (configuration.Features.EnableAgentSkills)
+        {
+            yield return "load_skill";
+            yield return "read_skill_resource";
+            yield return "run_skill_script";
         }
     }
 }

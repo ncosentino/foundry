@@ -10,11 +10,16 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// </summary>
 internal sealed class FakeHarnessChatClient : IChatClient
 {
+    internal ChatOptions? LastOptions { get; private set; }
+
     Task<ChatResponse> IChatClient.GetResponseAsync(
         IEnumerable<ChatMessage> chatMessages,
         ChatOptions? options,
-        CancellationToken cancellationToken) =>
-        Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "fake-response")));
+        CancellationToken cancellationToken)
+    {
+        LastOptions = options;
+        return Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "fake-response")));
+    }
 
     IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
         IEnumerable<ChatMessage> chatMessages,

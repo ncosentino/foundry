@@ -63,10 +63,12 @@ public sealed record FoundryHarnessAgentConfiguration
     /// </summary>
     /// <remarks>
     /// This must be a "raw" selected-provider chat client. <see cref="FoundryHarnessAgentFactory"/>
-    /// fails closed if it already carries a function-invocation loop, message-injection
-    /// middleware, or OpenTelemetry instrumentation (regardless of
-    /// <see cref="FoundryHarnessFeatureSelections.EnableOpenTelemetry"/>), because the upstream
-    /// bundle must own the complete pipeline itself.
+    /// rejects function-invocation, message-injection, and OpenTelemetry middleware that is
+    /// discoverable through <see cref="IChatClient.GetService(Type, object?)"/>, following the
+    /// forwarding convention implemented by <c>DelegatingChatClient</c>. The <see cref="IChatClient"/>
+    /// contract does not require wrappers to forward service discovery, so opaque wrappers can
+    /// defeat this check. Callers remain responsible for supplying an undecorated client; this
+    /// validation catches common accidental double-wrapping and is not a security boundary.
     /// </remarks>
     public required IChatClient ChatClient { get; init; }
 
@@ -80,7 +82,10 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <c>NexusLabs.Foundry.MicrosoftAgentFramework</c>) must resolve their generated
     /// <see cref="AIFunction"/> instances explicitly and include them in this list; this
     /// configuration type intentionally performs no reflection-based or generated-tool discovery
-    /// of its own. Duplicate tool names cause <see cref="FoundryHarnessAgentFactory"/> to fail closed.
+    /// of its own. Duplicate caller tool names and collisions with enabled, known upstream built-in
+    /// provider tools cause <see cref="FoundryHarnessAgentFactory"/> to fail closed. Additional
+    /// caller-supplied <see cref="AIContextProvider"/> instances can inject tools dynamically; their
+    /// names are outside the factory's control and must not collide with this list or each other.
     /// </remarks>
     public required IReadOnlyList<AITool> Tools { get; init; }
 
@@ -100,13 +105,10 @@ public sealed record FoundryHarnessAgentConfiguration
     /// </para>
     /// <para>
     /// Must be <see langword="null"/> when <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/>
-    /// is <see langword="false"/>. The upstream default <c>InMemoryChatHistoryProvider</c>
-    /// constructs a compaction reducer when both <see cref="MaxContextWindowTokens"/> and
-    /// <see cref="MaxOutputTokens"/> are present, independently of
-    /// <c>HarnessAgentOptions.DisableCompaction</c>. Supplying a context-window budget while
-    /// compaction is disabled would leave a compaction-specific budget configured even though
-    /// compaction was explicitly disabled. Foundry rejects that ambiguous combination so the
-    /// disabled disposition cannot approach the upstream reducer-activation condition.
+    /// is <see langword="false"/>. Upstream ignores this value when
+    /// <c>HarnessAgentOptions.DisableCompaction</c> is <see langword="true"/>. Foundry rejects that
+    /// no-op configuration so an explicitly supplied context-window budget is never silently
+    /// discarded.
     /// <see cref="MaxOutputTokens"/> alone is still permitted as an independent per-response
     /// output cap when compaction is disabled; it does not trigger the reducer.
     /// </para>
@@ -120,9 +122,9 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <remarks>
     /// Required (together with <see cref="MaxContextWindowTokens"/>) when
     /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/>.
-    /// May also be supplied when compaction is disabled as a standalone per-response output
-    /// cap, without triggering the upstream default history provider's compaction reducer (which
-    /// only activates when both token budgets are present).
+    /// May also be supplied when compaction is disabled as a standalone per-response output cap.
+    /// Upstream propagates this value to <c>ChatOptions.MaxOutputTokens</c> while
+    /// <c>DisableCompaction</c> prevents chat reduction.
     /// </remarks>
     public required int? MaxOutputTokens { get; init; }
 
@@ -151,13 +153,11 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <summary>
     /// Gets the <see cref="ChatHistoryProvider"/> backing history persistence (mapped to
     /// <c>HarnessAgentOptions.ChatHistoryProvider</c>), or <see langword="null"/> to use the
-    /// upstream default: an <c>InMemoryChatHistoryProvider</c>, configured with a compaction-based
-    /// chat reducer only when both <see cref="MaxContextWindowTokens"/> and
-    /// <see cref="MaxOutputTokens"/> are supplied. Under Foundry validation,
-    /// <see cref="MaxContextWindowTokens"/> is rejected when
-    /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="false"/>,
-    /// so the default provider only has a reducer when compaction is explicitly enabled with both
-    /// token budgets; there is no hidden reducer when compaction is disabled.
+    /// upstream default: an <c>InMemoryChatHistoryProvider</c>. When compaction is enabled, the
+    /// default provider uses a compaction-based chat reducer backed by either
+    /// <see cref="CompactionStrategy"/> or the strategy constructed from
+    /// <see cref="MaxContextWindowTokens"/> and <see cref="MaxOutputTokens"/>. When compaction is
+    /// disabled, upstream configures the default provider without chat reduction.
     /// </summary>
     public required ChatHistoryProvider? ChatHistoryProvider { get; init; }
 

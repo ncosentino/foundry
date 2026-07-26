@@ -273,4 +273,98 @@ public sealed class HarnessAgentPipelineBehaviorTests
 
         Assert.NotNull(agent.GetService<FunctionInvokingChatClient>());
     }
+
+    [Theory]
+    [InlineData(FoundryHarnessFeature.WebSearch)]
+    [InlineData(FoundryHarnessFeature.TodoProvider)]
+    [InlineData(FoundryHarnessFeature.AgentModeProvider)]
+    [InlineData(FoundryHarnessFeature.FileMemory)]
+    [InlineData(FoundryHarnessFeature.FileAccess)]
+    [InlineData(FoundryHarnessFeature.AgentSkills)]
+    public async Task Run_EnabledBuiltInProviderInjectsExpectedToolNames(
+        FoundryHarnessFeature feature)
+    {
+        var chatClient = new FakeHarnessChatClient();
+        var configuration = HarnessBundleTestsHelpers.CreateWithBuiltInToolProvider(feature, chatClient);
+        var agent = Factory.Create(configuration);
+
+        await agent.RunAsync(
+            "run",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var actualToolNames = chatClient.LastOptions?.Tools?
+            .Select(tool => tool.Name)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Equal(GetExpectedBuiltInToolNames(feature), actualToolNames);
+    }
+
+    [Fact]
+    public async Task Run_MaxOutputTokensOnly_PropagatesToProviderChatOptions()
+    {
+        var chatClient = new FakeHarnessChatClient();
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            ChatClient = chatClient,
+            MaxOutputTokens = 1_234,
+        };
+        var agent = Factory.Create(configuration);
+
+        await agent.RunAsync(
+            "run",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(1_234, chatClient.LastOptions?.MaxOutputTokens);
+    }
+
+    private static IReadOnlyList<string> GetExpectedBuiltInToolNames(
+        FoundryHarnessFeature feature) =>
+        feature switch
+        {
+            FoundryHarnessFeature.WebSearch =>
+            [
+                "web_search",
+            ],
+            FoundryHarnessFeature.TodoProvider =>
+            [
+                "todos_add",
+                "todos_complete",
+                "todos_get_all",
+                "todos_get_remaining",
+                "todos_remove",
+            ],
+            FoundryHarnessFeature.AgentModeProvider =>
+            [
+                "mode_get",
+                "mode_set",
+            ],
+            FoundryHarnessFeature.FileMemory =>
+            [
+                "file_memory_delete",
+                "file_memory_grep",
+                "file_memory_ls",
+                "file_memory_read",
+                "file_memory_replace",
+                "file_memory_replace_lines",
+                "file_memory_write",
+            ],
+            FoundryHarnessFeature.FileAccess =>
+            [
+                "file_access_delete",
+                "file_access_grep",
+                "file_access_ls",
+                "file_access_read",
+                "file_access_replace",
+                "file_access_replace_lines",
+                "file_access_write",
+            ],
+            FoundryHarnessFeature.AgentSkills =>
+            [
+                "load_skill",
+                "read_skill_resource",
+                "run_skill_script",
+            ],
+            _ => throw new ArgumentOutOfRangeException(nameof(feature), feature, null),
+        };
 }

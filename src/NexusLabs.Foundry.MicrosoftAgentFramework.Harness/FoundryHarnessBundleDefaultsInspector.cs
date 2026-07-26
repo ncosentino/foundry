@@ -73,20 +73,22 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
         bool callerSupplied = configuration.ChatHistoryProvider is not null;
         bool hasBothTokenBudgets =
             configuration.MaxContextWindowTokens is not null && configuration.MaxOutputTokens is not null;
+        bool usesExplicitCompactionStrategy =
+            configuration.Features.EnableCompaction && configuration.CompactionStrategy is not null;
+        bool usesBudgetCompactionStrategy =
+            configuration.Features.EnableCompaction && !usesExplicitCompactionStrategy && hasBothTokenBudgets;
 
         string backingDescription = callerSupplied
             ? "Caller-supplied ChatHistoryProvider instance is used directly."
-            : hasBothTokenBudgets
+            : usesExplicitCompactionStrategy
                 ? "Upstream default: InMemoryChatHistoryProvider, configured with a compaction-based " +
-                  "chat reducer because both MaxContextWindowTokens and MaxOutputTokens are supplied. " +
-                  "Under Foundry validation, MaxContextWindowTokens is rejected when " +
-                  "Features.EnableCompaction is false, so a reducer is only present here when " +
-                  "compaction is explicitly enabled with both token budgets; there is no hidden " +
-                  "reducer when compaction is disabled."
-                : "Upstream default: InMemoryChatHistoryProvider, no in-loop compaction configured. " +
-                  "MaxContextWindowTokens was not supplied; the upstream default provider only " +
-                  "activates compaction when both MaxContextWindowTokens and MaxOutputTokens are " +
-                  "present.";
+                  "chat reducer backed by the caller-supplied CompactionStrategy."
+                : usesBudgetCompactionStrategy
+                    ? "Upstream default: InMemoryChatHistoryProvider, configured with a compaction-based " +
+                      "chat reducer backed by the ContextWindowCompactionStrategy constructed from " +
+                      "MaxContextWindowTokens and MaxOutputTokens."
+                    : "Upstream default: InMemoryChatHistoryProvider without chat reduction because " +
+                      "compaction is disabled.";
 
         return FoundryHarnessFeatureDisposition.Create(
             FoundryHarnessFeature.HistoryPersistence,

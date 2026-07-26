@@ -149,6 +149,64 @@ public sealed class FoundryHarnessAgentFactoryTests
         Assert.NotNull(agent);
     }
 
+    [Theory]
+    [InlineData(FoundryHarnessFeature.TodoProvider, "todos_add")]
+    [InlineData(FoundryHarnessFeature.TodoProvider, "todos_complete")]
+    [InlineData(FoundryHarnessFeature.TodoProvider, "todos_remove")]
+    [InlineData(FoundryHarnessFeature.TodoProvider, "todos_get_remaining")]
+    [InlineData(FoundryHarnessFeature.TodoProvider, "todos_get_all")]
+    [InlineData(FoundryHarnessFeature.AgentModeProvider, "mode_set")]
+    [InlineData(FoundryHarnessFeature.AgentModeProvider, "mode_get")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_write")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_read")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_delete")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_ls")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_grep")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_replace")]
+    [InlineData(FoundryHarnessFeature.FileMemory, "file_memory_replace_lines")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_read")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_ls")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_grep")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_write")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_delete")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_replace")]
+    [InlineData(FoundryHarnessFeature.FileAccess, "file_access_replace_lines")]
+    [InlineData(FoundryHarnessFeature.AgentSkills, "load_skill")]
+    [InlineData(FoundryHarnessFeature.AgentSkills, "read_skill_resource")]
+    [InlineData(FoundryHarnessFeature.AgentSkills, "run_skill_script")]
+    public void Create_EnabledBuiltInProviderWithCollidingToolName_ThrowsArgumentException(
+        FoundryHarnessFeature feature,
+        string toolName)
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateWithBuiltInToolProvider(feature) with
+        {
+            Tools = [AIFunctionFactory.Create(() => "caller", name: toolName)],
+        };
+
+        var exception = Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+
+        Assert.Contains(toolName, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("todos_add")]
+    [InlineData("mode_set")]
+    [InlineData("file_memory_read")]
+    [InlineData("file_access_read")]
+    [InlineData("load_skill")]
+    public void Create_DisabledBuiltInProviderWithSameToolName_ReturnsAgent(string toolName)
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled()) with
+        {
+            Tools = [AIFunctionFactory.Create(() => "caller", name: toolName)],
+        };
+
+        var agent = Factory.Create(configuration);
+
+        Assert.NotNull(agent);
+    }
+
     [Fact]
     public void Create_FileMemoryStoreSuppliedWhileDisabled_ThrowsArgumentException()
     {

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.AI;
+
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
@@ -64,4 +66,39 @@ internal static class HarnessBundleTestsHelpers
             OpenTelemetrySourceName = null,
             AdditionalContextProviders = [],
         };
+
+    internal static FoundryHarnessAgentConfiguration CreateWithBuiltInToolProvider(
+        FoundryHarnessFeature feature,
+        IChatClient? chatClient = null)
+    {
+        var disabledFeatures = AllFeaturesDisabled();
+        var configuration = feature switch
+        {
+            FoundryHarnessFeature.WebSearch => CreateBaseline(
+                disabledFeatures with { EnableWebSearch = true }),
+            FoundryHarnessFeature.TodoProvider => CreateBaseline(
+                disabledFeatures with { EnableTodoProvider = true }),
+            FoundryHarnessFeature.AgentModeProvider => CreateBaseline(
+                disabledFeatures with { EnableAgentModeProvider = true }),
+            FoundryHarnessFeature.FileMemory => CreateBaseline(
+                disabledFeatures with { EnableFileMemory = true }) with
+                {
+                    FileMemoryStore = new InMemoryAgentFileStoreFake(),
+                },
+            FoundryHarnessFeature.FileAccess => CreateBaseline(disabledFeatures) with
+            {
+                FileAccessStore = new InMemoryAgentFileStoreFake(),
+            },
+            FoundryHarnessFeature.AgentSkills => CreateBaseline(
+                disabledFeatures with { EnableAgentSkills = true }) with
+                {
+                    AgentSkillsSource = new FakeAgentSkillsSource(),
+                },
+            _ => throw new ArgumentOutOfRangeException(nameof(feature), feature, null),
+        };
+
+        return chatClient is null
+            ? configuration
+            : configuration with { ChatClient = chatClient };
+    }
 }

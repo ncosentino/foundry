@@ -92,6 +92,24 @@ public sealed class HarnessBundleDefaultsTests
     }
 
     [Fact]
+    public void HistoryPersistence_CompactionEnabledWithExplicitStrategy_ReportsReducerInBackingDescription()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableCompaction = true }) with
+        {
+            CompactionStrategy = new Microsoft.Agents.AI.Compaction.ContextWindowCompactionStrategy(
+                8_000, 1_000),
+        };
+
+        var disposition = Factory.DescribeEffectiveDefaults(configuration)
+            .GetDisposition(FoundryHarnessFeature.HistoryPersistence);
+
+        Assert.Equal(FoundryHarnessFeatureBackingSelection.UpstreamDefault, disposition.BackingSelection);
+        Assert.Contains("reducer", disposition.BackingDescription!, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("caller-supplied", disposition.BackingDescription!, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void HistoryPersistence_CompactionDisabledWithOutputOnlyBudget_ReportsNoReducerInBackingDescription()
     {
         var configuration = HarnessBundleTestsHelpers.CreateBaseline(
