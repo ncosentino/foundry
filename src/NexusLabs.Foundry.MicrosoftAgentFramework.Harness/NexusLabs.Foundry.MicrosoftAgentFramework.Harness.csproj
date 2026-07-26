@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Optional Microsoft Agent Framework Harness bundle integration for NexusLabs.Foundry.MicrosoftAgentFramework. Constructs the official upstream complete-bundle HarnessAgent pipeline (Microsoft.Agents.AI.Harness) from explicit Foundry configuration, and reports requested-versus-effective bundle defaults. This package is optional: the core NexusLabs.Foundry.MicrosoftAgentFramework package never references it, and no other Foundry package gains it transitively.</PackageDescription>
+    <!-- Specific HarnessAgentOptions and AgentFileStore members consumed by this package carry
+         the MAAI001 experimental diagnostic in Microsoft.Agents.AI.Harness 1.15.0. Consuming
+         these members is intentional and load-bearing because this package's entire purpose is to
+         compose the official upstream complete-bundle pipeline. -->
+    <NoWarn>$(NoWarn);MAAI001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI.Harness" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests" />
+  </ItemGroup>
+
+  <!-- The core ProjectReference is load-bearing only for Foundry's public progress contracts.
+       Upstream Microsoft.Agents.AI.Harness remains the sole function-loop and OpenTelemetry owner;
+       the optional package does not consume core discovery, provider composition, or Needlr. -->
+
+</Project>
