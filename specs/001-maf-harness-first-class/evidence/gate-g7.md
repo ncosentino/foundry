@@ -2,8 +2,7 @@
 
 ## Decision
 
-**PROVISIONAL PASS for the cumulative G7 hardening slice. Final G7.4 hosted
-evidence is pending publication.**
+**PASS for the cumulative G7 hardening slice.**
 
 G7 promotes only evidence-backed profiles and documentation:
 
@@ -25,7 +24,11 @@ generator remains packaged through MSBuild's analyzer mechanism, and existing
 |---|---|---|---|
 | Scenario runner, parity, and NativeAOT proof | `0985a8c5` / PR #115 | 213 Harness tests, 69 generated-wrapper tests, 2,181 core tests, native binary execution | Merged |
 | Analyzer feasibility | `a1fec14a` / PR #116 | Candidate matrix, independent MAF and rubber-duck review | Merged; approve none |
-| Guidance, selected-provider example, and final gate | Current G7.4 branch | Docs/example/local validation | Hosted checks pending |
+| Guidance, selected-provider example, and final gate | `fb441486` / PR #117 | Docs, example execution, full local gate, hosted checks | Merged |
+
+Final G7 implementation integration head:
+`fb4414863cecbf3cdd7b83bde6d15c8c1f5387d2` on
+`harness/g7-integration`.
 
 Hosted PR #115 checks passed:
 
@@ -40,6 +43,14 @@ Hosted PR #116 checks passed:
 - [`aot`](https://github.com/ncosentino/foundry/actions/runs/30218032143/job/89835487774)
 - [`aot-harness`](https://github.com/ncosentino/foundry/actions/runs/30218032143/job/89835487707)
 - [`docs`](https://github.com/ncosentino/foundry/actions/runs/30218032141/job/89835487857)
+
+Hosted PR #117 checks passed:
+
+- [`build-test-pack`](https://github.com/ncosentino/foundry/actions/runs/30225561881/job/89855062357)
+- [`aot`](https://github.com/ncosentino/foundry/actions/runs/30225561881/job/89855062328)
+- [`aot-harness`](https://github.com/ncosentino/foundry/actions/runs/30225561881/job/89855062368)
+- [`harness-aot`](https://github.com/ncosentino/foundry/actions/runs/30225561931/job/89855062456)
+- [`docs`](https://github.com/ncosentino/foundry/actions/runs/30225561889/job/89855062434)
 
 All local .NET commands use
 `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'`.
@@ -169,11 +180,13 @@ presents iterative execution as the only valid answer to conversation growth.
   uncertainty evaluation remains G8.
 - Stable release and retention/deletion decisions remain G9.
 
-## Gate completion condition
+## Gate completion evidence
 
-Replace the provisional decision with a final PASS after the G7.4 PR:
-
-1. runs the selected-provider example;
-2. passes build/test/package, standard AOT, Harness AOT, and documentation jobs;
-3. records the merge commit and final G7 integration head; and
-4. closes issue #54 with that evidence.
+- `HarnessHybridApp` executed successfully with
+  `Compaction=Disabled`.
+- Build/test/package, standard AOT, new Harness AOT, legacy Harness AOT, and
+  documentation jobs passed.
+- PR #117 merged at
+  `fb4414863cecbf3cdd7b83bde6d15c8c1f5387d2`.
+- The public/internal profile, NativeAOT, and no-new-diagnostic dispositions are
+  recorded above.
