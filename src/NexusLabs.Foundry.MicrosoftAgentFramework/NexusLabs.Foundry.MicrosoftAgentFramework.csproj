@@ -18,6 +18,7 @@
     <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Tests" />
     <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.GeneratedWrapper.Tests" />
     <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
+    <InternalsVisibleTo Include="HarnessHybridApp" />
   </ItemGroup>
 
   <!-- Run Foundry generators and analyzers during source-mode development.
