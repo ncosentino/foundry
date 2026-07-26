@@ -21,22 +21,28 @@ together with this leaf's privacy-safe structured observability over it:
    cannot converge (`Irreducible`) or is destabilized by concurrent mutation
    until its attempt budget is exhausted (`ConcurrentMutationLimit`) throws
    rather than dispatching an over-budget or stale context.
-3. **One-shot rehydration delivery per outer run** — a non-retransmission
-   coordinator reserves a lease per digest per provider call so a rehydrated
-   body is delivered to the real provider at most once per outer run; a
-   nested or later call within the same run observes it filtered back out of
-   its own snapshot.
-4. **Compaction/context-composition observability (this leaf)** — a
-   privacy-safe `HarnessContextDiagnostics` snapshot and four public progress
-   events (started, completed, terminated, composed) reporting every
-   assembly attempt's outcome, sizes, stages, and final per-category
-   contribution, wired through the existing progress-reporter accessor seam
-   with no new ambient singleton and no optional parameter; an explicit
-   `HarnessContextMeasurementUnit` on every size estimator so no generic
-   integer is ever mislabeled as a provider token count; and a shared
-   `HarnessContextAttribution` UTF-8 byte snapshot riding along on the
-   existing `HarnessArtifactDiagnostics` contract for both offload and
-   rehydration decisions.
+3. **One-shot rehydration delivery per outer run, with atomic same-run
+   admission** — a non-retransmission coordinator reserves a lease per digest
+   per provider call so a rehydrated body is delivered to the real provider
+   at most once per outer run; a per-digest revision counter defends against
+   losing a recoverable body across sequential lease releases; and a
+   per-run provider-call admission gate makes concurrent same-run provider
+   dispatch structurally impossible, so two nested calls within one outer
+   run can never race each other into (or through) the real provider.
+4. **Compaction/context-composition observability** — a privacy-safe
+   `HarnessContextDiagnostics` snapshot and four public progress events
+   (started, completed, terminated, composed) reporting every assembly
+   attempt's outcome, sizes, stages, per-assembly correlation (`AssemblyId`),
+   and final per-category contribution, wired through the existing
+   progress-reporter accessor seam with no new ambient singleton and no
+   optional parameter; an explicit `HarnessContextMeasurementUnit` on every
+   size estimator so no generic integer is ever mislabeled as a provider
+   token count; and a shared `HarnessContextAttribution` UTF-8 byte snapshot
+   riding along on the existing `HarnessArtifactDiagnostics` contract for
+   both offload and rehydration decisions.
+5. **Bounded, backpressured progress delivery** — `ChannelProgressReporter`
+   applies genuine producer-side backpressure once its bounded channel
+   saturates, rather than accumulating an unbounded background write queue.
 
 `HarnessProviderComposition` remains the sole selected-provider composition
 root; `HarnessCompactionComposition` is invoked internally by it against the
@@ -48,7 +54,7 @@ gate and ADR-0007 are where that policy, and its observability, are decided.
 
 No public Harness runtime configuration/composition API is approved by this
 gate. The only public API surface introduced by this leaf is the
-observability contract: six enums, three records (`HarnessContextDiagnostics`,
+observability contract: four enums, three records (`HarnessContextDiagnostics`,
 `HarnessContextCategoryContribution`, `HarnessContextAttribution`), and four
 `IProgressEvent` records. Every compaction mechanism, request, result,
 policy, and status type — including the estimator interface itself — remains
@@ -56,7 +62,7 @@ policy, and status type — including the estimator interface itself — remains
 
 ## Evidence identity
 
-Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
+Cumulative test counts on top of the G4 foundation gate (`gate-g4.md`):
 
 | Item | Cumulative Harness tests | Cumulative project tests | Harness delta | Project delta |
 |---|---|---|---|---|
@@ -65,54 +71,25 @@ Cumulative history on top of the G4 foundation gate (`gate-g4.md`):
 | #100 | 480 | 2,049 | +60 | +60 |
 | #101 | 569 | 2,138 | +89 | +89 |
 | Compaction/context-composition observability | 601 | 2,172 | +32 | +34 |
-| **Concurrency blocker fix (this leaf — final evidence pass)** | **609** | **2,180** | **+8** | **+8** |
+| Concurrency blocker fix (PR #106) | 609 | 2,180 | +8 | +8 |
+| Same-run provider-call admission gate + bounded backpressure fix | **610** | **2,181** | **+1** | **+1** |
 
-- Cumulative counts through #101 were supplied as known prior measurements for
-  this branch's history; the observability leaf's own +32 Harness / +34
-  project deltas, and this final evidence pass's own +8 / +8 deltas, were each
-  measured directly against the current working tree via `dotnet test`, not
-  estimated from source occurrences.
-- Final reviewed G5 integration head: `c0240a1c` on
-  `harness/g5-integration`; the observability/gate leaf merged through
-  [PR #102](https://github.com/ncosentino/foundry/pull/102), the initial final
+- Every delta above was measured directly against the working tree via
+  `dotnet test`, not estimated from source occurrences.
+- Reviewed G5 integration head: `c0240a1c` on `harness/g5-integration`; the
+  observability/gate leaf merged through
+  [PR #102](https://github.com/ncosentino/foundry/pull/102), a subsequent
   evidence refresh through [PR #104](https://github.com/ncosentino/foundry/pull/104),
   and the concurrency-blocker fix through
-  [PR #106](https://github.com/ncosentino/foundry/pull/106).
-- The compaction/context-composition observability leaf's 32 new Harness tests
-  break down as:
-  - 14 in `HarnessContextObservabilityTests.cs`, covering success/termination
-    event families, explicit measurement units, absent-profile behavior,
-    privacy, classifier/snapshot pre-start failures, nested reporter
-    correlation, trust-revalidation ordering, and concurrent per-assembly
-    correlation IDs;
-  - 13 in `HarnessContextDiagnosticsValidationTests.cs`, covering invalid
-    contribution values/categories, negative estimator output, checked
-    overflow, duplicate categories, and undefined measurement units;
-  - 3 in `HarnessCapabilityProfileTests.cs`, covering the exact Compaction
-    capability state/evidence matrix; and
-  - 2 in `HarnessArtifactObservabilityTests.cs`, proving multibyte offload and
-    rehydration attribution uses UTF-8 byte counts rather than UTF-16 length.
-- Two additional project-only tests in `ChannelProgressReporterTests.cs`
-  prove the bounded channel performs asynchronous saturation queueing —
-  pending events are queued and eventually delivered rather than dropped when
-  momentarily full, while the producer-facing `Report` call remains
-  non-blocking — and that enqueue failures after completion are surfaced
-  through the configured error handler, producing the project delta's
-  additional two tests. Pending writes can still grow unbounded ahead of a
-  slow sink under sustained load; genuine flow-control back on the producer is
-  explicitly not implemented here and is left as a possible G7 follow-up.
-- The 10 pre-existing offload/rehydration outcome tests in
-  `HarnessArtifactObservabilityTests.cs` were each extended in place with new
-  `Attribution` assertions rather than duplicated into new test methods, so
-  they contribute no additional count here despite carrying new coverage.
-- This final evidence pass's own +8 Harness tests (also +8 project, since all
-  eight live in the Harness test tree) are documented in the "G5 concurrency
-  blocker and fix" section below.
-- All `dotnet build`/`dotnet test` commands for this leaf, and for this final
-  evidence pass, were run with
+  [PR #106](https://github.com/ncosentino/foundry/pull/106). The final
+  same-run provider-call admission gate and `ChannelProgressReporter`
+  bounded-backpressure fix (net +1/+1 above) have not yet been pushed or
+  opened as a PR; see "Validation status and next permitted gates" below for
+  what the recorded hosted CI links do and do not cover.
+- All `dotnet build`/`dotnet test` commands for this gate were run with
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'` set.
 
-## Files changed (current leaf — compaction/context-composition observability)
+## Files changed (cumulative)
 
 New files:
 - `src/NexusLabs.Foundry.MicrosoftAgentFramework/Diagnostics/HarnessContextCompactionOutcome.cs`
@@ -132,282 +109,69 @@ New files:
 - `docs/adr/adr-0007-experimental-hybrid-context-compaction.md`
 - `specs/001-maf-harness-first-class/evidence/gate-g5.md` (this file)
 
-Modified files:
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessHybridCompactionChatClient.cs`
-  — added a required nullable trailing `IProgressReporterAccessor? progressAccessor`
-  constructor parameter (no optional parameter); `AssembleBoundedMessagesAsync`
-  now reports exactly one started event before assembly begins and exactly
-  one terminal event per attempt — a terminated event immediately before
-  throwing `HarnessCompactionIrreducibleException` on failure, or a completed
-  event immediately once a success outcome is known (deliberately before the
-  post-assembly execution-binding revalidation, so an already-successful
-  decision remains observable even if that later revalidation itself fails)
-  — and, only once that revalidation has also passed, a composed event
-  carrying the identical diagnostics instance as the completed event, right
-  before the bounded messages are returned for dispatch. Four private
-  `Report*` helper methods build each event's correlation fields
-  (`Timestamp`, `WorkflowId`, `AgentId`, `ParentAgentId` via
-  `IProgressReporterContext`, `Depth`, `SequenceNumber`) directly from the
-  current `IProgressReporter`, mirroring the existing
-  `HarnessArtifactOffloadDecisionEvent`/`HarnessArtifactRehydrationDecisionEvent`
-  pattern; each helper is a no-op when the accessor is `null`.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessCompactionComposition.cs`,
-  `HarnessCompactionCompositionRequest.cs` — threaded a required nullable
-  trailing `IProgressReporterAccessor? ProgressAccessor` member/parameter
-  through the composer's request record and its construction of
-  `HarnessHybridCompactionChatClient`.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/HarnessProviderComposition.cs`
-  — the compaction composition call site now passes the existing
-  `HarnessProviderCompositionRequest.ProgressAccessor` value through, rather
-  than introducing a second, independent accessor seam.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessHybridContextPolicy.cs`,
-  `IHarnessContextSizeEstimator.cs`, `HarnessUtf8ContextSizeEstimator.cs`,
-  `HarnessUtf8TextSizeEstimator.cs` — added a required
-  `HarnessContextMeasurementUnit MeasurementUnit` property to
-  `IHarnessContextSizeEstimator`; both production estimators
-  (`HarnessUtf8ContextSizeEstimator`, the text-only estimator) report
-  `Utf8Bytes`.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Diagnostics/HarnessArtifactDiagnostics.cs`
-  — added a public `Attribution` property; `ForOffload`/`ForRehydration` now
-  build a matching `HarnessContextAttribution.ForOffload`/`.ForRehydration`
-  snapshot automatically from the same outcome/observed-size/reference-id
-  inputs already supplied, so every existing offload/rehydration call site
-  needed no changes beyond the factory bodies themselves.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Capabilities/HarnessCapabilityResolver.cs`
-  — the `Compaction` definition's `TrustBoundary` changed from `None` to
-  `ExternalContent` (hybrid-compacted context is ultimately host-classified
-  external/conversational content flowing through the same classification
-  path as every other context entry) and its `AotStatus` changed from
-  `Verified` to `Unverified` (no NativeAOT app directly executes hybrid
-  composition; existing hosted Harness AOT coverage only compiles the
-  composition graph). `DiagnosticsStatus` is `Available` (this leaf).
-  `Stability` remains `Experimental`, `DefaultEnabledInBundle` remains
-  `false`, and `DeliveryPhase` remains `G5`.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessConstantSizeContextEstimator.cs`,
-  `HarnessFixedSizeContextEstimator.cs` — both fixture estimators now report
-  `HarnessContextMeasurementUnit.HostDefinedUnits`, since neither measures
-  bytes or tokens.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessCompactionCancellationTests.cs`,
-  `HarnessCompactionComposeTests.cs`, `HarnessCompactionRunCoordinatorTests.cs`,
-  `HarnessCompactionSeamTests.cs`, `HarnessCompactionSessionIntegrationTests.cs`,
-  `HarnessProviderCompositionCompactionTests.cs` — updated direct
-  `HarnessHybridCompactionChatClient` construction call sites for the new
-  trailing `progressAccessor` parameter (explicit `null` in every case except
-  where a test specifically exercises reporting).
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessCapabilityProfileTests.cs`
-  — added 3 new tests asserting the Compaction capability's exact
-  requested+accepted/deferred/disabled resolution matrix and exact evidence
-  field values.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessArtifactObservabilityTests.cs`
-  — every existing offload/rehydration outcome test now also asserts
-  `Attribution.Operation`/`InputUtf8Bytes`/`OutputUtf8Bytes`; added 2 new
-  dedicated multibyte tests proving UTF-8 byte counts, never UTF-16
-  char/code-unit counts, are reported for both offload and rehydration.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/ProgressEventCoverageTests.cs`
-  — added the 4 new event type names to the hard-coded catalogue of every
-  known `IProgressEvent` implementation.
+Modified files (final, cumulative state; mechanisms described in full in the
+architecture sections below):
+- `Harness/Context/HarnessHybridCompactionChatClient.cs` — required nullable
+  trailing `IProgressReporterAccessor? progressAccessor` constructor
+  parameter; reports Started/Completed-or-Terminated/Composed events per
+  assembly attempt; both `GetResponseAsync`/`GetStreamingResponseAsync`
+  acquire the coordinator's per-run provider-call gate before assembly.
+- `Harness/Context/HarnessCompactionComposition.cs`,
+  `HarnessCompactionCompositionRequest.cs`, `Harness/HarnessProviderComposition.cs`
+  — threaded the same `IProgressReporterAccessor?` through the composer's
+  request record and its one call site, rather than a second accessor seam.
+- `Harness/Context/HarnessHybridContextPolicy.cs`, `IHarnessContextSizeEstimator.cs`,
+  `HarnessUtf8ContextSizeEstimator.cs`, `HarnessUtf8TextSizeEstimator.cs` —
+  required `HarnessContextMeasurementUnit MeasurementUnit` on the estimator
+  interface; both production estimators report `Utf8Bytes`.
+- `Diagnostics/HarnessArtifactDiagnostics.cs` — added a public `Attribution`
+  property, populated automatically by the existing `ForOffload`/`ForRehydration`
+  factories.
+- `Harness/Capabilities/HarnessCapabilityResolver.cs` — `Compaction`'s
+  `TrustBoundary` is `ExternalContent`, `AotStatus` is `Unverified`,
+  `DiagnosticsStatus` is `Available`; `Stability`/`DefaultEnabledInBundle`/
+  `DeliveryPhase` unchanged (`Experimental`/`false`/`G5`).
+- `Harness/Context/HarnessCompactionRunCoordinator.cs`,
+  `HarnessDeliveredSegmentFilteringSnapshotProvider.cs` — per-digest
+  `Revisions` tracking plus `GetRevision`, the `ProviderCallGate` semaphore
+  plus `EnterProviderCallAsync`, and the snapshot provider's conversion from
+  stateless to a stateful effective-version computation.
+- `Progress/ChannelProgressReporter.cs`, `Progress/IProgressSink.cs`,
+  `docs/progress-reporting.md` — `Report` applies bounded producer-side
+  backpressure once the channel saturates, catching only `ChannelClosedException`.
+- Test fixtures updated for the trailing `progressAccessor` parameter:
+  `Harness/HarnessConstantSizeContextEstimator.cs`, `HarnessFixedSizeContextEstimator.cs`
+  (report `HostDefinedUnits`), `HarnessCompactionCancellationTests.cs`,
+  `HarnessCompactionComposeTests.cs`, `HarnessCompactionSeamTests.cs`,
+  `HarnessCompactionSessionIntegrationTests.cs`,
+  `HarnessProviderCompositionCompactionTests.cs`.
+- `Harness/HarnessCompactionRunCoordinatorTests.cs` (25 tests),
+  `Harness/HarnessCapabilityProfileTests.cs` (+3),
+  `Harness/HarnessArtifactObservabilityTests.cs` (+2 multibyte),
+  `ProgressEventCoverageTests.cs`, `ChannelProgressReporterTests.cs` (8) —
+  cover the admission gate/revision defense, capability resolution matrix,
+  UTF-8 attribution, event-type catalogue, and channel backpressure/dispose
+  behavior respectively, each described in the relevant section below.
 
-Every existing direct construction call site of `HarnessHybridCompactionChatClient`
-and `HarnessCompactionCompositionRequest` outside this leaf's own new test
-file passes an explicit `progressAccessor`/`ProgressAccessor` value — no call
-site was left uncompiled or defaulted.
-
-## Isolated-review follow-up
-
-An independent isolated review of the cumulative leaf above raised five
-findings, all addressed in this same pass without any change to the gate's
-`PASS` disposition:
-
-1. **Per-assembly correlation (`AssemblyId`).** Added a public `Guid
-   AssemblyId` to all four progress events
-   (`HarnessContextCompactionStartedEvent`, `HarnessContextCompactionCompletedEvent`,
-   `HarnessContextCompactionTerminatedEvent`, `HarnessContextComposedEvent`)
-   and to the internal `HarnessBoundedMessageAssembly` dispatch result.
-   `HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync` generates
-   the ID exactly once per attempt, immediately after adapter/snapshot/
-   assembler setup succeeds and immediately before Started is emitted, and
-   threads the identical value onto every event that attempt goes on to
-   report. See the "Per-assembly correlation (`AssemblyId`)" bullet above for
-   the full test list, including a dedicated `Task.Run`-based concurrency
-   test proving two genuinely concurrent same-agent assemblies produce two
-   distinct, non-empty IDs whose own lifecycles remain pairable despite
-   interleaved `SequenceNumber`s. Files:
-   `Progress/HarnessContextCompactionStartedEvent.cs`,
-   `Progress/HarnessContextCompactionCompletedEvent.cs`,
-   `Progress/HarnessContextCompactionTerminatedEvent.cs`,
-   `Progress/HarnessContextComposedEvent.cs`,
-   `Harness/Context/HarnessHybridCompactionChatClient.cs`,
-   `Harness/HarnessContextObservabilityTests.cs` (+1 test, 13 → 14).
-2. **`ChannelProgressReporter` no longer silently drops on a full channel.**
-   `Report` now calls the channel writer's `WriteAsync` (Wait mode) instead of
-   `TryWrite`; if the returned `ValueTask` completes synchronously (capacity
-   immediately available), `Report` returns exactly as before — still
-   non-blocking. When it does not complete synchronously, `Report` hands the
-   pending write to a private fire-and-forget observer that awaits it and
-   surfaces any failure through the existing `IProgressReporterErrorHandler`
-   (once per affected sink/event), never swallowing it. `DisposeAsync` now
-   drains every in-flight pending write before completing the channel writer,
-   so a write merely waiting for capacity is never itself turned into a
-   spurious `ChannelClosedException` by disposal, while still preserving the
-   original drain-then-complete semantics. File:
-   `Progress/ChannelProgressReporter.cs`. Tests added to
-   `ChannelProgressReporterTests.cs` (+2, 6 → 8): a deterministic
-   capacity-1/slow-sink test proving every one of several sequenced events is
-   delivered exactly once, in order, with none silently lost while the
-   channel was momentarily full; and an enqueue-after-`DisposeAsync` test
-   proving a late `Report` neither throws synchronously nor is silently
-   dropped, instead surfacing `ChannelClosedException` through the recorded
-   error handler.
-3. **ADR-0007 identity wording corrected.** The ADR previously stated, in its
-   Consequences section, that "the identical instance is observable from both
-   the internal result and the corresponding progress event" for **both**
-   success and termination. That overclaimed identity for termination: only
-   the success path shares one `HarnessContextDiagnostics` instance across
-   the internal dispatch result (`HarnessBoundedMessageAssembly.Diagnostics`),
-   the completed event, and the composed event. On termination, the
-   diagnostics snapshot is built from the internal terminating assembly
-   result and carried by the terminated event, but no caller-visible internal
-   result escapes to compare it against — `HarnessCompactionIrreducibleException`
-   carries only the outcome, final estimated size, and hard limit, never the
-   diagnostics instance. The ADR's Decision and Consequences sections were
-   corrected to state this precisely; `HarnessContextDiagnostics`'s own XML
-   doc remarks already scoped the shared-instance claim correctly to
-   Completed/Composed only and needed no change.
-4. **Gate capability footnote for `DiagnosticsStatus`.** Added a footnote
-   directly under the capability disposition table (below) clarifying that
-   `DiagnosticsStatus.Available` records only that the progress/diagnostics
-   *contract* is implemented for the `Compaction` capability — not that the
-   capability itself is activated. Activation remains governed by
-   `Stability: Experimental` / `DefaultEnabledInBundle: false`, and any change
-   to activation is a separate, later public API decision.
-5. **Test counts re-measured.** No completed-run aggregation and no public
-   runtime configuration were added by this pass — both remain explicitly out
-   of scope, as recorded elsewhere in this document. The "Local validation"
-   results below were re-run after all four fixes above and reflect the
-   final, current counts.
-
-## G5 concurrency blocker and fix (final evidence pass)
-
-Independent review of the cumulative leaf above surfaced one remaining
-runtime blocker in the one-shot rehydration delivery coordinator itself,
-found before staging and fixed in this same pass, before any hosted rerun.
-
-**Bug.** Within one outer run, two overlapping provider calls (leases A and
-B) can race for the same reservable digest:
-
-1. A reserves the digest first; B's own snapshot capture loses the race and
-   filters the recoverable body back out of what it would otherwise forward.
-2. A's own assembly attempt later discovers the body must be pressure-evicted
-   before dispatch (e.g. a size-triggered eviction, or any other path that
-   ends without forwarding it) and its caller closes the lease with an empty
-   delivered set. `Complete`'s atomic contract correctly releases A's
-   reservation without promoting it to Delivered — the digest becomes
-   reservable again.
-3. B's next capture (its own finalization recheck) previously reported the
-   exact same `HarnessContextSnapshot.Version` as before, because the
-   *inner* snapshot provider's own version only changes when a new message is
-   injected — never when purely coordinator-internal reservation/delivery
-   state changes. `HarnessContextAssembler` only ever restarts an assembly
-   attempt on an observed version change, so B never restarted, never saw the
-   digest become available again, and never forwarded the body. Neither A
-   (never dispatched it) nor B (never saw it available again) ever delivered
-   it: zero delivery for the entire run, despite the body being definitely
-   recoverable and definitely available.
-
-**Fix.** Two seams close the gap, both scoped to the existing one-shot
-delivery mechanism and requiring no change to `HarnessContextAssembler` or
-`HarnessHybridCompactionChatClient`:
-
-1. `HarnessCompactionRunCoordinator` now tracks a monotonic per-digest
-   revision inside the active run's state, incremented on every
-   externally-observable reservation/delivery state change for that digest:
-   a digest's first reservation (unclaimed → reserved by anyone), every
-   digest `Complete` processes for its owning lease (whether promoted to
-   Delivered or released unpromoted), and every digest `Release` releases.
-   The same lease re-reserving a digest it already holds, and a failed
-   reservation attempt, both bump nothing — neither is an externally-visible
-   state change. A new closed-world, lock-protected internal
-   `GetRevision(string digest)` method — requiring the same active run scope
-   every other lease-lifecycle method requires — returns a digest's current
-   revision, `0` before any state exists for it.
-2. `HarnessDeliveredSegmentFilteringSnapshotProvider` no longer forwards the
-   inner snapshot's own version unchanged. It now maintains its own effective
-   monotonic version, computed from a previous-capture signature consisting
-   of the inner snapshot's version plus the sorted `(digest, coordinator
-   revision)` pairs for every recoverable segment present in the *inner*
-   snapshot before filtering (only digests this provider's own inner
-   snapshot actually reports — an unrelated digest's revision change can
-   never appear in this signature and can therefore never affect this
-   instance's effective version). On each `CaptureSnapshot`, after this
-   call's own reservation attempts are resolved, it re-reads every relevant
-   digest's current revision, and reports a strictly greater effective
-   version whenever the inner version or this signature differs from the
-   previous capture — even when the inner snapshot's own version is
-   unchanged. The very first capture always reports effective version `0`.
-
-With both seams in place, A's release becomes visible to B: B's next
-finalization capture observes the digest's coordinator revision changed,
-retries reservation, includes the body, and returns a new effective version;
-`HarnessContextAssembler`'s existing version-comparison restart logic — wholly
-unmodified — then restarts B's assembly from that snapshot and B becomes the
-one call that forwards the raw body.
-
-**Files changed:**
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessCompactionRunCoordinator.cs`
-  — per-digest `Revisions` tracking in `RunState`, revision bumps wired into
-  `TryReserve`/`Complete`/`Release`, new internal `GetRevision(string digest)`.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework/Harness/Context/HarnessDeliveredSegmentFilteringSnapshotProvider.cs`
-  — converted from stateless to stateful; computes its own independent
-  effective monotonic version from the inner version plus the coordinator's
-  per-digest revisions instead of passing the inner version through
-  unchanged.
-- `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessCompactionRunCoordinatorTests.cs`
-  (+8 tests): one deterministic, single-threaded, explicitly-sequenced test
-  reproducing the exact bug end to end —
-  `SameOuterRun_LoserFiltersThenWinnerPressureEvictsAndReleases_LoserRestartsAndDeliversExactlyOnce`
-  — asserting B's filtered first capture, A's release-without-forwarding, B's
-  version-changed second capture with the body restored, a stable third
-  capture, and that a later lease can never re-reserve (and therefore never
-  redeliver) the digest once B delivers it: no duplicate and no zero-delivery
-  for the run. The pre-existing
-  `SameOuterRun_ConcurrentProviderCalls_ExactlyOneForwardsRawBody` test (real
-  genuinely-overlapping concurrent calls through a barrier-gated leaf client)
-  is preserved unmodified. Seven further direct unit tests cover the new
-  surface in isolation: `GetRevision` throwing without an active run scope,
-  returning `0` before any state, advancing only on real state changes (not
-  on a same-lease re-reservation) across first reservation and `Complete`
-  promotion, and advancing on both a `Complete`-driven release and an
-  explicit `Release`; and three
-  `HarnessDeliveredSegmentFilteringSnapshotProvider` tests proving an
-  unrelated digest's revision change never affects this provider's own
-  effective version, its own repeated captures with nothing racing in report
-  a stable effective version, and a concurrently-releasing lease's relevant
-  digest does advance it.
-
-**Wording correction (unrelated to this bug, carried in this same pass).**
-The bounded progress-event channel's behavior under a full channel, described
-above as "backpressure," is more precisely asynchronous saturation queueing:
-the channel writer queues a pending write and the fire-and-forget observer
-eventually delivers it rather than dropping it, but the producer-facing
-`Report` call itself never blocks waiting for capacity, and pending writes
-can grow unboundedly ahead of a slow sink under sustained load. Genuine
-producer-side flow control is not implemented and remains a possible G7
-follow-up if ever needed.
+(All paths above are relative to
+`src/NexusLabs.Foundry.MicrosoftAgentFramework[.Tests]/`.) Every direct
+construction call site of `HarnessHybridCompactionChatClient`/
+`HarnessCompactionCompositionRequest` outside the dedicated test fixtures
+passes an explicit `progressAccessor`/`ProgressAccessor` value.
 
 ## One-top-level-type-per-file disposition
 
-The issue names a single plural file, `Progress/HarnessContextProgressEvents.cs`,
-for the new progress events. The repository convention is one top-level C#
-type per file (already established by G4's identical split for
+The repository convention is one top-level C# type per file (already
+established by G4's identical split for
 `HarnessArtifactOffloadDecisionEvent.cs`/`HarnessArtifactRehydrationDecisionEvent.cs`).
-This leaf honors that convention by giving each of the four new progress
+This gate honors that convention by giving each of the four new progress
 events its own file under `Progress/`:
 `HarnessContextCompactionStartedEvent.cs`, `HarnessContextCompactionCompletedEvent.cs`,
 `HarnessContextCompactionTerminatedEvent.cs`, and `HarnessContextComposedEvent.cs`.
 The diagnostics contract is likewise split across seven separate files under
 `Diagnostics/` (the `HarnessContextDiagnostics` record itself, four
 single-enum files, one contribution record, and the `HarnessContextAttribution`
-record) rather than combined into one file. No file introduced by this leaf
+record) rather than combined into one file. No file introduced by this gate
 contains more than one top-level type.
 
 ## Selected extension point and why it sees every provider request
@@ -437,8 +201,12 @@ rehydrated body itself: every call re-adapts the exact messages presented for
 that call and assembles bounded context fresh from the caller-supplied
 session/snapshot integration, with no singleton mutable history retained by
 the node; the only cross-call state it owns is the non-retransmission
-coordinator's per-digest lease bookkeeping (reserve/commit/release), never
-the bodies themselves.
+coordinator's per-digest lease bookkeeping (reserve/commit/release) and its
+per-run provider-call gate, never the bodies themselves. This is what makes
+rehydration history-safe: a rehydrated body can be forwarded to the real
+provider without ever being written back into persisted session/history
+state, so no compacted artifact reference is ever silently replaced by its
+resolved body in storage.
 
 ## Policy / trigger / fallback / sequence / termination matrix
 
@@ -460,22 +228,23 @@ Trigger evaluation: a policy's `TriggerThreshold` is always `HardLimit -
 TriggerMargin`; assembly is triggered whenever the current estimated size is
 at or above that threshold. Every size, the threshold, and the hard limit are
 reported in whatever `HarnessContextMeasurementUnit` the configured
-`IHarnessContextSizeEstimator` declares.
+`IHarnessContextSizeEstimator` declares — never assumed to be a provider
+token count. `HarnessUtf8ContextSizeEstimator` and the text-only estimator
+report `Utf8Bytes`; the fixed/constant test estimators report
+`HostDefinedUnits`; `EstimatedTokens` is reserved, unused by any estimator in
+this codebase today, for a future tokenizer-backed estimator.
 
 Event sequencing (per assembly attempt, enforced by
-`HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync`):
+`HarnessHybridCompactionChatClient.AssembleBoundedMessagesAsync`), each event
+carrying the same per-attempt `AssemblyId` (`Guid`, generated once
+immediately before Started — see "Observability and privacy" below for the
+full correlation contract):
 
-0. A single opaque `AssemblyId` (`Guid`) is generated exactly once for this
-   attempt, at the same success gate as the Started event below (immediately
-   after message adaptation, snapshot integration, and assembler construction
-   all succeed), and is threaded identically onto every event this attempt
-   goes on to report.
 1. `HarnessContextCompactionStartedEvent` — emitted after message adaptation,
    snapshot integration, and assembler construction have all succeeded,
    immediately before `AssembleAsync` is called. A classifier or
    snapshot-construction exception propagates directly without emitting this
-   event or any subsequent event — no dangling Started event is ever emitted
-   for an attempt that never reached the assembler.
+   event or any subsequent event.
 2. Exactly one terminal event (for attempts that emitted a Started event):
    - `HarnessContextCompactionCompletedEvent` — reported immediately once a
      success outcome is known, deliberately before the post-assembly
@@ -484,29 +253,137 @@ Event sequencing (per assembly attempt, enforced by
    - `HarnessContextCompactionTerminatedEvent` — reported immediately before
      `HarnessCompactionIrreducibleException` is thrown for either termination
      outcome (`Irreducible` or `ConcurrentMutationLimit`). The exception
-     itself carries only the outcome, final estimated size, and hard limit —
-     never the diagnostics instance — so the Terminated event is the only
+     itself carries only the outcome, final size, and hard limit — never the
+     diagnostics instance — so the Terminated event is the only
      caller-observable surface for that instance on termination.
    Exceptional failures during assembly (cancellation, binding invalidation,
    or reducer exception) propagate directly without masquerading as Completed
-   or Terminated — no Terminated event is emitted for a non-structured failure.
+   or Terminated.
 3. `HarnessContextComposedEvent` — reported only after a completed event,
    only once execution-binding revalidation has also passed, and only
    immediately before the bounded messages are returned for dispatch;
    carries the identical `HarnessContextDiagnostics` instance as the
-   preceding completed event and the `HarnessBoundedMessageAssembly`
-   dispatch result. Never reported for a terminated attempt.
-
-Every event above carries the same `AssemblyId` generated in step 0 for this
-attempt, so two concurrently-running assemblies for the same agent/workflow
-remain independently pairable by `AssemblyId` despite their `SequenceNumber`s
-interleaving — see the "Per-assembly correlation (`AssemblyId`)" bullet below
-for the dedicated concurrency proof.
+   preceding completed event. Never reported for a terminated attempt.
 
 No event of any kind is reported when the chat client was constructed with a
-`null` progress accessor — every `Report*` helper is a no-op in that case, and
-ordinary assembly behavior (including throwing on termination) is fully
+`null` progress accessor — every `Report*` helper is a no-op in that case,
+and ordinary assembly behavior (including throwing on termination) is fully
 preserved regardless.
+
+## One-shot rehydration, atomic leases, and same-run admission
+
+Every call to `AssembleBoundedMessagesAsync` generates a fresh lease token and
+wraps the configured snapshot provider in a
+`HarnessDeliveredSegmentFilteringSnapshotProvider` bound to that lease and the
+shared `HarnessCompactionRunCoordinator` for the active outer run. A
+recoverable segment body already promoted to Delivered earlier in the same
+run scope — or currently reserved by a different, concurrently-running
+provider call within the same run — is filtered back out before the
+assembler ever considers it. On success, the caller
+(`GetResponseAsync`/`GetStreamingResponseAsync`) commits the lease's forwarded
+digests to Delivered only once the real provider call itself completes
+successfully; on any failure — including a canceled or failed real-provider
+call — the lease is released instead, so a subsequent retry within the same
+run scope can still reserve, and ultimately deliver, the exact same digests.
+This guarantees a given body is dispatched to the real provider at most once
+per outer run, while never permanently losing the ability to recover it on a
+genuine retry.
+
+Two further mechanisms defend that guarantee against concurrent same-run
+provider calls:
+
+- **Per-digest revision defense.** `HarnessCompactionRunCoordinator` tracks a
+  monotonic per-digest revision inside the active run's state, incremented on
+  every externally-observable reservation/delivery state change for that
+  digest: a digest's first reservation, every `Complete` a lease processes
+  for that digest (whether promoted to Delivered or released unpromoted),
+  and every explicit `Release`. The same lease re-reserving a digest it
+  already holds, and a failed reservation attempt, both bump nothing.
+  `HarnessDeliveredSegmentFilteringSnapshotProvider` computes its own
+  effective monotonic version from the inner snapshot's version plus the
+  sorted `(digest, coordinator revision)` pairs for every recoverable
+  segment the inner snapshot reports, and reports a strictly greater
+  effective version whenever either input changes — even when the inner
+  snapshot's own version is unchanged. This closes a gap where a losing
+  call's own filtered snapshot would otherwise never observe a winning
+  call's later release, because the inner snapshot provider's version only
+  changes when a new message is injected, never when purely
+  coordinator-internal reservation/delivery state changes.
+  `HarnessContextAssembler`'s existing version-comparison restart logic —
+  unmodified — restarts an assembly whenever this effective version
+  advances, so a call whose reservation is released becomes visible to any
+  sibling still active in the same run, and the body is neither
+  double-delivered nor permanently lost.
+- **Same-run provider-call admission gate.** `HarnessCompactionRunCoordinator`'s
+  per-run `RunState` owns a `SemaphoreSlim(1, 1)` gate (`ProviderCallGate`)
+  and an `internal async Task<IDisposable> EnterProviderCallAsync(CancellationToken)`
+  method that requires the same active run scope every other lease-lifecycle
+  method requires, checks for a pre-canceled token before touching any state
+  (so a pre-canceled token throws the same `OperationCanceledException` type
+  a mid-wait cancellation does), then awaits the gate and returns an
+  idempotent releaser. `HarnessHybridCompactionChatClient.GetResponseAsync`
+  and `GetStreamingResponseAsync` each acquire this gate via a `using`
+  declaration immediately after `EnsureRunScope()` and before assembly
+  begins, holding it across assembly, real dispatch, and the
+  `Complete`/`Release` decision — the entire method/iterator, never released
+  early. A canceled wait creates no reservation and leaves the gate exactly
+  as if the call had never been made. Because the gate lives on `RunState`
+  (the same `AsyncLocal<RunState>`-scoped instance the reservation protocol
+  already uses), two different **outer** runs — each its own `RunState` —
+  remain fully concurrent; only nested calls *within one outer run* are
+  serialized. This makes two same-run calls racing each other into (or
+  through) the real provider structurally impossible, independent of the
+  revision-bump defense-in-depth above.
+
+`HarnessCompactionRunCoordinatorTests.cs` (25 tests) proves both mechanisms:
+a deterministic, single-threaded test reproduces cross-release visibility
+end to end (filtered first capture, release-without-forwarding, a
+version-changed second capture with the body restored, and no later
+re-reservation once delivered); a real, genuinely-concurrent barrier-gated
+test proves the admission gate blocks a second same-run call until the first
+completes and releases, after which the raw body is delivered exactly once;
+a cancellation-while-waiting test proves the gate is left unaffected for a
+subsequent caller; direct unit tests cover `GetRevision`'s scope and
+advance-only-on-real-change behavior; and an unmodified test continues
+proving two concurrent **outer** runs proceed fully independently.
+
+## Bounded, backpressured progress delivery
+
+`ChannelProgressReporter.Report` enqueues to its bounded `Channel<T>` via
+`ChannelWriter<T>.WriteAsync` (Wait mode — never `TryWrite`, so a full
+channel never silently drops an event). Whenever capacity is available — the
+common case — the enqueue completes synchronously and `Report` returns
+immediately. Only when the channel is momentarily saturated does `Report`
+itself synchronously block on the pending write, applying backpressure
+directly to the caller instead of accumulating an unbounded set of
+fire-and-forget pending-write tasks; sink I/O itself remains entirely on the
+background consumer task, and `Report` never runs a sink directly. Writing
+after the channel has already been completed (e.g. after `DisposeAsync`)
+never throws synchronously out of `Report`: the resulting
+`ChannelClosedException` — the one specific, expected exception for this
+condition — is caught and surfaced through the existing, non-throwing
+`IProgressReporterErrorHandler` path, consistent with how every other
+enqueue failure is already reported. Any other, unexpected exception from
+that wait is not caught and propagates directly to the caller, so it is
+never reshaped into a handled error or otherwise hidden. `DisposeAsync` is a
+plain complete-then-drain (`_channel.Writer.TryComplete()` then await the
+consumer task): because `Report` never leaves an enqueue running in the
+background unobserved — it either completes synchronously or the caller's
+own call is the one waiting on it — there is no separate pending-write set
+for disposal to wait on.
+
+`ChannelProgressReporterTests.cs` (8 tests) proves: the fast synchronous path
+when capacity is available; genuine producer-side blocking under a
+capacity-1 saturated channel, with the blocked `Report` call running on its
+own background `Task` (since it now blocks the calling thread), staying
+incomplete while the sink is deliberately held open, and completing once the
+sink releases, with all events still delivered exactly once and in channel
+order; and that enqueuing after `DisposeAsync` surfaces `ChannelClosedException`
+through the recorded error handler synchronously (by the time `Report`
+returns), never thrown out of `Report` and never silently dropped. Class and
+interface docs (`ChannelProgressReporter.cs`, `IProgressSink.cs`,
+`docs/progress-reporting.md`) describe delivery as non-blocking while
+capacity exists and bounded/backpressured once the channel saturates.
 
 ## Cancellation taxonomy and message-injection behavior
 
@@ -527,7 +404,8 @@ path:
 - cancellation during a message-injection-induced extra provider call (an
   injected batch's own recursive call into this node is subject to the same
   cancellation checks as any other call);
-- cancellation during snapshot/finalization capture; and
+- cancellation during snapshot/finalization capture, and while waiting on
+  the same-run provider-call admission gate; and
 - trust-binding invalidation detected between successful assembly and
   dispatch, both non-streaming and streaming — `EnsureCurrent` is checked
   once at entry and again immediately after a successful assembly, right
@@ -539,29 +417,10 @@ path:
 every injected batch, so an injection-driven extra call is observed by this
 node exactly like any other provider call — its own started/terminal/composed
 events are reported independently, correlated by that call's own
-`SequenceNumber`, never merged into or confused with the triggering call's
-events.
+`SequenceNumber` and `AssemblyId`, never merged into or confused with the
+triggering call's events.
 
-## One-shot rehydration / non-retransmission
-
-Every call to `AssembleBoundedMessagesAsync` generates a fresh lease token and
-wraps the configured snapshot provider in a
-`HarnessDeliveredSegmentFilteringSnapshotProvider` bound to that lease and the
-shared `HarnessCompactionRunCoordinator` for the active outer run. A
-recoverable segment body already promoted to Delivered earlier in the same
-run scope — or currently reserved by a different, concurrently-running
-provider call within the same run — is filtered back out before the
-assembler ever considers it. On success, the caller
-(`GetResponseAsync`/`GetStreamingResponseAsync`) commits the lease's forwarded
-digests to Delivered only once the real provider call itself completes
-successfully; on any failure — including a canceled or failed real-provider
-call — the lease is released instead, so a subsequent retry within the same
-run scope can still reserve, and ultimately deliver, the exact same digests.
-This guarantees a given body is dispatched to the real provider at most once
-per outer run, while never permanently losing the ability to recover it on a
-genuine retry.
-
-## Observability and privacy (this leaf)
+## Observability and privacy
 
 - **Contract.** `HarnessContextDiagnostics` carries: outcome category (5
   values, the 2 termination members doubling as the termination category),
@@ -569,136 +428,80 @@ genuine retry.
   threshold, hard limit, attempt count, ordered stage categories, per-category
   final size/entry-count contributions (empty on termination), and a final
   sequence-validity flag (`true` on success, `null` on termination). Private
-  constructor plus `ForSuccess`/`ForTermination` factories enforce every
-  invariant: only a valid success/termination outcome for each factory, only a
-  defined `HarnessContextMeasurementUnit` value, no negative
-  size/threshold/limit/attempt value, final size never exceeding the hard limit
-  on success, unique categories in contributions, an undefined
-  `HarnessContextCategory` value on any contribution rejected defensively even
-  though the only public construction path already rejects it, and the sum of
-  category contribution sizes (checked against `int` overflow) always
-  equalling the final size on success. `HarnessContextCategoryContribution`
-  uses a private constructor and an internal `Create` factory that rejects an
-  undefined `HarnessContextCategory` value, a negative size, or a non-positive
-  entry count, so no invalid contribution can be constructed through its own
-  public surface.
-- **Deterministic mapping, never string parsing.**
-  `HarnessContextDiagnosticsFactory.Create` maps the internal
-  `HarnessContextAssemblyResult` to the public snapshot entirely through
-  switch expressions (`ToPublicOutcome`, `ToPublicStage`, `ToPublicCategory`)
-  that throw `ArgumentOutOfRangeException` on any unrecognized internal
-  value — never by parsing an exception or evidence string. Per-category
-  contributions are computed by summing the exact same
-  `IHarnessContextSizeEstimator` instance that governed the originating
-  policy decision over the final entries; a negative estimator result is
-  rejected with `InvalidOperationException` and per-category accumulation
-  uses `checked` arithmetic, so the contribution total always agrees with
-  the reported final size and overflow is never silently truncated.
-- **Explicit measurement unit.** `IHarnessContextSizeEstimator.MeasurementUnit`
-  is a required property. `HarnessUtf8ContextSizeEstimator` and the
-  text-only estimator report `Utf8Bytes`; the fixed/constant test estimators
-  report `HostDefinedUnits`; `EstimatedTokens` is reserved, unused by any
-  estimator in this codebase today, for a future tokenizer-backed estimator.
-  Every size, threshold, and limit on a diagnostics instance or a started
-  event is reported in whatever unit the governing estimator declared —
-  never assumed to be a token count.
-- **Exactly-once emission (for assemblies that reach the assembler).** A
-  `HarnessContextCompactionStartedEvent` is emitted only after message
-  adaptation, snapshot integration, and assembler construction have all
-  succeeded — immediately before `AssembleAsync`. A classifier or
-  snapshot-construction exception propagates directly without emitting any
-  event. For attempts that do emit a Started event, exactly one terminal event
-  follows (Completed or Terminated, never both); a Composed event follows a
-  Completed event only on confirmed success after revalidation. Exceptional
-  failures during assembly (cancellation, binding invalidation, reducer
-  exception) propagate without masquerading as Completed or Terminated.
-  No event is reported when the progress accessor is `null`.
+  constructors plus `ForSuccess`/`ForTermination`/`Create` factories reject any
+  invalid outcome, undefined enum value, negative size/threshold/limit/
+  attempt/entry-count, a final size exceeding the hard limit on success,
+  duplicate categories, or a contribution-size sum (checked against `int`
+  overflow) that disagrees with the final size on success.
+  `HarnessContextDiagnosticsFactory.Create` maps the internal result to the
+  public snapshot entirely through switch expressions that throw
+  `ArgumentOutOfRangeException` on any unrecognized internal value — never by
+  parsing an exception or evidence string; a negative estimator result is
+  rejected with `InvalidOperationException`.
 - **No new ambient singleton.** The chat client and the compaction composer's
-  request record each accept a required nullable
-  `IProgressReporterAccessor?` at their existing construction/request seam,
-  threaded from the existing `HarnessProviderCompositionRequest.ProgressAccessor`
-  — no new ambient singleton, and no optional parameter anywhere in this
-  leaf's public or internal signatures.
+  request record each accept a required nullable `IProgressReporterAccessor?`
+  at their existing construction/request seam — no new ambient singleton,
+  and no optional parameter anywhere in this gate's public or internal
+  signatures.
 - **Correlation.** Every event carries `WorkflowId`, `AgentId`,
-  `ParentAgentId` (via `IProgressReporterContext`), `Depth`, and
-  `SequenceNumber` read directly from the current `IProgressReporter`,
-  matching the existing `HarnessArtifactOffloadDecisionEvent`/
-  `HarnessArtifactRehydrationDecisionEvent` pattern established in G4. A
-  dedicated root→child→grandchild nested-reporter test proves this directly
-  for the context events too: `AgentId`/`ParentAgentId`/`Depth` trace the
-  exact three-level tree (`null`/0, root-agent/1, child-agent/2) and every
-  Started/Completed/Composed (and, separately, Started/Terminated for an
-  irreducible attempt) event shares one strictly increasing `SequenceNumber`
-  across all three reporter instances rather than each restarting its own
-  counter.
-- **Per-assembly correlation (`AssemblyId`).** All four progress events also
-  carry a public `Guid AssemblyId`, generated exactly once per assembly
-  attempt at the same success gate that governs Started (immediately after
-  message adaptation, snapshot integration, and assembler construction all
-  succeed, immediately before Started is emitted) and threaded identically
-  onto every event this attempt ever reports — Started, whichever terminal
-  event follows, and Composed on success. `HarnessBoundedMessageAssembly`
-  (the internal dispatch result) also carries the same `AssemblyId` for the
-  successful attempt it describes. `WorkflowId`/`AgentId`/`SequenceNumber`
-  alone cannot pair events from two concurrently-running assemblies on the
-  same agent/workflow, because their `SequenceNumber`s can interleave;
-  `AssemblyId` is the opaque, privacy-safe correlation key that makes each
-  attempt's own lifecycle recoverable regardless of interleaving. Proven by:
-  normal-success tests (Started/Completed/Composed share one non-empty ID),
-  termination tests (Started/Terminated share one non-empty ID), the nested
-  root/child/grandchild tests (each of the three attempts keeps its own
-  distinct ID across all three reporter levels), and a dedicated concurrency
-  test in which two genuinely concurrent same-agent assemblies (run via
-  `Task.Run`, rendezvousing inside a shared upstream reducer so their
-  `SequenceNumber`s are provably interleaved) each produce their own distinct,
-  non-empty `AssemblyId` and each attempt's own Started/Completed/Composed
-  trio remains internally pairable and sequence-ordered.
-- **Binding-revalidation ordering.** A dedicated test pins the intentional
-  split between Completed and Composed: when the trusted execution binding is
-  invalidated in the window between a successful assembly decision and the
-  post-assembly `EnsureCurrent` revalidation, the already-emitted Started and
-  Completed events remain observed exactly as reported, `HarnessContextComposedEvent`
-  is never emitted (revalidation never passed, so the context was never
-  "ready for dispatch"), `HarnessContextCompactionTerminatedEvent` is also
-  never emitted (a binding-invalidation failure is not itself a structured
-  `Irreducible`/`ConcurrentMutationLimit` outcome), and `InvalidOperationException`
-  propagates directly to the caller.
+  `ParentAgentId` (via `IProgressReporterContext`), `Depth`, `SequenceNumber`,
+  and `AssemblyId`, matching the G4 `HarnessArtifactOffloadDecisionEvent`/
+  `HarnessArtifactRehydrationDecisionEvent` pattern. A root→child→grandchild
+  nested-reporter test proves the three-level tree and one shared, strictly
+  increasing `SequenceNumber`; a concurrency test proves two genuinely
+  concurrent same-agent assemblies each produce their own distinct
+  `AssemblyId`, with each attempt's Started/Completed/Composed trio
+  remaining internally pairable despite interleaved `SequenceNumber`s.
+- **Binding-revalidation ordering.** When the trusted execution binding is
+  invalidated between a successful assembly decision and the post-assembly
+  `EnsureCurrent` revalidation, the already-emitted Started/Completed events
+  remain as reported, neither Composed nor Terminated is ever emitted (this
+  is not itself a structured `Irreducible`/`ConcurrentMutationLimit`
+  outcome), and `InvalidOperationException` propagates to the caller.
 - **Attribution across offload/rehydration.** `HarnessContextAttribution`
-  (public record) carries `Operation`, `InputUtf8Bytes`, and
-  `OutputUtf8Bytes` (nullable), always measured in UTF-8 bytes regardless of
-  direction. `OutputUtf8Bytes` is the artifact-derived output only — the
-  reference identity's byte length for `Offloaded`/`ExistingReference`, the
-  resolved body's byte length for a successful `Resolved` rehydration — and
-  is `null` for `Failed`/`RecoveryRequired` offloads and every non-`Resolved`
-  rehydration outcome, even though the caller may emit a separate bounded
-  error string for those outcomes. `HarnessArtifactDiagnostics.ForOffload`/
-  `.ForRehydration` build a matching attribution automatically from the same
-  inputs already supplied, so the identical attribution value rides along on
-  the exact same snapshot already attached to the internal offload
-  outcome/rehydration result and its corresponding progress event — no second,
-  independently computed value exists anywhere.
-- **Multibyte correctness.** Dedicated tests inject Japanese (3 bytes/char)
-  and mixed 1/2/4-byte-per-code-point UTF-8 content and assert every
-  attribution/diagnostics byte count matches `Encoding.UTF8.GetByteCount`
-  exactly — never a UTF-16 char or code-unit count.
+  carries `Operation`, `InputUtf8Bytes`, and `OutputUtf8Bytes` (nullable),
+  always in UTF-8 bytes; `OutputUtf8Bytes` is null for `Failed`/
+  `RecoveryRequired` offloads and every non-`Resolved` rehydration outcome.
+  `HarnessArtifactDiagnostics.ForOffload`/`.ForRehydration` build a matching
+  attribution automatically, so the same value rides on the snapshot already
+  attached to the internal result and its progress event — no second,
+  independently computed value exists anywhere. Dedicated multibyte tests
+  assert every byte count matches `Encoding.UTF8.GetByteCount` exactly, never
+  a UTF-16 char/code-unit count.
 - **Never present anywhere in the public surface:** raw message text,
   artifact bodies, workspace paths, owner identities, tool arguments/results,
-  exception text, or classifier output text. Confirmed by
-  `HarnessContextObservabilityTests.Events_NeverContainRawMessageText`, a
-  reflection-based test that recursively walks every public string property
-  (including nested `HarnessContextDiagnostics`/`HarnessContextCategoryContribution`
-  collections) and each record's default `ToString()` across every emitted
-  event for `WithinLimit`, `Reduced`, and `PreservationFallback` scenarios
-  seeded with distinctive marker text, asserting the marker never appears.
+  exception text, or classifier output text. Confirmed by a reflection-based
+  test (`Events_NeverContainRawMessageText`) that recursively walks every
+  public string property and each record's default `ToString()` across every
+  emitted event, seeded with distinctive marker text that never appears.
 - **Diagnostics/progress identity.** The exact same `HarnessContextDiagnostics`
-  instance produced by `HarnessContextDiagnosticsFactory.Create` is carried by
-  the `HarnessBoundedMessageAssembly` dispatch result, the Completed (or
-  Terminated) event, and — on success — the Composed event; never a second,
-  independently rebuilt snapshot.
+  instance is carried by the dispatch result, the Completed (or Terminated)
+  event, and — on success — the Composed event; never a second,
+  independently rebuilt snapshot. On termination, no caller-visible internal
+  result carries the diagnostics instance — the Terminated event is the only
+  caller-observable surface for it.
+
+## Session/history safety
+
+The chat client never persists a rehydrated body back into session or
+conversation history storage: every call re-adapts the exact messages
+presented for that call and assembles bounded context fresh from the
+caller-supplied session/snapshot integration on each invocation. Combined
+with the one-shot delivery coordinator's purely in-memory, per-run lease
+bookkeeping (never the artifact bodies themselves), this means a stored
+conversation transcript and any persisted session state are always
+unaffected by whether, or how many times, hybrid compaction ran — rehydration
+is a transient, per-call, per-provider-request concern, never a mutation of
+durable history. `HarnessCompactionSessionIntegrationTests.cs` and
+`HarnessCompactionSeamTests.cs` cover this directly against the real
+session/snapshot integration seam. Retention/deletion behavior for
+workspace-backed artifacts referenced from compacted conversation history is
+unchanged from ADR-0006 (no new retention or deletion behavior is introduced
+by this gate).
 
 ## Public API disposition
 
-The only public API surface introduced by this leaf is:
+The only public API surface introduced by this gate is:
 
 | Type | Kind | Namespace |
 |---|---|---|
@@ -723,14 +526,15 @@ factories.
 
 `IHarnessContextSizeEstimator`, `HarnessContextDiagnosticsFactory`,
 `HarnessHybridCompactionChatClient`, `HarnessCompactionComposition`,
-`HarnessCompactionCompositionRequest`, `HarnessHybridContextPolicy`, and every
-other compaction mechanism/request/result/status type remain `internal`,
-unchanged in visibility from prior gates. `HarnessCapability.Compaction`'s
-resolver definition is data (field values on an existing internal
-definition), not new public API.
+`HarnessCompactionCompositionRequest`, `HarnessHybridContextPolicy`,
+`HarnessCompactionRunCoordinator`, and every other compaction
+mechanism/request/result/status type remain `internal`, unchanged in
+visibility from prior gates. `HarnessCapability.Compaction`'s resolver
+definition is data (field values on an existing internal definition), not
+new public API.
 
 `IAgentRunDiagnostics`, `IDiagnosticsSink`, and `IAgentMetrics` are
-deliberately **not** expanded by this leaf, matching the same G4 precedent:
+deliberately **not** expanded by this gate, matching the same G4 precedent:
 the diagnostics snapshot attached to a compaction/composition decision is
 available directly through that decision's own result or its corresponding
 progress event; aggregating either into a completed-run diagnostics summary,
@@ -747,19 +551,15 @@ avoid a duplicate writer for the same underlying decision.
 | Source package | `Microsoft.Agents.AI` |
 | Trust boundary | `ExternalContent` |
 | AOT status | `Unverified` |
-| Diagnostics status | `Available` (this leaf) |
+| Diagnostics status | `Available` |
 | Delivery phase | `G5` |
 
 > **Diagnostics status footnote.** `DiagnosticsStatus.Available` records that
 > the progress/diagnostics *contract* is fully implemented for this
-> capability — the four progress events, the `HarnessContextDiagnostics`
-> snapshot, and the `HarnessContextAttribution` byte accounting all exist,
-> are wired through the existing accessor seam, and are covered by this
-> gate's tests. It does **not** assert that the `Compaction` capability
-> itself is activated, enabled by default, or ready for general use — that
-> remains governed independently by `Stability: Experimental` and
-> `DefaultEnabledInBundle: false` above, and any change to activation is a
-> separate, later public API decision, not implied by `DiagnosticsStatus`.
+> capability. It does **not** assert that the `Compaction` capability itself
+> is activated, enabled by default, or ready for general use — that remains
+> governed independently by `Stability: Experimental` and
+> `DefaultEnabledInBundle: false` above.
 
 Resolution matrix (`HarnessCapabilityProfileTests.cs`):
 
@@ -775,24 +575,19 @@ acceptance and phase are never independently sufficient to enable a
 capability the caller never asked for. `DefaultEnabledInBundle: false` is
 additionally covered by the pre-existing `Resolve_CompleteBundleBeforeG6_DefersBundleDefaults`
 bundle-lane test, which already proves an unrequested experimental capability
-stays off by default within the complete-bundle lane; this leaf added no new
-default-bundle test since that behavior required no resolver changes.
+stays off by default within the complete-bundle lane.
 
 Trust boundary is `ExternalContent` rather than `None` because hybrid-compacted
 context is, ultimately, host-classified external/conversational content
 flowing through the exact same message-classification path every other
-context entry already flows through — no new classification behavior is
-introduced by compaction itself, so recording `None` would understate the
-actual trust surface. AOT status is `Unverified` rather than `Verified`
-because no NativeAOT application in this codebase directly executes hybrid
-composition end-to-end; existing hosted Harness AOT coverage only compiles
-the composition graph (proving the types are trim/AOT-safe to construct),
-never runs a hybrid-enabled agent under NativeAOT. `Compatible` was
-considered and rejected in favor of the more conservative `Unverified`,
-since no direct construction-and-execution test exists yet under NativeAOT
-for this specific capability — `Compatible` would overstate current evidence.
+context entry already flows through. AOT status is `Unverified` rather than
+`Verified` because no NativeAOT application in this codebase directly
+executes hybrid composition end-to-end; existing hosted Harness AOT coverage
+only compiles the composition graph (proving the types are trim/AOT-safe to
+construct), never runs a hybrid-enabled agent under NativeAOT. `Compatible`
+was considered and rejected as overstating current evidence.
 
-## Accepted limitations (cumulative)
+## Accepted limitations and deferrals (cumulative)
 
 - **Estimator is not token-exact unless labeled.** A `Utf8Bytes`- or
   `HostDefinedUnits`-labeled estimator's hard limit is a byte or arbitrary
@@ -804,24 +599,62 @@ for this specific capability — `Compatible` would overstate current evidence.
   provider-specific behavior remain outside this decision's control; this
   gate bounds correctness (never accepting a non-reducing or structurally
   invalid proposal) and attempt count, not reducer quality.
-- **No completed-run diagnostics aggregation.** As recorded above, the
-  structured compaction diagnostics are inspectable per-decision (via the
-  attached result or the corresponding progress event) but are not yet
-  aggregated into `IAgentRunDiagnostics`, `IDiagnosticsSink`, or
-  `IAgentMetrics`. Deferred to later hardening scope, consistent with the
-  identical G4 offload/rehydration limitation.
-- **No direct NativeAOT execution of the hybrid profile.** Carried forward
-  as the reason `AotStatus` is `Unverified` rather than `Verified`; existing
-  hosted Harness AOT coverage compiles the graph but does not execute a
+- **No completed-run diagnostics aggregation.** The structured compaction
+  diagnostics are inspectable per-decision (via the attached result or the
+  corresponding progress event) but are not yet aggregated into
+  `IAgentRunDiagnostics`, `IDiagnosticsSink`, or `IAgentMetrics`. Deferred to
+  later hardening scope, consistent with the identical G4 offload/rehydration
+  limitation.
+- **No direct NativeAOT execution of the hybrid profile.** The reason
+  `AotStatus` is `Unverified` rather than `Verified`; existing hosted
+  Harness AOT coverage compiles the graph but does not execute a
   hybrid-enabled agent under NativeAOT.
 - **Public runtime configuration remains deferred.** No public API exists
   for selecting, tuning, or composing a hybrid profile; every policy input
-  remains an internal construction-time value, per this leaf's explicit
+  remains an internal construction-time value, per this gate's explicit
   scope boundary.
-- **Retention/deletion inherited from ADR-0006.** This leaf introduces no
+- **Retention/deletion inherited from ADR-0006.** This gate introduces no
   new retention or deletion behavior for workspace-backed artifacts
   referenced from compacted conversation history; ADR-0006's accepted
   no-delete limitation continues to apply unchanged.
+
+## Review dispositions (final)
+
+Independent review — spanning the initial observability leaf, a dedicated
+concurrency-blocker pass, and a final same-run admission/backpressure pass —
+raised the following findings. Every one below was adopted in this gate's
+current, cumulative state; none changed the `PASS` disposition:
+
+1. **Per-assembly correlation.** Added the public `Guid AssemblyId` (see
+   "Observability and privacy" above), proven by a dedicated concurrency
+   test with two genuinely concurrent same-agent assemblies.
+2. **ADR-0007 identity wording corrected.** The ADR previously overclaimed
+   shared-instance diagnostics identity for *both* success and termination;
+   only success shares one instance across the dispatch result, completed
+   event, and composed event. Corrected in the ADR's Decision and
+   Consequences sections.
+3. **Gate capability footnote for `DiagnosticsStatus`.** Added the footnote
+   under "Capability disposition" above clarifying that `Available` records
+   only that the progress/diagnostics *contract* is implemented, not that
+   the capability itself is activated.
+4. **One-shot rehydration cross-release visibility.** Overlapping same-run
+   provider calls could previously race such that a released-but-unpromoted
+   reservation was never observed by a sibling call, causing zero delivery
+   for the run. Fixed by the per-digest revision defense under "One-shot
+   rehydration, atomic leases, and same-run admission" above.
+5. **Same-run provider-call admission.** The revision fix alone did not
+   prevent two same-run calls from dispatching filtered context to the real
+   provider while a sibling reservation was still unresolved. Fixed by the
+   per-run provider-call admission gate in the same section above.
+6. **`ChannelProgressReporter` bounded memory and exception specificity.**
+   An earlier fire-and-forget observer per saturated write, tracked in an
+   unbounded background collection, could grow without bound under
+   sustained load. Replaced by the genuine producer-side backpressure
+   described under "Bounded, backpressured progress delivery" above, with
+   `Report`'s catch clause narrowed to the one specific, expected
+   `ChannelClosedException` rather than a broad `catch (Exception)`, so any
+   other, unexpected exception from the pending write propagates to the
+   caller instead of being reshaped into a handled error.
 
 ## Local validation
 
@@ -831,49 +664,56 @@ dotnet build src\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.Mic
 dotnet build src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~ChannelProgressReporterTests"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~HarnessContextObservabilityTests|FullyQualifiedName~HarnessContextDiagnosticsValidationTests"
-dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~HarnessCompactionRunCoordinatorTests|FullyQualifiedName~HarnessContextAssembler|FullyQualifiedName~ConcurrentProviderCalls|FullyQualifiedName~Concurrent"
+dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~HarnessCompactionRunCoordinatorTests|FullyQualifiedName~HarnessContextAssembler|FullyQualifiedName~ConcurrentProviderCalls|FullyQualifiedName~Concurrent|FullyQualifiedName~ChannelProgressReporterTests"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug --filter "FullyQualifiedName~Harness"
 dotnet test src\NexusLabs.Foundry.MicrosoftAgentFramework.Tests\NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj -c Debug
 dotnet build src\NexusLabs.Foundry.slnx -c Debug
 ```
 
-Results (final measurement against the complete cumulative leaf, including
-the isolated-review follow-up pass and this final concurrency-blocker-fix
-evidence pass):
+Results (final measurement against the complete cumulative gate, including
+the narrowed `ChannelClosedException` catch in `ChannelProgressReporter.Report`):
 
 - `ChannelProgressReporterTests` in isolation: **8 passed, 0 failed**.
 - New/modified test classes in isolation
   (`HarnessContextObservabilityTests` + `HarnessContextDiagnosticsValidationTests`):
   **27 passed, 0 failed** (14 observability and 13 diagnostics-validation
   tests).
-- Coordinator/concurrency/assembly filter
+- Coordinator/concurrency/channel/progress filter, combining every area
+  touched by the admission-gate and backpressure fixes
   (`HarnessCompactionRunCoordinatorTests` + `HarnessContextAssembler` +
-  `ConcurrentProviderCalls` + `Concurrent`): **44 passed, 0 failed**, run
-  **10 consecutive times** with identical, stable results each time — no
-  flakiness in either the new bug-reproduction test or the pre-existing
-  `SameOuterRun_ConcurrentProviderCalls_ExactlyOneForwardsRawBody` test.
-- Full Harness filter (`FullyQualifiedName~Harness`): **609 passed, 0
-  failed** (no regressions; +8 over the prior 601, all from this final
-  evidence pass).
-- Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,180
-  passed, 0 failed** (no regressions; +8 over the prior 2,172), re-run
-  **3 consecutive times** with identical, stable results each time.
+  `ConcurrentProviderCalls` + `Concurrent` + `ChannelProgressReporterTests`):
+  **53 passed, 0 failed**, run **3 consecutive times** with identical,
+  stable results each time.
+- Full Harness filter (`FullyQualifiedName~Harness`): **610 passed, 0
+  failed**, re-run **2 consecutive times** with identical, stable results
+  each time.
+- Full `NexusLabs.Foundry.MicrosoftAgentFramework.Tests` project: **2,181
+  passed, 0 failed**, re-run **2 consecutive times** with identical, stable
+  results each time.
 - Full `src` solution build (`dotnet build src\NexusLabs.Foundry.slnx -c Debug`):
-  succeeded, 0 errors; pre-existing generated-code `CS0162` warnings in
-  unrelated example apps (`DagRoutingApp.Agents`,
-  `GeneratorCoexistenceApp`, `DevUIApp` twice) not touched by any change in
-  this gate, the follow-up pass, or this final evidence pass.
+  succeeded, 0 errors; the same 4 pre-existing generated-code `CS0162`
+  warnings in unrelated example apps (`DagRoutingApp.Agents`,
+  `GeneratorCoexistenceApp`, `DevUIApp` twice), not touched by any change in
+  this gate.
 
 ## Validation status and next permitted gates
 
-- **Local:** complete — targeted new-test filters, a 10x-repeated
-  coordinator/concurrency/assembly filter, a 3x-repeated full project test
-  suite, and a full solution build all pass with zero regressions and zero
-  observed flakiness.
+- **Local:** complete — targeted new-test filters, a 3x-repeated
+  coordinator/concurrency/channel/progress filter, a 2x-repeated full Harness
+  filter, a 2x-repeated full project test suite, and a full solution build
+  all pass with zero regressions and zero observed flakiness.
 - **Review:** independent correctness, MAF-order, and architecture review
-  completed; all blocking findings — including the concurrency blocker
-  documented above — were adopted and revalidated.
-- **Hosted CI:** passed:
+  completed; every finding in "Review dispositions (final)" above was
+  adopted and revalidated.
+- **Hosted CI:** the links below are prior passing evidence from
+  [PR #106](https://github.com/ncosentino/foundry/pull/106) (the concurrency
+  blocker fix) and reflect that state of the branch, not the current working
+  tree. The final same-run provider-call admission gate and
+  `ChannelProgressReporter` bounded-backpressure fix — including the
+  narrowed `ChannelClosedException` catch — have not been pushed and have no
+  hosted CI run of their own yet; per this task's explicit instruction not
+  to commit, push, or open a PR, those checks remain pending against this
+  fix's own future PR and are not claimed as covered by the PR #106 links:
   [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30174782948/job/89721699167),
   [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30174782948/job/89721699193),
   [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30174782929/job/89721699143),
@@ -881,6 +721,14 @@ evidence pass):
   [documentation](https://github.com/ncosentino/foundry/actions/runs/30174782947/job/89721699383).
 - **Next permitted gates:** G6 (background agents, loop evaluation) and G7
   (test/AOT hardening, including the completed-run diagnostics aggregation
-  this leaf explicitly deferred, and optionally genuine producer-side flow
-  control for the progress-event channel) per the dependency graph in
-  `tasks.md`; G5 is cumulatively complete.
+  this gate explicitly deferred) per the dependency graph in `tasks.md`; G5
+  is cumulatively complete. Genuine producer-side flow control for the
+  progress-event channel — previously a possible G7 follow-up — was
+  implemented in this gate rather than deferred.
+
+## ADR reference
+
+See `docs/adr/adr-0007-experimental-hybrid-context-compaction.md` for the
+full architectural decision record backing this gate: context/scope,
+decision drivers, the decision itself, alternatives considered, and
+consequences (positive, negative, and neutral).

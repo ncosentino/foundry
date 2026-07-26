@@ -609,11 +609,24 @@ public sealed class HarnessCompactionRunCoordinatorTests
         Assert.Equal(2, leaf.ObservedCalls.Count(call => call.Any(message => message.Text == rawBody)));
     }
 
+    /// <summary>
+    /// Proves the same-run provider-call admission gate added to close the residual concurrency gap
+    /// the reservation/lease protocol alone could not: two nested provider calls racing within the
+    /// very same outer run can no longer even begin overlapping — call B is fully blocked (never
+    /// reaching assembly, let alone the real provider) for as long as call A's own assembly, real
+    /// dispatch, and Complete/Release decision remain unresolved. This supersedes the previous
+    /// version of this test, which deliberately forced both calls to genuinely overlap inside the
+    /// real provider via a barrier — that scenario is no longer reachable at all once this gate is in
+    /// place, which is exactly the point: the class of race the barrier-based test exercised is now
+    /// structurally impossible rather than merely resolved after the fact by the revision-restart
+    /// logic (still covered directly, as defense-in-depth, by
+    /// <see cref="SameOuterRun_LoserFiltersThenWinnerPressureEvictsAndReleases_LoserRestartsAndDeliversExactlyOnce"/>).
+    /// </summary>
     [Fact]
-    public async Task SameOuterRun_ConcurrentProviderCalls_ExactlyOneForwardsRawBody()
+    public async Task SameOuterRun_ConcurrentCalls_GateBlocksSecondCallUntilFirstReleases_ExactlyOneDeliversRawBody()
     {
         const string rawBody = "SECRET-RAW-RECOVERED-BODY";
-        const string artifactContentSeed = "coordinator-same-run-concurrent-artifact-content";
+        const string artifactContentSeed = "coordinator-same-run-gate-artifact-content";
         const string recoveredEntryId = "recovered-entry-id";
         var digest = HarnessArtifactIdentity.ComputeDigest(artifactContentSeed);
         var reference = HarnessCompactionTestFixture.SampleReference(artifactContentSeed, DateTimeOffset.UtcNow);
@@ -632,8 +645,10 @@ public sealed class HarnessCompactionRunCoordinatorTests
                 new(ChatRole.User, "hello"),
             };
 
-            // A classifier deliberately free of any shared mutable state, since it is invoked
-            // concurrently by two provider calls racing within the very same run scope below.
+            // A classifier deliberately free of any shared mutable state, since assembly for A and B
+            // could in principle still overlap in wall-clock time with the classifier itself (the
+            // gate serializes assembly-through-dispatch as a whole; it does not require the
+            // classifier specifically to be reentrant-unsafe to prove the point).
             var classifier = new NoOverrideMessageClassifier();
             var hybridProfile = HarnessHybridProfile.Create(
                 HarnessCompactionTestFixture.CreatePolicy(
@@ -644,10 +659,10 @@ public sealed class HarnessCompactionRunCoordinatorTests
                     HarnessContextSnapshotAugmentation.WithRecoverableSegment(
                         baselineEntries, recoveredEntryId, segment)));
 
-            // Forces genuinely overlapping execution: both provider calls below must actually arrive
-            // concurrently before either is allowed to complete, so this test cannot pass merely
-            // because the two calls happened to run sequentially.
-            var leaf = new BarrierObservingChatClient(expectedConcurrentCalls: 2);
+            // The leaf's first arrival blocks until explicitly released, letting the test prove B
+            // never reaches it while A is still in flight — the direct, deterministic replacement
+            // for the barrier-forced overlap the previous version of this test required.
+            var leaf = new GatedObservingChatClient();
             var coordinator = new HarnessCompactionRunCoordinator();
 
             // One shared outer run scope, exactly as HarnessGuardedAgent.RunCoreAsync begins around an
@@ -659,22 +674,89 @@ public sealed class HarnessCompactionRunCoordinatorTests
             var compactionClientB = new HarnessHybridCompactionChatClient(
                 leaf, hybridProfile, binding, accessor, HarnessCompositionTestFixture.SessionId, coordinator, progressAccessor: null);
 
+            // Call A assembles, reserves the digest, dispatches to the leaf, and blocks there.
             var callA = compactionClientA.GetResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken);
+            await leaf.FirstCallArrived.WaitAsync(
+                TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+            // Call B starts concurrently, within the very same run scope, while A still holds the
+            // same-run admission gate — A has not returned from the real provider, let alone made its
+            // Complete/Release decision.
             var callB = compactionClientB.GetResponseAsync(
                 messages, cancellationToken: TestContext.Current.CancellationToken);
 
-            await Task.WhenAll(callA, callB);
+            // B must not even reach the real provider — let alone begin assembling a second,
+            // potentially conflicting reservation — while A's own call is still unresolved: the leaf
+            // must observe exactly one arrival for as long as A stays blocked.
+            var stillPending = await Task.WhenAny(
+                callB, Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken));
+            Assert.NotSame(callB, stillPending);
+            Assert.Equal(1, leaf.CallCount);
+
+            // Releasing A lets it finish — forwarding the raw body, then committing the lease and
+            // vacating the same-run admission gate so B can finally begin.
+            leaf.ReleaseFirstCall();
+            await callA;
+
+            await callB.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
             Assert.Equal(2, leaf.CallCount);
 
-            // Both calls genuinely overlapped inside the real provider (the barrier only releases once
-            // both arrivals are observed), yet exactly one of them ever forwarded the raw recovered
-            // body: the atomic reservation/lease protocol — not incidental sequencing — is what
-            // prevents the other concurrent call from also forwarding it.
+            // A forwarded the raw body (it reserved and delivered it, uncontested). B's own capture —
+            // which, thanks to the gate, strictly followed A's commit in real time rather than racing
+            // it — correctly filters the now-already-delivered digest back out on its very first
+            // attempt, with no restart required. The raw body reaches the real provider exactly once
+            // across the whole run: never zero, never twice.
             var callsWithRawBody = leaf.ObservedCalls.Count(call => call.Any(message => message.Text == rawBody));
             Assert.Equal(1, callsWithRawBody);
+            Assert.Contains(leaf.ObservedCalls[0], message => message.Text == rawBody);
+            Assert.DoesNotContain(leaf.ObservedCalls[1], message => message.Text == rawBody);
         }
+    }
+
+    /// <summary>
+    /// A caller waiting on <see cref="HarnessCompactionRunCoordinator.EnterProviderCallAsync"/> that is
+    /// canceled before the slot frees must observe the cancellation (never silently swallow it or
+    /// pretend it was admitted), and must leave the gate exactly as if the canceled attempt had never
+    /// happened: the very next caller — including the one that already held the slot, once it
+    /// releases — must be admitted normally, with no residual hold left behind by the canceled waiter
+    /// and no digest reservation of any kind ever created on its behalf.
+    /// </summary>
+    [Fact]
+    public async Task EnterProviderCallAsync_CancellationWhileWaiting_PropagatesAndLeavesGateUnaffected()
+    {
+        var coordinator = new HarnessCompactionRunCoordinator();
+        using var runScope = coordinator.BeginRun();
+
+        // First caller occupies the sole same-run provider-call slot.
+        var firstLease = await coordinator.EnterProviderCallAsync(CancellationToken.None);
+
+        using var cts = new CancellationTokenSource();
+        var waitingTask = coordinator.EnterProviderCallAsync(cts.Token);
+
+        // Give the second caller a moment to genuinely start waiting on the gate before canceling it,
+        // so this test cannot pass merely because cancellation raced ahead of the wait even starting.
+        var stillWaiting = await Task.WhenAny(
+            waitingTask, Task.Delay(TimeSpan.FromMilliseconds(200), TestContext.Current.CancellationToken));
+        Assert.NotSame(waitingTask, stillWaiting);
+
+        cts.Cancel();
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => waitingTask);
+
+        // The canceled waiter never acquired the gate, so it never needs to (and must not) release
+        // it: releasing the first lease must immediately admit a brand-new caller.
+        firstLease.Dispose();
+
+        var secondLease = await coordinator
+            .EnterProviderCallAsync(CancellationToken.None)
+            .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        secondLease.Dispose();
+
+        // No reservation of any kind was ever created by the canceled waiter: TryReserve for an
+        // arbitrary digest still succeeds cleanly in this same run scope.
+        Assert.True(coordinator.TryReserve("gate-cancellation-unaffected-digest", Guid.NewGuid()));
     }
 
     /// <summary>
@@ -1373,6 +1455,83 @@ public sealed class HarnessCompactionRunCoordinatorTests
         IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
             IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken) =>
             GetStreamingResponseAsyncCore(chatMessages, cancellationToken);
+
+        object? IChatClient.GetService(Type serviceType, object? key) => null;
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    /// Test-only leaf <see cref="IChatClient"/> whose very first call blocks until explicitly
+    /// released via <see cref="ReleaseFirstCall"/>, while every later call returns immediately. Lets a
+    /// test deterministically prove that a second, concurrently-started caller never reaches this
+    /// client at all — the same-run admission gate blocks it upstream — for as long as the first call
+    /// remains unreleased, without needing a barrier that requires both calls to actually arrive
+    /// (which the gate now makes structurally impossible for two calls sharing one run scope).
+    /// Thread-safe: every mutable field is guarded by a lock or is itself thread-safe.
+    /// </summary>
+    private sealed class GatedObservingChatClient : IChatClient
+    {
+        private readonly object _gate = new();
+        private readonly List<IReadOnlyList<ChatMessage>> _observedCalls = [];
+        private readonly TaskCompletionSource _firstCallArrived = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource _releaseFirstCall = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        /// <summary>Completes once the first call has arrived and is now blocked.</summary>
+        internal Task FirstCallArrived => _firstCallArrived.Task;
+
+        /// <summary>Unblocks the first call so it can return.</summary>
+        internal void ReleaseFirstCall() => _releaseFirstCall.TrySetResult();
+
+        internal IReadOnlyList<IReadOnlyList<ChatMessage>> ObservedCalls
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return [.. _observedCalls];
+                }
+            }
+        }
+
+        internal int CallCount
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _observedCalls.Count;
+                }
+            }
+        }
+
+        async Task<ChatResponse> IChatClient.GetResponseAsync(
+            IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken)
+        {
+            var materialized = chatMessages.ToList();
+            bool isFirstCall;
+            lock (_gate)
+            {
+                isFirstCall = _observedCalls.Count == 0;
+                _observedCalls.Add(materialized);
+            }
+
+            if (isFirstCall)
+            {
+                _firstCallArrived.TrySetResult();
+                await _releaseFirstCall.Task
+                    .WaitAsync(TimeSpan.FromSeconds(10), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            return new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok"));
+        }
+
+        IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
+            IEnumerable<ChatMessage> chatMessages, ChatOptions? options, CancellationToken cancellationToken) =>
+            throw new NotSupportedException("Streaming is not required by this test client.");
 
         object? IChatClient.GetService(Type serviceType, object? key) => null;
 

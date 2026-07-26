@@ -111,6 +111,17 @@ internal sealed class HarnessHybridCompactionChatClient(
         // the reservation bookkeeping for that call.
         using var runScope = _runCoordinator.EnsureRunScope();
 
+        // Admits at most one nested provider call — assembly through real dispatch and the
+        // Complete/Release decision below — per outer run at a time. Acquired immediately after the
+        // run scope is established and held (via this `using`, which disposes only once this entire
+        // method returns or throws) until the finally block below has finished, so a sibling call
+        // racing within the very same run can never even begin assembling while this call's own
+        // reservation is unresolved. See the remarks on
+        // <see cref="HarnessCompactionRunCoordinator.EnterProviderCallAsync"/>.
+        using var providerCallLease = await _runCoordinator
+            .EnterProviderCallAsync(cancellationToken)
+            .ConfigureAwait(false);
+
         var assembly = await AssembleBoundedMessagesAsync(messages, cancellationToken).ConfigureAwait(false);
 
         var completedSuccessfully = false;
@@ -143,6 +154,14 @@ internal sealed class HarnessHybridCompactionChatClient(
         // See the remarks on GetResponseAsync: the run scope must span the entire call, not merely
         // assembly, for the same reason.
         using var runScope = _runCoordinator.EnsureRunScope();
+
+        // See the remarks on GetResponseAsync: the same-run provider-call admission gate must also
+        // span the entire call — assembly through the entire streamed response and the Complete/Release
+        // decision below — so a sibling call within the same run can never begin while this stream is
+        // still in flight.
+        using var providerCallLease = await _runCoordinator
+            .EnterProviderCallAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         var assembly = await AssembleBoundedMessagesAsync(messages, cancellationToken).ConfigureAwait(false);
 
