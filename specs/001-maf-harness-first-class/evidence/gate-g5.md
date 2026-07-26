@@ -76,16 +76,15 @@ Cumulative test counts on top of the G4 foundation gate (`gate-g4.md`):
 
 - Every delta above was measured directly against the working tree via
   `dotnet test`, not estimated from source occurrences.
-- Reviewed G5 integration head: `c0240a1c` on `harness/g5-integration`; the
+- Final reviewed G5 integration head: `2c0bbd80` on `harness/g5-integration`; the
   observability/gate leaf merged through
   [PR #102](https://github.com/ncosentino/foundry/pull/102), a subsequent
   evidence refresh through [PR #104](https://github.com/ncosentino/foundry/pull/104),
   and the concurrency-blocker fix through
   [PR #106](https://github.com/ncosentino/foundry/pull/106). The final
   same-run provider-call admission gate and `ChannelProgressReporter`
-  bounded-backpressure fix (net +1/+1 above) have not yet been pushed or
-  opened as a PR; see "Validation status and next permitted gates" below for
-  what the recorded hosted CI links do and do not cover.
+  bounded-backpressure fix merged through
+  [PR #108](https://github.com/ncosentino/foundry/pull/108).
 - All `dotnet build`/`dotnet test` commands for this gate were run with
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'` set.
 
@@ -705,20 +704,12 @@ the narrowed `ChannelClosedException` catch in `ChannelProgressReporter.Report`)
 - **Review:** independent correctness, MAF-order, and architecture review
   completed; every finding in "Review dispositions (final)" above was
   adopted and revalidated.
-- **Hosted CI:** the links below are prior passing evidence from
-  [PR #106](https://github.com/ncosentino/foundry/pull/106) (the concurrency
-  blocker fix) and reflect that state of the branch, not the current working
-  tree. The final same-run provider-call admission gate and
-  `ChannelProgressReporter` bounded-backpressure fix — including the
-  narrowed `ChannelClosedException` catch — have not been pushed and have no
-  hosted CI run of their own yet; per this task's explicit instruction not
-  to commit, push, or open a PR, those checks remain pending against this
-  fix's own future PR and are not claimed as covered by the PR #106 links:
-  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30174782948/job/89721699167),
-  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30174782948/job/89721699193),
-  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30174782929/job/89721699143),
+- **Hosted CI:** passed for the final G5 integration state through PR #108:
+  [build/test/package](https://github.com/ncosentino/foundry/actions/runs/30181327414/job/89738244873),
+  [standard NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30181327414/job/89738244885),
+  [Harness NativeAOT](https://github.com/ncosentino/foundry/actions/runs/30181327413/job/89738244866),
   and
-  [documentation](https://github.com/ncosentino/foundry/actions/runs/30174782947/job/89721699383).
+  [documentation](https://github.com/ncosentino/foundry/actions/runs/30181327430/job/89738245016).
 - **Next permitted gates:** G6 (background agents, loop evaluation) and G7
   (test/AOT hardening, including the completed-run diagnostics aggregation
   this gate explicitly deferred) per the dependency graph in `tasks.md`; G5
