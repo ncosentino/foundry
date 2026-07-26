@@ -32,6 +32,15 @@ public enum FoundryHarnessFeature
     HistoryPersistence,
 
     /// <summary>
+    /// The harness-level instructions (<c>HarnessAgentOptions.HarnessInstructions</c>) that guide
+    /// general tool usage and reasoning patterns, combined with (and preceding) agent-specific
+    /// instructions. <see langword="null"/> uses the upstream built-in default instructions,
+    /// <see cref="string.Empty"/> omits harness-level instructions entirely, and any other value is
+    /// used verbatim.
+    /// </summary>
+    HarnessInstructions,
+
+    /// <summary>
     /// The hosted <c>Microsoft.Extensions.AI.HostedWebSearchTool</c> added to chat options.
     /// </summary>
     WebSearch,
@@ -90,6 +99,13 @@ public enum FoundryHarnessFeature
     /// budget and an output token budget (or a custom strategy) are supplied.
     /// </summary>
     Compaction,
+
+    /// <summary>
+    /// Additional <c>Microsoft.Agents.AI.AIContextProvider</c> instances (mapped to
+    /// <c>HarnessAgentOptions.AIContextProviders</c>) included in the agent pipeline alongside the
+    /// built-in providers. Opt-in: disabled unless at least one instance is supplied.
+    /// </summary>
+    AdditionalContextProviders,
 
     /// <summary>
     /// The <c>Microsoft.Agents.AI.BackgroundAgentsProvider</c> context provider for delegating

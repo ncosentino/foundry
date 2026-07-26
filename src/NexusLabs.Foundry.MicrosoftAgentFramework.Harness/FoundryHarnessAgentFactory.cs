@@ -18,6 +18,16 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// </remarks>
 public sealed class FoundryHarnessAgentFactory
 {
+    /// <summary>
+    /// The exact upstream marker name for the hosted web search tool
+    /// (<c>Microsoft.Extensions.AI.HostedWebSearchTool().Name</c>), confirmed by live
+    /// instantiation against <c>Microsoft.Agents.AI.Harness</c> 1.15.0. When
+    /// <see cref="FoundryHarnessFeatureSelections.EnableWebSearch"/> is <see langword="true"/>, the
+    /// upstream bundle adds a tool with exactly this name to <c>ChatOptions.Tools</c>; a
+    /// caller-supplied tool sharing this name would collide with it.
+    /// </summary>
+    internal const string WebSearchToolName = "web_search";
+
     private readonly FoundryHarnessBundleDefaultsInspector _inspector = new();
 
     /// <summary>
@@ -112,6 +122,9 @@ public sealed class FoundryHarnessAgentFactory
         Validate(configuration);
 
         var tools = configuration.Tools.Count > 0 ? new List<AITool>(configuration.Tools) : null;
+        var additionalContextProviders = configuration.AdditionalContextProviders.Count > 0
+            ? new List<AIContextProvider>(configuration.AdditionalContextProviders)
+            : null;
 
         var options = new HarnessAgentOptions
         {
@@ -126,19 +139,28 @@ public sealed class FoundryHarnessAgentFactory
             },
             MaxContextWindowTokens = configuration.MaxContextWindowTokens,
             MaxOutputTokens = configuration.MaxOutputTokens,
+            CompactionStrategy = configuration.CompactionStrategy,
             DisableCompaction = !configuration.Features.EnableCompaction,
             MaximumIterationsPerRequest = configuration.MaximumIterationsPerRequest,
+            ChatHistoryProvider = configuration.ChatHistoryProvider,
+            AIContextProviders = additionalContextProviders,
             DisableToolAutoApproval = !configuration.Features.EnableToolAutoApproval,
+            ToolApprovalAgentOptions = configuration.ToolApprovalAgentOptions,
             DisableApprovalNotRequiredFunctionBypassing =
                 !configuration.Features.EnableApprovalNotRequiredFunctionBypassing,
             DisableApprovalResponseBinding = !configuration.Features.EnableApprovalResponseBinding,
             DisableFileMemory = !configuration.Features.EnableFileMemory,
+            FileMemoryStore = configuration.FileMemoryStore,
             FileAccessStore = configuration.FileAccessStore,
+            FileAccessProviderOptions = configuration.FileAccessProviderOptions,
             DisableWebSearch = !configuration.Features.EnableWebSearch,
             DisableTodoProvider = !configuration.Features.EnableTodoProvider,
             DisableAgentModeProvider = !configuration.Features.EnableAgentModeProvider,
+            AgentModeProviderOptions = configuration.AgentModeProviderOptions,
             DisableAgentSkillsProvider = !configuration.Features.EnableAgentSkills,
+            AgentSkillsSource = configuration.AgentSkillsSource,
             DisableOpenTelemetry = !configuration.Features.EnableOpenTelemetry,
+            OpenTelemetrySourceName = configuration.OpenTelemetrySourceName,
         };
 
         return configuration.ChatClient.AsHarnessAgent(options, loggerFactory, services);
@@ -150,6 +172,7 @@ public sealed class FoundryHarnessAgentFactory
         ArgumentNullException.ThrowIfNull(configuration.ChatClient);
         ArgumentNullException.ThrowIfNull(configuration.Tools);
         ArgumentNullException.ThrowIfNull(configuration.Features);
+        ArgumentNullException.ThrowIfNull(configuration.AdditionalContextProviders);
 
         if (string.IsNullOrWhiteSpace(configuration.Name))
         {
@@ -190,6 +213,21 @@ public sealed class FoundryHarnessAgentFactory
                 "FoundryHarnessAgentConfiguration.MaxContextWindowTokens must be greater than " +
                 "MaxOutputTokens. The upstream bundle requires MaxOutputTokens < " +
                 "MaxContextWindowTokens to reserve context space for the function-invocation loop.",
+                nameof(configuration));
+        }
+
+        // Reserve the context-window budget for enabled compaction so the disabled disposition
+        // cannot approach the upstream history provider's independent reducer activation path.
+        if (!configuration.Features.EnableCompaction && configuration.MaxContextWindowTokens is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.MaxContextWindowTokens was supplied while " +
+                "Features.EnableCompaction is false. This context-window budget is reserved for " +
+                "enabled compaction because the upstream default InMemoryChatHistoryProvider " +
+                "constructs a reducer when both token budgets are present, independently of " +
+                "DisableCompaction. Pass null for MaxContextWindowTokens when compaction is " +
+                "disabled. MaxOutputTokens alone may still be supplied as a standalone " +
+                "per-response output cap.",
                 nameof(configuration));
         }
 
@@ -235,13 +273,110 @@ public sealed class FoundryHarnessAgentFactory
                 nameof(configuration));
         }
 
+        if (configuration.Features.EnableWebSearch &&
+            configuration.Tools.Any(tool => string.Equals(tool.Name, WebSearchToolName, StringComparison.Ordinal)))
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.Tools contains a tool named " +
+                $"'{WebSearchToolName}' while FoundryHarnessFeatureSelections.EnableWebSearch is true. " +
+                "The upstream bundle adds its own hosted web search tool under this exact name when " +
+                "web search is enabled, and a caller-supplied tool with the same name would collide " +
+                "with it. Either rename the caller-supplied tool or set EnableWebSearch to false.",
+                nameof(configuration));
+        }
+
+        for (int i = 0; i < configuration.AdditionalContextProviders.Count; i++)
+        {
+            if (configuration.AdditionalContextProviders[i] is null)
+            {
+                throw new ArgumentException(
+                    "FoundryHarnessAgentConfiguration.AdditionalContextProviders contains a null " +
+                    $"element at index {i}.",
+                    nameof(configuration));
+            }
+        }
+
         if (configuration.Features.EnableCompaction &&
+            configuration.CompactionStrategy is null &&
             (configuration.MaxContextWindowTokens is null || configuration.MaxOutputTokens is null))
         {
             throw new ArgumentException(
                 "FoundryHarnessAgentConfiguration.Features.EnableCompaction is true, but " +
-                "MaxContextWindowTokens and MaxOutputTokens were not both supplied. The upstream " +
-                "bundle cannot honor in-loop compaction without both token budgets.",
+                "CompactionStrategy was not supplied and MaxContextWindowTokens/MaxOutputTokens " +
+                "were not both supplied. The upstream bundle cannot honor in-loop compaction " +
+                "without either an explicit strategy or both token budgets.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableCompaction && configuration.CompactionStrategy is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.CompactionStrategy was supplied while " +
+                "Features.EnableCompaction is false. Set EnableCompaction to true to use a custom " +
+                "compaction strategy, or pass null here to leave compaction disabled.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableFileMemory && configuration.FileMemoryStore is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.FileMemoryStore was supplied while " +
+                "Features.EnableFileMemory is false. Set EnableFileMemory to true to use a custom " +
+                "file memory store, or pass null here to leave file memory at its disabled state.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableAgentSkills && configuration.AgentSkillsSource is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.AgentSkillsSource was supplied while " +
+                "Features.EnableAgentSkills is false. Set EnableAgentSkills to true to use a custom " +
+                "skills source, or pass null here to leave agent skills at its disabled state.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableToolAutoApproval && configuration.ToolApprovalAgentOptions is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.ToolApprovalAgentOptions was supplied while " +
+                "Features.EnableToolAutoApproval is false. Set EnableToolAutoApproval to true to use " +
+                "custom approval options, or pass null here to leave tool auto-approval disabled.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableAgentModeProvider && configuration.AgentModeProviderOptions is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.AgentModeProviderOptions was supplied while " +
+                "Features.EnableAgentModeProvider is false. Set EnableAgentModeProvider to true to " +
+                "use custom mode options, or pass null here to leave the agent-mode provider disabled.",
+                nameof(configuration));
+        }
+
+        if (configuration.FileAccessStore is null && configuration.FileAccessProviderOptions is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.FileAccessProviderOptions was supplied while " +
+                "FileAccessStore is null. FileAccessProviderOptions only applies when a " +
+                "FileAccessStore is also supplied; supply a store or pass null here.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableOpenTelemetry && configuration.OpenTelemetrySourceName is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.OpenTelemetrySourceName was supplied while " +
+                "Features.EnableOpenTelemetry is false. Set EnableOpenTelemetry to true to use a " +
+                "custom source name, or pass null here to leave OpenTelemetry disabled.",
+                nameof(configuration));
+        }
+
+        if (configuration.OpenTelemetrySourceName is not null &&
+            string.IsNullOrWhiteSpace(configuration.OpenTelemetrySourceName))
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.OpenTelemetrySourceName must be non-empty when " +
+                "provided; pass null to use the upstream default source name.",
                 nameof(configuration));
         }
 

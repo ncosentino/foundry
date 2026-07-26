@@ -94,6 +94,256 @@ public sealed class FoundryHarnessAgentFactoryTests
     }
 
     [Fact]
+    public void Create_CompactionEnabledWithExplicitStrategyAndNoTokenBudgets_ReturnsAgent()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableCompaction = true }) with
+        {
+            CompactionStrategy = new Microsoft.Agents.AI.Compaction.ContextWindowCompactionStrategy(
+                8_000, 1_000),
+        };
+
+        var agent = Factory.Create(configuration);
+
+        Assert.NotNull(agent);
+    }
+
+    [Fact]
+    public void Create_WebSearchEnabledWithCollidingToolName_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableWebSearch = true }) with
+        {
+            Tools = [AIFunctionFactory.Create(() => "ok", name: "web_search")],
+        };
+
+        var exception = Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+        Assert.Contains("web_search", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Create_WebSearchDisabledWithSameToolName_ReturnsAgent()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled()) with
+        {
+            Tools = [AIFunctionFactory.Create(() => "ok", name: "web_search")],
+        };
+
+        var agent = Factory.Create(configuration);
+
+        Assert.NotNull(agent);
+    }
+
+    [Fact]
+    public void Create_WebSearchEnabledWithoutCollidingToolName_ReturnsAgent()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableWebSearch = true }) with
+        {
+            Tools = [AIFunctionFactory.Create(() => "ok", name: "distinct-tool")],
+        };
+
+        var agent = Factory.Create(configuration);
+
+        Assert.NotNull(agent);
+    }
+
+    [Fact]
+    public void Create_FileMemoryStoreSuppliedWhileDisabled_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            FileMemoryStore = new InMemoryAgentFileStoreFake(),
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_AgentSkillsSourceSuppliedWhileDisabled_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            AgentSkillsSource = new FakeAgentSkillsSource(),
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_ToolApprovalAgentOptionsSuppliedWhileDisabled_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            ToolApprovalAgentOptions = new(),
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_AgentModeProviderOptionsSuppliedWhileDisabled_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            AgentModeProviderOptions = new(),
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_CompactionStrategySuppliedWhileDisabled_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            CompactionStrategy = new Microsoft.Agents.AI.Compaction.ContextWindowCompactionStrategy(
+                8_000, 1_000),
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_CompactionDisabledWithMaxContextWindowTokens_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled()) with
+        {
+            MaxContextWindowTokens = 8_000,
+        };
+
+        var exception = Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+        Assert.Contains("MaxContextWindowTokens", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DescribeEffectiveDefaults_CompactionDisabledWithMaxContextWindowTokens_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled()) with
+        {
+            MaxContextWindowTokens = 8_000,
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.DescribeEffectiveDefaults(configuration));
+    }
+
+    [Fact]
+    public void Create_CompactionDisabledWithMaxOutputTokensOnly_ReturnsAgent()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled()) with
+        {
+            MaxOutputTokens = 1_000,
+        };
+
+        var agent = Factory.Create(configuration);
+
+        Assert.NotNull(agent);
+    }
+
+    [Fact]
+    public void DescribeEffectiveDefaults_CompactionDisabledWithMaxOutputTokensOnly_ReportsCompactionDisabled()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled()) with
+        {
+            MaxOutputTokens = 1_000,
+        };
+
+        var defaults = Factory.DescribeEffectiveDefaults(configuration);
+
+        var compaction = defaults.GetDisposition(FoundryHarnessFeature.Compaction);
+        Assert.Equal(FoundryHarnessFeatureRequestedState.RequestedDisabled, compaction.RequestedState);
+        Assert.Equal(FoundryHarnessFeatureEffectiveState.Disabled, compaction.EffectiveState);
+        Assert.Equal(FoundryHarnessFeatureBackingSelection.NotApplicable, compaction.BackingSelection);
+    }
+
+    [Fact]
+    public void Create_FileAccessProviderOptionsSuppliedWithoutStore_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            FileAccessProviderOptions = new(),
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_OpenTelemetrySourceNameSuppliedWhileDisabled_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            OpenTelemetrySourceName = "custom-source",
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_BlankOpenTelemetrySourceName_ThrowsArgumentException(string sourceName)
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with { EnableOpenTelemetry = true }) with
+        {
+            OpenTelemetrySourceName = sourceName,
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_NullAdditionalContextProviders_ThrowsArgumentNullException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            AdditionalContextProviders = null!,
+        };
+
+        Assert.Throws<ArgumentNullException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_NullAdditionalContextProviderElement_ThrowsArgumentException()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            AdditionalContextProviders = [null!],
+        };
+
+        Assert.Throws<ArgumentException>(() => Factory.Create(configuration));
+    }
+
+    [Fact]
+    public void Create_AllCoherentBackingObjectsSupplied_ReturnsAgent()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesEnabled()) with
+        {
+            MaxContextWindowTokens = 8_000,
+            MaxOutputTokens = 1_000,
+            ChatHistoryProvider = new FakeChatHistoryProvider(),
+            FileMemoryStore = new InMemoryAgentFileStoreFake(),
+            AgentSkillsSource = new FakeAgentSkillsSource(),
+            ToolApprovalAgentOptions = new(),
+            AgentModeProviderOptions = new(),
+            OpenTelemetrySourceName = "custom-source",
+            FileAccessStore = new InMemoryAgentFileStoreFake(),
+            FileAccessProviderOptions = new(),
+            AdditionalContextProviders = [new FakeAIContextProvider()],
+        };
+
+        var agent = Factory.Create(configuration);
+
+        Assert.NotNull(agent);
+    }
+
+    [Fact]
     public void Create_ChatClientWithExistingFunctionInvocationLoop_ThrowsInvalidOperationException()
     {
         var decoratedChatClient = new ChatClientBuilder(new FakeHarnessChatClient())
@@ -125,15 +375,12 @@ public sealed class FoundryHarnessAgentFactoryTests
             ChatClient = decoratedChatClient,
         };
 
-        // OTel enabled + pre-existing OTel → duplicate telemetry owner
         Assert.Throws<InvalidOperationException>(() => Factory.Create(configuration));
     }
 
     [Fact]
     public void Create_OpenTelemetryDisabledWithExistingInstrumentation_ThrowsInvalidOperationException()
     {
-        // Fail-closed: pre-existing OTel is rejected even when EnableOpenTelemetry is false,
-        // because the requested-disabled state would be ineffective (the instrumentation remains active).
         var decoratedChatClient = new ChatClientBuilder(new FakeHarnessChatClient())
             .UseOpenTelemetry()
             .Build();
@@ -149,9 +396,6 @@ public sealed class FoundryHarnessAgentFactoryTests
     [Fact]
     public void DescribeEffectiveDefaults_OpenTelemetryDisabledWithExistingInstrumentation_ThrowsInvalidOperationException()
     {
-        // Defaults-report consistency: the report and Create have the same validity envelope.
-        // A configuration that would fail Create must also fail DescribeEffectiveDefaults so
-        // the inspector never produces a report that cannot actually be constructed.
         var decoratedChatClient = new ChatClientBuilder(new FakeHarnessChatClient())
             .UseOpenTelemetry()
             .Build();
@@ -262,7 +506,6 @@ public sealed class FoundryHarnessAgentFactoryTests
     [Fact]
     public void Create_MaxOutputTokensEqualToMaxContextWindowTokens_ThrowsArgumentException()
     {
-        // Upstream requires MaxOutputTokens < MaxContextWindowTokens
         var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
         {
             MaxContextWindowTokens = 1_000,
@@ -352,8 +595,6 @@ public sealed class FoundryHarnessAgentFactoryTests
     [Fact]
     public void DescribeEffectiveDefaults_CompactionEnabledWithoutBudgets_ThrowsSameAsCreate()
     {
-        // Validates that DescribeEffectiveDefaults applies the same validation as Create,
-        // ensuring the report can never describe a configuration that cannot be constructed.
         var configuration = HarnessBundleTestsHelpers.CreateBaseline(
             HarnessBundleTestsHelpers.AllFeaturesEnabled());
 

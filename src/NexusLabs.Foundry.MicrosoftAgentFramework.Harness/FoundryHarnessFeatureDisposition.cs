@@ -37,9 +37,27 @@ public sealed record FoundryHarnessFeatureDisposition
     public string? Limitation { get; private init; }
 
     /// <summary>
+    /// Gets whether this dimension has a configurable backing object (a store, source, or options
+    /// instance) and, if so, whether the caller supplied one explicitly or the upstream bundle
+    /// substitutes its own built-in default.
+    /// </summary>
+    public FoundryHarnessFeatureBackingSelection BackingSelection { get; private init; }
+
+    /// <summary>
+    /// Gets a human-readable, source-derived description of exactly which backing implementation
+    /// is in effect. Non-<see langword="null"/> exactly when <see cref="BackingSelection"/> is not
+    /// <see cref="FoundryHarnessFeatureBackingSelection.NotApplicable"/>: it names the upstream
+    /// default semantics (for <see cref="FoundryHarnessFeatureBackingSelection.UpstreamDefault"/>) or
+    /// confirms the caller-supplied instance is used directly (for
+    /// <see cref="FoundryHarnessFeatureBackingSelection.CallerSupplied"/>).
+    /// </summary>
+    public string? BackingDescription { get; private init; }
+
+    /// <summary>
     /// Creates a validated <see cref="FoundryHarnessFeatureDisposition"/> enforcing the coherence
-    /// invariants between <paramref name="effectiveState"/>, <paramref name="requestedState"/>, and
-    /// <paramref name="limitation"/>.
+    /// invariants between <paramref name="effectiveState"/>, <paramref name="requestedState"/>,
+    /// <paramref name="limitation"/>, <paramref name="backingSelection"/>, and
+    /// <paramref name="backingDescription"/>.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -58,6 +76,10 @@ public sealed record FoundryHarnessFeatureDisposition
     /// <item><description>
     /// When <paramref name="limitation"/> is non-null it must not be whitespace-only.
     /// </description></item>
+    /// <item><description>
+    /// <paramref name="backingDescription"/> must be non-null and non-whitespace exactly when
+    /// <paramref name="backingSelection"/> is not <see cref="FoundryHarnessFeatureBackingSelection.NotApplicable"/>.
+    /// </description></item>
     /// </list>
     /// </para>
     /// </remarks>
@@ -65,7 +87,9 @@ public sealed record FoundryHarnessFeatureDisposition
         FoundryHarnessFeature feature,
         FoundryHarnessFeatureRequestedState requestedState,
         FoundryHarnessFeatureEffectiveState effectiveState,
-        string? limitation)
+        string? limitation,
+        FoundryHarnessFeatureBackingSelection backingSelection,
+        string? backingDescription)
     {
         if (!Enum.IsDefined(feature))
         {
@@ -86,6 +110,13 @@ public sealed record FoundryHarnessFeatureDisposition
             throw new ArgumentOutOfRangeException(
                 nameof(effectiveState), effectiveState,
                 $"EffectiveState must be a defined {nameof(FoundryHarnessFeatureEffectiveState)} value.");
+        }
+
+        if (!Enum.IsDefined(backingSelection))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(backingSelection), backingSelection,
+                $"BackingSelection must be a defined {nameof(FoundryHarnessFeatureBackingSelection)} value.");
         }
 
         bool isAlwaysOnUnavoidable = effectiveState == FoundryHarnessFeatureEffectiveState.AlwaysOnUnavoidable;
@@ -115,12 +146,31 @@ public sealed record FoundryHarnessFeatureDisposition
                 nameof(limitation));
         }
 
+        bool backingApplicable = backingSelection != FoundryHarnessFeatureBackingSelection.NotApplicable;
+        if (backingApplicable && string.IsNullOrWhiteSpace(backingDescription))
+        {
+            throw new ArgumentException(
+                $"A non-empty {nameof(BackingDescription)} is required when {nameof(BackingSelection)} is not " +
+                $"{nameof(FoundryHarnessFeatureBackingSelection)}.{nameof(FoundryHarnessFeatureBackingSelection.NotApplicable)}.",
+                nameof(backingDescription));
+        }
+
+        if (!backingApplicable && backingDescription is not null)
+        {
+            throw new ArgumentException(
+                $"{nameof(BackingDescription)} must be null when {nameof(BackingSelection)} is " +
+                $"{nameof(FoundryHarnessFeatureBackingSelection)}.{nameof(FoundryHarnessFeatureBackingSelection.NotApplicable)}.",
+                nameof(backingDescription));
+        }
+
         return new FoundryHarnessFeatureDisposition
         {
             Feature = feature,
             RequestedState = requestedState,
             EffectiveState = effectiveState,
             Limitation = limitation,
+            BackingSelection = backingSelection,
+            BackingDescription = backingDescription,
         };
     }
 }

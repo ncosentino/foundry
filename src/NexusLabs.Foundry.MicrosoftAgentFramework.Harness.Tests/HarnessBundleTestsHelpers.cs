@@ -54,5 +54,14 @@ internal static class HarnessBundleTestsHelpers
             MaxOutputTokens = null,
             MaximumIterationsPerRequest = null,
             FileAccessStore = null,
+            FileAccessProviderOptions = null,
+            ChatHistoryProvider = null,
+            FileMemoryStore = null,
+            AgentSkillsSource = null,
+            ToolApprovalAgentOptions = null,
+            AgentModeProviderOptions = null,
+            CompactionStrategy = null,
+            OpenTelemetrySourceName = null,
+            AdditionalContextProviders = [],
         };
 }
