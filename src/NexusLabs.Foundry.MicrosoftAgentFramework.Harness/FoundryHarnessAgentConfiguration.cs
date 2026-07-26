@@ -2,6 +2,8 @@ using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Compaction;
 using Microsoft.Extensions.AI;
 
+using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
+
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 /// <summary>
@@ -93,6 +95,29 @@ public sealed record FoundryHarnessAgentConfiguration
     /// Gets the explicit choices for every default-on-but-disableable upstream bundle dimension.
     /// </summary>
     public required FoundryHarnessFeatureSelections Features { get; init; }
+
+    /// <summary>
+    /// Gets the Foundry progress accessor used to emit ordered agent, model-call, and tool-call
+    /// events around the upstream bundle pipeline, or <see langword="null"/> to disable Foundry
+    /// progress.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The caller must establish an active reporter scope before running the agent; without one,
+    /// reporting is a no-op. The accessor is supplied explicitly rather than resolved from the
+    /// factory's service provider so progress composition has one inspectable source of truth.
+    /// </para>
+    /// <para>
+    /// This option does not add OpenTelemetry instrumentation or another function-invocation loop.
+    /// The upstream Harness bundle remains the sole owner of both.
+    /// </para>
+    /// <para>
+    /// Foundry observes tool execution by chaining the constructed bundle's
+    /// <c>FunctionInvokingChatClient.FunctionInvoker</c>. Replacing that delegate after construction
+    /// also replaces Foundry's tool-progress hook.
+    /// </para>
+    /// </remarks>
+    public required IProgressReporterAccessor? ProgressAccessor { get; init; }
 
     /// <summary>
     /// Gets the maximum number of tokens the model's context window supports, or

@@ -7,12 +7,10 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// <summary>
 /// Proves that the optional Harness bundle package is isolated from the core
 /// <c>NexusLabs.Foundry.MicrosoftAgentFramework</c> package: the core package never references
-/// <c>Microsoft.Agents.AI.Harness</c> or Needlr, this optional package's production code
-/// references exactly the upstream bundle package (no core dependency at all), and the public
+/// <c>Microsoft.Agents.AI.Harness</c> or Needlr, this optional package references only the neutral
+/// core progress contracts and the upstream bundle package, and the public
 /// namespace boundary between the two Harness surfaces (core's internal selected-provider lane
-/// versus this package's bundle lane) is preserved. This test project keeps its own separate
-/// reference to core purely to assert these isolation boundaries via reflection; that reference
-/// is not part of the bundle package's own dependency closure.
+/// versus this package's bundle lane) is preserved.
 /// </summary>
 public sealed class HarnessPackageIsolationTests
 {
@@ -77,28 +75,32 @@ public sealed class HarnessPackageIsolationTests
     }
 
     [Fact]
-    public void BundleLibrary_DependsOnExactlyHarnessBundlePackage()
+    public void BundleLibrary_DependsOnExactlyCoreAndHarnessBundlePackages()
     {
         var closure = DependencyClosureReader.ReadDirectDependenciesByLibraryName(TestAssemblyDepsJsonPath);
         var bundleDependencies = closure[BundleAssemblyName];
 
         Assert.Equal(
-            new HashSet<string>(StringComparer.Ordinal) { HarnessAssemblyName },
+            new HashSet<string>(StringComparer.Ordinal)
+            {
+                CoreAssemblyName,
+                HarnessAssemblyName,
+            },
             bundleDependencies);
     }
 
     [Fact]
-    public void BundleAssembly_DoesNotReferenceCore()
+    public void BundleAssembly_ReferencesCore()
     {
         var referencedNames = GetReferencedSimpleNames(BundleAssembly);
-        Assert.DoesNotContain(CoreAssemblyName, referencedNames);
+        Assert.Contains(CoreAssemblyName, referencedNames);
     }
 
     [Fact]
-    public void BundleProjectFile_HasNoCoreProjectReference()
+    public void BundleProjectFile_HasCoreProjectReference()
     {
         var csprojText = ReadProjectFileText(BundleAssemblyName);
-        Assert.DoesNotContain(
+        Assert.Contains(
             $"{CoreAssemblyName}.csproj",
             csprojText,
             StringComparison.Ordinal);

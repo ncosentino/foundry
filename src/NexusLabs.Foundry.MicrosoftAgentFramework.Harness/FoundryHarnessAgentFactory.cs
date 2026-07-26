@@ -111,6 +111,7 @@ public sealed class FoundryHarnessAgentFactory
         FoundryHarnessAgentConfiguration configuration)
     {
         Validate(configuration);
+        _ = FoundryHarnessTelemetryComposition.Create(configuration);
         return _inspector.Describe(configuration);
     }
 
@@ -120,6 +121,7 @@ public sealed class FoundryHarnessAgentFactory
         IServiceProvider? services)
     {
         Validate(configuration);
+        var telemetryComposition = FoundryHarnessTelemetryComposition.Create(configuration);
 
         var tools = configuration.Tools.Count > 0 ? new List<AITool>(configuration.Tools) : null;
         var additionalContextProviders = configuration.AdditionalContextProviders.Count > 0
@@ -163,7 +165,10 @@ public sealed class FoundryHarnessAgentFactory
             OpenTelemetrySourceName = configuration.OpenTelemetrySourceName,
         };
 
-        return configuration.ChatClient.AsHarnessAgent(options, loggerFactory, services);
+        var agent = telemetryComposition
+            .ComposeChatClient(configuration.ChatClient)
+            .AsHarnessAgent(options, loggerFactory, services);
+        return telemetryComposition.ComposeAgent(agent);
     }
 
     private static void Validate(FoundryHarnessAgentConfiguration configuration)

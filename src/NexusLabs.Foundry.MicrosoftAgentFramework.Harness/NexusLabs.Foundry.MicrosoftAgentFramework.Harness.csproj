@@ -11,19 +11,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Agents.AI.Harness" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests" />
   </ItemGroup>
 
-  <!-- Deliberately no ProjectReference to NexusLabs.Foundry.MicrosoftAgentFramework: this package's
-       production code composes only the upstream Microsoft.Agents.AI.Harness bundle and does not
-       currently use any public core type (IAgentFactory, diagnostics, progress reporting, or
-       generated-tool discovery). Add the reference back only when a concrete integration point in
-       this project actually consumes a public core type, and document that usage here when it does.
-       The Tests project keeps its own separate ProjectReference to core purely to assert this
-       package's dependency-isolation boundary; that reference is not a transitive production
-       dependency of this package. -->
+  <!-- The core ProjectReference is load-bearing only for Foundry's public progress contracts.
+       Upstream Microsoft.Agents.AI.Harness remains the sole function-loop and OpenTelemetry owner;
+       the optional package does not consume core discovery, provider composition, or Needlr. -->
 
 </Project>
