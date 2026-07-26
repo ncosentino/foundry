@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Optional Microsoft Agent Framework Harness bundle integration for NexusLabs.Foundry.MicrosoftAgentFramework. Constructs the official upstream complete-bundle HarnessAgent pipeline (Microsoft.Agents.AI.Harness) from explicit Foundry configuration, and reports requested-versus-effective bundle defaults. This package is optional: the core NexusLabs.Foundry.MicrosoftAgentFramework package never references it, and no other Foundry package gains it transitively.</PackageDescription>
+    <!-- Specific HarnessAgentOptions and AgentFileStore members consumed by this package carry
+         the MAAI001 experimental diagnostic in Microsoft.Agents.AI.Harness 1.15.0. Consuming
+         these members is intentional and load-bearing because this package's entire purpose is to
+         compose the official upstream complete-bundle pipeline. -->
+    <NoWarn>$(NoWarn);MAAI001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI.Harness" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests" />
+  </ItemGroup>
+
+  <!-- Deliberately no ProjectReference to NexusLabs.Foundry.MicrosoftAgentFramework: this package's
+       production code composes only the upstream Microsoft.Agents.AI.Harness bundle and does not
+       currently use any public core type (IAgentFactory, diagnostics, progress reporting, or
+       generated-tool discovery). Add the reference back only when a concrete integration point in
+       this project actually consumes a public core type, and document that usage here when it does.
+       The Tests project keeps its own separate ProjectReference to core purely to assert this
+       package's dependency-isolation boundary; that reference is not a transitive production
+       dependency of this package. -->
+
+</Project>
