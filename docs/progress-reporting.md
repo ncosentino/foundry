@@ -177,6 +177,6 @@ Built-in event types include:
 
 ---
 
-## Non-Blocking Delivery
+## Bounded, Backpressured Delivery
 
-For sinks that perform I/O (HTTP calls, database writes, file logging), use `ChannelProgressReporter` to decouple event production from consumption. Events are buffered in a `Channel<T>` and delivered on a background task, so a slow sink never blocks the agent pipeline.
+For sinks that perform I/O (HTTP calls, database writes, file logging), use `ChannelProgressReporter` to decouple event production from consumption. Events are buffered in a bounded `Channel<T>` and delivered on a background task, so a slow sink does not block the agent pipeline while spare capacity remains. This is not fully non-blocking, though: the channel is bounded (default capacity 1000), and once it saturates — the background consumer can't keep up — `Report` applies backpressure by synchronously waiting for capacity to free, rather than buffering an unbounded backlog of undelivered events in memory. Choose `capacity` based on the burst size you're willing to buffer before producers start blocking.

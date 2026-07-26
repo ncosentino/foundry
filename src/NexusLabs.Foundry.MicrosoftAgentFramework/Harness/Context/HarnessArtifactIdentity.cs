@@ -99,6 +99,11 @@ internal static class HarnessArtifactIdentity
     }
 
     /// <summary>
+    /// The fixed scheme prefix every canonical artifact reference identity begins with.
+    /// </summary>
+    internal const string ReferenceIdPrefix = "artifact://sha256/";
+
+    /// <summary>
     /// Builds the stable, bounded, LLM/reference-facing identity string for an artifact with the
     /// given <paramref name="digest"/>: <c>artifact://sha256/{digest}</c>. Deterministic — identical
     /// content always produces the identical reference identity.
@@ -115,6 +120,31 @@ internal static class HarnessArtifactIdentity
                 nameof(digest));
         }
 
-        return $"artifact://sha256/{digest}";
+        return $"{ReferenceIdPrefix}{digest}";
+    }
+
+    /// <summary>
+    /// Structurally recognizes a canonical artifact reference identity — exactly
+    /// <see cref="ReferenceIdPrefix"/> followed by a well-formed lowercase 64-character hex SHA-256
+    /// digest and nothing else. Returns <see langword="false"/> for a bare workspace path, an
+    /// arbitrary URI, an uppercase digest, or a digest of the wrong length, without ever attempting to
+    /// infer intent from surrounding prose.
+    /// </summary>
+    internal static bool TryParseReferenceId(string candidate, out string digest)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);
+
+        if (candidate.StartsWith(ReferenceIdPrefix, StringComparison.Ordinal))
+        {
+            var remainder = candidate[ReferenceIdPrefix.Length..];
+            if (IsWellFormedDigest(remainder))
+            {
+                digest = remainder;
+                return true;
+            }
+        }
+
+        digest = string.Empty;
+        return false;
     }
 }

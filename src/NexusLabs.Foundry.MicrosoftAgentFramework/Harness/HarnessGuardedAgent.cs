@@ -6,6 +6,7 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
+using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Providers;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 
@@ -23,7 +24,8 @@ internal sealed class HarnessGuardedAgent(
     IReadOnlyList<HarnessCapability> enabledCapabilities,
     bool toolAutoApprovalEnabled,
     HarnessApprovalHostValidator? approvalHostValidator,
-    IProgressReporterAccessor? progressAccessor)
+    IProgressReporterAccessor? progressAccessor,
+    HarnessCompactionRunCoordinator? compactionRunCoordinator)
     : DelegatingAIAgent(innerAgent)
 {
     /// <inheritdoc />
@@ -84,6 +86,13 @@ internal sealed class HarnessGuardedAgent(
         await EnsureApprovalReauthorizedAsync(materializedMessages, session, cancellationToken)
             .ConfigureAwait(false);
 
+        // Non-retransmission: one coordinator run scope around this entire outer run, so every
+        // nested FunctionInvokingChatClient tool round and every MessageInjectingChatClient extra call
+        // this run triggers shares the same delivered-digest set, and a later, separate outer run always
+        // starts from an empty one again. Never begun at all when compaction is not enabled for this
+        // composed agent (compactionRunCoordinator is null).
+        using var compactionRunScope = compactionRunCoordinator?.BeginRun();
+
         var response = await base
             .RunCoreAsync(materializedMessages, session, options, cancellationToken)
             .ConfigureAwait(false);
@@ -105,6 +114,10 @@ internal sealed class HarnessGuardedAgent(
         await EnsureApprovalReauthorizedAsync(materializedMessages, session, cancellationToken)
             .ConfigureAwait(false);
         var reportedApprovalRequests = new HashSet<string>(StringComparer.Ordinal);
+
+        // Same non-retransmission run scope as RunCoreAsync, held open for the entire streaming
+        // enumeration so every nested provider call the streaming run triggers shares one delivered set.
+        using var compactionRunScope = compactionRunCoordinator?.BeginRun();
 
         await foreach (var update in base
             .RunCoreStreamingAsync(materializedMessages, session, options, cancellationToken)

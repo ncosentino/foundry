@@ -103,6 +103,69 @@ public sealed class HarnessCapabilityProfileTests
     }
 
     [Fact]
+    public void Resolve_CompactionRequestedAndAcceptedAtItsDeliveryPhase_ReportsExactEvidenceFields()
+    {
+        var resolver = new HarnessCapabilityResolver();
+
+        var profile = resolver.Resolve(
+            CreateRequest(
+                HarnessConstructionLane.SelectedProviders,
+                HarnessCapabilityAcceptance.StableAndExperimental,
+                HarnessDeliveryPhase.G5,
+                [HarnessCapability.Compaction],
+                []));
+
+        var evidence = profile.Capabilities[HarnessCapability.Compaction];
+        Assert.Equal(HarnessCapabilityState.Enabled, evidence.EffectiveState);
+        Assert.Equal(HarnessCapabilityStability.Experimental, evidence.Stability);
+        Assert.False(evidence.DefaultEnabledInBundle);
+        Assert.True(evidence.Requested);
+        Assert.Equal("Microsoft.Agents.AI", evidence.SourcePackage);
+        Assert.Null(evidence.RequiredProviderCapability);
+        Assert.Equal(HarnessCapabilityTrustBoundary.ExternalContent, evidence.TrustBoundary);
+        Assert.Equal(HarnessCapabilityAotStatus.Unverified, evidence.AotStatus);
+        Assert.Equal(HarnessCapabilityDiagnosticsStatus.Available, evidence.DiagnosticsStatus);
+        Assert.Equal(HarnessDeliveryPhase.G5, evidence.DeliveryPhase);
+    }
+
+    [Fact]
+    public void Resolve_CompactionAcceptedButDeliveryPhaseNotYetReached_DefersIt()
+    {
+        var resolver = new HarnessCapabilityResolver();
+
+        var profile = resolver.Resolve(
+            CreateRequest(
+                HarnessConstructionLane.SelectedProviders,
+                HarnessCapabilityAcceptance.StableAndExperimental,
+                HarnessDeliveryPhase.G4,
+                [HarnessCapability.Compaction],
+                []));
+
+        Assert.Equal(
+            HarnessCapabilityState.Deferred,
+            profile.Capabilities[HarnessCapability.Compaction].EffectiveState);
+        Assert.False(profile.IsExecutable);
+    }
+
+    [Fact]
+    public void Resolve_CompactionNotRequested_IsDisabledRegardlessOfAcceptanceOrPhase()
+    {
+        var resolver = new HarnessCapabilityResolver();
+
+        var profile = resolver.Resolve(
+            CreateRequest(
+                HarnessConstructionLane.SelectedProviders,
+                HarnessCapabilityAcceptance.StableAndExperimental,
+                HarnessDeliveryPhase.G5,
+                [],
+                []));
+
+        var evidence = profile.Capabilities[HarnessCapability.Compaction];
+        Assert.False(evidence.Requested);
+        Assert.Equal(HarnessCapabilityState.Disabled, evidence.EffectiveState);
+    }
+
+    [Fact]
     public void Resolve_ProviderDependentWithoutEvidence_DefersIt()
     {
         var resolver = new HarnessCapabilityResolver();
