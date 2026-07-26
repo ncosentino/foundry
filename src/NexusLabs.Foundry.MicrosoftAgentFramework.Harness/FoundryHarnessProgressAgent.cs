@@ -64,23 +64,30 @@ internal sealed class FoundryHarnessProgressAgent(
         ReportInvoked(state);
         Exception? failure = null;
         bool completedEnumeration = false;
-        var enumerator = base
-            .RunCoreStreamingAsync(messages, session, options, cancellationToken)
-            .GetAsyncEnumerator(cancellationToken);
+        IAsyncEnumerator<AgentResponseUpdate>? enumerator = null;
 
         try
         {
-            while (true)
+            try
             {
-                AgentResponseUpdate update;
+                enumerator = base
+                    .RunCoreStreamingAsync(messages, session, options, cancellationToken)
+                    .GetAsyncEnumerator(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+
+            while (failure is null && enumerator is not null)
+            {
                 try
                 {
                     if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
+                        completedEnumeration = true;
                         break;
                     }
-
-                    update = enumerator.Current;
                 }
                 catch (Exception ex)
                 {
@@ -88,20 +95,21 @@ internal sealed class FoundryHarnessProgressAgent(
                     break;
                 }
 
-                yield return update;
+                yield return enumerator.Current;
             }
-
-            completedEnumeration = true;
         }
         finally
         {
-            try
+            if (enumerator is not null)
             {
-                await enumerator.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                failure ??= ex;
+                try
+                {
+                    await enumerator.DisposeAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    failure ??= ex;
+                }
             }
 
             stopwatch.Stop();
@@ -126,13 +134,13 @@ internal sealed class FoundryHarnessProgressAgent(
             {
                 runCoordinator.Restore(previous);
             }
-        }
 
-        if (failure is not null)
-        {
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo
-                .Capture(failure)
-                .Throw();
+            if (failure is not null)
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo
+                    .Capture(failure)
+                    .Throw();
+            }
         }
     }
 

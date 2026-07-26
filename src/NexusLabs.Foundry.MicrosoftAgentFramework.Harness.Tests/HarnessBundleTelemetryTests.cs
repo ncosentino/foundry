@@ -320,6 +320,74 @@ public sealed class HarnessBundleTelemetryTests
     }
 
     [Fact]
+    public async Task RunStreaming_EnumeratorAcquisitionFailure_EmitsTerminalProgressAndRethrows()
+    {
+        var chatClient = new HarnessBundleStreamingLifecycleFailureChatClient(
+            throwOnAcquire: true,
+            throwOnDispose: false);
+        var (services, agent, progressAccessor, reporter, sink) =
+            CreateStreamingFailureHarness(chatClient);
+        using (services)
+        {
+            using (progressAccessor.BeginScope(reporter))
+            {
+                var enumerator = agent
+                    .RunStreamingAsync(
+                        "stream",
+                        cancellationToken: TestContext.Current.CancellationToken)
+                    .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+                var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                    async () => await enumerator.MoveNextAsync());
+                Assert.Equal("stream acquisition failed", exception.Message);
+                await enumerator.DisposeAsync();
+            }
+        }
+
+        Assert.Equal(
+            [
+                typeof(AgentInvokedEvent),
+                typeof(LlmCallStartedEvent),
+                typeof(LlmCallFailedEvent),
+                typeof(AgentFailedEvent),
+            ],
+            sink.Events.Select(progressEvent => progressEvent.GetType()));
+    }
+
+    [Fact]
+    public async Task RunStreaming_DisposeFailure_EmitsTerminalProgressAndRethrows()
+    {
+        var chatClient = new HarnessBundleStreamingLifecycleFailureChatClient(
+            throwOnAcquire: false,
+            throwOnDispose: true);
+        var (services, agent, progressAccessor, reporter, sink) =
+            CreateStreamingFailureHarness(chatClient);
+        using (services)
+        {
+            using (progressAccessor.BeginScope(reporter))
+            {
+                var enumerator = agent
+                    .RunStreamingAsync(
+                        "stream",
+                        cancellationToken: TestContext.Current.CancellationToken)
+                    .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+                Assert.True(await enumerator.MoveNextAsync());
+                var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                    async () => await enumerator.DisposeAsync());
+                Assert.Equal("stream dispose failed", exception.Message);
+            }
+        }
+
+        Assert.Equal(
+            [
+                typeof(AgentInvokedEvent),
+                typeof(LlmCallStartedEvent),
+                typeof(LlmCallFailedEvent),
+                typeof(AgentFailedEvent),
+            ],
+            sink.Events.Select(progressEvent => progressEvent.GetType()));
+    }
+
+    [Fact]
     public async Task Run_ModelFailure_EmitsLlmAndAgentFailureProgress()
     {
         var chatClient = new HarnessBundleFailingChatClient(
@@ -482,6 +550,31 @@ public sealed class HarnessBundleTelemetryTests
         };
         ActivitySource.AddActivityListener(listener);
         return listener;
+    }
+
+    private static (
+        ServiceProvider Services,
+        AIAgent Agent,
+        IProgressReporterAccessor ProgressAccessor,
+        IProgressReporter Reporter,
+        HarnessBundleProgressSink Sink) CreateStreamingFailureHarness(
+            IChatClient chatClient)
+    {
+        var sink = new HarnessBundleProgressSink();
+        var services = new ServiceCollection()
+            .AddFoundryAgentFramework()
+            .BuildServiceProvider();
+        var progressFactory = services.GetRequiredService<IProgressReporterFactory>();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
+        var reporter = progressFactory.Create("bundle-stream-failure-workflow", [sink]);
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            Id = "bundle-stream-failure-agent",
+            Name = "Bundle Stream Failure Agent",
+            ChatClient = chatClient,
+            ProgressAccessor = progressAccessor,
+        };
+        return (services, Factory.Create(configuration), progressAccessor, reporter, sink);
     }
 
     private static void AssertActivityCounts(

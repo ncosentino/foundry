@@ -90,22 +90,29 @@ internal sealed class FoundryHarnessProgressChatClient(
         var buffered = new List<ChatResponseUpdate>();
         Exception? failure = null;
         bool completedEnumeration = false;
-        var enumerator = base
-            .GetStreamingResponseAsync(messages, options, cancellationToken)
-            .GetAsyncEnumerator(cancellationToken);
+        IAsyncEnumerator<ChatResponseUpdate>? enumerator = null;
         try
         {
-            while (true)
+            try
             {
-                ChatResponseUpdate update;
+                enumerator = base
+                    .GetStreamingResponseAsync(messages, options, cancellationToken)
+                    .GetAsyncEnumerator(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+
+            while (failure is null && enumerator is not null)
+            {
                 try
                 {
                     if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
+                        completedEnumeration = true;
                         break;
                     }
-
-                    update = enumerator.Current;
                 }
                 catch (Exception ex)
                 {
@@ -113,21 +120,22 @@ internal sealed class FoundryHarnessProgressChatClient(
                     break;
                 }
 
-                buffered.Add(update);
-                yield return update;
+                buffered.Add(enumerator.Current);
+                yield return enumerator.Current;
             }
-
-            completedEnumeration = true;
         }
         finally
         {
-            try
+            if (enumerator is not null)
             {
-                await enumerator.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                failure ??= ex;
+                try
+                {
+                    await enumerator.DisposeAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    failure ??= ex;
+                }
             }
 
             stopwatch.Stop();
@@ -151,13 +159,13 @@ internal sealed class FoundryHarnessProgressChatClient(
                     new InvalidOperationException(AbandonedStreamingErrorMessage),
                     stopwatch.Elapsed);
             }
-        }
 
-        if (failure is not null)
-        {
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo
-                .Capture(failure)
-                .Throw();
+            if (failure is not null)
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo
+                    .Capture(failure)
+                    .Throw();
+            }
         }
     }
 
