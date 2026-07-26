@@ -119,41 +119,47 @@ if (composition.Status != HarnessProviderCompositionStatus.Success ||
 }
 
 var agent = composition.Agent;
-var session = await agent.CreateSessionAsync();
-var response = await agent.RunAsync(
-    "Persist the deterministic selected-provider proof.",
-    session);
-string? responseText = response.GetText();
-var output = workspace.TryReadFile(HybridWorkspaceTool.OutputPath);
-if (!output.Success ||
-    !string.Equals(
-        output.Value.Content,
-        HybridWorkspaceTool.ExpectedContent,
-        StringComparison.Ordinal) ||
-    !string.Equals(responseText, ExpectedResponse, StringComparison.Ordinal))
+try
 {
-    Console.Error.WriteLine("The selected-provider workspace/result proof failed.");
-    return 6;
-}
+    var session = await agent.CreateSessionAsync();
+    var response = await agent.RunAsync(
+        "Persist the deterministic selected-provider proof.",
+        session);
+    string? responseText = response.GetText();
+    var output = workspace.TryReadFile(HybridWorkspaceTool.OutputPath);
+    if (!output.Success ||
+        !string.Equals(
+            output.Value.Content,
+            HybridWorkspaceTool.ExpectedContent,
+            StringComparison.Ordinal) ||
+        !string.Equals(responseText, ExpectedResponse, StringComparison.Ordinal))
+    {
+        Console.Error.WriteLine("The selected-provider workspace/result proof failed.");
+        return 6;
+    }
 
-if (profile.Capabilities[HarnessCapability.Compaction].EffectiveState !=
-        HarnessCapabilityState.Disabled ||
-    profile.ToolLoopOwner != HarnessToolLoopOwner.Foundry ||
-    profile.TelemetryOwner != HarnessTelemetryOwner.Foundry)
+    if (profile.Capabilities[HarnessCapability.Compaction].EffectiveState !=
+            HarnessCapabilityState.Disabled ||
+        profile.ToolLoopOwner != HarnessToolLoopOwner.Foundry ||
+        profile.TelemetryOwner != HarnessTelemetryOwner.Foundry)
+    {
+        Console.Error.WriteLine("The stable profile ownership or hybrid disposition was incorrect.");
+        return 7;
+    }
+
+    if (!progressSink.Events.OfType<LlmCallCompletedEvent>().Any() ||
+        !progressSink.Events.OfType<ToolCallCompletedEvent>().Any())
+    {
+        Console.Error.WriteLine("Foundry diagnostics progress was not observed.");
+        return 8;
+    }
+
+    Console.WriteLine(
+        $"HarnessHybridApp:{SessionId}:{responseText}:" +
+        $"Compaction={profile.Capabilities[HarnessCapability.Compaction].EffectiveState}");
+    return 0;
+}
+finally
 {
-    Console.Error.WriteLine("The stable profile ownership or hybrid disposition was incorrect.");
-    return 7;
+    (agent as IDisposable)?.Dispose();
 }
-
-if (!progressSink.Events.OfType<LlmCallCompletedEvent>().Any() ||
-    !progressSink.Events.OfType<ToolCallCompletedEvent>().Any())
-{
-    Console.Error.WriteLine("Foundry diagnostics progress was not observed.");
-    return 8;
-}
-
-(agent as IDisposable)?.Dispose();
-Console.WriteLine(
-    $"HarnessHybridApp:{SessionId}:{responseText}:" +
-    $"Compaction={profile.Capabilities[HarnessCapability.Compaction].EffectiveState}");
-return 0;

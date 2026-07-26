@@ -8,7 +8,7 @@ Foundry provides first-class integrations for AI agent frameworks, taking care o
 
 Three upstream ecosystems are supported:
 
-- **Microsoft Agent Framework** (`NexusLabs.Foundry.MicrosoftAgentFramework`) — for generated tools, agents, workflows, testing, and the optional complete Harness bundle
+- **Microsoft Agent Framework package family** — core generated tools and agents, with separate packages for workflows, testing, the optional complete Harness bundle, and Needlr integration
 - **Semantic Kernel** (`NexusLabs.Foundry.Needlr.SemanticKernel`) — for `[KernelFunction]`-annotated plugin classes wired into a `Kernel` via `Microsoft.SemanticKernel`
 - **GitHub Copilot** (`NexusLabs.Foundry.Copilot`) — an `IChatClient` backed by the GitHub Copilot API, plus a web search `AIFunction`. See the [Copilot integration page](copilot.md) for details.
 
@@ -60,14 +60,20 @@ Dynamic skills, scripts, reflection fallbacks, and other provider features can s
 ### Packages
 
 ```xml
-<!-- Runtime -->
+<!-- Core runtime: agents, generated tools, diagnostics, progress, workspace -->
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework" />
 
-<!-- Optional complete Harness bundle -->
+<!-- Add only when you use workflow APIs such as UsingResilience -->
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
+
+<!-- Add only when you use deterministic scenario runners -->
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Testing" />
+
+<!-- Add only when you use the complete upstream Harness bundle -->
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Harness" />
 
-<!-- Deterministic scenario runner -->
-<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Testing" />
+<!-- Required by the Syringe/UsingAgentFramework sample below -->
+<PackageReference Include="NexusLabs.Foundry.Needlr.MicrosoftAgentFramework" />
 
 <!-- Source generator (add as analyzer — no runtime dep) -->
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
@@ -85,6 +91,10 @@ Dynamic skills, scripts, reflection fallbacks, and other provider features can s
 | Iterative loop | Workspace files should drive fresh per-iteration prompts | Foundry outer loop |
 
 See [Microsoft Agent Framework Harness](maf-harness.md) for complete-bundle configuration, effective defaults, progress, AOT, and current limitations.
+
+The packages are independent choices. Installing the core runtime alone does
+not provide `UsingAgentFramework`, workflow middleware, scenario runners, or
+the complete Harness factory.
 
 ### Quick start
 

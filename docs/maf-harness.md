@@ -14,7 +14,6 @@ should own the agent pipeline and how much upstream behavior you want.
 |---|---|---|---|
 | Plain Foundry MAF agent | `NexusLabs.Foundry.MicrosoftAgentFramework` | Generated agents, ordinary MAF tools, and Foundry-owned construction | Does not opt into the complete Harness bundle |
 | Complete Harness bundle | `NexusLabs.Foundry.MicrosoftAgentFramework.Harness` | The official upstream batteries-included Harness pipeline with explicit Foundry configuration | Upstream owns the function loop and OpenTelemetry |
-| Selected-provider Harness profile | Internal candidate, demonstrated by `HarnessHybridApp` | Framework development and conformance of individually selected MAF providers | Not a supported consumer API |
 | Iterative agent loop | `IIterativeAgentLoop` | Workspace-driven work where each iteration should start from a fresh model conversation | Foundry owns the outer loop; see [Iterative Agent Loop](iterative-agent-loop.md) |
 
 The complete bundle is optional. Referencing
@@ -212,7 +211,7 @@ See [Iterative Agent Loop](iterative-agent-loop.md) for a detailed comparison.
 Dynamic skills/scripts, background agents, loop evaluators, and experimental
 hybrid compaction are not included in that minimum profile.
 
-## Selected-provider example
+## Internal selected-provider conformance example
 
 `src/Examples/AgentFramework/HarnessHybridApp` demonstrates the stable
 selected-provider seam with:
@@ -224,8 +223,16 @@ selected-provider seam with:
 - exactly one function loop and telemetry owner; and
 - an explicit assertion that experimental compaction is disabled.
 
-The example is a friend assembly over internal composition types. It is
-conformance evidence, not a public consumer API.
+!!! warning "Contributor-only internal example"
+    `HarnessHybridApp` is a non-packable friend assembly over internal
+    composition types. The unsigned `InternalsVisibleTo` grant is not a
+    security boundary and does not make those types a supported API. Consumers
+    should choose a public path from the table at the start of this guide.
+
+The task-defined name `HarnessHybridApp` refers to the selected-provider seam
+where experimental hybrid context can attach. The example itself uses the
+stable-only profile and proves that compaction remains disabled; it does not
+claim to execute hybrid compaction.
 
 ## Current limitations
 

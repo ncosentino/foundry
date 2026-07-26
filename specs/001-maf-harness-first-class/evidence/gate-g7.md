@@ -15,7 +15,9 @@ G7 promotes only evidence-backed profiles and documentation:
 6. a deterministic non-Azure selected-provider example; and
 7. explicit public/internal profile and AOT dispositions.
 
-No speculative analyzer ships.
+No new speculative Harness diagnostic rule ships. The existing MAF source
+generator remains packaged through MSBuild's analyzer mechanism, and existing
+`FDRYMAF` rules are unchanged.
 
 ## Evidence identity
 
@@ -95,6 +97,12 @@ plugins, workspace bridges, and experimental hybrid compaction remain
 demonstrate and test the stable selected-provider seam. It is not a supported
 consumer composition API.
 
+The example is non-packable. Because the repository assemblies are unsigned,
+the `InternalsVisibleTo` grant is not a security boundary and could be imitated
+by an assembly with the same name. The gate treats the seam as unsupported
+internal implementation, not as inaccessible security-sensitive functionality
+or a compatibility promise.
+
 The example requests:
 
 - GeneratedTools
@@ -108,8 +116,10 @@ session, and progress evidence.
 
 ### Hybrid context disposition
 
-Despite the example name, experimental hybrid compaction is deliberately
-disabled. The profile uses `StableOnly`; compaction remains:
+The task-defined example name refers to the selected-provider seam where hybrid
+context could attach, not to an enabled compaction feature. Experimental hybrid
+compaction is deliberately disabled. The profile uses `StableOnly`; compaction
+remains:
 
 - experimental;
 - internal;
