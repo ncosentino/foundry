@@ -1,27 +1,26 @@
 using System.Collections.Concurrent;
-using System.Text.Json;
 
 using Microsoft.Extensions.AI;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Testing;
 
-internal sealed class HarnessScenarioTrackingAIFunction(
-    AIFunction innerFunction,
-    ConcurrentQueue<string> executedToolNames) : AIFunction
+internal sealed class HarnessScenarioTrackingAIFunction : DelegatingAIFunction
 {
-    public override string Name => innerFunction.Name;
+    private readonly ConcurrentQueue<string> _executedToolNames;
 
-    public override string Description => innerFunction.Description;
-
-    public override JsonElement JsonSchema => innerFunction.JsonSchema;
-
-    public override JsonElement? ReturnJsonSchema => innerFunction.ReturnJsonSchema;
+    internal HarnessScenarioTrackingAIFunction(
+        AIFunction innerFunction,
+        ConcurrentQueue<string> executedToolNames)
+        : base(innerFunction)
+    {
+        _executedToolNames = executedToolNames;
+    }
 
     protected override ValueTask<object?> InvokeCoreAsync(
         AIFunctionArguments arguments,
         CancellationToken cancellationToken)
     {
-        executedToolNames.Enqueue(innerFunction.Name);
-        return innerFunction.InvokeAsync(arguments, cancellationToken);
+        _executedToolNames.Enqueue(InnerFunction.Name);
+        return base.InvokeCoreAsync(arguments, cancellationToken);
     }
 }

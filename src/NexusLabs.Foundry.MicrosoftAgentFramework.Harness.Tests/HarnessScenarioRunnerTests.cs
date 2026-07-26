@@ -13,6 +13,20 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 public sealed class HarnessScenarioRunnerTests
 {
     [Fact]
+    public void Constructor_WithoutScopeFactory_ThrowsInvalidOperationException()
+    {
+        using var services = CreateServices();
+        var accessor = services.GetRequiredService<IAgentExecutionContextAccessor>();
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => new HarnessScenarioRunner(
+                new HarnessRunnerNoScopeServiceProvider(),
+                accessor));
+
+        Assert.Contains("IServiceScopeFactory", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void IHarnessScenario_ExtendsAgentScenarioWithHarnessLifecycleMembers()
     {
         Assert.Contains(typeof(IAgentScenario), typeof(IHarnessScenario).GetInterfaces());
@@ -43,7 +57,7 @@ public sealed class HarnessScenarioRunnerTests
         Assert.NotNull(result.Session);
         Assert.Equal("bundle-complete", result.ResponseText);
         Assert.Equal(["Record"], result.ResolvedGeneratedToolNames);
-        Assert.Equal(["Record"], result.ExecutedToolNames);
+        Assert.Equal(["Record"], result.ExecutedGeneratedToolNames);
         Assert.Equal("generated-value", scenario.ScopedCapture?.Value);
         Assert.True(result.Workspace.FileExists("seed.txt"));
         Assert.Equal(1, scenario.CreateAgentCallCount);
@@ -118,7 +132,7 @@ public sealed class HarnessScenarioRunnerTests
 
         Assert.True(result.Succeeded);
         Assert.Equal(["Record"], result.ResolvedGeneratedToolNames);
-        Assert.Equal(["Record"], result.ExecutedToolNames);
+        Assert.Equal(["Record"], result.ExecutedGeneratedToolNames);
     }
 
     [Fact]
@@ -143,6 +157,29 @@ public sealed class HarnessScenarioRunnerTests
         Assert.Equal("root-poison", rootCapture.Value);
         Assert.NotSame(rootCapture, scenario.ScopedCapture);
         Assert.Equal("generated-value", scenario.ScopedCapture?.Value);
+    }
+
+    [Fact]
+    public async Task RunAsync_NullGeneratedType_ReportsOriginalIndex()
+    {
+        using var services = CreateServices();
+        var runner = new HarnessScenarioRunner(
+            services,
+            services.GetRequiredService<IAgentExecutionContextAccessor>());
+        var scenario = new HarnessRunnerTestScenario(
+            [
+                typeof(HarnessBundleGeneratedTool),
+                typeof(HarnessBundleGeneratedTool),
+                null!,
+            ],
+            failBaseVerification: false,
+            failHarnessVerification: false);
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => runner.RunAsync(scenario, TestContext.Current.CancellationToken));
+
+        Assert.Contains("index 2", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(0, scenario.CreateAgentCallCount);
     }
 
     [Theory]

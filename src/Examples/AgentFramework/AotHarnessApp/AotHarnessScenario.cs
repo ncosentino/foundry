@@ -128,7 +128,7 @@ internal sealed class AotHarnessScenario : IHarnessScenario
                 "The generated tool resolution evidence was incorrect.");
         }
 
-        if (!context.ExecutedToolNames.SequenceEqual(
+        if (!context.ExecutedGeneratedToolNames.SequenceEqual(
             ["WriteWorkspace"],
             StringComparer.Ordinal))
         {

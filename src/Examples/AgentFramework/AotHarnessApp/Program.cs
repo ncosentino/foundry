@@ -32,7 +32,7 @@ if (result.Session is null)
     return 2;
 }
 
-if (!result.ExecutedToolNames.SequenceEqual(["WriteWorkspace"], StringComparer.Ordinal))
+if (!result.ExecutedGeneratedToolNames.SequenceEqual(["WriteWorkspace"], StringComparer.Ordinal))
 {
     Console.Error.WriteLine("The generated workspace tool did not execute exactly once.");
     return 3;
@@ -70,5 +70,5 @@ if (!result.Succeeded || scenario.EffectiveDefaults is null)
 
 Console.WriteLine(
     $"AotHarnessApp:{result.SessionId}:{result.ResponseText}:" +
-    $"{string.Join(',', result.ExecutedToolNames)}");
+    $"{string.Join(',', result.ExecutedGeneratedToolNames)}");
 return 0;

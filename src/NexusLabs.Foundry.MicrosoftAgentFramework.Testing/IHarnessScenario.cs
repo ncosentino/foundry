@@ -25,6 +25,11 @@ public interface IHarnessScenario : IAgentScenario
     /// <param name="context">
     /// The seeded workspace, trusted execution identity, caller services, and generated functions.
     /// </param>
+    /// <remarks>
+    /// The supplied generated functions carry the runner's execution tracker. Scenarios must pass
+    /// them through directly, or through wrappers that delegate to them, for generated-body
+    /// execution evidence to be recorded.
+    /// </remarks>
     /// <returns>The constructed Harness-enabled agent.</returns>
     AIAgent CreateAgent(HarnessScenarioAgentContext context);
 

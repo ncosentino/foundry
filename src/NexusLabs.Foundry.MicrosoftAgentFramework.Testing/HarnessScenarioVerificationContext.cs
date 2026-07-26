@@ -16,7 +16,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Testing;
 /// <param name="Session">The created MAF session, or <see langword="null"/> if creation failed.</param>
 /// <param name="ResponseText">The final response text, or <see langword="null"/> if execution failed.</param>
 /// <param name="ResolvedGeneratedToolNames">Generated tool names resolved before construction.</param>
-/// <param name="ExecutedToolNames">Tool names observed at the upstream function-invoker seam.</param>
+/// <param name="ExecutedGeneratedToolNames">
+/// Generated tool names whose supplied function bodies were invoked.
+/// </param>
 /// <param name="ExecutionError">The construction, session, or execution error, if any.</param>
 public sealed record HarnessScenarioVerificationContext(
     string ScenarioName,
@@ -27,5 +29,5 @@ public sealed record HarnessScenarioVerificationContext(
     AgentSession? Session,
     string? ResponseText,
     IReadOnlyList<string> ResolvedGeneratedToolNames,
-    IReadOnlyList<string> ExecutedToolNames,
+    IReadOnlyList<string> ExecutedGeneratedToolNames,
     Exception? ExecutionError);

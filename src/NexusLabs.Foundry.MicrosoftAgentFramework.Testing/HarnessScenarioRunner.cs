@@ -20,7 +20,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Testing;
 /// </remarks>
 public sealed class HarnessScenarioRunner
 {
-    private readonly IServiceProvider _services;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly IAgentExecutionContextAccessor _contextAccessor;
 
     /// <summary>
@@ -28,11 +28,21 @@ public sealed class HarnessScenarioRunner
     /// </summary>
     /// <param name="services">Services used to activate generated function groups.</param>
     /// <param name="contextAccessor">The trusted execution-context accessor scoped around the run.</param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="services"/> or <paramref name="contextAccessor"/> is null.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// <paramref name="services"/> does not expose an <see cref="IServiceScopeFactory"/>.
+    /// </exception>
     public HarnessScenarioRunner(
         IServiceProvider services,
         IAgentExecutionContextAccessor contextAccessor)
     {
-        _services = services ?? throw new ArgumentNullException(nameof(services));
+        ArgumentNullException.ThrowIfNull(services);
+        _scopeFactory = services.GetService<IServiceScopeFactory>()
+            ?? throw new InvalidOperationException(
+                "HarnessScenarioRunner requires an IServiceScopeFactory so every run can " +
+                "resolve generated tools and agent dependencies in an isolated scope.");
         _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
     }
 
@@ -72,8 +82,8 @@ public sealed class HarnessScenarioRunner
         ArgumentException.ThrowIfNullOrWhiteSpace(scenario.Name);
         ArgumentNullException.ThrowIfNull(scenario.GeneratedFunctionTypes);
 
-        using var serviceScope = _services.GetService<IServiceScopeFactory>()?.CreateScope();
-        var runServices = serviceScope?.ServiceProvider ?? _services;
+        using var serviceScope = _scopeFactory.CreateScope();
+        var runServices = serviceScope.ServiceProvider;
         var generatedTools = ResolveGeneratedTools(
             scenario.GeneratedFunctionTypes,
             runServices);
@@ -208,6 +218,16 @@ public sealed class HarnessScenarioRunner
                 duplicateToolNames: []);
         }
 
+        for (int index = 0; index < functionTypes.Count; index++)
+        {
+            if (functionTypes[index] is null)
+            {
+                throw new ArgumentException(
+                    $"GeneratedFunctionTypes contains a null entry at index {index}.",
+                    nameof(functionTypes));
+            }
+        }
+
         var distinctFunctionTypes = functionTypes
             .Distinct()
             .ToArray();
@@ -216,13 +236,6 @@ public sealed class HarnessScenarioRunner
         for (int index = 0; index < distinctFunctionTypes.Length; index++)
         {
             var functionType = distinctFunctionTypes[index];
-            if (functionType is null)
-            {
-                throw new ArgumentException(
-                    $"GeneratedFunctionTypes contains a null entry at index {index}.",
-                    nameof(functionTypes));
-            }
-
             if (!provider.TryGetFunctions(
                 functionType,
                 resolutionServices,
