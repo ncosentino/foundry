@@ -2,8 +2,8 @@
 
 ## Decision
 
-**PROVISIONAL PASS for the cumulative G6 optional-bundle implementation and
-public API candidate. Final hosted PR evidence is pending publication.**
+**PASS for the cumulative G6 optional-bundle implementation and public API
+candidate.**
 
 G6 delivers one separately referenced complete-bundle lane:
 
@@ -37,8 +37,12 @@ history. The optional-bundle decision is therefore recorded as
 | Generated-tool ingress (T075) | `e458a970` | 191 | 2,181 | Passed |
 | Telemetry/progress composition (T076/T079) | `63bb57f6` | 203 | 2,181 | Passed; reviewed |
 | API and streaming review fixes | `dae70326`, `8f0deda9` | **203** | **2,181** | All blockers resolved |
+| G6.2 generated tools, telemetry, progress, and decision | `32f9854d` / PR #112 | **203** | **2,181** | Merged into `harness/g6-integration` |
 
 - Final reviewed local G6.2 head: `8f0deda9` on `harness/g6-telemetry`.
+- Final G6 implementation integration head: `32f9854d91b58820a329b5a1278e02de3da7dfb0`
+  on `harness/g6-integration`, merged through
+  [PR #112](https://github.com/ncosentino/foundry/pull/112).
 - `dotnet build src\NexusLabs.Foundry.slnx`: 0 errors.
 - Full package validation: 14 Foundry packages share one version; the optional
   bundle has the required direct dependencies on
@@ -50,8 +54,10 @@ history. The optional-bundle decision is therefore recorded as
   duplicate or broken decision relationship exists.
 - All local .NET commands set
   `$env:NUGET_PACKAGES='G:\dev\caches\nuget\packages'`.
-- Hosted `build-test-pack`, AOT, and documentation evidence will replace this
-  pending statement after the G6.2 PR runs.
+- Hosted PR #112 checks all passed:
+  - [`build-test-pack`](https://github.com/ncosentino/foundry/actions/runs/30206628827/job/89805741050)
+  - [`aot`](https://github.com/ncosentino/foundry/actions/runs/30206628827/job/89805741056)
+  - [`docs`](https://github.com/ncosentino/foundry/actions/runs/30206628777/job/89805741072)
 
 ## Package and dependency disposition
 
@@ -267,11 +273,10 @@ Final closing reviews:
 - Direct NativeAOT execution, deterministic scenario infrastructure, analyzer
   guidance, hosted comparisons, and release guidance remain G7-G9.
 
-## Gate completion condition
+## Gate completion evidence
 
-Replace the provisional decision with a final PASS after:
-
-1. the G6.2 PR targets `harness/g6-integration`;
-2. hosted `build-test-pack`, AOT, and documentation checks pass;
-3. the PR merge commit and final integration head are recorded here; and
-4. issue #50 is closed with that evidence.
+- G6.2 was published through PR #112 to `harness/g6-integration`.
+- Hosted `build-test-pack`, AOT, and documentation checks passed.
+- The merged implementation head is `32f9854d91b58820a329b5a1278e02de3da7dfb0`.
+- ADR-0008 is accepted and its targeted drift audit is healthy.
+- Every blocking API-candidate review finding is resolved.
