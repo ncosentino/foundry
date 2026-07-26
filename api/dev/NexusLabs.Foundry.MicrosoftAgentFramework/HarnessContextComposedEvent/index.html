@@ -12,7 +12,7 @@
         <meta name="author" content="Nick Cosentino">
       
       
-        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessArtifactDiagnostics/">
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessContextComposedEvent/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>HarnessArtifactDiagnostics - Foundry</title>
+        <title>HarnessContextComposedEvent - Foundry</title>
       
     
     
@@ -60,12 +60,12 @@
   
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="HarnessArtifactDiagnostics – Foundry" />
+  <meta property="og:title" content="HarnessContextComposedEvent – Foundry" />
   <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
-  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessArtifactDiagnostics/" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessContextComposedEvent/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="HarnessArtifactDiagnostics – Foundry" />
+  <meta name="twitter:title" content="HarnessContextComposedEvent – Foundry" />
   <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              HarnessArtifactDiagnostics
+              HarnessContextComposedEvent
             
           </span>
         </div>
@@ -2813,95 +2813,134 @@
   
 
 
-  <h1>HarnessArtifactDiagnostics</h1>
+  <h1>HarnessContextComposedEvent</h1>
 
 <h4 id="nexuslabsfoundrymicrosoftagentframework"><a href="../" title="index">NexusLabs.Foundry.MicrosoftAgentFramework</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframework" title="Permanent link">&para;</a></h4>
-<h3 id="nexuslabsfoundrymicrosoftagentframeworkdiagnostics"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkdiagnostics" title="Permanent link">&para;</a></h3>
-<h2 id="harnessartifactdiagnostics-class">HarnessArtifactDiagnostics Class<a class="headerlink" href="#harnessartifactdiagnostics-class" title="Permanent link">&para;</a></h2>
-<p>Privacy-safe, structured evidence for one artifact offload or rehydration decision. Carries
-only categorical classifications, byte counts, and a bounded reference identity — never an
-artifact body, a serialized raw result, a workspace path, an owner user/orchestration/session
-identity, or a raw exception message. Every instance is produced by <a href="../">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ForOffload(NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactContentCategory,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDecisionReason,System.Int32,System.Int32,System.String)</a> or
-<a href="../">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ForRehydration(NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDecisionReason,System.Nullable{System.Int32},System.Int32,System.String)</a>, each of which only accepts the outcome and reason values valid for
-that operation, so a snapshot can never mix the two decisions' state machines.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">record</span><span class="w"> </span><span class="n">HarnessArtifactDiagnostics</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">IEquatable</span><span class="o">&lt;</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactDiagnostics</span><span class="o">&gt;</span>
+<h3 id="nexuslabsfoundrymicrosoftagentframeworkprogress"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Progress/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress">NexusLabs.Foundry.MicrosoftAgentFramework.Progress</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkprogress" title="Permanent link">&para;</a></h3>
+<h2 id="harnesscontextcomposedevent-class">HarnessContextComposedEvent Class<a class="headerlink" href="#harnesscontextcomposedevent-class" title="Permanent link">&para;</a></h2>
+<p>The final bounded context for one provider call is composed and ready for dispatch. Emitted only
+on success — immediately after <a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a> for the same
+attempt, once execution-binding revalidation has also passed and the bounded messages are about to
+be handed to the real provider client — never emitted for a terminated attempt. Carries the exact
+same <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Diagnostics" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Diagnostics">Diagnostics</a> instance as the preceding
+<a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a>, so its final category attribution and
+<a href="../HarnessContextDiagnostics/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics.FinalSequenceValid" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics.FinalSequenceValid">FinalSequenceValid</a> flag are inspectable at the
+ready-for-dispatch point without a second, independently-built snapshot.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">record</span><span class="w"> </span><span class="n">HarnessContextComposedEvent</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">IProgressEvent</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">IEquatable</span><span class="o">&lt;</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">HarnessContextComposedEvent</span><span class="o">&gt;</span>
 </code></pre></div>
-<p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; HarnessArtifactDiagnostics</p>
-<p>Implements <a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">System.IEquatable&lt;</a><a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics">HarnessArtifactDiagnostics</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">&gt;</a></p>
-<h3 id="remarks">Remarks<a class="headerlink" href="#remarks" title="Permanent link">&para;</a></h3>
-<p>The same instance attached to an internal offload outcome or rehydration result is also the
-instance carried by the corresponding progress event, so inspecting either surface observes
-identical data.</p>
+<p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; HarnessContextComposedEvent</p>
+<p>Implements <a href="../IProgressEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent">IProgressEvent</a>, <a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">System.IEquatable&lt;</a><a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent">HarnessContextComposedEvent</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">&gt;</a></p>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics)'></a></p>
+<h2 id="harnesscontextcomposedeventdatetimeoffset-string-string-string-int-long-guid-harnesscontextdiagnostics-constructor">HarnessContextComposedEvent(DateTimeOffset, string, string, string, int, long, Guid, HarnessContextDiagnostics) Constructor<a class="headerlink" href="#harnesscontextcomposedeventdatetimeoffset-string-string-string-int-long-guid-harnesscontextdiagnostics-constructor" title="Permanent link">&para;</a></h2>
+<p>The final bounded context for one provider call is composed and ready for dispatch. Emitted only
+on success — immediately after <a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a> for the same
+attempt, once execution-binding revalidation has also passed and the bounded messages are about to
+be handed to the real provider client — never emitted for a terminated attempt. Carries the exact
+same <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Diagnostics" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Diagnostics">Diagnostics</a> instance as the preceding
+<a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a>, so its final category attribution and
+<a href="../HarnessContextDiagnostics/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics.FinalSequenceValid" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics.FinalSequenceValid">FinalSequenceValid</a> flag are inspectable at the
+ready-for-dispatch point without a second, independently-built snapshot.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="nf">HarnessContextComposedEvent</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Guid</span><span class="w"> </span><span class="n">AssemblyId</span><span class="p">,</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessContextDiagnostics</span><span class="w"> </span><span class="n">Diagnostics</span><span class="p">);</span>
+</code></pre></div>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).Timestamp'></a></p>
+<p><code>Timestamp</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
+<p>When the context was composed and ready for dispatch.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).WorkflowId'></a></p>
+<p><code>WorkflowId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Top-level workflow correlation ID.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).AgentId'></a></p>
+<p><code>AgentId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Which agent emitted this event, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for workflow-level events.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).ParentAgentId'></a></p>
+<p><code>ParentAgentId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>Parent agent ID for sub-agent runs, enabling tree reconstruction.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).Depth'></a></p>
+<p><code>Depth</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
+<p>Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).SequenceNumber'></a></p>
+<p><code>SequenceNumber</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
+<p>Globally ordered sequence number for event ordering.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).AssemblyId'></a></p>
+<p><code>AssemblyId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.guid" title="System.Guid">System.Guid</a></p>
+<p>The identical opaque per-assembly correlation ID carried by both the
+<a href="../HarnessContextCompactionStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionStartedEvent">HarnessContextCompactionStartedEvent</a> and the preceding
+<a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a> for this same attempt, so this Composed
+event remains pairable with the rest of its lifecycle even when other concurrently-running
+assemblies on the same agent interleave their own events' <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.SequenceNumber" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.SequenceNumber">SequenceNumber</a>s in
+between.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.HarnessContextComposedEvent(System.DateTimeOffset,string,string,string,int,long,System.Guid,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics).Diagnostics'></a></p>
+<p><code>Diagnostics</code> <a href="../HarnessContextDiagnostics/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics">HarnessContextDiagnostics</a></p>
+<p>The privacy-safe, structured evidence for this decision, identical to the instance carried by the
+preceding <a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a> for the same attempt.</p>
 <h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Attribution'></a></p>
-<h2 id="harnessartifactdiagnosticsattribution-property">HarnessArtifactDiagnostics.Attribution Property<a class="headerlink" href="#harnessartifactdiagnosticsattribution-property" title="Permanent link">&para;</a></h2>
-<p>The privacy-safe UTF-8 byte attribution for this decision — how many bytes were observed
-coming in, and how many bytes actually became model/history-facing context as a result. The
-identical instance is also carried by the progress event and internal outcome/result this
-snapshot is attached to, since it rides along on this shared <a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics">HarnessArtifactDiagnostics</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessContextAttribution</span><span class="w"> </span><span class="n">Attribution</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.AgentId'></a></p>
+<h2 id="harnesscontextcomposedeventagentid-property">HarnessContextComposedEvent.AgentId Property<a class="headerlink" href="#harnesscontextcomposedeventagentid-property" title="Permanent link">&para;</a></h2>
+<p>Which agent emitted this event, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for workflow-level events.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">AgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.AgentId">AgentId</a></p>
 <h4 id="property-value">Property Value<a class="headerlink" href="#property-value" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessContextAttribution/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextAttribution">HarnessContextAttribution</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ConfiguredThresholdOrBudget'></a></p>
-<h2 id="harnessartifactdiagnosticsconfiguredthresholdorbudget-property">HarnessArtifactDiagnostics.ConfiguredThresholdOrBudget Property<a class="headerlink" href="#harnessartifactdiagnosticsconfiguredthresholdorbudget-property" title="Permanent link">&para;</a></h2>
-<p>The configured inline byte threshold (offload) or maximum byte budget (rehydration) this
-decision was evaluated against. Always known regardless of outcome, because it is a
-caller-supplied input rather than an observation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">ConfiguredThresholdOrBudget</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.AssemblyId'></a></p>
+<h2 id="harnesscontextcomposedeventassemblyid-property">HarnessContextComposedEvent.AssemblyId Property<a class="headerlink" href="#harnesscontextcomposedeventassemblyid-property" title="Permanent link">&para;</a></h2>
+<p>The identical opaque per-assembly correlation ID carried by both the
+<a href="../HarnessContextCompactionStartedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionStartedEvent">HarnessContextCompactionStartedEvent</a> and the preceding
+<a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a> for this same attempt, so this Composed
+event remains pairable with the rest of its lifecycle even when other concurrently-running
+assemblies on the same agent interleave their own events' <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.SequenceNumber" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.SequenceNumber">SequenceNumber</a>s in
+between.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Guid</span><span class="w"> </span><span class="n">AssemblyId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h4 id="property-value_1">Property Value<a class="headerlink" href="#property-value_1" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Content'></a></p>
-<h2 id="harnessartifactdiagnosticscontent-property">HarnessArtifactDiagnostics.Content Property<a class="headerlink" href="#harnessartifactdiagnosticscontent-property" title="Permanent link">&para;</a></h2>
-<p>The kind of content the decision was made about.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactContentCategory</span><span class="w"> </span><span class="n">Content</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.guid" title="System.Guid">System.Guid</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Depth'></a></p>
+<h2 id="harnesscontextcomposedeventdepth-property">HarnessContextComposedEvent.Depth Property<a class="headerlink" href="#harnesscontextcomposedeventdepth-property" title="Permanent link">&para;</a></h2>
+<p>Nesting depth: 0 = workflow, 1 = agent, 2 = sub-agent, etc.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Depth</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Depth">Depth</a></p>
 <h4 id="property-value_2">Property Value<a class="headerlink" href="#property-value_2" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactContentCategory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactContentCategory">HarnessArtifactContentCategory</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ObservedUtf8ByteSize'></a></p>
-<h2 id="harnessartifactdiagnosticsobservedutf8bytesize-property">HarnessArtifactDiagnostics.ObservedUtf8ByteSize Property<a class="headerlink" href="#harnessartifactdiagnosticsobservedutf8bytesize-property" title="Permanent link">&para;</a></h2>
-<p>The UTF-8 byte size actually observed/measured for this decision, or
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> when no content was ever measured (for example a rehydration
-<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Missing" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Missing">Missing</a> or
-<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Unauthorized" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Unauthorized">Unauthorized</a> outcome, where the workspace was
-never — or could never be — read).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ObservedUtf8ByteSize</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Diagnostics'></a></p>
+<h2 id="harnesscontextcomposedeventdiagnostics-property">HarnessContextComposedEvent.Diagnostics Property<a class="headerlink" href="#harnesscontextcomposedeventdiagnostics-property" title="Permanent link">&para;</a></h2>
+<p>The privacy-safe, structured evidence for this decision, identical to the instance carried by the
+preceding <a href="../HarnessContextCompactionCompletedEvent/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextCompactionCompletedEvent">HarnessContextCompactionCompletedEvent</a> for the same attempt.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessContextDiagnostics</span><span class="w"> </span><span class="n">Diagnostics</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h4 id="property-value_3">Property Value<a class="headerlink" href="#property-value_3" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">System.Nullable&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">&gt;</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Operation'></a></p>
-<h2 id="harnessartifactdiagnosticsoperation-property">HarnessArtifactDiagnostics.Operation Property<a class="headerlink" href="#harnessartifactdiagnosticsoperation-property" title="Permanent link">&para;</a></h2>
-<p>Whether this snapshot describes an offload decision or a rehydration decision.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactOperationCategory</span><span class="w"> </span><span class="n">Operation</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="../HarnessContextDiagnostics/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextDiagnostics">HarnessContextDiagnostics</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.ParentAgentId'></a></p>
+<h2 id="harnesscontextcomposedeventparentagentid-property">HarnessContextComposedEvent.ParentAgentId Property<a class="headerlink" href="#harnesscontextcomposedeventparentagentid-property" title="Permanent link">&para;</a></h2>
+<p>Parent agent ID for sub-agent runs, enabling tree reconstruction.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ParentAgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.ParentAgentId">ParentAgentId</a></p>
 <h4 id="property-value_4">Property Value<a class="headerlink" href="#property-value_4" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactOperationCategory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOperationCategory">HarnessArtifactOperationCategory</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Outcome'></a></p>
-<h2 id="harnessartifactdiagnosticsoutcome-property">HarnessArtifactDiagnostics.Outcome Property<a class="headerlink" href="#harnessartifactdiagnosticsoutcome-property" title="Permanent link">&para;</a></h2>
-<p>The explicit outcome of the decision.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactOutcomeCategory</span><span class="w"> </span><span class="n">Outcome</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.SequenceNumber'></a></p>
+<h2 id="harnesscontextcomposedeventsequencenumber-property">HarnessContextComposedEvent.SequenceNumber Property<a class="headerlink" href="#harnesscontextcomposedeventsequencenumber-property" title="Permanent link">&para;</a></h2>
+<p>Globally ordered sequence number for event ordering.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">SequenceNumber</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.SequenceNumber">SequenceNumber</a></p>
 <h4 id="property-value_5">Property Value<a class="headerlink" href="#property-value_5" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactOutcomeCategory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory">HarnessArtifactOutcomeCategory</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Reason'></a></p>
-<h2 id="harnessartifactdiagnosticsreason-property">HarnessArtifactDiagnostics.Reason Property<a class="headerlink" href="#harnessartifactdiagnosticsreason-property" title="Permanent link">&para;</a></h2>
-<p>The stable, explicit reason category behind <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Outcome" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Outcome">Outcome</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactDecisionReason</span><span class="w"> </span><span class="n">Reason</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int64" title="System.Int64">System.Int64</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.Timestamp'></a></p>
+<h2 id="harnesscontextcomposedeventtimestamp-property">HarnessContextComposedEvent.Timestamp Property<a class="headerlink" href="#harnesscontextcomposedeventtimestamp-property" title="Permanent link">&para;</a></h2>
+<p>When the context was composed and ready for dispatch.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">DateTimeOffset</span><span class="w"> </span><span class="n">Timestamp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.Timestamp">Timestamp</a></p>
 <h4 id="property-value_6">Property Value<a class="headerlink" href="#property-value_6" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactDecisionReason/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDecisionReason">HarnessArtifactDecisionReason</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ReferenceId'></a></p>
-<h2 id="harnessartifactdiagnosticsreferenceid-property">HarnessArtifactDiagnostics.ReferenceId Property<a class="headerlink" href="#harnessartifactdiagnosticsreferenceid-property" title="Permanent link">&para;</a></h2>
-<p>The bounded, model/history-facing artifact reference identity (<code>artifact://sha256/...</code>)
-this decision concerns, when one is available. Always available for a rehydration decision
-(the reference being resolved is always known upfront). Only available for an offload
-decision whose outcome committed or reused a reference
-(<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Offloaded" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Offloaded">Offloaded</a> or
-<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.ExistingReference" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.ExistingReference">ExistingReference</a>); <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for
-every other offload outcome.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ReferenceId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset" title="System.DateTimeOffset">System.DateTimeOffset</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.HarnessContextComposedEvent.WorkflowId'></a></p>
+<h2 id="harnesscontextcomposedeventworkflowid-property">HarnessContextComposedEvent.WorkflowId Property<a class="headerlink" href="#harnesscontextcomposedeventworkflowid-property" title="Permanent link">&para;</a></h2>
+<p>Top-level workflow correlation ID.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">WorkflowId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
+<p>Implements <a href="../IProgressEvent/#NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId" title="NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent.WorkflowId">WorkflowId</a></p>
 <h4 id="property-value_7">Property Value<a class="headerlink" href="#property-value_7" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 

@@ -2848,13 +2848,15 @@ Implement this interface to build SSE streams, console displays, trace diagrams,
             default sinks entirely, giving multi-tenant or multi-workflow applications full
             control over which sinks receive events for each orchestration.</p>
 <p><strong>Performance:</strong> Implementations should be fast — a slow sink delays
-            the agent pipeline. Use <code>ChannelProgressReporter</code> for non-blocking delivery
-            when sinks perform I/O.</p>
+            the agent pipeline. Use <code>ChannelProgressReporter</code> to decouple production from
+            consumption while channel capacity is available; under sustained saturation it applies
+            bounded backpressure to the caller rather than buffering unboundedly.</p>
 <h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressSink.OnEventAsync(NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressEvent,System.Threading.CancellationToken)'></a></p>
 <h2 id="iprogresssinkoneventasynciprogressevent-cancellationtoken-method">IProgressSink.OnEventAsync(IProgressEvent, CancellationToken) Method<a class="headerlink" href="#iprogresssinkoneventasynciprogressevent-cancellationtoken-method" title="Permanent link">&para;</a></h2>
 <p>Called for each progress event. Implementations should be fast — a slow sink
-delays the agent pipeline (use <code>ChannelProgressReporter</code> for non-blocking delivery).</p>
+delays the agent pipeline (use <code>ChannelProgressReporter</code> to decouple production from
+consumption while capacity is available; it backpressures the caller once saturated).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">System</span><span class="p">.</span><span class="n">Threading</span><span class="p">.</span><span class="n">Tasks</span><span class="p">.</span><span class="n">ValueTask</span><span class="w"> </span><span class="n">OnEventAsync</span><span class="p">(</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">IProgressEvent</span><span class="w"> </span><span class="n">progressEvent</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Threading</span><span class="p">.</span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
 </code></pre></div>
 <h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>

@@ -12,7 +12,7 @@
         <meta name="author" content="Nick Cosentino">
       
       
-        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessArtifactDiagnostics/">
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/adr/adr-0007-experimental-hybrid-context-compaction/">
       
       
       
@@ -20,19 +20,19 @@
         
       
       
-      <link rel="icon" href="../../../../assets/foundry.webp">
+      <link rel="icon" href="../../assets/foundry.webp">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>HarnessArtifactDiagnostics - Foundry</title>
+        <title>ADR-0007: Experimental hybrid context compaction - Foundry</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,7 +51,7 @@
       
     
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -60,12 +60,12 @@
   
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="HarnessArtifactDiagnostics – Foundry" />
+  <meta property="og:title" content="ADR-0007: Experimental hybrid context compaction – Foundry" />
   <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
-  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.MicrosoftAgentFramework/HarnessArtifactDiagnostics/" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/adr/adr-0007-experimental-hybrid-context-compaction/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="HarnessArtifactDiagnostics – Foundry" />
+  <meta name="twitter:title" content="ADR-0007: Experimental hybrid context compaction – Foundry" />
   <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nexuslabsfoundrymicrosoftagentframework" class="md-skip">
+        <a href="#context-and-scope" class="md-skip">
           Skip to content
         </a>
       
@@ -105,9 +105,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="Foundry" class="md-header__button md-logo" aria-label="Foundry" data-md-component="logo">
+    <a href="../.." title="Foundry" class="md-header__button md-logo" aria-label="Foundry" data-md-component="logo">
       
-  <img src="../../../../assets/foundry.webp" alt="logo">
+  <img src="../../assets/foundry.webp" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -124,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              HarnessArtifactDiagnostics
+              ADR-0007: Experimental hybrid context compaction
             
           </span>
         </div>
@@ -237,7 +237,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -256,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../getting-started/" class="md-tabs__link">
+      <a href="../../getting-started/" class="md-tabs__link">
         
   
   
@@ -275,7 +275,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../configuration/" class="md-tabs__link">
+      <a href="../../configuration/" class="md-tabs__link">
         
   
   
@@ -294,7 +294,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../building/" class="md-tabs__link">
+      <a href="../../building/" class="md-tabs__link">
         
   
   
@@ -315,7 +315,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../guides/" class="md-tabs__link">
+        <a href="../../guides/" class="md-tabs__link">
           
   
   
@@ -335,7 +335,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../ai-integrations/" class="md-tabs__link">
+        <a href="../../ai-integrations/" class="md-tabs__link">
           
   
   
@@ -355,7 +355,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../evaluation/" class="md-tabs__link">
+        <a href="../../evaluation/" class="md-tabs__link">
           
   
   
@@ -375,7 +375,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../copilot/" class="md-tabs__link">
+        <a href="../../copilot/" class="md-tabs__link">
           
   
   
@@ -395,7 +395,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../testing-tools/" class="md-tabs__link">
+        <a href="../../testing-tools/" class="md-tabs__link">
           
   
   
@@ -415,7 +415,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../analyzers/" class="md-tabs__link">
+        <a href="../../analyzers/" class="md-tabs__link">
           
   
   
@@ -435,7 +435,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../" class="md-tabs__link">
+        <a href="../../api/" class="md-tabs__link">
           
   
   
@@ -455,7 +455,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../local-runners/" class="md-tabs__link">
+        <a href="../../local-runners/" class="md-tabs__link">
           
   
   
@@ -475,7 +475,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../adr/adr-0001-dag-graph-workflow-support/" class="md-tabs__link">
+        <a href="../adr-0001-dag-graph-workflow-support/" class="md-tabs__link">
           
   
   
@@ -511,9 +511,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="Foundry" class="md-nav__button md-logo" aria-label="Foundry" data-md-component="logo">
+    <a href="../.." title="Foundry" class="md-nav__button md-logo" aria-label="Foundry" data-md-component="logo">
       
-  <img src="../../../../assets/foundry.webp" alt="logo">
+  <img src="../../assets/foundry.webp" alt="logo">
 
     </a>
     Foundry
@@ -540,7 +540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -567,7 +567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -594,7 +594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../configuration/" class="md-nav__link">
+      <a href="../../configuration/" class="md-nav__link">
         
   
   
@@ -621,7 +621,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../building/" class="md-nav__link">
+      <a href="../../building/" class="md-nav__link">
         
   
   
@@ -702,7 +702,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/" class="md-nav__link">
+      <a href="../../guides/" class="md-nav__link">
         
   
   
@@ -791,7 +791,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../ai-integrations/" class="md-nav__link">
+      <a href="../../ai-integrations/" class="md-nav__link">
         
   
   
@@ -819,7 +819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../agent-functions/" class="md-nav__link">
+      <a href="../../agent-functions/" class="md-nav__link">
         
   
   
@@ -847,7 +847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../iterative-agent-loop/" class="md-nav__link">
+      <a href="../../iterative-agent-loop/" class="md-nav__link">
         
   
   
@@ -875,7 +875,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../workspace/" class="md-nav__link">
+      <a href="../../workspace/" class="md-nav__link">
         
   
   
@@ -903,7 +903,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../progress-reporting/" class="md-nav__link">
+      <a href="../../progress-reporting/" class="md-nav__link">
         
   
   
@@ -931,7 +931,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../pipeline-metrics/" class="md-nav__link">
+      <a href="../../pipeline-metrics/" class="md-nav__link">
         
   
   
@@ -959,7 +959,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../gen-ai-token-metrics/" class="md-nav__link">
+      <a href="../../gen-ai-token-metrics/" class="md-nav__link">
         
   
   
@@ -987,7 +987,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../stage-termination/" class="md-nav__link">
+      <a href="../../stage-termination/" class="md-nav__link">
         
   
   
@@ -1015,7 +1015,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../tool-result-middleware/" class="md-nav__link">
+      <a href="../../tool-result-middleware/" class="md-nav__link">
         
   
   
@@ -1043,7 +1043,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../tiered-provider-selector/" class="md-nav__link">
+      <a href="../../tiered-provider-selector/" class="md-nav__link">
         
   
   
@@ -1132,7 +1132,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../evaluation/" class="md-nav__link">
+      <a href="../../evaluation/" class="md-nav__link">
         
   
   
@@ -1160,7 +1160,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../experiment-runner/" class="md-nav__link">
+      <a href="../../experiment-runner/" class="md-nav__link">
         
   
   
@@ -1188,7 +1188,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../langfuse/" class="md-nav__link">
+      <a href="../../langfuse/" class="md-nav__link">
         
   
   
@@ -1277,7 +1277,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../copilot/" class="md-nav__link">
+      <a href="../../copilot/" class="md-nav__link">
         
   
   
@@ -1366,7 +1366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../testing-tools/" class="md-nav__link">
+      <a href="../../testing-tools/" class="md-nav__link">
         
   
   
@@ -1455,7 +1455,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/" class="md-nav__link">
+      <a href="../../analyzers/" class="md-nav__link">
         
   
   
@@ -1483,7 +1483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF001/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF001/" class="md-nav__link">
         
   
   
@@ -1511,7 +1511,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF002/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF002/" class="md-nav__link">
         
   
   
@@ -1539,7 +1539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF003/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF003/" class="md-nav__link">
         
   
   
@@ -1567,7 +1567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF004/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF004/" class="md-nav__link">
         
   
   
@@ -1595,7 +1595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF005/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF005/" class="md-nav__link">
         
   
   
@@ -1623,7 +1623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF006/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF006/" class="md-nav__link">
         
   
   
@@ -1651,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF007/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF007/" class="md-nav__link">
         
   
   
@@ -1679,7 +1679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF008/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF008/" class="md-nav__link">
         
   
   
@@ -1707,7 +1707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF009/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF009/" class="md-nav__link">
         
   
   
@@ -1735,7 +1735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF010/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF010/" class="md-nav__link">
         
   
   
@@ -1763,7 +1763,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF011/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF011/" class="md-nav__link">
         
   
   
@@ -1791,7 +1791,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF012/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF012/" class="md-nav__link">
         
   
   
@@ -1819,7 +1819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF013/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF013/" class="md-nav__link">
         
   
   
@@ -1847,7 +1847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF014/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF014/" class="md-nav__link">
         
   
   
@@ -1875,7 +1875,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF015/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF015/" class="md-nav__link">
         
   
   
@@ -1903,7 +1903,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF016/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF016/" class="md-nav__link">
         
   
   
@@ -1931,7 +1931,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF017/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF017/" class="md-nav__link">
         
   
   
@@ -1959,7 +1959,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF018/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF018/" class="md-nav__link">
         
   
   
@@ -1987,7 +1987,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF019/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF019/" class="md-nav__link">
         
   
   
@@ -2015,7 +2015,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF020/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF020/" class="md-nav__link">
         
   
   
@@ -2043,7 +2043,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF021/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF021/" class="md-nav__link">
         
   
   
@@ -2071,7 +2071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF022/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF022/" class="md-nav__link">
         
   
   
@@ -2099,7 +2099,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF024/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF024/" class="md-nav__link">
         
   
   
@@ -2127,7 +2127,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF025/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF025/" class="md-nav__link">
         
   
   
@@ -2155,7 +2155,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF027/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF027/" class="md-nav__link">
         
   
   
@@ -2183,7 +2183,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF028/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF028/" class="md-nav__link">
         
   
   
@@ -2211,7 +2211,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF029/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF029/" class="md-nav__link">
         
   
   
@@ -2239,7 +2239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../analyzers/FDRYMAF030/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF030/" class="md-nav__link">
         
   
   
@@ -2328,7 +2328,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../" class="md-nav__link">
+      <a href="../../api/" class="md-nav__link">
         
   
   
@@ -2356,7 +2356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
+      <a href="../../api/dev/" class="md-nav__link">
         
   
   
@@ -2384,7 +2384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../stable/" class="md-nav__link">
+      <a href="../../api/stable/" class="md-nav__link">
         
   
   
@@ -2473,7 +2473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../local-runners/" class="md-nav__link">
         
   
   
@@ -2501,7 +2501,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../publishing/" class="md-nav__link">
+      <a href="../../publishing/" class="md-nav__link">
         
   
   
@@ -2529,7 +2529,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../releasing/" class="md-nav__link">
+      <a href="../../releasing/" class="md-nav__link">
         
   
   
@@ -2618,7 +2618,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../adr/adr-0001-dag-graph-workflow-support/" class="md-nav__link">
+      <a href="../adr-0001-dag-graph-workflow-support/" class="md-nav__link">
         
   
   
@@ -2653,7 +2653,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../adr/adr-0002-build-scriptedchatclient-locally/" class="md-nav__link">
+      <a href="../adr-0002-build-scriptedchatclient-locally/" class="md-nav__link">
         
   
   
@@ -2688,7 +2688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../adr/adr-0003-provider-neutral-experiment-runner/" class="md-nav__link">
+      <a href="../adr-0003-provider-neutral-experiment-runner/" class="md-nav__link">
         
   
   
@@ -2723,7 +2723,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../adr/adr-0004-extract-ai-platform-from-needlr/" class="md-nav__link">
+      <a href="../adr-0004-extract-ai-platform-from-needlr/" class="md-nav__link">
         
   
   
@@ -2758,7 +2758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../adr/adr-0005-first-class-maf-harness-integration/" class="md-nav__link">
+      <a href="../adr-0005-first-class-maf-harness-integration/" class="md-nav__link">
         
   
   
@@ -2813,103 +2813,356 @@
   
 
 
-  <h1>HarnessArtifactDiagnostics</h1>
+  <h1>ADR-0007: Experimental hybrid context compaction</h1>
 
-<h4 id="nexuslabsfoundrymicrosoftagentframework"><a href="../" title="index">NexusLabs.Foundry.MicrosoftAgentFramework</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframework" title="Permanent link">&para;</a></h4>
-<h3 id="nexuslabsfoundrymicrosoftagentframeworkdiagnostics"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkdiagnostics" title="Permanent link">&para;</a></h3>
-<h2 id="harnessartifactdiagnostics-class">HarnessArtifactDiagnostics Class<a class="headerlink" href="#harnessartifactdiagnostics-class" title="Permanent link">&para;</a></h2>
-<p>Privacy-safe, structured evidence for one artifact offload or rehydration decision. Carries
-only categorical classifications, byte counts, and a bounded reference identity — never an
-artifact body, a serialized raw result, a workspace path, an owner user/orchestration/session
-identity, or a raw exception message. Every instance is produced by <a href="../">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ForOffload(NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactContentCategory,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDecisionReason,System.Int32,System.Int32,System.String)</a> or
-<a href="../">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ForRehydration(NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory,NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDecisionReason,System.Nullable{System.Int32},System.Int32,System.String)</a>, each of which only accepts the outcome and reason values valid for
-that operation, so a snapshot can never mix the two decisions' state machines.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">record</span><span class="w"> </span><span class="n">HarnessArtifactDiagnostics</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">IEquatable</span><span class="o">&lt;</span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactDiagnostics</span><span class="o">&gt;</span>
-</code></pre></div>
-<p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; HarnessArtifactDiagnostics</p>
-<p>Implements <a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">System.IEquatable&lt;</a><a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics">HarnessArtifactDiagnostics</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.iequatable-1" title="System.IEquatable`1">&gt;</a></p>
-<h3 id="remarks">Remarks<a class="headerlink" href="#remarks" title="Permanent link">&para;</a></h3>
-<p>The same instance attached to an internal offload outcome or rehydration result is also the
-instance carried by the corresponding progress event, so inspecting either surface observes
-identical data.</p>
-<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Attribution'></a></p>
-<h2 id="harnessartifactdiagnosticsattribution-property">HarnessArtifactDiagnostics.Attribution Property<a class="headerlink" href="#harnessartifactdiagnosticsattribution-property" title="Permanent link">&para;</a></h2>
-<p>The privacy-safe UTF-8 byte attribution for this decision — how many bytes were observed
-coming in, and how many bytes actually became model/history-facing context as a result. The
-identical instance is also carried by the progress event and internal outcome/result this
-snapshot is attached to, since it rides along on this shared <a href="./" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics">HarnessArtifactDiagnostics</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessContextAttribution</span><span class="w"> </span><span class="n">Attribution</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value">Property Value<a class="headerlink" href="#property-value" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessContextAttribution/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessContextAttribution">HarnessContextAttribution</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ConfiguredThresholdOrBudget'></a></p>
-<h2 id="harnessartifactdiagnosticsconfiguredthresholdorbudget-property">HarnessArtifactDiagnostics.ConfiguredThresholdOrBudget Property<a class="headerlink" href="#harnessartifactdiagnosticsconfiguredthresholdorbudget-property" title="Permanent link">&para;</a></h2>
-<p>The configured inline byte threshold (offload) or maximum byte budget (rehydration) this
-decision was evaluated against. Always known regardless of outcome, because it is a
-caller-supplied input rather than an observation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">ConfiguredThresholdOrBudget</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_1">Property Value<a class="headerlink" href="#property-value_1" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Content'></a></p>
-<h2 id="harnessartifactdiagnosticscontent-property">HarnessArtifactDiagnostics.Content Property<a class="headerlink" href="#harnessartifactdiagnosticscontent-property" title="Permanent link">&para;</a></h2>
-<p>The kind of content the decision was made about.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactContentCategory</span><span class="w"> </span><span class="n">Content</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_2">Property Value<a class="headerlink" href="#property-value_2" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactContentCategory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactContentCategory">HarnessArtifactContentCategory</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ObservedUtf8ByteSize'></a></p>
-<h2 id="harnessartifactdiagnosticsobservedutf8bytesize-property">HarnessArtifactDiagnostics.ObservedUtf8ByteSize Property<a class="headerlink" href="#harnessartifactdiagnosticsobservedutf8bytesize-property" title="Permanent link">&para;</a></h2>
-<p>The UTF-8 byte size actually observed/measured for this decision, or
-<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> when no content was ever measured (for example a rehydration
-<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Missing" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Missing">Missing</a> or
-<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Unauthorized" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Unauthorized">Unauthorized</a> outcome, where the workspace was
-never — or could never be — read).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ObservedUtf8ByteSize</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_3">Property Value<a class="headerlink" href="#property-value_3" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">System.Nullable&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">&gt;</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Operation'></a></p>
-<h2 id="harnessartifactdiagnosticsoperation-property">HarnessArtifactDiagnostics.Operation Property<a class="headerlink" href="#harnessartifactdiagnosticsoperation-property" title="Permanent link">&para;</a></h2>
-<p>Whether this snapshot describes an offload decision or a rehydration decision.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactOperationCategory</span><span class="w"> </span><span class="n">Operation</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_4">Property Value<a class="headerlink" href="#property-value_4" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactOperationCategory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOperationCategory">HarnessArtifactOperationCategory</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Outcome'></a></p>
-<h2 id="harnessartifactdiagnosticsoutcome-property">HarnessArtifactDiagnostics.Outcome Property<a class="headerlink" href="#harnessartifactdiagnosticsoutcome-property" title="Permanent link">&para;</a></h2>
-<p>The explicit outcome of the decision.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactOutcomeCategory</span><span class="w"> </span><span class="n">Outcome</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_5">Property Value<a class="headerlink" href="#property-value_5" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactOutcomeCategory/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory">HarnessArtifactOutcomeCategory</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Reason'></a></p>
-<h2 id="harnessartifactdiagnosticsreason-property">HarnessArtifactDiagnostics.Reason Property<a class="headerlink" href="#harnessartifactdiagnosticsreason-property" title="Permanent link">&para;</a></h2>
-<p>The stable, explicit reason category behind <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Outcome" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.Outcome">Outcome</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Diagnostics</span><span class="p">.</span><span class="n">HarnessArtifactDecisionReason</span><span class="w"> </span><span class="n">Reason</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_6">Property Value<a class="headerlink" href="#property-value_6" title="Permanent link">&para;</a></h4>
-<p><a href="../HarnessArtifactDecisionReason/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDecisionReason">HarnessArtifactDecisionReason</a></p>
-<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactDiagnostics.ReferenceId'></a></p>
-<h2 id="harnessartifactdiagnosticsreferenceid-property">HarnessArtifactDiagnostics.ReferenceId Property<a class="headerlink" href="#harnessartifactdiagnosticsreferenceid-property" title="Permanent link">&para;</a></h2>
-<p>The bounded, model/history-facing artifact reference identity (<code>artifact://sha256/...</code>)
-this decision concerns, when one is available. Always available for a rehydration decision
-(the reference being resolved is always known upfront). Only available for an offload
-decision whose outcome committed or reused a reference
-(<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Offloaded" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.Offloaded">Offloaded</a> or
-<a href="../HarnessArtifactOutcomeCategory/#NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.ExistingReference" title="NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.HarnessArtifactOutcomeCategory.ExistingReference">ExistingReference</a>); <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for
-every other offload outcome.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">ReferenceId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<h4 id="property-value_7">Property Value<a class="headerlink" href="#property-value_7" title="Permanent link">&para;</a></h4>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<h2 id="context-and-scope">Context and scope<a class="headerlink" href="#context-and-scope" title="Permanent link">&para;</a></h2>
+<p>ADR-0006 established that <code>IWorkspace</code> is Foundry's sole authoritative store
+for bulk artifact bytes and that a conversation carries only a bounded
+<code>artifact://sha256/...</code> reference in place of an offloaded body, recovered
+only through an explicit, verified rehydration act. That decision deliberately
+left conversation compaction policy — whether, when, and how a long-lived
+hybrid agent's own history is kept within a provider's context limits — out of
+scope. This decision picks that question back up and settles it: a single,
+explicit, experimental opt-in hybrid compaction profile that assembles bounded
+context for every provider call, together with privacy-safe, structured
+observability over every decision it makes. It refines ADR-0006's
+workspace-authority and rehydration framing into a concrete compaction
+contract that governs when a rehydrated body is evicted and how a conversation
+is kept within a hard limit; it does not supersede ADR-0006, and every
+rule ADR-0006 established about workspace authority, reference shape, and
+explicit rehydration is unchanged and continues to govern how a body ever
+re-enters context.</p>
+<p>This decision governs four things: how one experimental compaction profile is
+selected and never defaulted on, how a bounded context is deterministically
+assembled for a single provider call, how a rehydrated body's lifetime is kept
+inside the conversation's own history boundary, and how every assembly
+decision is made observable without ever exposing conversation content. It
+does not approve a public Harness runtime configuration or composition API —
+every mechanism introduced remains <code>internal</code> — and it does not aggregate this
+leaf's observability into completed-run diagnostics, a sink, or a metrics
+surface; that aggregation is explicitly deferred, as recorded in
+<code>specs/001-maf-harness-first-class/evidence/gate-g5.md</code>.</p>
+<h2 id="decision-drivers">Decision drivers<a class="headerlink" href="#decision-drivers" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A long-lived hybrid agent's conversation must eventually exceed any fixed
+  provider context limit; Foundry needs one deterministic answer for what
+  happens next, not an ad hoc one per caller.</li>
+<li>Exactly one coherent capability profile may govern whether compaction is
+  active for a given composition — a second, independently-resolved profile
+  or a second installed compaction component would reintroduce the
+  divergence risk ADR-0005/ADR-0006 already rejected for workspace authority.</li>
+<li>An upstream-supplied <code>IChatReducer</code> cannot be trusted to enforce Foundry's
+  own structural-preservation and hard-limit guarantees; its output must be
+  treated as a proposal, never as ground truth.</li>
+<li>A rehydrated artifact body must never become a second, durable copy living
+  indefinitely inside conversation history — its presence there must be
+  bounded to the run that requested it, with the durable reference always
+  available to fetch it again.</li>
+<li>The same rehydrated body must never cross the wire to the provider twice
+  within one outer run purely because two nested provider calls both observed
+  it in their respective snapshots.</li>
+<li>A policy that cannot converge (content that structurally cannot fit) or
+  that is destabilized by concurrent mutation of the underlying history must
+  fail with an explicit, distinguishable outcome — never silently forward an
+  over-budget or stale context.</li>
+<li>Every compaction decision must be inspectable by tests and operators
+  without exposing raw message text, artifact bodies, workspace paths, owner
+  identity, tool arguments/results, exception text, or classifier output.</li>
+<li>Observability must not introduce an ambient singleton, an optional
+  parameter, or a public runtime configuration surface, matching the pattern
+  ADR-0006 already established for offload/rehydration observability.</li>
+</ul>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p>Hybrid context compaction is exactly one explicit, experimental opt-in
+profile, never a default. A caller must both request
+<code>HarnessCapability.Compaction</code> on the capability profile it resolves and
+separately supply a <code>HarnessHybridProfile</code> for the exact same composition
+call; either one without the other fails closed before any agent is
+constructed, and the capability's own delivery-phase gating keeps it
+<code>Deferred</code> until its resolver evidence is actually present at its declared
+delivery phase. Enabling the capability never turns compaction on by itself,
+and supplying a profile never turns it on without the capability also being
+enabled — the two are read from, and validated against, the same single
+resolved capability profile a composition call already carries, never a
+second independently-resolved one.</p>
+<p>Exactly one hybrid compaction component may ever be installed for a given
+composition. It is wrapped at the proven per-provider-call seam — the
+innermost position around the real provider <code>IChatClient</code>, beneath every
+other Foundry-owned middleware — so it observes the exact message set
+dispatched for every intermediate tool round and every injected extra call,
+never merely the outer agent call and never only the first or last request.
+This is a deliberate choice over MAF's own turn-scoped compaction seam, which
+evaluates once per agent turn against a history index that has not yet
+observed the current tool round's result, and is therefore structurally
+insufficient for a caller that needs every intermediate provider request
+bounded, not only the final one per turn.</p>
+<p>Every call assembles bounded context deterministically from a fresh snapshot
+of that call's own message set: recoverable rehydrated bodies are evicted
+first, ahead of any reducer proposal; the configured upstream <code>IChatReducer</code>
+is then invoked, bounded to a configured maximum attempt count, but its output
+is never trusted directly — it is advisory only, and Foundry's own verifier
+independently confirms every proposal is both strictly size-reducing and
+structurally valid (required content preserved, message sequencing intact)
+before accepting it. Every attempt is evaluated against one deterministic
+trigger margin below a hard limit and against the hard limit itself, both
+expressed in whatever unit the configured size estimator declares — never
+assumed to be a provider token count unless an estimator says so explicitly.
+When no accepted reducer proposal fits within the configured attempt bound,
+a deterministic preservation-only fallback runs instead: required content,
+plus any retained optional context that still fits, is kept and nothing
+reducer-dependent is trusted to produce the final answer. If required content
+alone still exceeds the hard limit even after that fallback, or if injected
+concurrent mutation keeps invalidating in-flight proposals until the attempt
+budget is exhausted before a version change can be consumed as a restart,
+assembly terminates explicitly — <code>Irreducible</code> or <code>ConcurrentMutationLimit</code>
+respectively — and this node throws rather than ever forwarding an
+over-budget or stale context to the real provider.</p>
+<p>A rehydrated body's presence in context is transient and scoped to the
+current outer run's history boundary; the durable <code>artifact://sha256/...</code>
+reference persists in the conversation regardless. A non-retransmission
+coordinator reserves, and later commits or releases, one lease per digest per
+provider call, so the exact same body is delivered to the real provider at
+most once per outer run — a second nested call within the same run that would
+otherwise re-observe an already-delivered body has it filtered back out of
+its own snapshot before assembly ever considers it. This is deliberately not
+automatic, repeated rehydration on every observation: a body earns its way
+back into context only through the same explicit, budget-checked rehydration
+act ADR-0006 already requires, and once delivered within a run it is not
+delivered again within that same run.</p>
+<p>Every assembly decision is observable through one shared, privacy-safe
+contract: a categorical outcome (one of the three success outcomes or one of
+the two termination outcomes, the termination outcomes doubling as the
+explicit termination category), an explicit measurement unit, original/final
+sizes, the trigger threshold and hard limit in force, an attempt count, the
+ordered stages actually executed, per-category final size/entry-count
+contributions computed with the same estimator that governed the policy
+decision, and a final sequence-validity flag. Every categorical field is
+assigned through a deterministic mapping from the internal structured
+assembly result — never by parsing an exception or evidence string. For every
+assembly attempt that reaches the assembler (i.e., after message adaptation,
+snapshot integration, and assembler construction have all succeeded), exactly
+one started event and exactly one terminal event (a completed event on
+success, or a terminated event on termination, never both) are reported; a
+context-composed/ready-for-dispatch event, carrying the identical diagnostics
+instance as the completed event, is reported only on success and only after
+the same post-assembly trust revalidation that already guards every dispatch —
+never for a terminated attempt. A single opaque <code>AssemblyId</code> (a <code>Guid</code>) is
+generated exactly once per attempt, at that same success gate immediately
+before the started event is emitted, and is threaded identically onto the
+started event, whichever terminal event follows, and the composed event on
+success — so every event this attempt ever reports carries the same
+<code>AssemblyId</code>, letting two concurrently-running assemblies for the same
+agent/workflow remain pairable by that ID despite their <code>SequenceNumber</code>s
+interleaving. Exceptional failures before assembly begins
+(classifier exception, snapshot-construction failure) propagate directly
+without emitting any event; exceptional failures during assembly (cancellation,
+binding invalidation, reducer exception) propagate without masquerading as
+Completed or Terminated. Reporting threads through the existing
+<code>HarnessProviderCompositionRequest.ProgressAccessor</code> seam as a required
+nullable constructor parameter with no optional parameter and no ambient
+singleton; when the accessor is absent, nothing is reported and ordinary
+assembly behavior is fully preserved. Offload and rehydration decisions
+additionally carry a shared UTF-8 byte attribution — input bytes observed and
+artifact-derived output bytes (the reference identity's byte length when an
+artifact reference was written or reused, the resolved body's byte length when
+rehydration succeeded), or <code>null</code> when no artifact-derived output was committed
+— riding along on the exact same <code>HarnessArtifactDiagnostics</code> snapshot
+ADR-0006 already attaches to both the internal outcome/result and its
+corresponding progress event, so no second, independently-computed attribution
+value can ever diverge from the one a test or operator already inspects. Null
+output bytes for failure or recovery-required outcomes reflect only that no
+artifact-derived output was produced; the caller may still emit a separate
+bounded error string for those outcomes, which is not counted here.</p>
+<p>No public Harness runtime configuration or composition API is introduced by
+this decision. Every compaction mechanism, request, result, policy, and
+status type remains <code>internal</code>; the only public surface is the observability
+contract itself — diagnostics/attribution records, categorical enums, and
+progress events — exactly as ADR-0006 already established for
+offload/rehydration.</p>
+<h2 id="alternatives-considered">Alternatives considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">&para;</a></h2>
+<h3 id="unbounded-history">Unbounded history<a class="headerlink" href="#unbounded-history" title="Permanent link">&para;</a></h3>
+<p>A hybrid agent could simply forward its entire accumulated history on every
+call and rely on the provider to reject or truncate an oversized request.
+This was rejected because it pushes an unrecoverable, provider-specific
+failure mode onto every long-lived agent and gives Foundry no deterministic,
+inspectable point at which a bounding decision is made; a caller would learn
+about an over-budget conversation only from a provider error, with no
+structured evidence explaining why.</p>
+<h3 id="workspace-only-rebuild-or-discard-conversation-history">Workspace-only rebuild or discard conversation history<a class="headerlink" href="#workspace-only-rebuild-or-discard-conversation-history" title="Permanent link">&para;</a></h3>
+<p>Instead of compacting in place, a caller could discard accumulated
+conversation history entirely and rebuild working context solely from
+workspace-backed artifacts and references on each call. This was rejected
+because it destroys ordinary conversational continuity (a plain back-and-forth
+exchange is not an artifact and has nothing to rebuild from) and conflates two
+different concerns ADR-0006 already kept separate: <code>IWorkspace</code> is
+authoritative for bulk artifact bytes, not for the shape or continuity of a
+model-facing conversation.</p>
+<h3 id="trust-the-upstream-reducer-without-verification">Trust the upstream reducer without verification<a class="headerlink" href="#trust-the-upstream-reducer-without-verification" title="Permanent link">&para;</a></h3>
+<p>The selected upstream <code>IChatReducer</code>'s output could be accepted directly as
+the final bounded history, saving a verification pass. This was rejected
+because an upstream reducer has no knowledge of Foundry's own structural
+requirements — required system/authoritative/approval content, atomic
+tool-call/tool-result exchange integrity, or message sequencing validity — and
+a reducer proposal that violates any of them would be indistinguishable from
+a correct one without independent verification. Treating the reducer as
+advisory-only and verifying every proposal before it can be accepted is the
+only way to keep the hard-limit and structural-preservation guarantees this
+decision requires regardless of which reducer a caller configures.</p>
+<h3 id="outer-agent-only-reduction">Outer-agent-only reduction<a class="headerlink" href="#outer-agent-only-reduction" title="Permanent link">&para;</a></h3>
+<p>Compaction could be evaluated once per outer agent turn (mirroring MAF's own
+built-in compaction seam) rather than once per real provider call. This was
+rejected because an outer-turn-scoped evaluation is checked against a history
+index that has not yet observed the current tool round's result, so an
+intermediate tool-round request — the exact request most likely to be large,
+immediately after a sizeable tool result — could still exceed the hard limit
+before the next turn-level evaluation ever runs. Only a per-provider-call seam
+observes every such request.</p>
+<h3 id="automatic-repeated-rehydration">Automatic repeated rehydration<a class="headerlink" href="#automatic-repeated-rehydration" title="Permanent link">&para;</a></h3>
+<p>A reference could be automatically re-resolved to its body every time a
+snapshot observes it, rather than being filtered out once already delivered
+within the current run. This was rejected for the same reason ADR-0006
+rejected implicit/automatic rehydration generally: it removes the caller's
+ability to bound when, and how many times, a potentially large body re-enters
+context, and would silently retransmit an already-delivered body to the real
+provider on every subsequent nested call within the same run.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<h3 id="positive">Positive<a class="headerlink" href="#positive" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A long-lived hybrid agent's context is kept within a deterministic hard
+  limit at every intermediate provider call, not only at the outer turn
+  boundary, with no ad hoc per-caller bounding logic required.</li>
+<li>Exactly one coherent capability profile and, when active, exactly one
+  installed compaction component governs the decision — there is no path to
+  two competing compactors or a mismatched capability/profile pair.</li>
+<li>An upstream reducer can never violate Foundry's own structural-preservation
+  or hard-limit guarantees, because its output is always independently
+  verified and never trusted directly.</li>
+<li>A rehydrated body is delivered to the real provider at most once per outer
+  run, and its durable reference always remains available for a later,
+  explicit, budget-checked recovery — never silently duplicated, never
+  silently discarded.</li>
+<li>Every assembly decision — success or termination — is inspectable through
+  a categorical, privacy-safe snapshot without ever exposing conversation
+  content. On success, the identical diagnostics instance is shared by the
+  internal dispatch result (<code>HarnessBoundedMessageAssembly.Diagnostics</code>), the
+  completed event, and the composed event. On termination, the diagnostics
+  snapshot is built from the internal terminating assembly result and carried
+  by the terminated event, but no caller-visible internal result exists to
+  compare it against — the thrown <code>HarnessCompactionIrreducibleException</code>
+  carries only the outcome, final estimated size, and hard limit, never the
+  diagnostics instance itself. Every attempt's four possible progress events
+  (started, and whichever of completed/composed or terminated follow) also
+  carry one opaque <code>AssemblyId</code> generated once per attempt, so two
+  concurrently-running assemblies for the same agent/workflow remain
+  independently pairable despite their <code>SequenceNumber</code>s interleaving.</li>
+<li>The observability contract adds no ambient singleton, optional parameter,
+  or public runtime configuration, consistent with ADR-0006's precedent.</li>
+</ul>
+<h3 id="negative">Negative<a class="headerlink" href="#negative" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The configured size estimator is not guaranteed to be token-exact unless it
+  is explicitly labeled <code>EstimatedTokens</code>; a <code>Utf8Bytes</code>-labeled estimator's
+  hard limit is a byte bound, not a provider token bound, even though the two
+  are sometimes loosely correlated.</li>
+<li>An arbitrary upstream <code>IChatReducer</code>'s actual reduction quality and latency
+  remain outside this decision's control; this decision bounds correctness
+  (never accepting a non-reducing or structurally invalid proposal) and
+  attempt count, not reducer quality.</li>
+<li>This leaf's structured diagnostics are inspectable per-decision (via the
+  attached result or the corresponding progress event) but are not yet
+  aggregated into <code>IAgentRunDiagnostics</code>, <code>IDiagnosticsSink</code>, or
+  <code>IAgentMetrics</code>; that aggregation is deferred to later hardening scope.</li>
+<li>No direct NativeAOT execution proof exists for the hybrid compaction
+  profile itself; Harness's existing hosted AOT coverage compiles the
+  composition graph but does not execute a hybrid-enabled agent under
+  NativeAOT, so this capability's AOT status is recorded honestly as
+  <code>Unverified</code>, not <code>Verified</code>.</li>
+<li>No public runtime configuration exists yet for selecting or tuning a hybrid
+  profile; every policy input remains an internal construction-time value
+  until a public configuration surface is a separate, later decision.</li>
+</ul>
+<h3 id="neutral">Neutral<a class="headerlink" href="#neutral" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Retention and deletion of workspace-backed artifacts referenced from a
+  compacted conversation remain governed entirely by ADR-0006; this decision
+  introduces no new retention or deletion behavior of its own.</li>
+<li>The trust boundary recorded for the Compaction capability
+  (<code>ExternalContent</code>) reflects that hybrid-compacted context is ultimately
+  host-classified conversational/tool content flowing through the same
+  classification path every other context entry already flows through — not
+  a new or different trust concern this decision introduces.</li>
+<li>A public Harness composition/configuration API remains undecided; every
+  type this decision introduces is either an internal mechanism or a
+  documented public diagnostics/attribution/progress record.</li>
+</ul>
+<h2 id="confirmation">Confirmation<a class="headerlink" href="#confirmation" title="Permanent link">&para;</a></h2>
+<p>The decision is confirmed by:</p>
+<ul>
+<li>policy/trigger/fallback/termination tests covering <code>WithinLimit</code>,
+  <code>Reduced</code>, <code>PreservationFallback</code>, <code>Irreducible</code>, and
+  <code>ConcurrentMutationLimit</code> outcomes, including bounded reducer-attempt
+  exhaustion and restart-after-mutation behavior;</li>
+<li>capability resolver tests proving Compaction is <code>Enabled</code> only when both
+  requested and accepted at its delivery phase, <code>Deferred</code> when accepted but
+  the delivery phase has not yet been reached, and <code>Disabled</code> when not
+  requested at all, with exact trust-boundary, AOT, and diagnostics-status
+  field values asserted directly;</li>
+<li>progress-event tests proving exactly one started event and exactly one
+  terminal event (never both a completed and a terminated event) per
+  assembly attempt, a context-composed event only on success and only after
+  trust revalidation, and no compaction event of any kind when no hybrid
+  profile is configured;</li>
+<li>measurement-unit tests proving every diagnostics size is labeled with the
+  exact unit the governing estimator declared, and that a fixed/constant
+  test estimator is never mislabeled as reporting an estimated token count;</li>
+<li>category-contribution tests proving the sum of every final per-category
+  contribution equals the reported final size exactly, for every category
+  this decision distinguishes;</li>
+<li>non-retransmission tests proving a rehydrated body reserved by one nested
+  provider call's lease is filtered out of a second, concurrently-running or
+  subsequent call's own snapshot within the same outer run, and that a
+  failed or canceled call releases its reservation so a later retry can still
+  reserve and eventually deliver the same digest;</li>
+<li>artifact attribution tests covering every offload and rehydration outcome,
+  including multibyte payload and reference-byte-count correctness, proving
+  the shared UTF-8 byte attribution never diverges between the internal
+  snapshot and its corresponding progress event; and</li>
+<li>reflection-based privacy tests asserting that no diagnostics or progress
+  event's string properties or default string representation ever carries
+  raw message text, an artifact body, a workspace path, an owner identity,
+  tool arguments/results, exception text, or classifier output text.</li>
+</ul>
+<p>Local build and test validation for this leaf is recorded in
+<code>specs/001-maf-harness-first-class/evidence/gate-g5.md</code>. An MAF or MEAI
+upgrade that changes provider-call middleware ordering, chat-reducer
+behavior, or progress-reporting behavior must rerun these contracts before
+this decision can claim continued compatibility.</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>ADR-0006 establishes <code>IWorkspace</code> as the sole authoritative bulk-artifact
+  store and the explicit, verified rehydration contract this decision's
+  transient-delivery and non-retransmission rules build on.</li>
+<li>ADR-0005 establishes the trusted execution binding and selected-provider
+  composition root this decision's per-provider-call seam and capability
+  resolution continue to rely on.</li>
+<li><code>specs/001-maf-harness-first-class/evidence/gate-g5.md</code> records the
+  cumulative implementation evidence, policy/trigger/fallback/termination
+  matrices, and public API disposition for this decision.</li>
+<li><code>HarnessContextDiagnostics</code>, <code>HarnessContextAttribution</code>, and the
+  <code>HarnessContextCompactionStartedEvent</code> / <code>HarnessContextCompactionCompletedEvent</code>
+  / <code>HarnessContextCompactionTerminatedEvent</code> / <code>HarnessContextComposedEvent</code>
+  progress events carry the structured observability contract confirmed by
+  this record.</li>
+</ul>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -2988,12 +3241,12 @@ every other offload outcome.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.highlight", "search.suggest", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.highlight", "search.suggest", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../../javascripts/api-version-switcher.js"></script>
+        <script src="../../javascripts/api-version-switcher.js"></script>
       
     
   </body>
