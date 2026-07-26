@@ -95,6 +95,29 @@ public sealed record FoundryHarnessAgentConfiguration
     public required FoundryHarnessFeatureSelections Features { get; init; }
 
     /// <summary>
+    /// Gets whether Foundry emits ordered agent, model-call, and tool-call progress events around
+    /// the upstream bundle pipeline.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When <see langword="true"/>, construction requires an <see cref="IServiceProvider"/> that
+    /// resolves <c>NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporterAccessor</c>.
+    /// The caller must still establish an active reporter scope before running the agent; without
+    /// one, reporting is a no-op.
+    /// </para>
+    /// <para>
+    /// This option does not add OpenTelemetry instrumentation or another function-invocation loop.
+    /// The upstream Harness bundle remains the sole owner of both.
+    /// </para>
+    /// <para>
+    /// Foundry observes tool execution by chaining the constructed bundle's
+    /// <c>FunctionInvokingChatClient.FunctionInvoker</c>. Replacing that delegate after construction
+    /// also replaces Foundry's tool-progress hook.
+    /// </para>
+    /// </remarks>
+    public required bool EnableFoundryProgress { get; init; }
+
+    /// <summary>
     /// Gets the maximum number of tokens the model's context window supports, or
     /// <see langword="null"/> if not applicable.
     /// </summary>

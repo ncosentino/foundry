@@ -94,23 +94,52 @@ public sealed class FoundryHarnessAgentFactory
     /// </summary>
     /// <param name="configuration">The explicit bundle configuration to inspect.</param>
     /// <returns>A complete <see cref="FoundryHarnessEffectiveDefaults"/> report.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// <see cref="FoundryHarnessAgentConfiguration.EnableFoundryProgress"/> is
+    /// <see langword="true"/>. Use the overload that accepts <see cref="IServiceProvider"/>.
+    /// </exception>
     /// <remarks>
     /// <para>
-    /// This method runs the same configuration validation as every <c>Create</c> overload.
-    /// An invalid configuration that would cause <c>Create</c> to throw will also cause
-    /// <c>DescribeEffectiveDefaults</c> to throw with the same error. This guarantees that any
-    /// report returned here describes a configuration that can actually be constructed.
+    /// This method runs the same validation as <see cref="Create(FoundryHarnessAgentConfiguration)"/>.
+    /// A configuration that requires Foundry progress services is rejected because this overload
+    /// has no service provider. This guarantees that any report returned here describes a
+    /// configuration constructible by the corresponding service-free <c>Create</c> overload.
     /// </para>
     /// <para>
-    /// This is a pure function of <paramref name="configuration"/>. Call it before construction
-    /// to preview what a configuration will do, or after construction (with the same
-    /// configuration instance) to explain what was actually built.
+    /// Call it before service-free construction to preview what a configuration will do, or after
+    /// construction (with the same configuration instance) to explain what was actually built.
     /// </para>
     /// </remarks>
     public FoundryHarnessEffectiveDefaults DescribeEffectiveDefaults(
         FoundryHarnessAgentConfiguration configuration)
     {
         Validate(configuration);
+        _ = FoundryHarnessTelemetryComposition.Create(configuration, services: null);
+        return _inspector.Describe(configuration);
+    }
+
+    /// <summary>
+    /// Computes the requested-versus-effective disposition of every upstream bundle dimension
+    /// while validating progress dependencies against <paramref name="services"/>.
+    /// </summary>
+    /// <param name="configuration">The explicit bundle configuration to inspect.</param>
+    /// <param name="services">
+    /// The service provider that will be used for construction and, when Foundry progress is
+    /// enabled, must resolve
+    /// <c>NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporterAccessor</c>.
+    /// </param>
+    /// <returns>A complete <see cref="FoundryHarnessEffectiveDefaults"/> report.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="services"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Foundry progress is enabled but the required progress accessor is unavailable.
+    /// </exception>
+    public FoundryHarnessEffectiveDefaults DescribeEffectiveDefaults(
+        FoundryHarnessAgentConfiguration configuration,
+        IServiceProvider services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        Validate(configuration);
+        _ = FoundryHarnessTelemetryComposition.Create(configuration, services);
         return _inspector.Describe(configuration);
     }
 
@@ -120,6 +149,9 @@ public sealed class FoundryHarnessAgentFactory
         IServiceProvider? services)
     {
         Validate(configuration);
+        var telemetryComposition = FoundryHarnessTelemetryComposition.Create(
+            configuration,
+            services);
 
         var tools = configuration.Tools.Count > 0 ? new List<AITool>(configuration.Tools) : null;
         var additionalContextProviders = configuration.AdditionalContextProviders.Count > 0
@@ -163,7 +195,10 @@ public sealed class FoundryHarnessAgentFactory
             OpenTelemetrySourceName = configuration.OpenTelemetrySourceName,
         };
 
-        return configuration.ChatClient.AsHarnessAgent(options, loggerFactory, services);
+        var agent = telemetryComposition
+            .ComposeChatClient(configuration.ChatClient)
+            .AsHarnessAgent(options, loggerFactory, services);
+        return telemetryComposition.ComposeAgent(agent);
     }
 
     private static void Validate(FoundryHarnessAgentConfiguration configuration)

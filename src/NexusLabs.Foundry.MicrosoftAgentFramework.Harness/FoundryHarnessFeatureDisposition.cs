@@ -6,7 +6,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Instances are produced exclusively by <see cref="FoundryHarnessAgentFactory.DescribeEffectiveDefaults"/>.
+/// Instances are produced exclusively by
+/// <see cref="FoundryHarnessAgentFactory.DescribeEffectiveDefaults(FoundryHarnessAgentConfiguration)"/>
+/// and its service-aware overload.
 /// The constructor is not public; use the internal <see cref="Create"/> factory within the bundle
 /// assembly to produce validated instances.
 /// </para>

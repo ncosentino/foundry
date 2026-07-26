@@ -246,6 +246,9 @@ Assert-Dependency $packagesById `
 Assert-Dependency $packagesById `
     'NexusLabs.Foundry.MicrosoftAgentFramework.Harness' `
     'Microsoft.Agents.AI.Harness'
+Assert-Dependency $packagesById `
+    'NexusLabs.Foundry.MicrosoftAgentFramework.Harness' `
+    'NexusLabs.Foundry.MicrosoftAgentFramework'
 
 if ($failures.Count -gt 0) {
     Write-Host 'Package validation failed:' -ForegroundColor Red
