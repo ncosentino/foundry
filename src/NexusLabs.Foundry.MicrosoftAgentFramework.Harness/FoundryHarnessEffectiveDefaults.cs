@@ -7,8 +7,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// <remarks>
 /// <para>
 /// Obtain an instance from
-/// <see cref="FoundryHarnessAgentFactory.DescribeEffectiveDefaults(FoundryHarnessAgentConfiguration)"/>
-/// or its service-aware overload.
+/// <see cref="FoundryHarnessAgentFactory.DescribeEffectiveDefaults(FoundryHarnessAgentConfiguration)"/>.
 /// Because this report is a pure function of the configuration, it is valid both before and
 /// after calling <see cref="FoundryHarnessAgentFactory.Create(FoundryHarnessAgentConfiguration)"/>
 /// with the same configuration instance.

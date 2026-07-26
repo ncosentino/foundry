@@ -11,6 +11,9 @@ internal sealed class FoundryHarnessProgressChatClient(
     IChatClient innerClient,
     FoundryHarnessProgressRunCoordinator runCoordinator) : DelegatingChatClient(innerClient)
 {
+    internal const string AbandonedStreamingErrorMessage =
+        "Streaming model response enumeration ended before completion.";
+
     public override async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -86,6 +89,7 @@ internal sealed class FoundryHarnessProgressChatClient(
 
         var buffered = new List<ChatResponseUpdate>();
         Exception? failure = null;
+        bool completedEnumeration = false;
         var enumerator = base
             .GetStreamingResponseAsync(messages, options, cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
@@ -112,25 +116,49 @@ internal sealed class FoundryHarnessProgressChatClient(
                 buffered.Add(update);
                 yield return update;
             }
+
+            completedEnumeration = true;
         }
         finally
         {
-            await enumerator.DisposeAsync().ConfigureAwait(false);
+            try
+            {
+                await enumerator.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                failure ??= ex;
+            }
+
+            stopwatch.Stop();
+            if (failure is not null)
+            {
+                ReportFailed(state, callSequence, failure, stopwatch.Elapsed);
+            }
+            else if (completedEnumeration)
+            {
+                ReportCompleted(
+                    state,
+                    callSequence,
+                    buffered.ToChatResponse(),
+                    stopwatch.Elapsed);
+            }
+            else
+            {
+                ReportFailed(
+                    state,
+                    callSequence,
+                    new InvalidOperationException(AbandonedStreamingErrorMessage),
+                    stopwatch.Elapsed);
+            }
         }
 
-        stopwatch.Stop();
-        if (failure is null)
+        if (failure is not null)
         {
-            ReportCompleted(
-                state,
-                callSequence,
-                buffered.ToChatResponse(),
-                stopwatch.Elapsed);
-            yield break;
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo
+                .Capture(failure)
+                .Throw();
         }
-
-        ReportFailed(state, callSequence, failure, stopwatch.Elapsed);
-        throw failure;
     }
 
     private static void ReportCompleted(

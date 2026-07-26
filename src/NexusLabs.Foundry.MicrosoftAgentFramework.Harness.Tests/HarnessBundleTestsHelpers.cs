@@ -52,7 +52,7 @@ internal static class HarnessBundleTestsHelpers
             ChatClient = new FakeHarnessChatClient(),
             Tools = [],
             Features = features ?? AllFeaturesDisabled(),
-            EnableFoundryProgress = false,
+            ProgressAccessor = null,
             MaxContextWindowTokens = null,
             MaxOutputTokens = null,
             MaximumIterationsPerRequest = null,

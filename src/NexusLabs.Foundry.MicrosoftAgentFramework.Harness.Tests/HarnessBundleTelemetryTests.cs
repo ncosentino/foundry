@@ -39,7 +39,7 @@ public sealed class HarnessBundleTelemetryTests
             chatClient,
             function,
             sourceName,
-            enableFoundryProgress: false);
+            progressAccessor: null);
         var agent = Factory.Create(configuration);
 
         await agent.RunAsync(
@@ -80,8 +80,8 @@ public sealed class HarnessBundleTelemetryTests
             chatClient,
             function,
             sourceName,
-            enableFoundryProgress: true);
-        var agent = Factory.Create(configuration, services);
+            progressAccessor);
+        var agent = Factory.Create(configuration);
 
         using (progressAccessor.BeginScope(reporter))
         {
@@ -145,15 +145,16 @@ public sealed class HarnessBundleTelemetryTests
             .AddFoundryAgentFramework()
             .AddSingleton<IProgressSink>(sink)
             .BuildServiceProvider();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
         var configuration = CreateTelemetryConfiguration(
             chatClient,
             function,
             sourceName: null,
-            enableFoundryProgress: true) with
+            progressAccessor) with
         {
             Features = HarnessBundleTestsHelpers.AllFeaturesDisabled(),
         };
-        var agent = Factory.Create(configuration, services);
+        var agent = Factory.Create(configuration);
 
         await agent.RunAsync(
             "run one tool",
@@ -183,11 +184,11 @@ public sealed class HarnessBundleTelemetryTests
             chatClient,
             function,
             sourceName: null,
-            enableFoundryProgress: false) with
+            progressAccessor: null) with
         {
             Features = HarnessBundleTestsHelpers.AllFeaturesDisabled(),
         };
-        var agent = Factory.Create(configuration, services);
+        var agent = Factory.Create(configuration);
 
         using (progressAccessor.BeginScope(reporter))
         {
@@ -201,74 +202,18 @@ public sealed class HarnessBundleTelemetryTests
     }
 
     [Fact]
-    public void Create_FoundryProgressEnabledWithoutServices_ThrowsInvalidOperationException()
-    {
-        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
-        {
-            EnableFoundryProgress = true,
-        };
-
-        var exception = Assert.Throws<InvalidOperationException>(() => Factory.Create(configuration));
-
-        Assert.Contains("IServiceProvider", exception.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void Create_FoundryProgressEnabledWithoutAccessor_ThrowsInvalidOperationException()
-    {
-        using var services = new ServiceCollection().BuildServiceProvider();
-        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
-        {
-            EnableFoundryProgress = true,
-        };
-
-        var exception = Assert.Throws<InvalidOperationException>(
-            () => Factory.Create(configuration, services));
-
-        Assert.Contains("IProgressReporterAccessor", exception.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void DescribeEffectiveDefaults_FoundryProgressEnabledWithoutServices_ThrowsInvalidOperationException()
-    {
-        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
-        {
-            EnableFoundryProgress = true,
-        };
-
-        var exception = Assert.Throws<InvalidOperationException>(
-            () => Factory.DescribeEffectiveDefaults(configuration));
-
-        Assert.Contains("IServiceProvider", exception.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void DescribeEffectiveDefaults_FoundryProgressEnabledWithoutAccessor_ThrowsInvalidOperationException()
-    {
-        using var services = new ServiceCollection().BuildServiceProvider();
-        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
-        {
-            EnableFoundryProgress = true,
-        };
-
-        var exception = Assert.Throws<InvalidOperationException>(
-            () => Factory.DescribeEffectiveDefaults(configuration, services));
-
-        Assert.Contains("IProgressReporterAccessor", exception.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void DescribeEffectiveDefaults_FoundryProgressEnabledWithAccessor_ReturnsReport()
+    public void DescribeEffectiveDefaults_ProgressAccessorSupplied_ReturnsReport()
     {
         using var services = new ServiceCollection()
             .AddFoundryAgentFramework()
             .BuildServiceProvider();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
         var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
         {
-            EnableFoundryProgress = true,
+            ProgressAccessor = progressAccessor,
         };
 
-        var defaults = Factory.DescribeEffectiveDefaults(configuration, services);
+        var defaults = Factory.DescribeEffectiveDefaults(configuration);
 
         Assert.NotEmpty(defaults.Dispositions);
     }
@@ -289,9 +234,9 @@ public sealed class HarnessBundleTelemetryTests
             Id = "bundle-stream-agent",
             Name = "Bundle Stream Agent",
             ChatClient = chatClient,
-            EnableFoundryProgress = true,
+            ProgressAccessor = progressAccessor,
         };
-        var agent = Factory.Create(configuration, services);
+        var agent = Factory.Create(configuration);
         var updates = new List<AgentResponseUpdate>();
 
         using (progressAccessor.BeginScope(reporter))
@@ -326,6 +271,55 @@ public sealed class HarnessBundleTelemetryTests
     }
 
     [Fact]
+    public async Task RunStreaming_EarlyDisposal_EmitsLlmAndAgentFailureProgress()
+    {
+        var chatClient = new HarnessBundleStreamingChatClient();
+        var sink = new HarnessBundleProgressSink();
+        using var services = new ServiceCollection()
+            .AddFoundryAgentFramework()
+            .BuildServiceProvider();
+        var progressFactory = services.GetRequiredService<IProgressReporterFactory>();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
+        var reporter = progressFactory.Create("bundle-abandoned-stream-workflow", [sink]);
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            Id = "bundle-abandoned-stream-agent",
+            Name = "Bundle Abandoned Stream Agent",
+            ChatClient = chatClient,
+            ProgressAccessor = progressAccessor,
+        };
+        var agent = Factory.Create(configuration);
+
+        using (progressAccessor.BeginScope(reporter))
+        {
+            var enumerator = agent
+                .RunStreamingAsync(
+                    "stream",
+                    cancellationToken: TestContext.Current.CancellationToken)
+                .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+            Assert.True(await enumerator.MoveNextAsync());
+            await enumerator.DisposeAsync();
+        }
+
+        Assert.Equal(
+            [
+                typeof(AgentInvokedEvent),
+                typeof(LlmCallStartedEvent),
+                typeof(LlmCallFailedEvent),
+                typeof(AgentFailedEvent),
+            ],
+            sink.Events.Select(progressEvent => progressEvent.GetType()));
+        var llmFailed = Assert.IsType<LlmCallFailedEvent>(sink.Events[2]);
+        Assert.Equal(
+            FoundryHarnessProgressChatClient.AbandonedStreamingErrorMessage,
+            llmFailed.ErrorMessage);
+        var agentFailed = Assert.IsType<AgentFailedEvent>(sink.Events[3]);
+        Assert.Equal(
+            FoundryHarnessProgressAgent.AbandonedStreamingErrorMessage,
+            agentFailed.ErrorMessage);
+    }
+
+    [Fact]
     public async Task Run_ModelFailure_EmitsLlmAndAgentFailureProgress()
     {
         var chatClient = new HarnessBundleFailingChatClient(
@@ -342,9 +336,9 @@ public sealed class HarnessBundleTelemetryTests
             Id = "bundle-failure-agent",
             Name = "Bundle Failure Agent",
             ChatClient = chatClient,
-            EnableFoundryProgress = true,
+            ProgressAccessor = progressAccessor,
         };
-        var agent = Factory.Create(configuration, services);
+        var agent = Factory.Create(configuration);
 
         using (progressAccessor.BeginScope(reporter))
         {
@@ -387,9 +381,9 @@ public sealed class HarnessBundleTelemetryTests
             Name = "Bundle Tool Failure Agent",
             ChatClient = chatClient,
             Tools = [function],
-            EnableFoundryProgress = true,
+            ProgressAccessor = progressAccessor,
         };
-        var agent = Factory.Create(configuration, services);
+        var agent = Factory.Create(configuration);
 
         using (progressAccessor.BeginScope(reporter))
         {
@@ -406,11 +400,53 @@ public sealed class HarnessBundleTelemetryTests
         Assert.Single(sink.Events.OfType<AgentCompletedEvent>());
     }
 
+    [Fact]
+    public async Task Run_ConcurrentScopes_OnOneAgent_DoNotCrossProgressEvents()
+    {
+        var chatClient = new HarnessBundleConcurrentChatClient();
+        var firstSink = new HarnessBundleProgressSink();
+        var secondSink = new HarnessBundleProgressSink();
+        using var services = new ServiceCollection()
+            .AddFoundryAgentFramework()
+            .BuildServiceProvider();
+        var progressFactory = services.GetRequiredService<IProgressReporterFactory>();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
+        var firstReporter = progressFactory.Create("bundle-concurrent-a", [firstSink]);
+        var secondReporter = progressFactory.Create("bundle-concurrent-b", [secondSink]);
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline() with
+        {
+            Id = "bundle-concurrent-agent",
+            Name = "Bundle Concurrent Agent",
+            ChatClient = chatClient,
+            ProgressAccessor = progressAccessor,
+        };
+        var agent = Factory.Create(configuration);
+
+        await Task.WhenAll(
+            RunWithProgressScopeAsync(firstReporter, "first"),
+            RunWithProgressScopeAsync(secondReporter, "second"));
+
+        AssertConcurrentRunEvents(firstSink.Events, "bundle-concurrent-a");
+        AssertConcurrentRunEvents(secondSink.Events, "bundle-concurrent-b");
+
+        async Task RunWithProgressScopeAsync(
+            IProgressReporter reporter,
+            string message)
+        {
+            using (progressAccessor.BeginScope(reporter))
+            {
+                await agent.RunAsync(
+                    message,
+                    cancellationToken: TestContext.Current.CancellationToken);
+            }
+        }
+    }
+
     private static FoundryHarnessAgentConfiguration CreateTelemetryConfiguration(
         IChatClient chatClient,
         AIFunction function,
         string? sourceName,
-        bool enableFoundryProgress) =>
+        IProgressReporterAccessor? progressAccessor) =>
         HarnessBundleTestsHelpers.CreateBaseline(
             HarnessBundleTestsHelpers.AllFeaturesDisabled() with
             {
@@ -421,7 +457,7 @@ public sealed class HarnessBundleTelemetryTests
             Name = "Bundle Agent",
             ChatClient = chatClient,
             Tools = [function],
-            EnableFoundryProgress = enableFoundryProgress,
+            ProgressAccessor = progressAccessor,
             OpenTelemetrySourceName = sourceName,
         };
 
@@ -478,5 +514,29 @@ public sealed class HarnessBundleTelemetryTests
                 StringComparison.Ordinal)) == 1,
             evidence);
         Assert.Equal(4, operationNames.Count);
+    }
+
+    private static void AssertConcurrentRunEvents(
+        IReadOnlyList<IProgressEvent> events,
+        string workflowId)
+    {
+        Assert.Equal(
+            [
+                typeof(AgentInvokedEvent),
+                typeof(LlmCallStartedEvent),
+                typeof(LlmCallCompletedEvent),
+                typeof(AgentCompletedEvent),
+            ],
+            events.Select(progressEvent => progressEvent.GetType()));
+        Assert.All(
+            events,
+            progressEvent =>
+            {
+                Assert.Equal(workflowId, progressEvent.WorkflowId);
+                Assert.Equal("bundle-concurrent-agent", progressEvent.AgentId);
+            });
+        var completed = Assert.IsType<AgentCompletedEvent>(events[^1]);
+        Assert.Equal(5, completed.TotalTokens);
+        Assert.Equal(0, completed.ToolCallCount);
     }
 }

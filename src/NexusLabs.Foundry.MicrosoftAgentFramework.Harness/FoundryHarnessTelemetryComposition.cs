@@ -17,35 +17,10 @@ internal sealed class FoundryHarnessTelemetryComposition
     }
 
     internal static FoundryHarnessTelemetryComposition Create(
-        FoundryHarnessAgentConfiguration configuration,
-        IServiceProvider? services)
+        FoundryHarnessAgentConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-
-        if (!configuration.EnableFoundryProgress)
-        {
-            return new FoundryHarnessTelemetryComposition(progressAccessor: null);
-        }
-
-        if (services is null)
-        {
-            throw new InvalidOperationException(
-                "FoundryHarnessAgentConfiguration.EnableFoundryProgress is true, but no " +
-                "IServiceProvider was supplied. Use a FoundryHarnessAgentFactory.Create overload " +
-                "that accepts services and register IProgressReporterAccessor.");
-        }
-
-        var progressAccessor = services.GetService(typeof(IProgressReporterAccessor))
-            as IProgressReporterAccessor;
-        if (progressAccessor is null)
-        {
-            throw new InvalidOperationException(
-                "FoundryHarnessAgentConfiguration.EnableFoundryProgress is true, but the supplied " +
-                "IServiceProvider does not resolve IProgressReporterAccessor. Register Foundry's " +
-                "Microsoft Agent Framework progress services before constructing the bundle agent.");
-        }
-
-        return new FoundryHarnessTelemetryComposition(progressAccessor);
+        return new FoundryHarnessTelemetryComposition(configuration.ProgressAccessor);
     }
 
     internal IChatClient ComposeChatClient(IChatClient chatClient)

@@ -15,6 +15,9 @@ internal sealed class FoundryHarnessProgressAgent(
     string agentId,
     string agentName) : DelegatingAIAgent(innerAgent)
 {
+    internal const string AbandonedStreamingErrorMessage =
+        "Streaming agent response enumeration ended before completion.";
+
     protected override async Task<AgentResponse> RunCoreAsync(
         IEnumerable<ChatMessage> messages,
         AgentSession? session = null,
@@ -60,58 +63,76 @@ internal sealed class FoundryHarnessProgressAgent(
         var stopwatch = Stopwatch.StartNew();
         ReportInvoked(state);
         Exception? failure = null;
+        bool completedEnumeration = false;
+        var enumerator = base
+            .RunCoreStreamingAsync(messages, session, options, cancellationToken)
+            .GetAsyncEnumerator(cancellationToken);
 
         try
         {
-            var enumerator = base
-                .RunCoreStreamingAsync(messages, session, options, cancellationToken)
-                .GetAsyncEnumerator(cancellationToken);
-            try
+            while (true)
             {
-                while (true)
+                AgentResponseUpdate update;
+                try
                 {
-                    AgentResponseUpdate update;
-                    try
+                    if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
                     {
-                        if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
-                        {
-                            break;
-                        }
-
-                        update = enumerator.Current;
-                    }
-                    catch (Exception ex)
-                    {
-                        failure = ex;
                         break;
                     }
 
-                    yield return update;
+                    update = enumerator.Current;
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                    break;
+                }
+
+                yield return update;
+            }
+
+            completedEnumeration = true;
+        }
+        finally
+        {
+            try
+            {
+                await enumerator.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                failure ??= ex;
+            }
+
+            stopwatch.Stop();
+            try
+            {
+                if (failure is not null)
+                {
+                    ReportFailed(state, failure);
+                }
+                else if (completedEnumeration)
+                {
+                    ReportCompleted(state, stopwatch.Elapsed);
+                }
+                else
+                {
+                    ReportFailed(
+                        state,
+                        new InvalidOperationException(AbandonedStreamingErrorMessage));
                 }
             }
             finally
             {
-                await enumerator.DisposeAsync().ConfigureAwait(false);
+                runCoordinator.Restore(previous);
             }
-
-            stopwatch.Stop();
-            if (failure is null)
-            {
-                ReportCompleted(state, stopwatch.Elapsed);
-            }
-            else
-            {
-                ReportFailed(state, failure);
-            }
-        }
-        finally
-        {
-            runCoordinator.Restore(previous);
         }
 
         if (failure is not null)
         {
-            throw failure;
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo
+                .Capture(failure)
+                .Throw();
         }
     }
 
