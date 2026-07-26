@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
     <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Harness\NexusLabs.Foundry.MicrosoftAgentFramework.Harness.csproj" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Testing\NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
     <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework.Generators\NexusLabs.Foundry.MicrosoftAgentFramework.Generators.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
