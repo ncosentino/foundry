@@ -168,10 +168,8 @@ internal sealed class HostedEvaluationDriver
                     batchResults[entry.Arm] = result;
                 }
 
-                scheduledBatchCount++;
                 var batchRelativePath =
                     $"batches/{batchIndex + 1:D3}-{batch.CaseId}-t{batch.TrialIndex}.json";
-                _batchArtifactReferences[batch] = batchRelativePath;
                 var batchArtifact = new HostedBatchArtifact(
                     batchIndex + 1,
                     batch,
@@ -185,8 +183,10 @@ internal sealed class HostedEvaluationDriver
                         _options.OutputDirectory,
                         batchRelativePath.Replace('/', Path.DirectorySeparatorChar)),
                     batchArtifact,
-                    cancellationToken).ConfigureAwait(false);
-                await WriteLedgerAsync(cancellationToken).ConfigureAwait(false);
+                    CancellationToken.None).ConfigureAwait(false);
+                _batchArtifactReferences[batch] = batchRelativePath;
+                scheduledBatchCount++;
+                await WriteLedgerAsync(CancellationToken.None).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -198,6 +198,7 @@ internal sealed class HostedEvaluationDriver
         stopwatch.Stop();
         var finalizationToken = CancellationToken.None;
         var ledger = BuildLedger();
+        ValidateEvidenceReferences(ledger);
         await WriteJsonAtomicAsync(
             Path.Combine(_options.OutputDirectory, "ledger", "trial-records.json"),
             ledger,
@@ -688,6 +689,40 @@ internal sealed class HostedEvaluationDriver
             Path.Combine(_options.OutputDirectory, "ledger", "trial-records.json"),
             BuildLedger(),
             cancellationToken).ConfigureAwait(false);
+
+    private void ValidateEvidenceReferences(
+        IReadOnlyList<HarnessComparisonTrialRecord> ledger)
+    {
+        foreach (var record in ledger.Where(record => record.Scheduled))
+        {
+            if (string.IsNullOrWhiteSpace(record.EvidenceArtifactReference) ||
+                string.IsNullOrWhiteSpace(record.ResponseCaptureReference))
+            {
+                throw new InvalidDataException(
+                    $"Scheduled row '{record.Arm}/{record.CaseId}/{record.TrialIndex}' is missing an evidence or capture reference.");
+            }
+
+            var evidencePath = Path.Combine(
+                _options.OutputDirectory,
+                record.EvidenceArtifactReference
+                    .Replace('/', Path.DirectorySeparatorChar));
+            if (!File.Exists(evidencePath))
+            {
+                throw new InvalidDataException(
+                    $"Scheduled row '{record.Arm}/{record.CaseId}/{record.TrialIndex}' references missing evidence '{record.EvidenceArtifactReference}'.");
+            }
+
+            var capturePath = Path.Combine(
+                _options.OutputDirectory,
+                record.ResponseCaptureReference
+                    .Replace('/', Path.DirectorySeparatorChar));
+            if (!File.Exists(capturePath))
+            {
+                throw new InvalidDataException(
+                    $"Scheduled row '{record.Arm}/{record.CaseId}/{record.TrialIndex}' references missing capture '{record.ResponseCaptureReference}'.");
+            }
+        }
+    }
 
     private async Task WriteJsonAtomicAsync<T>(
         string path,
