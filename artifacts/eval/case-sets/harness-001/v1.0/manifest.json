@@ -10,10 +10,10 @@
       "development": false,
       "tags": ["hosted", "tools"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-01/completion", "relativePath": "cases/h001-01/completion.json", "sha256": "fac09b8a76f03d939a6bed940b25ec03fed771772024446b1c5a73e9462576ae" },
-        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-01/tool-trajectory", "relativePath": "cases/h001-01/tool-trajectory.json", "sha256": "bff7db7d6dc5a32253f780582aa9a391e330ad1c6dba998c1d160345f4908b07" },
-        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-01/termination", "relativePath": "cases/h001-01/termination.json", "sha256": "f1a8991a3c197ce55cc7bf2a587e4f70fee5a3744a122691843b58739fe5c8c5" },
-        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-01/diagnostics-parity", "relativePath": "cases/h001-01/diagnostics-parity.json", "sha256": "82b1fb499f218c13fc84bc951f402b3a0aa5536b67fc34f0514b6ca07e2b47e3" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-01/completion", "relativePath": "cases/h001-01/completion.json", "sha256": "2b85278fff3bcf653de88b99504b6ffecaddb6a1d1cdd6af0b78bf89b6bc3d9b" },
+        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-01/tool-trajectory", "relativePath": "cases/h001-01/tool-trajectory.json", "sha256": "3933e35b757c08359186b7dfd85330b8c9df1f61411cafeac0373322a2b96172" },
+        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-01/termination", "relativePath": "cases/h001-01/termination.json", "sha256": "41ead26d9eaa9079c4c3e52315d86876b2b48b71beae6317cef4bdf811d4bbff" },
+        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-01/diagnostics-parity", "relativePath": "cases/h001-01/diagnostics-parity.json", "sha256": "15e02c85a25da14d02e22e9c3674873bd9466f693b0fe1a35c6f35e6434fc1ee" }
       ]
     },
     {
@@ -22,10 +22,10 @@
       "development": false,
       "tags": ["hosted", "context"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-02/completion", "relativePath": "cases/h001-02/completion.json", "sha256": "cef470602a8449795c471f0652626d1ad7c9e227a57a67404f01094e99bb5819" },
-        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-02/context-safety", "relativePath": "cases/h001-02/context-safety.json", "sha256": "3024e2bc531acb93512410c9ddbfd5e44d4559c95d871dcb5da886b06c8fe31e" },
-        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-02/cumulative-tokens", "relativePath": "cases/h001-02/cumulative-tokens.json", "sha256": "29612bee4eaddb66b003ce87bc10c6875e2340f042ae1d8edb4f1f6b04620db2" },
-        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-02/peak-tokens", "relativePath": "cases/h001-02/peak-tokens.json", "sha256": "782300dd45078d8d151d7fa6869feef7f228011a5e743b36db95058514473949" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-02/completion", "relativePath": "cases/h001-02/completion.json", "sha256": "5d5b07c67744ba7553f10edc00d8b391b11d4d0506b24942f1c94da6011b52e2" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-02/context-safety", "relativePath": "cases/h001-02/context-safety.json", "sha256": "6acddba6763b674e001fed8eb7df4120bb30caa8cb29bca55790002f4d1ea51b" },
+        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-02/cumulative-tokens", "relativePath": "cases/h001-02/cumulative-tokens.json", "sha256": "1ce34d394842ae734b5c2458afff1f55cb00e5c2968eea2ad7b89580f11931f8" },
+        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-02/peak-tokens", "relativePath": "cases/h001-02/peak-tokens.json", "sha256": "934c623d935815d6d22a182e59a7576ef7759dc3f9d90c74b6faa77fe497764a" }
       ]
     },
     {
@@ -34,9 +34,9 @@
       "development": false,
       "tags": ["hosted", "artifacts"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-03/completion", "relativePath": "cases/h001-03/completion.json", "sha256": "4c72a530e92a6e15aa67a4e8dcd2c57064df470c1a88118f6d736b4269621712" },
-        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-03/artifact-reuse", "relativePath": "cases/h001-03/artifact-reuse.json", "sha256": "9d43795cc04f8976d30f85230778deb6f1aa7db0dfc5dd3689344bab375cceb6" },
-        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-03/cost-attribution", "relativePath": "cases/h001-03/cost-attribution.json", "sha256": "1724646834243e776ad06657ca67df3b98b87eb37ec131deb6e936d1e3e151cb" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-03/completion", "relativePath": "cases/h001-03/completion.json", "sha256": "63c74ac979edcccc3ffe6be655de7c49718f797ac57ac6bf087c659ba69726f2" },
+        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-03/artifact-reuse", "relativePath": "cases/h001-03/artifact-reuse.json", "sha256": "4a74bdfd2c9ecf0bb116d84b25b33ee0cc7fd4a613d41014d23159ac269f156e" },
+        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-03/cost-attribution", "relativePath": "cases/h001-03/cost-attribution.json", "sha256": "30f01e74cfaf46e9c4b87cb64ab42603bf7c469d77d1b17119a3431711d00483" }
       ]
     },
     {
@@ -45,9 +45,9 @@
       "development": false,
       "tags": ["hosted", "continuity"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-04/completion", "relativePath": "cases/h001-04/completion.json", "sha256": "0d18a3b7fccb8b7b3a34153b1d9389f374de224999c7e076f7c0f8d45e4220cf" },
-        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-04/continuity", "relativePath": "cases/h001-04/continuity.json", "sha256": "f4d4e0e6c9de0a1d2997758320d4a00047e47715e7d5aca4eabc91c723dcb976" },
-        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-04/latency", "relativePath": "cases/h001-04/latency.json", "sha256": "56cb014fac5086c2a6ba4e79f058006368a6fb02a4c965d6d5b252b717f5186c" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-04/completion", "relativePath": "cases/h001-04/completion.json", "sha256": "686f4e46c2200d9d00beb2c4b78bff82eed4ab2196defd19ea949349b4e25025" },
+        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-04/continuity", "relativePath": "cases/h001-04/continuity.json", "sha256": "81f2f70fed976a3987008c32ff87c8795122c58e41a634d60760b5a7d6bcd8a7" },
+        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-04/latency", "relativePath": "cases/h001-04/latency.json", "sha256": "dcd7742c74786b5fa5d58145470aa809de3fbe83ff4861bfd10d01fa1d918af6" }
       ]
     },
     {
@@ -56,9 +56,9 @@
       "development": false,
       "tags": ["hosted", "cancellation"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-05/completion", "relativePath": "cases/h001-05/completion.json", "sha256": "6e3f8583522b5ba5a65700c0f646017e9074a7c6ab567063934149339213fa8c" },
-        { "dimension": "Cancellation", "referenceId": "harness-001/v1.0/h001-05/cancellation", "relativePath": "cases/h001-05/cancellation.json", "sha256": "7f2d7fe130eec48b79db11d3b0911f93900d49834ca621f20247f5450fa0ae62" },
-        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-05/termination", "relativePath": "cases/h001-05/termination.json", "sha256": "a8dcf7f865a7dd024daa4a9091bed468c09f055190e2e5663db65790e8f8cf0f" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-05/completion", "relativePath": "cases/h001-05/completion.json", "sha256": "b37d478d62b1bee1de3fba1ab5fe31f9c22a06d8d4f4f46a98a060a0a2bdb5b0" },
+        { "dimension": "Cancellation", "referenceId": "harness-001/v1.0/h001-05/cancellation", "relativePath": "cases/h001-05/cancellation.json", "sha256": "622eb9100796ee0f9a5b183cd046622797c852ef04fa39a4ede327b7bb273d55" },
+        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-05/termination", "relativePath": "cases/h001-05/termination.json", "sha256": "32fa2fc99b46279fdcc7ec4617f36d28ab62aebb971a891b2490e51d8bcbaa1d" }
       ]
     },
     {
@@ -67,10 +67,10 @@
       "development": false,
       "tags": ["hosted", "context", "artifacts"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-06/completion", "relativePath": "cases/h001-06/completion.json", "sha256": "7fa73c4551f0fd7cad8f9965b68358ca16aadc66ba605d739774918902b9d922" },
-        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-06/context-safety", "relativePath": "cases/h001-06/context-safety.json", "sha256": "3a21effaceef34b71cc4cd5327b77df2d0bc7743fc29721676fe53e95c1bf75b" },
-        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-06/artifact-reuse", "relativePath": "cases/h001-06/artifact-reuse.json", "sha256": "a7f917c85f05c6074f27e2e16bcf372542398d9bdfb25c8fb47f520d4e65058d" },
-        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-06/diagnostics-parity", "relativePath": "cases/h001-06/diagnostics-parity.json", "sha256": "ee0fbbf101304dec33276c9590d3ff04c35c7f1d41c9ee08e60375cb4d5f086c" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-06/completion", "relativePath": "cases/h001-06/completion.json", "sha256": "90c61813dccd165ff7a387556741fa20238883580bb912a3e6d714d1e01d98cf" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-06/context-safety", "relativePath": "cases/h001-06/context-safety.json", "sha256": "a959900d037cb55e3d91abe21e0fab4a82285436fcaf5344112025debc8baaf8" },
+        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-06/artifact-reuse", "relativePath": "cases/h001-06/artifact-reuse.json", "sha256": "dfc2466139f9b49e08974ea2fea9ca0f031c2547ab66866958128f4d8ed46f81" },
+        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-06/diagnostics-parity", "relativePath": "cases/h001-06/diagnostics-parity.json", "sha256": "a9cfe4e808f4e40069e26468f38a0f60ca79c022ae804a6e13813e7f2c8fa6db" }
       ]
     },
     {
@@ -79,10 +79,10 @@
       "development": false,
       "tags": ["hosted", "tools", "cost"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-07/completion", "relativePath": "cases/h001-07/completion.json", "sha256": "70cde3c1f74feac0eb5eed27bccee614c66782751ef3a0fd4a2575dbd6825617" },
-        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-07/tool-trajectory", "relativePath": "cases/h001-07/tool-trajectory.json", "sha256": "ecafab7d770622cf090a91dc262b2d437d41ddac79550347a4ce029164a9ad2b" },
-        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-07/cost-attribution", "relativePath": "cases/h001-07/cost-attribution.json", "sha256": "d09279a58446c2555e9a60ab8518e44c2df96126f5cb0a230b128dda9f7a6d59" },
-        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-07/cumulative-tokens", "relativePath": "cases/h001-07/cumulative-tokens.json", "sha256": "37249566aafc68b2871f71779a38d910cc6cd22d836174b2d64707bb247bca15" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-07/completion", "relativePath": "cases/h001-07/completion.json", "sha256": "25710f2f16b34b7a9458f2c9949e3da692328cfc5f5b42902af643e0545681c6" },
+        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-07/tool-trajectory", "relativePath": "cases/h001-07/tool-trajectory.json", "sha256": "a5326c86ea8cbc312436f504963d1d88e54bea169fd056daec7a3ca055aa0cc2" },
+        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-07/cost-attribution", "relativePath": "cases/h001-07/cost-attribution.json", "sha256": "a20a6a0e6e0fdb2b649f362a0029daeec05b3cc1b1416ccd407148532da6989a" },
+        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-07/cumulative-tokens", "relativePath": "cases/h001-07/cumulative-tokens.json", "sha256": "2b1bbbab06e6b90dca8ecf85d56bde46ec9a9110f84d6f99613f19d1d75c2043" }
       ]
     },
     {
@@ -91,11 +91,11 @@
       "development": false,
       "tags": ["hosted", "context", "continuity"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-08/completion", "relativePath": "cases/h001-08/completion.json", "sha256": "e9e543526b70c663b9b5995fd8de1433d8c98350edae0ff13795439948c91c9b" },
-        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-08/continuity", "relativePath": "cases/h001-08/continuity.json", "sha256": "2606cc01e212f41241abf831128f90eeff570d0ed04a34e23c7de15a564ddf88" },
-        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-08/context-safety", "relativePath": "cases/h001-08/context-safety.json", "sha256": "ebee97c52fa682570c4db36abb86256af31afb0396721287143b0b2ec740d95a" },
-        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-08/latency", "relativePath": "cases/h001-08/latency.json", "sha256": "2e9e59cfc61276f4af8a770c44430af594ee29f9ef0e84d66d77f529441f102a" },
-        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-08/peak-tokens", "relativePath": "cases/h001-08/peak-tokens.json", "sha256": "2ba1c7f2cef86c930e2b66772fcf0b8ed8813ca512df482f39c095bd9635bbe1" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-08/completion", "relativePath": "cases/h001-08/completion.json", "sha256": "ec9630fbc7290a4871eaf1bdcc38cad45ebfe62602430472df4515f8b1cc8d89" },
+        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-08/continuity", "relativePath": "cases/h001-08/continuity.json", "sha256": "5198eb8c3246edfcc1ba4f3d41d7f0e10eb339127d40c0fd9e073aadfa49b29e" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-08/context-safety", "relativePath": "cases/h001-08/context-safety.json", "sha256": "788307e55bf340d31eaf2df2d810ec57f8faac4712018ef9f69644b3db6e1634" },
+        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-08/latency", "relativePath": "cases/h001-08/latency.json", "sha256": "bc1a4b9d9133904d4e9ffa20e64058381aa5deea5a9a33d5e77cae0cc5ebb8be" },
+        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-08/peak-tokens", "relativePath": "cases/h001-08/peak-tokens.json", "sha256": "7b95781c30db753908592d6b68d76d2adc6d84dc4fda86e0c82ad76eac06bd3a" }
       ]
     },
     {

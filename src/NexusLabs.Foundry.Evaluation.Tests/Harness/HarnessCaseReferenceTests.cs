@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 using NexusLabs.Foundry.Evaluation.Harness;
@@ -185,5 +186,9 @@ public sealed class HarnessCaseReferenceTests
     }
 
     private static string ComputeSha256(string path) =>
-        Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+        Convert.ToHexString(
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(
+                    File.ReadAllText(path).ReplaceLineEndings("\n"))))
+            .ToLowerInvariant();
 }
