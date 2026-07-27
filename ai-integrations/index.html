@@ -18,7 +18,7 @@
         <link rel="prev" href="../guides/">
       
       
-        <link rel="next" href="../agent-functions/">
+        <link rel="next" href="../maf-harness/">
       
       
         
@@ -910,10 +910,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#layer-2-instantiation-upstream-framework" class="md-nav__link">
+  <a href="#layer-2-function-wrapper-construction" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Layer 2 — Instantiation (upstream framework)
+        Layer 2 — Function wrapper construction
       
     </span>
   </a>
@@ -953,6 +953,17 @@
     <span class="md-ellipsis">
       
         Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-construction-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent construction choices
       
     </span>
   </a>
@@ -1245,6 +1256,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../maf-harness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MAF Harness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -3224,6 +3263,111 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0006-hybrid-context-and-workspace-authority/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0006 Hybrid Context and Workspace Authority
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0007-experimental-hybrid-context-compaction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0007 Experimental Hybrid Context Compaction
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0008-optional-harness-bundle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0008 Optional Harness Bundle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3252,10 +3396,10 @@
 
 
 <h1 id="ai-integrations">AI Integrations<a class="headerlink" href="#ai-integrations" title="Permanent link">&para;</a></h1>
-<p>Foundry provides first-class integrations for AI agent frameworks, taking care of function discovery, workflow wiring, and factory lifecycle so that you focus on writing agent logic rather than plumbing.</p>
-<p>Three integrations are supported:</p>
+<p>Foundry provides first-class integrations for AI agent frameworks, taking care of function discovery, workflow wiring, Harness composition, and factory lifecycle so that you focus on writing agent logic rather than plumbing.</p>
+<p>Three upstream ecosystems are supported:</p>
 <ul>
-<li><strong>Microsoft Agent Framework</strong> (<code>NexusLabs.Foundry.MicrosoftAgentFramework</code>) — for <code>[AgentFunction]</code>-annotated tools wired into <code>AIAgent</code> instances via <code>Microsoft.Extensions.AI</code></li>
+<li><strong>Microsoft Agent Framework package family</strong> — core generated tools and agents, with separate packages for workflows, testing, the optional complete Harness bundle, and Needlr integration</li>
 <li><strong>Semantic Kernel</strong> (<code>NexusLabs.Foundry.Needlr.SemanticKernel</code>) — for <code>[KernelFunction]</code>-annotated plugin classes wired into a <code>Kernel</code> via <code>Microsoft.SemanticKernel</code></li>
 <li><strong>GitHub Copilot</strong> (<code>NexusLabs.Foundry.Copilot</code>) — an <code>IChatClient</code> backed by the GitHub Copilot API, plus a web search <code>AIFunction</code>. See the <a href="../copilot/">Copilot integration page</a> for details.</li>
 </ul>
@@ -3289,29 +3433,77 @@
 </tbody>
 </table>
 <p>The reflection overloads (<code>AddAgentFunctionsFromAssemblies()</code>, <code>AddSemanticKernelPluginsFromAssemblies()</code>, etc.) are annotated with <code>[RequiresUnreferencedCode]</code> and <code>[RequiresDynamicCode]</code> to surface this at the call site.</p>
-<h3 id="layer-2-instantiation-upstream-framework">Layer 2 — Instantiation (upstream framework)<a class="headerlink" href="#layer-2-instantiation-upstream-framework" title="Permanent link">&para;</a></h3>
-<p><strong>What</strong>: Taking the discovered types and turning them into actual tool objects with JSON schemas that the LLM understands.</p>
-<p>For MAF this is <code>AIFunctionFactory.Create(MethodInfo, target)</code> from <code>Microsoft.Extensions.AI</code>. For SK this is <code>KernelPlugin.CreateFromObject(instance)</code> from <code>Microsoft.SemanticKernel</code>. Both use reflection internally to build JSON schemas from method signatures.</p>
-<p><strong>This layer is not controlled by Foundry.</strong> Both MAF and SK use reflection here regardless of which Foundry discovery path you choose. Neither <code>Microsoft.Extensions.AI</code> nor <code>Microsoft.SemanticKernel</code> are fully AOT-safe for tool/plugin schema generation at this time.</p>
+<h3 id="layer-2-function-wrapper-construction">Layer 2 — Function wrapper construction<a class="headerlink" href="#layer-2-function-wrapper-construction" title="Permanent link">&para;</a></h3>
+<p><strong>What</strong>: Turning annotated methods into <code>AIFunction</code> objects with JSON schemas and argument marshalling.</p>
+<p>Foundry's MAF source generator emits concrete <code>AIFunction</code> implementations, including schemas and argument coercion, and registers an <code>IAIFunctionProvider</code> through a module initializer. This path does not call reflection-based <code>AIFunctionFactory.Create(MethodInfo, target)</code> at runtime.</p>
+<p>The MAF reflection path still uses <code>AIFunctionFactory.Create(MethodInfo, target)</code>. Semantic Kernel plugin construction remains upstream-owned and may use reflection even when Foundry generated discovery supplies the plugin types.</p>
 <h3 id="what-this-means-in-practice">What this means in practice<a class="headerlink" href="#what-this-means-in-practice" title="Permanent link">&para;</a></h3>
-<p>If you use the source generation path, you eliminate reflection from Layer 1 (Foundry's responsibility). You do not eliminate reflection from Layer 2 (the upstream framework's responsibility). The practical effect is:</p>
+<p>For Foundry MAF tools, source generation removes runtime assembly scanning and reflection-based function wrapper construction. The practical effect is:</p>
 <ul>
 <li>No <code>[RequiresUnreferencedCode]</code> warnings from Foundry's own discovery code</li>
-<li>Faster startup (no runtime assembly scanning)</li>
-<li>The upstream framework may still emit its own reflection-related warnings</li>
+<li>No dynamic <code>MethodInfo</code>-based wrapper construction for generated functions</li>
+<li>Faster startup and a NativeAOT-compatible minimum Harness profile</li>
 </ul>
-<p>If full AOT support is important to you, watch the upstream framework's own AOT roadmap — Foundry will update its Layer 1 surface as those paths become available.</p>
+<p>Dynamic skills, scripts, reflection fallbacks, and other provider features can still carry their own trimming constraints. See <a href="../maf-harness/#nativeaot">Microsoft Agent Framework Harness</a> for the tested minimum profile.</p>
 <hr />
 <h2 id="microsoft-agent-framework">Microsoft Agent Framework<a class="headerlink" href="#microsoft-agent-framework" title="Permanent link">&para;</a></h2>
 <h3 id="packages">Packages<a class="headerlink" href="#packages" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cm">&lt;!-- Runtime --&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cm">&lt;!-- Core runtime: agents, generated tools, diagnostics, progress, workspace --&gt;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="cm">&lt;!-- Source generator (add as analyzer — no runtime dep) --&gt;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Generators&quot;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="cm">&lt;!-- Add only when you use workflow APIs such as UsingResilience --&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Workflows&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="cm">&lt;!-- Add only when you use deterministic scenario runners --&gt;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Testing&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="cm">&lt;!-- Add only when you use the complete upstream Harness bundle --&gt;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Harness&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="cm">&lt;!-- Required by the Syringe/UsingAgentFramework sample below --&gt;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.Needlr.MicrosoftAgentFramework&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="cm">&lt;!-- Source generator (add as analyzer — no runtime dep) --&gt;</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Generators&quot;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 </code></pre></div>
+<h3 id="agent-construction-choices">Agent construction choices<a class="headerlink" href="#agent-construction-choices" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Use when</th>
+<th>Ownership</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain Foundry MAF agent</td>
+<td>You want generated agents/tools and ordinary <code>AIAgent</code> construction</td>
+<td>Foundry</td>
+</tr>
+<tr>
+<td>Optional complete Harness bundle</td>
+<td>You want the official batteries-included upstream pipeline</td>
+<td>Harness owns loop and OpenTelemetry; Foundry can add progress</td>
+</tr>
+<tr>
+<td>Selected-provider candidate</td>
+<td>You are contributing conformance work inside Foundry</td>
+<td>Internal, not a consumer API</td>
+</tr>
+<tr>
+<td>Iterative loop</td>
+<td>Workspace files should drive fresh per-iteration prompts</td>
+<td>Foundry outer loop</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../maf-harness/">Microsoft Agent Framework Harness</a> for complete-bundle configuration, effective defaults, progress, AOT, and current limitations.</p>
+<p>The packages are independent choices. Installing the core runtime alone does
+not provide <code>UsingAgentFramework</code>, workflow middleware, scenario runners, or
+the complete Harness factory.</p>
 <h3 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.MicrosoftAgentFramework</span><span class="p">;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Needlr.Injection</span><span class="p">;</span>
@@ -3339,26 +3531,24 @@
 <a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="p">});</span>
 </code></pre></div>
 <h3 id="source-gen-path-recommended">Source gen path (recommended)<a class="headerlink" href="#source-gen-path-recommended" title="Permanent link">&para;</a></h3>
-<p>When <code>NexusLabs.Foundry.MicrosoftAgentFramework.Generators</code> is referenced as an analyzer, it runs at compile time and emits a class in your assembly's namespace:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Generated: AgentFrameworkFunctionRegistry.g.cs</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">namespace</span><span class="w"> </span><span class="nn">YourAssemblyName.Generated</span><span class="p">;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AgentFrameworkFunctionRegistry</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">{</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="n">Type</span><span class="o">&gt;</span><span class="w"> </span><span class="n">AllFunctionTypes</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Type</span><span class="p">[]</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="k">typeof</span><span class="p">(</span><span class="n">WeatherTools</span><span class="p">),</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">        </span><span class="c1">// ... all other types with [AgentFunction] methods</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">};</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
+<p>When <code>NexusLabs.Foundry.MicrosoftAgentFramework.Generators</code> is referenced as an analyzer, it emits a generated <code>IAIFunctionProvider</code> and registers it through a module initializer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">AgentFrameworkGeneratedBootstrap</span><span class="p">.</span><span class="n">TryGetAIFunctionProvider</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="k">out</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">functionProvider</span><span class="p">)</span><span class="w"> </span><span class="o">||</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="o">!</span><span class="n">functionProvider</span><span class="p">.</span><span class="n">TryGetFunctions</span><span class="p">(</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="k">typeof</span><span class="p">(</span><span class="n">WeatherTools</span><span class="p">),</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="n">services</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="k">out</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">functions</span><span class="p">))</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">{</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">InvalidOperationException</span><span class="p">(</span><span class="s">&quot;Generated weather tools were unavailable.&quot;</span><span class="p">);</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
 </code></pre></div>
-<p>Pass this to <code>AddAgentFunctionsFromGenerated</code> instead of the assembly scanning overload:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingChatClient</span><span class="p">(</span><span class="n">sp</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sp</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IChatClient</span><span class="o">&gt;</span><span class="p">())</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">.</span><span class="n">AddAgentFunctionsFromGenerated</span><span class="p">(</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="n">YourAssemblyName</span><span class="p">.</span><span class="n">Generated</span><span class="p">.</span><span class="n">AgentFrameworkFunctionRegistry</span><span class="p">.</span><span class="n">AllFunctionTypes</span><span class="p">))</span>
+<p><code>AddFoundryAgentFramework</code> and generated factory paths consume the registered provider automatically. Lower-level callers, including the optional Harness bundle, can pass the resolved functions directly through <code>ChatOptions.Tools</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">chatOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatOptions</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="n">Tools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[..</span><span class="w"> </span><span class="n">functions</span><span class="p">],</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">};</span>
 </code></pre></div>
-<p><code>AddAgentFunctionsFromGenerated</code> carries no <code>[RequiresUnreferencedCode]</code> annotation — it is the AOT-safe discovery path.</p>
+<p>The generated provider path carries no reflection fallback and is used by the executed <code>AotHarnessApp</code> NativeAOT fixture.</p>
 <h3 id="per-agent-tool-scoping">Per-agent tool scoping<a class="headerlink" href="#per-agent-tool-scoping" title="Permanent link">&para;</a></h3>
 <p>Multiple agents can be created from the same <code>IAgentFactory</code>, each with a tailored subset of the registered tools:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Agent 1: geography tools only</span>

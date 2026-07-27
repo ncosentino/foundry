@@ -819,6 +819,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../maf-harness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MAF Harness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../agent-functions/" class="md-nav__link">
         
   
@@ -2786,6 +2814,111 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/adr-0006-hybrid-context-and-workspace-authority/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0006 Hybrid Context and Workspace Authority
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/adr-0007-experimental-hybrid-context-compaction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0007 Experimental Hybrid Context Compaction
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/adr-0008-optional-harness-bundle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0008 Optional Harness Bundle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2833,6 +2966,26 @@
 <td style="text-align: left;">Executes <a href="IAgentScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IAgentScenario">IAgentScenario</a> instances with proper workspace isolation, execution context scoping, and diagnostics capture.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><a href="HarnessScenarioAgentContext/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioAgentContext">HarnessScenarioAgentContext</a></td>
+<td style="text-align: left;">Supplies the trusted inputs an <a href="IHarnessScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IHarnessScenario">IHarnessScenario</a> uses to construct its agent.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="HarnessScenarioRunner/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioRunner">HarnessScenarioRunner</a></td>
+<td style="text-align: left;">Runs <a href="IHarnessScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IHarnessScenario">IHarnessScenario</a> instances through a deterministic generated-tool, workspace, execution-context, session, and verification lifecycle.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="HarnessScenarioRunResult/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioRunResult">HarnessScenarioRunResult</a></td>
+<td style="text-align: left;">Reports the outcome and captured evidence of one <a href="IHarnessScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IHarnessScenario">IHarnessScenario</a> run.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="HarnessScenarioToolResolutionException/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioToolResolutionException">HarnessScenarioToolResolutionException</a></td>
+<td style="text-align: left;">Indicates that a Harness scenario's declared generated functions could not be resolved completely and uniquely from the source-generated provider.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="HarnessScenarioVerificationContext/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioVerificationContext">HarnessScenarioVerificationContext</a></td>
+<td style="text-align: left;">Contains the Harness lifecycle evidence supplied to <a href="IHarnessScenario/#NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IHarnessScenario.VerifyHarness(NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioVerificationContext)" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IHarnessScenario.VerifyHarness(NexusLabs.Foundry.MicrosoftAgentFramework.Testing.HarnessScenarioVerificationContext)">VerifyHarness(HarnessScenarioVerificationContext)</a>.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><a href="PipelineScenarioResult/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.PipelineScenarioResult">PipelineScenarioResult</a></td>
 <td style="text-align: left;">Result of running a single <a href="IPipelineScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IPipelineScenario">IPipelineScenario</a>.</td>
 </tr>
@@ -2877,6 +3030,10 @@
 <tr>
 <td style="text-align: left;"><a href="IAgentScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IAgentScenario">IAgentScenario</a></td>
 <td style="text-align: left;">Defines a self-contained agent test scenario with seed → execute → verify lifecycle. Scenarios are discovered automatically when registered via DI.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="IHarnessScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IHarnessScenario">IHarnessScenario</a></td>
+<td style="text-align: left;">Extends <a href="IAgentScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IAgentScenario">IAgentScenario</a> with the construction and verification hooks required to exercise a Microsoft Agent Framework Harness lifecycle.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="IPipelineScenario/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Testing.IPipelineScenario">IPipelineScenario</a></td>

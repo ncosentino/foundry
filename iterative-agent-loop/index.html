@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation.">
+        <meta name="description" content="Run workspace-driven agent iterations with bounded conversation growth and choose between iterative, Harness bundle, and hybrid context strategies.">
       
       
         <meta name="author" content="Nick Cosentino">
@@ -65,12 +65,12 @@
   
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Iterative Agent Loop – Foundry" />
-  <meta property="og:description" content="Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation." />
+  <meta property="og:description" content="Run workspace-driven agent iterations with bounded conversation growth and choose between iterative, Harness bundle, and hybrid context strategies." />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   <meta property="og:url" content="https://www.devleader.ca/projects/foundry/iterative-agent-loop/" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Iterative Agent Loop – Foundry" />
-  <meta name="twitter:description" content="Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation." />
+  <meta name="twitter:description" content="Run workspace-driven agent iterations with bounded conversation growth and choose between iterative, Harness bundle, and hybrid context strategies." />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
   
@@ -855,6 +855,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../maf-harness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MAF Harness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../agent-functions/" class="md-nav__link">
         
   
@@ -943,10 +971,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-problem-on2-token-cost" class="md-nav__link">
+  <a href="#the-problem-repeated-conversation-retransmission" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Problem: O(n²) Token Cost
+        The Problem: Repeated Conversation Retransmission
       
     </span>
   </a>
@@ -958,6 +986,17 @@
     <span class="md-ellipsis">
       
         The Solution: Workspace-Driven Iterations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-a-context-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a context strategy
       
     </span>
   </a>
@@ -3275,6 +3314,111 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0006-hybrid-context-and-workspace-authority/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0006 Hybrid Context and Workspace Authority
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0007-experimental-hybrid-context-compaction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0007 Experimental Hybrid Context Compaction
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0008-optional-harness-bundle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0008 Optional Harness Bundle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3303,10 +3447,10 @@
 
 
 <h1 id="iterative-agent-loop">Iterative Agent Loop<a class="headerlink" href="#iterative-agent-loop" title="Permanent link">&para;</a></h1>
-<p>The <strong>iterative agent loop</strong> (<code>IIterativeAgentLoop</code>) is an alternative execution model for agentic LLM workloads that eliminates the O(n²) token accumulation inherent in <code>FunctionInvokingChatClient</code>'s conversation-history approach.</p>
-<p>Instead of appending every tool call and result to a growing conversation, the iterative loop constructs a <strong>fresh prompt each iteration</strong> from workspace files. The workspace IS the memory — not the conversation.</p>
+<p>The <strong>iterative agent loop</strong> (<code>IIterativeAgentLoop</code>) is an alternative execution model for agentic LLM workloads that avoids carrying one ever-growing tool conversation across every outer iteration.</p>
+<p>Instead of appending every prior tool call and result to the next outer iteration, the loop constructs a <strong>fresh prompt each iteration</strong> from workspace files. The workspace is the authoritative working state for this execution model; each iteration still has its own bounded model/tool conversation.</p>
 <hr />
-<h2 id="the-problem-on2-token-cost">The Problem: O(n²) Token Cost<a class="headerlink" href="#the-problem-on2-token-cost" title="Permanent link">&para;</a></h2>
+<h2 id="the-problem-repeated-conversation-retransmission">The Problem: Repeated Conversation Retransmission<a class="headerlink" href="#the-problem-repeated-conversation-retransmission" title="Permanent link">&para;</a></h2>
 <p>When an agent makes tool calls through <code>FunctionInvokingChatClient</code> (FIC), every call and result is appended to the conversation history. Each subsequent LLM call re-sends the entire history:</p>
 <table>
 <thead>
@@ -3344,7 +3488,7 @@
 </tr>
 </tbody>
 </table>
-<p>For complex agentic workloads (article writers, code generators, trip planners) this produces catastrophic token bills. A real-world article pipeline measured <strong>2.26 million tokens</strong> in a single writer stage.</p>
+<p>For complex agentic workloads (article writers, code generators, trip planners), retransmitting old tool exchanges can dominate token usage.</p>
 <h2 id="the-solution-workspace-driven-iterations">The Solution: Workspace-Driven Iterations<a class="headerlink" href="#the-solution-workspace-driven-iterations" title="Permanent link">&para;</a></h2>
 <p>The iterative loop decouples agent memory from conversation history:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────┐
@@ -3360,7 +3504,52 @@
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  Next iteration starts with a FRESH conversation │
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>└─────────────────────────────────────────────────┘
 </code></pre></div>
-<p>Each iteration's input token count is bounded by the workspace size, not the conversation history. Total cost grows <strong>linearly</strong> with work done.</p>
+<p>Each iteration's input is rebuilt from selected workspace state rather than the prior outer-iteration transcript. Cost still depends on prompt/workspace growth and tool rounds, but conversation retransmission no longer grows automatically across outer iterations.</p>
+<h2 id="choosing-a-context-strategy">Choosing a context strategy<a class="headerlink" href="#choosing-a-context-strategy" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Choose it when</th>
+<th>Conversation behavior</th>
+<th>Public status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain Foundry MAF agent</td>
+<td>The run is short or ordinary chat continuity is sufficient</td>
+<td>MAF/MEAI conversation history</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Optional complete Harness bundle</td>
+<td>You want upstream providers and opinionated defaults</td>
+<td>Upstream history plus optional upstream compaction</td>
+<td>Public prerelease</td>
+</tr>
+<tr>
+<td>Iterative agent loop</td>
+<td>Files are the authoritative work state and fresh outer iterations are desirable</td>
+<td>Fresh workspace-derived prompt per iteration</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Experimental Foundry hybrid context</td>
+<td>You need structurally verified compaction plus workspace artifact references on every provider call</td>
+<td>Bounded conversation with selective offload/rehydration</td>
+<td>Internal experimental candidate</td>
+</tr>
+</tbody>
+</table>
+<p>Do not treat workspace-only iteration and conversational compaction as interchangeable:</p>
+<ul>
+<li>Iterative execution intentionally rebuilds the next outer prompt.</li>
+<li>Harness history preserves conversational continuity.</li>
+<li>Upstream bundle compaction follows upstream strategy semantics.</li>
+<li>Foundry hybrid compaction additionally verifies required-content and tool-exchange preservation, but is not a public configuration surface.</li>
+</ul>
+<p>See <a href="../maf-harness/">Microsoft Agent Framework Harness</a> for bundle configuration and the current hybrid-context disposition.</p>
 <hr />
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">Microsoft.Extensions.AI</span><span class="p">;</span>

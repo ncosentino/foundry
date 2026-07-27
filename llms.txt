@@ -16,8 +16,9 @@ Author: Nick Cosentino (https://www.devleader.ca).
 ## Agent Framework
 
 - [Integrations and Workflows](https://www.devleader.ca/projects/foundry/ai-integrations/) -- Build AI agent systems with Foundry in .NET using generated discovery, workflow orchestration, and optional Needlr integration.
+- [MAF Harness](https://www.devleader.ca/projects/foundry/maf-harness/) -- Choose and configure Foundry's Microsoft Agent Framework Harness paths, generated tools, progress, defaults, and AOT profile.
 - [Agent Functions](https://www.devleader.ca/projects/foundry/agent-functions/) -- Parameter optionality, default-value resolution, and DTO null-handling semantics for [AgentFunction]-decorated tools in Foundry's source-generated AIFunction wrappers.
-- [Iterative Agent Loop](https://www.devleader.ca/projects/foundry/iterative-agent-loop/) -- Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation.
+- [Iterative Agent Loop](https://www.devleader.ca/projects/foundry/iterative-agent-loop/) -- Run workspace-driven agent iterations with bounded conversation growth and choose between iterative, Harness bundle, and hybrid context strategies.
 - [Workspace](https://www.devleader.ca/projects/foundry/workspace/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [Progress Reporting](https://www.devleader.ca/projects/foundry/progress-reporting/) -- Track agent and workflow execution in real-time with Foundry's progress reporting system -- optional Needlr discovery, per-orchestration isolation, and ambient async context.
 - [Pipeline Metrics](https://www.devleader.ca/projects/foundry/pipeline-metrics/) -- Pipeline-shape OpenTelemetry metrics and distributed-tracing spans emitted automatically by SequentialPipelineRunner — per-pipeline outcome, per-stage duration / tokens / tool-failures, parent + child activity spans.
@@ -91,3 +92,6 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [ADR-0003 Provider-Neutral Experiment Runner](https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0004 Extract AI Platform from Needlr](https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0005 First-Class MAF Harness Integration](https://www.devleader.ca/projects/foundry/adr/adr-0005-first-class-maf-harness-integration/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0006 Hybrid Context and Workspace Authority](https://www.devleader.ca/projects/foundry/adr/adr-0006-hybrid-context-and-workspace-authority/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0007 Experimental Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0007-experimental-hybrid-context-compaction/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0008 Optional Harness Bundle](https://www.devleader.ca/projects/foundry/adr/adr-0008-optional-harness-bundle/) -- Build reliable, observable, and testable AI agent systems in .NET
