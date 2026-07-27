@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-07",
+  "referenceId": "harness-001/v1.0/h001-07/tool-trajectory",
+  "dimension": "ToolTrajectory",
+  "aggregation": "ThreeTrialMajority",
+  "contractKind": "DeterministicAssertions",
+  "assertions": [
+    {
+      "source": "EvaluationMetric",
+      "metricName": "Harness Tool Trajectory Compliant",
+      "operator": "Equals",
+      "expected": true
+    }
+  ],
+  "requiredToolSequence": [
+    "lookup_rate",
+    "calculate_total"
+  ],
+  "forbiddenTools": [
+    "lookup_rate_legacy",
+    "delete_workspace",
+    "write_outside_workspace"
+  ]
+}

@@ -10,10 +10,10 @@
       "development": false,
       "tags": ["hosted", "tools"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-01/completion", "relativePath": "cases/h001-01/completion.json" },
-        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-01/tool-trajectory", "relativePath": "cases/h001-01/tool-trajectory.json" },
-        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-01/termination", "relativePath": "cases/h001-01/termination.json" },
-        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-01/diagnostics-parity", "relativePath": "cases/h001-01/diagnostics-parity.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-01/completion", "relativePath": "cases/h001-01/completion.json", "sha256": "fac09b8a76f03d939a6bed940b25ec03fed771772024446b1c5a73e9462576ae" },
+        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-01/tool-trajectory", "relativePath": "cases/h001-01/tool-trajectory.json", "sha256": "3197c9e1ae17d3a034d57a980a8bfbe94231bfce796c6e2db0ed4358b4aa80bb" },
+        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-01/termination", "relativePath": "cases/h001-01/termination.json", "sha256": "f1a8991a3c197ce55cc7bf2a587e4f70fee5a3744a122691843b58739fe5c8c5" },
+        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-01/diagnostics-parity", "relativePath": "cases/h001-01/diagnostics-parity.json", "sha256": "e1bf57453b9277721e2db1648382b8f196f893b6b964816cbb559be1b7f047cf" }
       ]
     },
     {
@@ -22,10 +22,10 @@
       "development": false,
       "tags": ["hosted", "context"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-02/completion", "relativePath": "cases/h001-02/completion.json" },
-        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-02/context-safety", "relativePath": "cases/h001-02/context-safety.json" },
-        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-02/cumulative-tokens", "relativePath": "cases/h001-02/cumulative-tokens.json" },
-        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-02/peak-tokens", "relativePath": "cases/h001-02/peak-tokens.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-02/completion", "relativePath": "cases/h001-02/completion.json", "sha256": "cef470602a8449795c471f0652626d1ad7c9e227a57a67404f01094e99bb5819" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-02/context-safety", "relativePath": "cases/h001-02/context-safety.json", "sha256": "3024e2bc531acb93512410c9ddbfd5e44d4559c95d871dcb5da886b06c8fe31e" },
+        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-02/cumulative-tokens", "relativePath": "cases/h001-02/cumulative-tokens.json", "sha256": "b1cd102b02773eeee7cc3d952164a0480fdf93d00840d295a548fd2019994da5" },
+        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-02/peak-tokens", "relativePath": "cases/h001-02/peak-tokens.json", "sha256": "fedfe71a95aa2489e0b3b21e7cb3818600edde22e1b16beee0f9e133d471efc5" }
       ]
     },
     {
@@ -34,9 +34,9 @@
       "development": false,
       "tags": ["hosted", "artifacts"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-03/completion", "relativePath": "cases/h001-03/completion.json" },
-        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-03/artifact-reuse", "relativePath": "cases/h001-03/artifact-reuse.json" },
-        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-03/cost-attribution", "relativePath": "cases/h001-03/cost-attribution.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-03/completion", "relativePath": "cases/h001-03/completion.json", "sha256": "4c72a530e92a6e15aa67a4e8dcd2c57064df470c1a88118f6d736b4269621712" },
+        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-03/artifact-reuse", "relativePath": "cases/h001-03/artifact-reuse.json", "sha256": "9d43795cc04f8976d30f85230778deb6f1aa7db0dfc5dd3689344bab375cceb6" },
+        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-03/cost-attribution", "relativePath": "cases/h001-03/cost-attribution.json", "sha256": "9042a7a821bd71ecc2c127d6a27e83243bf8d323294193190ba42c1bf197fb78" }
       ]
     },
     {
@@ -45,9 +45,9 @@
       "development": false,
       "tags": ["hosted", "continuity"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-04/completion", "relativePath": "cases/h001-04/completion.json" },
-        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-04/continuity", "relativePath": "cases/h001-04/continuity.json" },
-        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-04/latency", "relativePath": "cases/h001-04/latency.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-04/completion", "relativePath": "cases/h001-04/completion.json", "sha256": "0d18a3b7fccb8b7b3a34153b1d9389f374de224999c7e076f7c0f8d45e4220cf" },
+        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-04/continuity", "relativePath": "cases/h001-04/continuity.json", "sha256": "f4d4e0e6c9de0a1d2997758320d4a00047e47715e7d5aca4eabc91c723dcb976" },
+        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-04/latency", "relativePath": "cases/h001-04/latency.json", "sha256": "e5edc1d07209ee88e5f35fead43a2d9ecfe10e0d6313de7d72cdef29a690690d" }
       ]
     },
     {
@@ -56,9 +56,9 @@
       "development": false,
       "tags": ["hosted", "cancellation"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-05/completion", "relativePath": "cases/h001-05/completion.json" },
-        { "dimension": "Cancellation", "referenceId": "harness-001/v1.0/h001-05/cancellation", "relativePath": "cases/h001-05/cancellation.json" },
-        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-05/termination", "relativePath": "cases/h001-05/termination.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-05/completion", "relativePath": "cases/h001-05/completion.json", "sha256": "6e3f8583522b5ba5a65700c0f646017e9074a7c6ab567063934149339213fa8c" },
+        { "dimension": "Cancellation", "referenceId": "harness-001/v1.0/h001-05/cancellation", "relativePath": "cases/h001-05/cancellation.json", "sha256": "fd8b16f0758ec730643dcec8fabbc50206827f64e7666524664062d8bcb79efa" },
+        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-05/termination", "relativePath": "cases/h001-05/termination.json", "sha256": "a8dcf7f865a7dd024daa4a9091bed468c09f055190e2e5663db65790e8f8cf0f" }
       ]
     },
     {
@@ -67,10 +67,10 @@
       "development": false,
       "tags": ["hosted", "context", "artifacts"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-06/completion", "relativePath": "cases/h001-06/completion.json" },
-        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-06/context-safety", "relativePath": "cases/h001-06/context-safety.json" },
-        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-06/artifact-reuse", "relativePath": "cases/h001-06/artifact-reuse.json" },
-        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-06/diagnostics-parity", "relativePath": "cases/h001-06/diagnostics-parity.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-06/completion", "relativePath": "cases/h001-06/completion.json", "sha256": "7fa73c4551f0fd7cad8f9965b68358ca16aadc66ba605d739774918902b9d922" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-06/context-safety", "relativePath": "cases/h001-06/context-safety.json", "sha256": "3a21effaceef34b71cc4cd5327b77df2d0bc7743fc29721676fe53e95c1bf75b" },
+        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-06/artifact-reuse", "relativePath": "cases/h001-06/artifact-reuse.json", "sha256": "a7f917c85f05c6074f27e2e16bcf372542398d9bdfb25c8fb47f520d4e65058d" },
+        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-06/diagnostics-parity", "relativePath": "cases/h001-06/diagnostics-parity.json", "sha256": "f2f44677fa15c017215aa91cc8b84f8712dc0cbd98817ef2ce869377e6a3b61c" }
       ]
     },
     {
@@ -79,10 +79,10 @@
       "development": false,
       "tags": ["hosted", "tools", "cost"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-07/completion", "relativePath": "cases/h001-07/completion.json" },
-        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-07/tool-trajectory", "relativePath": "cases/h001-07/tool-trajectory.json" },
-        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-07/cost-attribution", "relativePath": "cases/h001-07/cost-attribution.json" },
-        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-07/cumulative-tokens", "relativePath": "cases/h001-07/cumulative-tokens.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-07/completion", "relativePath": "cases/h001-07/completion.json", "sha256": "70cde3c1f74feac0eb5eed27bccee614c66782751ef3a0fd4a2575dbd6825617" },
+        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-07/tool-trajectory", "relativePath": "cases/h001-07/tool-trajectory.json", "sha256": "39789081dfcf72ef1b252a4c58b39b2629faf6e8f507fa5ee7cbe245038bffb0" },
+        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-07/cost-attribution", "relativePath": "cases/h001-07/cost-attribution.json", "sha256": "b0de761a286825f7c3d332b4914dc948c07c1b8f104366b56cf496b61922b031" },
+        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-07/cumulative-tokens", "relativePath": "cases/h001-07/cumulative-tokens.json", "sha256": "b4220e543137138963464dca510f8f621ae0a04b52a830101a5a138ed076663b" }
       ]
     },
     {
@@ -91,11 +91,11 @@
       "development": false,
       "tags": ["hosted", "context", "continuity"],
       "deterministicReferences": [
-        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-08/completion", "relativePath": "cases/h001-08/completion.json" },
-        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-08/continuity", "relativePath": "cases/h001-08/continuity.json" },
-        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-08/context-safety", "relativePath": "cases/h001-08/context-safety.json" },
-        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-08/latency", "relativePath": "cases/h001-08/latency.json" },
-        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-08/peak-tokens", "relativePath": "cases/h001-08/peak-tokens.json" }
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-08/completion", "relativePath": "cases/h001-08/completion.json", "sha256": "e9e543526b70c663b9b5995fd8de1433d8c98350edae0ff13795439948c91c9b" },
+        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-08/continuity", "relativePath": "cases/h001-08/continuity.json", "sha256": "2606cc01e212f41241abf831128f90eeff570d0ed04a34e23c7de15a564ddf88" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-08/context-safety", "relativePath": "cases/h001-08/context-safety.json", "sha256": "ebee97c52fa682570c4db36abb86256af31afb0396721287143b0b2ec740d95a" },
+        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-08/latency", "relativePath": "cases/h001-08/latency.json", "sha256": "69649082fbb866a2ed2ff839a0d65813ebd5d7374cdc68e38898ceed085bb37f" },
+        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-08/peak-tokens", "relativePath": "cases/h001-08/peak-tokens.json", "sha256": "b7e2c33235d96d138da24d27ace91c46370c32fbb2a12ccf891b083ef97ea778" }
       ]
     },
     {
