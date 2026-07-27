@@ -57,6 +57,9 @@ Case-majority completion:
 ## Secondary deterministic dimensions
 
 All reported paired intervals include zero.
+Each denominator contains only the cases whose frozen manifest declares that
+dimension. Within that pre-registered population, every scheduled failure is
+retained under the pessimistic treatment.
 
 - Continuity: every contrast difference is `0.0`.
 - Artifact reuse: every contrast difference is `0.0`.
@@ -68,7 +71,8 @@ All reported paired intervals include zero.
 - Termination: Plain Harness minus Iterative and Hybrid minus Iterative are
   `+0.5`, with interval `[-0.273, 0.905]`.
 
-Systematic failures retained in pessimistic denominators:
+The following systematic failures therefore remain in their applicable
+dimension-specific pessimistic denominators:
 
 - Iterative `h001-01`: all trials reached the eight-tool-call cap.
 - Hybrid `h001-02`: all trials failed closed with irreducible hybrid compaction
@@ -88,6 +92,9 @@ Every contrast reports:
 
 Continuous comparisons retain zero to two conditional paired cases. Every
 continuous interval is `insufficient-sample`; no interval bounds are published.
+Each continuous metric was pre-registered for two cases, not for the full
+eight-case completion population. Its pessimistic sensitivity retains scheduled
+failures within those two cases by substituting the frozen metric cap.
 
 | Contrast | Dimension | Conditional n | Mean X-Y | Pessimistic n | Pessimistic mean X-Y |
 |---|---|---:|---:|---:|---:|

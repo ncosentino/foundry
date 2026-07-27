@@ -14,7 +14,7 @@
   "files": [
     {
       "relativePath": "run-30273935931-publication.md",
-      "sha256": "31077c087a20d5ba7767f37349839ab380d68400ede03f3e685ffffeea4f729e"
+      "sha256": "1057a21cef6300062341143fb95c211229dcd5f5c426bd26275ae733af80b664"
     },
     {
       "relativePath": "run-30273935931-summary.md",
@@ -45,6 +45,14 @@
     {
       "path": "artifacts/eval/case-sets/harness-001/v1.0/analysis-plan.md",
       "sha256": "fd75e42c576c78b16bd13c06bf51db889963ce99a29bbab4028fc3ef93de2263"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/pricing/github-models.v1.json",
+      "sha256": "74fd11bee9794560f14ffd6b17faaac88bfce20695af860ab5c829f7489ce0a7"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/manifest.json",
+      "sha256": "b9915f357bfcde9b4635d9927dfada051e962ea73826797b6487380ec409cfd9"
     }
   ]
 }
