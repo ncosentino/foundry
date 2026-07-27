@@ -18,6 +18,7 @@ namespace HarnessEvaluationApp;
 internal sealed class HostedEvaluationDriver
 {
     private const int AttemptsPerBatchReservation = 6;
+    // Three arms times two attempts times eight provider requests.
     private const int RequestsPerBatchReservation = 48;
 
     private readonly HostedEvaluationOptions _options;
@@ -819,15 +820,14 @@ internal sealed class HostedEvaluationDriver
         for (var current = exception; current is not null; current = current.InnerException)
         {
             if (current is ClientResultException clientResult &&
-                (clientResult.Status == 429 || clientResult.Status >= 500))
+                IsRetryableStatus(clientResult.Status))
             {
                 return true;
             }
 
             if (current is HttpRequestException httpRequest &&
                 (httpRequest.StatusCode is null ||
-                 httpRequest.StatusCode == System.Net.HttpStatusCode.TooManyRequests ||
-                 (int)httpRequest.StatusCode >= 500))
+                 IsRetryableStatus((int)httpRequest.StatusCode)))
             {
                 return true;
             }
@@ -844,6 +844,9 @@ internal sealed class HostedEvaluationDriver
 
         return false;
     }
+
+    private static bool IsRetryableStatus(int status) =>
+        status is 429 or 500 or 502 or 503 or 504;
 
     private static bool ContainsInOrder(
         IReadOnlyList<string> observed,
