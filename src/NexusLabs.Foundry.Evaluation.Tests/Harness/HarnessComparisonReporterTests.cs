@@ -334,7 +334,10 @@ public sealed class HarnessComparisonReporterTests
             cancellationToken: TestContext.Current.CancellationToken);
         var root = document.RootElement;
         Assert.Equal(HarnessComparisonReporter.ArtifactSchemaVersion, root.GetProperty("schemaVersion").GetString());
-        Assert.Equal("report-1", root.GetProperty("report").GetProperty("reportId").GetString());
+        var reportJson = root.GetProperty("report");
+        Assert.Equal("report-1", reportJson.GetProperty("reportId").GetString());
+        Assert.True(
+            reportJson.GetProperty("contrasts")[0].TryGetProperty("diagnosticsParity", out _));
         var outcomes = root.GetProperty("canonicalOutcomes");
         Assert.Equal(
             HarnessComparisonExperiment.IterativeExperimentName,

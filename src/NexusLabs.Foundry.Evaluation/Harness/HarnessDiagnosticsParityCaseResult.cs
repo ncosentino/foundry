@@ -18,7 +18,7 @@ public sealed record HarnessDiagnosticsParityCaseResult
     /// <summary>Gets the hosted case identifier.</summary>
     public string CaseId { get; }
 
-    /// <summary>Gets whether all three paired batches were scheduled.</summary>
+    /// <summary>Gets whether all three trial indices were scheduled for both contrast arms.</summary>
     public bool FullyScheduled { get; }
 
     /// <summary>Gets whether every normalized dimension schema was marked comparable across the arms.</summary>
