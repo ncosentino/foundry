@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "judgeAssetsVersion": "v1.0",
+  "status": "UNCALIBRATED",
+  "minimumKappa": 0.6,
+  "rubrics": [
+    {
+      "rubricId": "harness-nominal-pairwise-preference",
+      "kind": "Nominal",
+      "version": "v1.0",
+      "relativePath": "rubrics/nominal-pairwise-preference.v1.json",
+      "sha256": "58102ac6a9f64fc4d11184e2d748d79dbd08505b6cb61709136d4c80e7c624d5"
+    },
+    {
+      "rubricId": "harness-ordinal-response-quality",
+      "kind": "Ordinal",
+      "version": "v1.0",
+      "relativePath": "rubrics/ordinal-response-quality.v1.json",
+      "sha256": "1e955706d161b6a8d7f62d357b71b2cc3bbd4df08cbd613203dc51e3bd93850a"
+    }
+  ],
+  "calibration": {
+    "manifestPath": "calibration/manifest.json",
+    "manifestSha256": "cb8a9bc60ef816a4d842d6b353b272cfa6656a6cab0e427bca26a745808d3f28",
+    "labelStatus": "PROVISIONAL",
+    "publishableAsCalibrated": false
+  },
+  "biasChecks": [
+    "Position",
+    "Verbosity",
+    "Style",
+    "DeterministicDisagreement"
+  ],
+  "governance": {
+    "orderInconsistentPairResult": "Disagreement",
+    "deterministicConflictAuthority": "DeterministicReference",
+    "uncalibratedArmRankingAllowed": false,
+    "differentJudgeModelFamilyPreferred": true
+  }
+}

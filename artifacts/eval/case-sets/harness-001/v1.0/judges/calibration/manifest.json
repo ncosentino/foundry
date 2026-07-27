@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "calibrationSetId": "harness-001/v1.0/judge-calibration-001",
+  "version": "v1.0",
+  "split": "heldout-calibration",
+  "status": "PROVISIONAL",
+  "judgeCalibrationState": "UNCALIBRATED",
+  "itemCount": 7,
+  "eligibleItemCount": 0,
+  "provisionalItemCount": 7,
+  "heldoutPath": "calibration/heldout.provisional.jsonl",
+  "heldoutSha256": "6ec7429c7c22e4313daac740140dd299eeb733ea91419645dba2be068d8bce81",
+  "rubricBindings": [
+    {
+      "rubricId": "harness-nominal-pairwise-preference",
+      "version": "v1.0",
+      "sha256": "58102ac6a9f64fc4d11184e2d748d79dbd08505b6cb61709136d4c80e7c624d5"
+    },
+    {
+      "rubricId": "harness-ordinal-response-quality",
+      "version": "v1.0",
+      "sha256": "1e955706d161b6a8d7f62d357b71b2cc3bbd4df08cbd613203dc51e3bd93850a"
+    }
+  ],
+  "labelProvenance": {
+    "type": "ai-bootstrap",
+    "createdBy": "GitHub Copilot CLI",
+    "createdAtUtc": "2026-07-27T03:59:35Z",
+    "isHumanLabel": false,
+    "calibrationEligibility": "Excluded until item-level and subset-level human attestation."
+  },
+  "humanAttestation": null,
+  "requiredHumanAttestation": {
+    "itemStatement": "I personally reviewed this item under the identified rubric version and SHA-256 digest and set or confirmed the final label. Any AI-produced draft label was treated only as provisional.",
+    "subsetStatement": "I attest that every eligible calibration item has a named human reviewer, timestamp, rubric version and digest, and final human label.",
+    "requiredFields": [
+      "attestedBy",
+      "attestedAtUtc",
+      "rubricId",
+      "rubricVersion",
+      "rubricSha256",
+      "finalLabel",
+      "statement"
+    ]
+  },
+  "publicationRule": "Judge results remain UNCALIBRATED and cannot rank arms until human-attested labels produce the required agreement, kappa, confusion counts, and denominators."
+}
