@@ -511,9 +511,15 @@ internal sealed class HostedEvaluationDriver
             result.Status,
             binary,
             continuous,
-            output?.CaptureReference,
+            output?.CaptureReference ?? TrialCaptureReference(arm, manifestCase.Id, trialIndex),
             _batchArtifactReferences[new HostedBatchKey(manifestCase.Id, trialIndex)]);
     }
+
+    private static string TrialCaptureReference(
+        HarnessComparisonArm arm,
+        string caseId,
+        int trialIndex) =>
+        $"capture/{HarnessComparisonExperiment.GetArmId(arm)}/{caseId}/trial-{trialIndex}";
 
     private static bool BinaryValue(
         HostedCaseDefinition definition,

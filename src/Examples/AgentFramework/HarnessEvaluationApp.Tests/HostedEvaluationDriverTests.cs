@@ -50,6 +50,11 @@ public sealed class HostedEvaluationDriverTests
                 Assert.True(File.Exists(Path.Combine(
                     outputDirectory,
                     evidenceReference!.Replace('/', Path.DirectorySeparatorChar))));
+                var captureReference = row.GetProperty("ResponseCaptureReference").GetString();
+                Assert.False(string.IsNullOrWhiteSpace(captureReference));
+                Assert.True(Directory.Exists(Path.Combine(
+                    outputDirectory,
+                    captureReference!.Replace('/', Path.DirectorySeparatorChar))));
             });
             var iterativeTimeoutRows = ledger.RootElement
                 .EnumerateArray()

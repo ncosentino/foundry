@@ -69,13 +69,16 @@ internal sealed class HostedArmExecutors
         var recorder = new HostedToolCallRecorder();
         var cancellationDelay = TimeSpan.FromSeconds(_options.AttemptTimeoutSeconds * 2);
         var tools = HostedCaseTools.Create(workspace, recorder, cancellationDelay);
-        var captureReference = Path.Combine(
+        var trialCaptureReference = Path.Combine(
             "capture",
             HarnessComparisonExperiment.GetArmId(context.Arm),
             context.Case.Id,
-            $"trial-{context.TrialIndex}",
+            $"trial-{context.TrialIndex}");
+        var captureReference = Path.Combine(
+            trialCaptureReference,
             $"attempt-{context.AttemptNumber}");
         var captureDirectory = Path.Combine(_options.OutputDirectory, captureReference);
+        Directory.CreateDirectory(captureDirectory);
         var providerClient = new HostedTelemetryChatClient(
             CreateBaseChatClient(),
             _requestBudget,
@@ -136,7 +139,7 @@ internal sealed class HostedArmExecutors
             providerClient.CumulativeTokens,
             providerClient.PeakTokens,
             stopwatch.Elapsed.TotalMilliseconds,
-            captureReference.Replace('\\', '/'),
+            trialCaptureReference.Replace('\\', '/'),
             output is { Success: true } ? output.Value.Content : null);
     }
 
