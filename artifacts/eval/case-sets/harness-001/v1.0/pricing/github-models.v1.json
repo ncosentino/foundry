@@ -9,6 +9,7 @@
       "modelId": "openai/gpt-4.1-mini",
       "maximumInputTokensPerRequest": 8000,
       "maximumOutputTokensPerRequest": 2000,
+      "minimumRequestIntervalMilliseconds": 4000,
       "conservativeInputUsdPerMillionTokens": 1.0,
       "conservativeOutputUsdPerMillionTokens": 4.0,
       "calculatedWorstCaseUsdPerRequest": 0.016,

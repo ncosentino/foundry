@@ -44,7 +44,9 @@ internal sealed class HostedEvaluationDriver
     {
         ValidateOptions(options);
         _options = options;
-        _requestBudget = new HostedRequestBudget(options.MaximumRequests);
+        _requestBudget = new HostedRequestBudget(
+            options.MaximumRequests,
+            TimeSpan.FromMilliseconds(options.MinimumProviderRequestIntervalMilliseconds));
         _executors = new HostedArmExecutors(options, _requestBudget, realChatClientFactory);
         var manifestPath = Path.Combine(
             FindRepositoryRoot(),
@@ -83,6 +85,8 @@ internal sealed class HostedEvaluationDriver
             options.MaximumRequests != 1152 ||
             options.MaximumRequestsPerAttempt != 8 ||
             options.MaximumOutputTokens != 2000 ||
+            options.MinimumProviderRequestIntervalMilliseconds < 0 ||
+            (!options.DryRun && options.MinimumProviderRequestIntervalMilliseconds != 4000) ||
             options.SchedulingDeadlineMinutes != 50 ||
             options.MaximumConcurrency != 3 ||
             options.CostCapUsd != 25m ||
@@ -119,6 +123,7 @@ internal sealed class HostedEvaluationDriver
                 _options.MaximumRequests,
                 _options.MaximumRequestsPerAttempt,
                 _options.MaximumOutputTokens,
+                _options.MinimumProviderRequestIntervalMilliseconds,
                 _options.SchedulingDeadlineMinutes,
                 _options.AttemptTimeoutSeconds,
                 _options.MaximumConcurrency,
@@ -327,6 +332,10 @@ internal sealed class HostedEvaluationDriver
                     attempts,
                     Failure: null);
             }
+            catch (OperationCanceledException) when (callerCancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (OperationCanceledException exception) when (
                 !callerCancellationToken.IsCancellationRequested)
             {
@@ -363,7 +372,7 @@ internal sealed class HostedEvaluationDriver
                         exception,
                         isRetryable: false));
             }
-            catch (HttpRequestException exception)
+            catch (Exception exception) when (IsTransientProviderFailure(exception))
             {
                 stopwatch.Stop();
                 var failure = Failure(
@@ -793,6 +802,20 @@ internal sealed class HostedEvaluationDriver
         {
             await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    private static bool IsTransientProviderFailure(Exception exception)
+    {
+        if (exception is HttpRequestException)
+        {
+            return true;
+        }
+
+        return exception.Message.Contains("Status: 429", StringComparison.OrdinalIgnoreCase) ||
+            exception.Message.Contains("Status: 500", StringComparison.OrdinalIgnoreCase) ||
+            exception.Message.Contains("Status: 502", StringComparison.OrdinalIgnoreCase) ||
+            exception.Message.Contains("Status: 503", StringComparison.OrdinalIgnoreCase) ||
+            exception.Message.Contains("Status: 504", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool ContainsInOrder(

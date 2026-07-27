@@ -12,6 +12,7 @@ internal sealed record HostedEvaluationOptions(
     int MaximumRequests,
     int MaximumRequestsPerAttempt,
     int MaximumOutputTokens,
+    int MinimumProviderRequestIntervalMilliseconds,
     int SchedulingDeadlineMinutes,
     int AttemptTimeoutSeconds,
     int MaximumConcurrency,
@@ -40,6 +41,9 @@ internal sealed record HostedEvaluationOptions(
             ReadInt32("HARNESS_EVAL_MAX_RESERVED_REQUESTS", 1152),
             ReadInt32("HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT", 8),
             ReadInt32("HARNESS_EVAL_MAX_OUTPUT_TOKENS", 2000),
+            dryRun
+                ? ReadInt32("HARNESS_EVAL_DRY_RUN_MIN_REQUEST_INTERVAL_MS", 0)
+                : ReadInt32("HARNESS_EVAL_MIN_REQUEST_INTERVAL_MS", 4000),
             ReadInt32("HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES", 50),
             dryRun
                 ? ReadInt32("HARNESS_EVAL_DRY_RUN_ATTEMPT_SECONDS", 3)

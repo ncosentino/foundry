@@ -147,6 +147,11 @@ if ([int]$modelPricing.maximumOutputTokensPerRequest -ne
     Stop-Preflight -Message 'The workflow output-token cap does not match the frozen pricing table.'
 }
 
+if ([int]$modelPricing.minimumRequestIntervalMilliseconds -ne
+    [int]$env:HARNESS_EVAL_MIN_REQUEST_INTERVAL_MS) {
+    Stop-Preflight -Message 'The workflow provider pacing does not match the frozen pricing table.'
+}
+
 $state = 'QuotaNotConfirmed'
 $reason = 'The paid GitHub Models quota precondition was not affirmed; the reserved worst-case request budget cannot be guaranteed on the free tier.'
 $smokeAttempted = $false

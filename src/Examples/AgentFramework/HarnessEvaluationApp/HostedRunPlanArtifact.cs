@@ -11,6 +11,7 @@ internal sealed record HostedRunPlanArtifact(
     int MaximumRequests,
     int MaximumRequestsPerAttempt,
     int MaximumOutputTokens,
+    int MinimumProviderRequestIntervalMilliseconds,
     int SchedulingDeadlineMinutes,
     int AttemptTimeoutSeconds,
     int MaximumConcurrency,

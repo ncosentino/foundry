@@ -40,7 +40,7 @@ internal sealed class HostedTelemetryChatClient : DelegatingChatClient
                 $"The per-attempt provider request cap of {_maximumRequests} was exceeded.");
         }
 
-        _globalBudget.Consume();
+        await _globalBudget.ConsumeAsync(cancellationToken).ConfigureAwait(false);
         var stopwatch = Stopwatch.StartNew();
         var response = await base
             .GetResponseAsync(messages, options, cancellationToken)
