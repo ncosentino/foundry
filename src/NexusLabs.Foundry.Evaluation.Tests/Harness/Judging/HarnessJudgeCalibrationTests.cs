@@ -17,6 +17,18 @@ public sealed class HarnessJudgeCalibrationTests
         Assert.Equal("v1.0", root.GetProperty("judgeAssetsVersion").GetString());
         Assert.Equal("UNCALIBRATED", root.GetProperty("status").GetString());
         Assert.Equal(0.6, root.GetProperty("minimumKappa").GetDouble());
+        Assert.Equal(
+            new[] { "Position", "Verbosity", "Style", "DeterministicDisagreement" },
+            root.GetProperty("biasChecks")
+                .EnumerateArray()
+                .Select(check => check.GetString()!)
+                .ToArray());
+
+        var governance = root.GetProperty("governance");
+        Assert.Equal("Disagreement", governance.GetProperty("orderInconsistentPairResult").GetString());
+        Assert.Equal("DeterministicReference", governance.GetProperty("deterministicConflictAuthority").GetString());
+        Assert.False(governance.GetProperty("uncalibratedArmRankingAllowed").GetBoolean());
+        Assert.True(governance.GetProperty("differentJudgeModelFamilyPreferred").GetBoolean());
 
         var rubrics = root.GetProperty("rubrics").EnumerateArray().ToArray();
         Assert.Equal(2, rubrics.Length);
@@ -53,6 +65,19 @@ public sealed class HarnessJudgeCalibrationTests
         Assert.Equal(
             root.GetProperty("heldoutSha256").GetString(),
             ComputeSha256(JudgePath(root.GetProperty("heldoutPath").GetString()!)));
+        Assert.All(root.GetProperty("rubricBindings").EnumerateArray(), binding =>
+        {
+            var rubricId = binding.GetProperty("rubricId").GetString();
+            var relativePath = rubricId switch
+            {
+                "harness-nominal-pairwise-preference" => "rubrics/nominal-pairwise-preference.v1.json",
+                "harness-ordinal-response-quality" => "rubrics/ordinal-response-quality.v1.json",
+                _ => throw new InvalidOperationException($"Unexpected rubric binding '{rubricId}'."),
+            };
+            Assert.Equal(
+                binding.GetProperty("sha256").GetString(),
+                ComputeSha256(JudgePath(relativePath)));
+        });
 
         Assert.All(items, item =>
         {
@@ -85,6 +110,12 @@ public sealed class HarnessJudgeCalibrationTests
             reversed.GetProperty("left").GetProperty("candidateId").GetString());
         Assert.Equal("Left", canonical.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
         Assert.Equal("Right", reversed.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
+        Assert.Equal(
+            canonical.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32(),
+            reversed.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32());
+        Assert.Equal(
+            canonical.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32(),
+            reversed.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32());
     }
 
     [Fact]
@@ -106,6 +137,9 @@ public sealed class HarnessJudgeCalibrationTests
                 left.GetProperty("text").GetString()!.Length,
                 right.GetProperty("text").GetString()!.Length);
             Assert.Equal("Tie", item.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
+            Assert.Equal(
+                item.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32(),
+                item.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32());
         });
     }
 
@@ -129,6 +163,9 @@ public sealed class HarnessJudgeCalibrationTests
                 right.GetProperty("surfaceStyle").GetString());
             Assert.NotEqual(left.GetProperty("text").GetString(), right.GetProperty("text").GetString());
             Assert.Equal("Tie", item.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
+            Assert.Equal(
+                item.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32(),
+                item.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32());
         });
     }
 
