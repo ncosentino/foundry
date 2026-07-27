@@ -53,6 +53,8 @@ public sealed class HarnessComparisonReporterTests
         var contrast = Assert.Single(report.Contrasts, candidate =>
             candidate.XArm == HarnessComparisonArm.PlainHarness &&
             candidate.YArm == HarnessComparisonArm.Iterative);
+        Assert.Equal(8, contrast.DiagnosticsParity.ComparableCaseCount);
+        Assert.Equal(0, contrast.DiagnosticsParity.NonComparableCaseCount);
         var completion = Assert.Single(contrast.BinaryDimensions, candidate =>
             candidate.Dimension == HarnessEvaluationDimension.Completion);
         Assert.Equal(8, completion.Pessimistic.ValidPairCount);
@@ -110,6 +112,41 @@ public sealed class HarnessComparisonReporterTests
         Assert.Equal(8, completion.Pessimistic.ValidPairCount);
         Assert.Equal(7, completion.Inconclusive.ValidPairCount);
         Assert.Equal(1, completion.Inconclusive.ExcludedCaseCount);
+    }
+
+    [Fact]
+    public void Build_DiagnosticsMismatch_IsReportedAndGatesAffectedDimension()
+    {
+        var source = CreateSource();
+        var binaryOverrides = new Dictionary<BinaryKey, BinaryOverride>
+        {
+            [new BinaryKey(
+                HarnessComparisonArm.PlainHarness,
+                "h001-01",
+                TrialIndex: 1,
+                HarnessEvaluationDimension.ToolTrajectory)] = new BinaryOverride(
+                    Value: true,
+                    IsComparable: false),
+        };
+        var report = new HarnessComparisonReporter().Build(CreateRequest(
+            source,
+            HarnessHostedRunState.Completed,
+            BuildRows(
+                source,
+                new HashSet<TrialKey>(),
+                new Dictionary<TrialKey, ExperimentItemStatus>(),
+                binaryOverrides,
+                new Dictionary<ContinuousKey, ContinuousOverride>())));
+        var contrast = Assert.Single(report.Contrasts, candidate =>
+            candidate.XArm == HarnessComparisonArm.PlainHarness &&
+            candidate.YArm == HarnessComparisonArm.Iterative);
+
+        Assert.Equal(7, contrast.DiagnosticsParity.ComparableCaseCount);
+        Assert.Equal(1, contrast.DiagnosticsParity.NonComparableCaseCount);
+        var toolTrajectory = Assert.Single(contrast.BinaryDimensions, candidate =>
+            candidate.Dimension == HarnessEvaluationDimension.ToolTrajectory);
+        Assert.Equal(1, toolTrajectory.Pessimistic.ValidPairCount);
+        Assert.Equal(1, toolTrajectory.Pessimistic.NonComparableCaseCount);
     }
 
     [Fact]
@@ -208,6 +245,33 @@ public sealed class HarnessComparisonReporterTests
         var disagreement = Assert.Single(report.JudgeDisagreement.Observations);
         Assert.True(disagreement.IsDisagreement);
         Assert.True(disagreement.DeterministicGoverns);
+    }
+
+    [Fact]
+    public void Build_DuplicateJudgeObservation_Throws()
+    {
+        var source = CreateSource();
+        var observation = new HarnessJudgeComparisonObservation(
+            caseId: "h001-01",
+            dimension: HarnessEvaluationDimension.Completion,
+            xArm: HarnessComparisonArm.PlainHarness,
+            yArm: HarnessComparisonArm.Iterative,
+            deterministicPreference: HarnessPairwisePreference.Left,
+            judgePreference: HarnessPairwisePreference.Right,
+            isOrderConsistent: true,
+            calibrationState: HarnessJudgeCalibrationState.Uncalibrated);
+        var request = CreateRequest(
+            source,
+            HarnessHostedRunState.Completed,
+            BuildRows(
+                source,
+                new HashSet<TrialKey>(),
+                new Dictionary<TrialKey, ExperimentItemStatus>(),
+                new Dictionary<BinaryKey, BinaryOverride>(),
+                new Dictionary<ContinuousKey, ContinuousOverride>()),
+            [observation, observation]);
+
+        Assert.Throws<ArgumentException>(() => new HarnessComparisonReporter().Build(request));
     }
 
     [Fact]

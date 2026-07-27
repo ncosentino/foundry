@@ -113,14 +113,17 @@ public sealed class HarnessComparisonReporter
             writer,
             "iterative",
             artifactWriter.Serialize(outcomes.Iterative, caseTypeInfo, outputTypeInfo));
+        cancellationToken.ThrowIfCancellationRequested();
         WriteOutcome(
             writer,
             "plainHarness",
             artifactWriter.Serialize(outcomes.PlainHarness, caseTypeInfo, outputTypeInfo));
+        cancellationToken.ThrowIfCancellationRequested();
         WriteOutcome(
             writer,
             "hybrid",
             artifactWriter.Serialize(outcomes.Hybrid, caseTypeInfo, outputTypeInfo));
+        cancellationToken.ThrowIfCancellationRequested();
         writer.WriteEndObject();
         writer.WriteEndObject();
         await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -277,9 +280,12 @@ public sealed class HarnessComparisonReporter
              trialIndex <= HarnessManifestCaseSource.RequiredHostedTrialCount;
              trialIndex++)
         {
-            if (!ledger[(HarnessComparisonArm.Iterative, caseId, trialIndex)].Scheduled)
+            foreach (var arm in Enum.GetValues<HarnessComparisonArm>())
             {
-                return false;
+                if (!ledger[(arm, caseId, trialIndex)].Scheduled)
+                {
+                    return false;
+                }
             }
         }
 
@@ -321,7 +327,40 @@ public sealed class HarnessComparisonReporter
                 yArm,
                 dimension))
             .ToArray();
-        return new HarnessPairwiseContrastReport(xArm, yArm, binary, continuous);
+        return new HarnessPairwiseContrastReport(
+            xArm,
+            yArm,
+            BuildDiagnosticsParity(hostedCases, ledger, xArm, yArm),
+            binary,
+            continuous);
+    }
+
+    private static HarnessDiagnosticsParityComparison BuildDiagnosticsParity(
+        IReadOnlyList<HarnessManifestCase> hostedCases,
+        IReadOnlyDictionary<
+            (HarnessComparisonArm Arm, string CaseId, int TrialIndex),
+            HarnessComparisonTrialRecord> ledger,
+        HarnessComparisonArm xArm,
+        HarnessComparisonArm yArm)
+    {
+        var cases = new HarnessDiagnosticsParityCaseResult[hostedCases.Count];
+        for (var caseIndex = 0; caseIndex < hostedCases.Count; caseIndex++)
+        {
+            var manifestCase = hostedCases[caseIndex];
+            var xRows = GetCaseRows(ledger, xArm, manifestCase.Id);
+            var yRows = GetCaseRows(ledger, yArm, manifestCase.Id);
+            var fullyScheduled = xRows.All(row => row.Scheduled) && yRows.All(row => row.Scheduled);
+            var isComparable =
+                fullyScheduled &&
+                xRows.All(AllDimensionsComparable) &&
+                yRows.All(AllDimensionsComparable);
+            cases[caseIndex] = new HarnessDiagnosticsParityCaseResult(
+                manifestCase.Id,
+                fullyScheduled,
+                isComparable);
+        }
+
+        return new HarnessDiagnosticsParityComparison(cases);
     }
 
     private static HarnessBinaryDimensionComparison BuildBinaryComparison(
@@ -492,6 +531,11 @@ public sealed class HarnessComparisonReporter
         IReadOnlyList<HarnessManifestCase> hostedCases)
     {
         var hostedById = hostedCases.ToDictionary(@case => @case.Id, StringComparer.Ordinal);
+        var identities = new HashSet<(
+            string CaseId,
+            HarnessEvaluationDimension Dimension,
+            HarnessComparisonArm XArm,
+            HarnessComparisonArm YArm)>();
         foreach (var observation in observations)
         {
             if (!hostedById.TryGetValue(observation.CaseId, out var manifestCase))
@@ -513,6 +557,17 @@ public sealed class HarnessComparisonReporter
             {
                 throw new ArgumentException(
                     $"Judge observation contrast '{observation.XArm}-{observation.YArm}' is not registered.",
+                    nameof(observations));
+            }
+
+            if (!identities.Add((
+                    observation.CaseId,
+                    observation.Dimension,
+                    observation.XArm,
+                    observation.YArm)))
+            {
+                throw new ArgumentException(
+                    $"Judge observation '{observation.CaseId}/{observation.Dimension}/{observation.XArm}-{observation.YArm}' appears more than once.",
                     nameof(observations));
             }
         }
@@ -537,6 +592,10 @@ public sealed class HarnessComparisonReporter
         HarnessComparisonTrialRecord row,
         HarnessEvaluationDimension dimension) =>
         row.ContinuousValues.Single(value => value.Dimension == dimension);
+
+    private static bool AllDimensionsComparable(HarnessComparisonTrialRecord row) =>
+        row.BinaryValues.All(value => value.IsComparable) &&
+        row.ContinuousValues.All(value => value.IsComparable);
 
     private static bool TryAggregateScorableBinary(
         IReadOnlyList<HarnessComparisonTrialRecord> rows,

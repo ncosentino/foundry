@@ -233,7 +233,10 @@ public static class HarnessJudgeAssetLoader
 
         var path = Path.GetFullPath(
             Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
-        if (!path.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        var relative = Path.GetRelativePath(root, path);
+        if (Path.IsPathRooted(relative) ||
+            relative.Equals("..", StringComparison.Ordinal) ||
+            relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
             throw new InvalidDataException($"Asset path '{relativePath}' escapes the judge directory.");
         }
