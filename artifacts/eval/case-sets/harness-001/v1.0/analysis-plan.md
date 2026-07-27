@@ -83,8 +83,9 @@ Every run records and hashes:
 - controlling/system instructions;
 - tool names, schemas, and implementation versions;
 - initial workspace fixture;
-- token/context budget, iteration/tool-round caps, attempt timeout, and
-  cancellation policy;
+- token/context budget, iteration/tool-round caps, maximum provider requests per
+  attempt, attempt timeout, and cancellation policy;
+- versioned provider pricing table and conservative cost-reservation formula;
 - capability profile;
 - package graph and git commit;
 - global run seed, per-case/trial seed derivation, arm-order seed, and bootstrap
@@ -112,7 +113,9 @@ Each case must have:
 - fixed prompts/tools/budgets; and
 - no development-case label.
 
-Development cases may exist in the manifest but are excluded from this run.
+All eight hosted cases must satisfy these conditions when the v1.0 manifest is
+frozen. Development cases may exist in the manifest but are outside the hosted
+ID set and excluded from this run.
 
 ### Trials
 
@@ -131,16 +134,37 @@ small differences and must be reported as such.
 
 - planned agent runs: 72;
 - maximum attempts, including retries: 144;
-- maximum provider requests across all attempts: 432;
-- maximum wall clock: 60 minutes;
-- maximum estimated provider cost: USD 25;
+- maximum provider requests per attempt: 8;
+- global provider-request reservation budget: 1,152
+  (`144 attempts × 8 requests`);
+- workflow hard timeout: 60 minutes;
+- scheduling deadline: 50 minutes;
+- estimated provider-cost reservation budget: USD 25;
 - maximum attempt duration: 120 seconds;
 - maximum output tokens per provider request: 2,000; and
 - maximum concurrent agent runs: 3.
 
-The first reached cap stops new scheduling. In-flight attempts may finish
-within their attempt timeout. A capped run is `TRUNCATED`, retains all captured
-evidence, and cannot be selectively extended after outcome inspection.
+The scheduling unit is one complete paired batch: all three arms for one
+case/trial index. The 24 case/trial batches are shuffled once from the pinned
+ordering seed. A batch is scheduled only when the hosted driver can reserve
+the worst-case request and estimated-cost allowance for all three arms and
+their permitted retry. In-flight work therefore consumes capacity that was
+reserved before launch.
+
+Estimated cost uses the pinned pricing table, request cap, context/token
+budgets, and retry allowance. It is a hard cap on the protocol's estimated
+cost, not a claim about the provider's final invoice. The per-attempt request
+counter terminates an attempt before a ninth provider request.
+
+No new batch is scheduled after the 50-minute deadline, leaving time for the
+current reserved batch to finish and flush evidence before the 60-minute
+workflow timeout. Reaching a scheduling cap produces the reporter-level run
+state `TruncatedByCap`; it is not an `ExperimentItemStatus`.
+
+After every paired batch, the hosted driver writes the batch result and
+scheduling ledger incrementally. A truncated run retains completed batches,
+records unscheduled batches explicitly, cannot be selectively extended after
+outcome inspection, and is advisory with degraded power.
 
 ## Pairing and trial ordering
 
@@ -153,8 +177,10 @@ For every case/trial index, all three arms use the same:
 - budgets and timeout.
 
 Arm execution order is deterministically shuffled per case/trial from the
-pinned arm-order seed. Pairing is analyzed at the case level; aligned trial
-indices are a variance-reduction aid, not an independence claim.
+pinned arm-order seed within each complete paired batch. Pairing is analyzed
+at the case level; aligned trial indices are a variance-reduction aid, not an
+independence claim. A scheduling cap never schedules only one arm from a
+case/trial batch.
 
 ## Retry versus independent-trial semantics
 
@@ -184,13 +210,29 @@ The primary analysis unit is the **case**.
 
 Within each case/arm cell:
 
-- binary dimensions use majority outcome across the three trials;
-- continuous dimensions use the trial mean as the case-level value;
+- binary dimensions use majority outcome across the three planned trial slots;
+- continuous dimensions use the trial mean as the case-level value only under
+  the conditional-on-full-measurement rules below;
 - the trial median is retained as a descriptive robustness value; and
 - attempt/retry counts remain operational descriptors.
 
 Pairwise analysis uses only case-level paired values. Trial rows are never
 treated as 24 independent population samples.
+
+For the pessimistic binary treatment, every **scheduled** trial slot yields a
+0/1 value: unscorable, failed, timed-out, canceled, or invalid scheduled trials
+are 0. A case/arm binary value requires all three trial batches to have been
+scheduled; if global truncation leaves fewer than three scheduled slots, that
+case is excluded from all case-level contrasts and counted as
+`incomplete-due-to-cap`.
+
+For the `Inconclusive` sensitivity, a case/arm cell is defined only when all
+three scheduled trials are scorable. Cells with one or more unscorable trials
+are dropped; two-trial ties are never broken post hoc.
+
+At least six fully scheduled cases are required for any retention
+recommendation. Below six, all results are descriptive truncation evidence
+only.
 
 ## Metric definitions and methods
 
@@ -204,14 +246,18 @@ treated as 24 independent population samples.
 | Cancellation | Expected cancellation category and no success-shaped output | 3-trial majority | Difference in success proportion | Same paired binary method | Secondary |
 | Termination | Expected terminal category | 3-trial majority | Difference in success proportion | Same paired binary method | Secondary |
 | Diagnostics parity | Required schema fields/relationships | Pass/fail | Comparability precondition | Exact fixture comparison; no cross-arm numeric comparison when failed | Precondition |
-| Cumulative tokens | Diagnostics counters | Trial mean per case | Mean paired difference | Case-level paired percentile bootstrap | Secondary |
-| Peak tokens | Diagnostics counters | Trial mean per case | Mean paired difference | Case-level paired percentile bootstrap | Secondary |
-| Attributed artifact/context cost | Attribution counters | Trial mean per case | Mean paired difference | Case-level paired percentile bootstrap | Secondary |
-| Latency | Monotonic duration | Trial mean per case | Mean paired difference | Case-level paired percentile bootstrap | Secondary |
+| Cumulative tokens | Diagnostics counters | Dual-success full-cell trial mean | Conditional mean paired difference | Case-level paired percentile bootstrap plus pessimistic cap sensitivity | Secondary |
+| Peak tokens | Diagnostics counters | Dual-success full-cell trial mean | Conditional mean paired difference | Case-level paired percentile bootstrap plus pessimistic cap sensitivity | Secondary |
+| Attributed artifact/context cost | Attribution counters | Dual-success full-cell trial mean | Conditional mean paired difference | Case-level paired percentile bootstrap plus pessimistic cap sensitivity | Secondary |
+| Latency | Monotonic duration | Dual-success full-cell trial mean | Conditional mean paired difference | Case-level paired percentile bootstrap plus pessimistic timeout sensitivity | Secondary |
 | Judge dimensions | Versioned rubric | Trial mean per case | Advisory mean paired difference | Descriptive bootstrap only | Exploratory |
 
 Continuous reports also include paired median difference descriptively. No
 normality assumption or unpaired test is used.
+
+The binary success estimand is the difference in the proportion of cases whose
+three-trial majority succeeds. It is not an estimate of a per-trial success
+probability.
 
 ## Paired binary evidence
 
@@ -250,6 +296,14 @@ If there are no discordant cases, report `delta = 0`, the paired interval, and
 
 ## Paired continuous evidence
 
+The primary continuous estimand is explicitly **conditional on dual success**.
+A case pair is valid only when both arms:
+
+- scheduled all three trial slots;
+- completed all three trials successfully for the deterministic completion
+  predicate; and
+- produced three finite, diagnostics-comparable values for the metric.
+
 For each valid case pair, compute:
 
 ```text
@@ -274,9 +328,21 @@ The bootstrap:
 If fewer than four valid case pairs remain, report descriptive values only and
 mark the interval `insufficient-sample`.
 
+With at most eight cases, percentile-bootstrap coverage is unstable. Every
+continuous interval is labeled descriptive and small-sample; it cannot support
+a superiority, non-inferiority, or removal claim.
+
+Every conditional continuous table is published adjacent to completion,
+timeout, cancellation, and failure counts. A conditional latency/token/cost
+advantage cannot justify retention or removal when the same arm has worse
+deterministic completion evidence.
+
 ## Missing, unknown, invalid, and non-comparable samples
 
-Every trial retains an explicit `ExperimentItemStatus`.
+Every scheduled trial retains an explicit `ExperimentItemStatus`. Missing or
+invalid metric values are evaluator outcomes mapped to the status/treatment
+rules below; they are not additional enum members. Unscheduled batches are
+recorded separately in the scheduling ledger.
 
 ### Binary dimensions
 
@@ -287,17 +353,30 @@ Primary treatment is pessimistic:
 
 Sensitivity treatment:
 
-- unknown/unscorable trials are excluded (`Inconclusive`), with denominator
-  changes reported.
+- unknown/unscorable trials use
+  `ExperimentUnknownSampleTreatment.Inconclusive`. The entire case/arm cell is
+  dropped unless all three trials are scorable; denominator changes are
+  reported.
 
 Both treatments are published. Divergence is evidence.
 
 ### Continuous dimensions
 
-Non-finite, missing, failed, timed-out, canceled, or non-comparable values are
-not imputed in the primary estimate. The case pair is dropped and counted.
-A pessimistic sensitivity may substitute the worst finite observed value, but
-must be labeled sensitivity-only.
+The primary estimate is conditional on dual full success as defined above.
+Non-finite, missing, failed, timed-out, canceled, non-comparable, or incomplete
+cells are dropped and counted.
+
+The required pessimistic sensitivity substitutes pre-declared metric bounds
+for **scheduled** failed/unscorable trials:
+
+- latency: the full trial timeout including the permitted retry;
+- cumulative tokens and attributed cost: the trial's reserved worst-case cap;
+- peak tokens: the per-request context/output cap.
+
+The sensitivity is labeled pessimistic and never replaces the conditional
+primary estimate. Trials never scheduled because of a global cap are not arm
+failures and are not imputed; their incomplete cases are excluded symmetrically
+from all arm contrasts.
 
 ### Diagnostics parity
 
@@ -316,9 +395,13 @@ The report distinguishes:
 - retry exhaustion; and
 - deterministic task failure.
 
-Whole-run caller cancellation or a binding cap produces a truncated run.
+Whole-run caller cancellation produces `CanceledByCaller`. A binding scheduling
+cap produces `TruncatedByCap`. These are reporter-level hosted-run states, not
+new `ExperimentItemStatus` or `ExperimentRunOutcome` values.
+
 Per-trial terminal failures remain in binary denominators under the primary
-pessimistic treatment.
+pessimistic treatment. Unscheduled paired batches remain outside item
+denominators and are disclosed in the scheduling ledger.
 
 ## Multiplicity and result language
 
@@ -366,22 +449,33 @@ limitation is explicit.
 
 ## Exclusions fixed before execution
 
-Excluded from the hosted analysis:
+At manifest freeze:
 
-- any manifest case with `developmentCase = true`;
-- any case outside `h001-01` through `h001-08`;
-- any case missing its deterministic completion predicate;
-- any dimension missing deterministic reference evidence; and
-- malformed manifest entries.
+- hosted IDs are exactly `h001-01` through `h001-08`;
+- all eight hosted cases are well-formed and have deterministic completion
+  predicates;
+- every decision dimension has deterministic reference evidence; and
+- development cases are outside the hosted ID set and labeled explicitly.
 
-The manifest records every excluded case. No post-hoc case or dimension
-exclusion is allowed for v1.0. A newly discovered invalid case requires a new
-case-set version; the v1.0 run remains published with the defect/truncation
-noted.
+A malformed manifest or invalid hosted case prevents the run from starting.
+If a previously hidden case/reference defect is discovered during or after
+execution, v1.0 is `InvalidInput`: no comparative conclusion or retention
+recommendation is published. The defect bundle remains immutable, and a
+corrected run requires a new case-set version. No post-hoc case or dimension
+exclusion is permitted.
 
 ## Capture, replay, and provenance
 
-Each attempt captures:
+Provider request/response capture and the full evidence bundle are separate
+surfaces.
+
+`EvaluationCaptureChatClient` captures provider request/response payloads only.
+Each arm/case/trial/attempt uses its own capture-store namespace, and replay is
+allowed only after validating the complete pinned-input tuple hash. The chat
+capture key is never treated as proof that non-captured options match.
+
+The hosted driver and reporter write an incremental attempt/batch evidence
+bundle, using the existing JSON artifact writer, containing:
 
 - request/response payloads;
 - tool calls/results;
@@ -390,6 +484,11 @@ Each attempt captures:
 - evaluator inputs/outputs;
 - retry/timeout/cancellation status; and
 - timing/token/cost counters.
+
+The batch bundle is flushed after every complete paired batch, before the next
+batch is scheduled. `run-status.json` records `Completed`, `TruncatedByCap`,
+`CanceledByCaller`, or `InvalidInput` as reporter-level states without changing
+the core experiment outcome enums.
 
 The report bundle contains:
 
@@ -405,8 +504,10 @@ The report bundle contains:
 - diagnostics-parity report; and
 - checksums for every published artifact.
 
-Deterministic evaluators and advisory judges operate on capture/replay inputs
-where possible so rescoring does not perturb agent execution.
+Deterministic evaluators rescore normalized evidence records and chat captures;
+advisory judges replay captured transcripts. Workspace state, retry state,
+progress, and diagnostics are retained as observed evidence and are not
+reconstructed from the chat-response store.
 
 ## Stopping, peeking, and truncation
 
@@ -419,9 +520,10 @@ No interim outcome review may:
 - stop an unfavorable arm; or
 - extend a favorable arm.
 
-Only the pre-declared caps can truncate execution. A rerun after code, case,
-model, rubric, or input changes is a new registered run and is not pooled with
-v1.0.
+Only the pre-declared scheduling/deadline caps can truncate execution. Batches
+are complete paired units, persisted before the next batch begins. A rerun
+after code, case, model, rubric, or input changes is a new registered run and
+is not pooled with v1.0.
 
 ## Governance and human review
 
@@ -436,9 +538,12 @@ The immutable comparison report requires a human signature block containing:
 - truncation/cap status; and
 - retention recommendation.
 
-The retention decision must cite workload-specific deterministic parity and
-migration guidance. Hosted stochastic evidence or judge evidence alone cannot
-remove an existing implementation or establish a default.
+The retention decision must cite workload-specific deterministic parity,
+completion/reliability evidence, uncertainty, and migration guidance. Judge
+evidence cannot break a deterministic tie or override uncertainty. Hosted
+stochastic or judge evidence alone cannot remove an existing implementation or
+establish a default; when deterministic evidence is tied or inconclusive, the
+default disposition is retention pending stronger evidence.
 
 ## Method references
 
