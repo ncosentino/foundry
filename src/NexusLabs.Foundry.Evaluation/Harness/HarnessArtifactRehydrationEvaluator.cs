@@ -65,6 +65,28 @@ public sealed class HarnessArtifactRehydrationEvaluator : IEvaluator
 
         foreach (var decision in decisions)
         {
+            if (decision is null)
+            {
+                consistent = false;
+                digestVerified = false;
+                continue;
+            }
+
+            var decisionValid =
+                Enum.IsDefined(decision.Operation) &&
+                Enum.IsDefined(decision.Outcome) &&
+                Enum.IsDefined(decision.Content) &&
+                Enum.IsDefined(decision.Reason) &&
+                decision.ConfiguredThresholdOrBudget >= 0 &&
+                decision.InputUtf8Bytes >= 0 &&
+                decision.ObservedUtf8ByteSize is null or >= 0 &&
+                decision.OutputUtf8Bytes is null or >= 0;
+            if (!decisionValid)
+            {
+                consistent = false;
+                digestVerified = false;
+            }
+
             if (decision.Operation != HarnessArtifactOperationCategory.Rehydration)
             {
                 continue;

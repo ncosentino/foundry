@@ -49,13 +49,24 @@ public sealed class HarnessSessionContinuityEvaluator : IEvaluator
             return new ValueTask<EvaluationResult>(new EvaluationResult());
         }
 
-        var presentDecisions = new HashSet<string>(continuity.PresentDecisionReferences, StringComparer.Ordinal);
-        var presentKeys = new HashSet<string>(continuity.PresentStateKeys, StringComparer.Ordinal);
+        var collectionsValid =
+            IsValidCollection(continuity.RequiredDecisionReferences) &&
+            IsValidCollection(continuity.PresentDecisionReferences) &&
+            IsValidCollection(continuity.RequiredStateKeys) &&
+            IsValidCollection(continuity.PresentStateKeys);
+        var presentDecisions = new HashSet<string>(
+            continuity.PresentDecisionReferences?
+                .Where(value => !string.IsNullOrWhiteSpace(value)) ?? [],
+            StringComparer.Ordinal);
+        var presentKeys = new HashSet<string>(
+            continuity.PresentStateKeys?
+                .Where(value => !string.IsNullOrWhiteSpace(value)) ?? [],
+            StringComparer.Ordinal);
 
-        var missingDecisions = continuity.RequiredDecisionReferences.Count(r => !presentDecisions.Contains(r));
-        var missingKeys = continuity.RequiredStateKeys.Count(k => !presentKeys.Contains(k));
+        var missingDecisions = CountMissing(continuity.RequiredDecisionReferences, presentDecisions);
+        var missingKeys = CountMissing(continuity.RequiredStateKeys, presentKeys);
 
-        var preserved = missingDecisions == 0 && missingKeys == 0;
+        var preserved = collectionsValid && missingDecisions == 0 && missingKeys == 0;
 
         var preservedMetric = new BooleanMetric(
             ContinuityPreservedMetricName,
@@ -78,5 +89,21 @@ public sealed class HarnessSessionContinuityEvaluator : IEvaluator
             preservedMetric,
             missingDecisionsMetric,
             missingKeysMetric));
+    }
+
+    private static bool IsValidCollection(IReadOnlyList<string>? values) =>
+        values is not null &&
+        values.All(value => !string.IsNullOrWhiteSpace(value));
+
+    private static int CountMissing(IReadOnlyList<string>? required, HashSet<string> present)
+    {
+        if (required is null)
+        {
+            return 1;
+        }
+
+        return required.Count(value =>
+            string.IsNullOrWhiteSpace(value) ||
+            !present.Contains(value));
     }
 }

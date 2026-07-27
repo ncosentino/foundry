@@ -64,7 +64,8 @@ public sealed class HarnessCostAttributionEvaluator : IEvaluator
             cost.ArtifactOutputUtf8Bytes >= 0 &&
             cost.ContextOriginalSize >= 0 &&
             cost.ContextFinalSize >= 0 &&
-            cost.AttributedTokenCost >= 0;
+            cost.AttributedTokenCost >= 0 &&
+            Enum.IsDefined(cost.MeasurementUnit);
 
         var validMetric = new BooleanMetric(
             AttributionValidMetricName,

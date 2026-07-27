@@ -63,19 +63,41 @@ public sealed class HarnessCompactionValidityEvaluator : IEvaluator
 
         foreach (var attempt in compactions)
         {
-            totalAttempts += Math.Max(0, attempt.AttemptCount);
-
-            if (attempt.OriginalSize < 0 || attempt.FinalSize < 0 ||
-                attempt.HardLimit < 0 || attempt.TriggerThreshold < 0 || attempt.AttemptCount < 0)
+            if (attempt is null)
             {
                 outcomeConsistent = false;
+                continue;
+            }
+
+            totalAttempts += Math.Max(0, attempt.AttemptCount);
+
+            var outcomeDefined = Enum.IsDefined(attempt.Outcome);
+            if (!outcomeDefined ||
+                !Enum.IsDefined(attempt.MeasurementUnit) ||
+                attempt.Stages is null ||
+                attempt.Stages.Any(stage => !Enum.IsDefined(stage)) ||
+                attempt.OriginalSize < 0 ||
+                attempt.FinalSize < 0 ||
+                attempt.HardLimit < 0 ||
+                attempt.TriggerThreshold < 0 ||
+                attempt.AttemptCount < 0 ||
+                attempt.CategoryContributionSizeSum < 0 ||
+                attempt.CategoryContributionCount < 0)
+            {
+                outcomeConsistent = false;
+            }
+
+            if (!outcomeDefined)
+            {
+                continue;
             }
 
             if (HarnessCompactionClassification.IsSuccess(attempt.Outcome))
             {
                 if (attempt.FinalSize > attempt.HardLimit ||
                     attempt.FinalSequenceValid != true ||
-                    attempt.CategoryContributionSizeSum != attempt.FinalSize)
+                    attempt.CategoryContributionSizeSum != attempt.FinalSize ||
+                    attempt.CategoryContributionCount <= 0)
                 {
                     outcomeConsistent = false;
                 }
@@ -89,7 +111,9 @@ public sealed class HarnessCompactionValidityEvaluator : IEvaluator
             else
             {
                 terminationCount++;
-                if (attempt.FinalSequenceValid is not null || attempt.CategoryContributionCount != 0)
+                if (attempt.FinalSequenceValid is not null ||
+                    attempt.CategoryContributionSizeSum != 0 ||
+                    attempt.CategoryContributionCount != 0)
                 {
                     outcomeConsistent = false;
                 }

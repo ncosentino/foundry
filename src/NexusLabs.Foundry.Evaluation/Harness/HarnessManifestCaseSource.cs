@@ -14,15 +14,25 @@ namespace NexusLabs.Foundry.Evaluation.Harness;
 /// </summary>
 public sealed partial class HarnessManifestCaseSource : IExperimentCaseSource<HarnessManifestCase>
 {
+    /// <summary>The frozen manifest schema version for the <c>harness-001</c> v1.0 case set.</summary>
+    public const string RequiredSchemaVersion = "1.0";
+
+    /// <summary>The frozen case-set identifier for the <c>harness-001</c> v1.0 case set.</summary>
+    public const string RequiredCaseSetId = "harness-001";
+
+    /// <summary>The frozen case-set version for the <c>harness-001</c> v1.0 case set.</summary>
+    public const string RequiredVersion = "v1.0";
+
     /// <summary>The frozen hosted trial count for the <c>harness-001</c> v1.0 case set.</summary>
     public const int RequiredHostedTrialCount = 3;
 
     /// <summary>The frozen, ordered hosted case IDs for the <c>harness-001</c> v1.0 case set.</summary>
     public static readonly IReadOnlyList<string> RequiredHostedCaseIds =
-    [
-        "h001-01", "h001-02", "h001-03", "h001-04",
-        "h001-05", "h001-06", "h001-07", "h001-08",
-    ];
+        Array.AsReadOnly(
+        [
+            "h001-01", "h001-02", "h001-03", "h001-04",
+            "h001-05", "h001-06", "h001-07", "h001-08",
+        ]);
 
     private readonly ExperimentCase<HarnessManifestCase>[] _cases;
     private readonly ExperimentSourceReference _source;
@@ -30,13 +40,13 @@ public sealed partial class HarnessManifestCaseSource : IExperimentCaseSource<Ha
     private HarnessManifestCaseSource(HarnessCaseSetManifest manifest, bool includeDevelopmentCases)
     {
         ArgumentNullException.ThrowIfNull(manifest);
-        Manifest = manifest;
         Validate(manifest);
+        Manifest = SnapshotManifest(manifest);
 
-        _source = new ExperimentSourceReference { Name = $"{manifest.CaseSetId} {manifest.Version}" };
+        _source = new ExperimentSourceReference { Name = $"{Manifest.CaseSetId} {Manifest.Version}" };
 
-        var materialized = new List<ExperimentCase<HarnessManifestCase>>(manifest.Cases.Count);
-        foreach (var manifestCase in manifest.Cases)
+        var materialized = new List<ExperimentCase<HarnessManifestCase>>(Manifest.Cases.Count);
+        foreach (var manifestCase in Manifest.Cases)
         {
             if (manifestCase.Development && !includeDevelopmentCases)
             {
@@ -47,7 +57,7 @@ public sealed partial class HarnessManifestCaseSource : IExperimentCaseSource<Ha
             {
                 Id = manifestCase.Id,
                 Value = manifestCase,
-                TrialCount = manifest.HostedTrialCount,
+                TrialCount = Manifest.HostedTrialCount,
                 Tags = manifestCase.Tags,
             });
         }
@@ -125,19 +135,22 @@ public sealed partial class HarnessManifestCaseSource : IExperimentCaseSource<Ha
 
     private static void Validate(HarnessCaseSetManifest manifest)
     {
-        if (string.IsNullOrWhiteSpace(manifest.SchemaVersion))
+        if (!string.Equals(manifest.SchemaVersion, RequiredSchemaVersion, StringComparison.Ordinal))
         {
-            throw new HarnessCaseSetManifestException("The manifest is missing a schema version.");
+            throw new HarnessCaseSetManifestException(
+                $"The manifest schema version must be exactly '{RequiredSchemaVersion}'.");
         }
 
-        if (string.IsNullOrWhiteSpace(manifest.CaseSetId))
+        if (!string.Equals(manifest.CaseSetId, RequiredCaseSetId, StringComparison.Ordinal))
         {
-            throw new HarnessCaseSetManifestException("The manifest is missing a case-set ID.");
+            throw new HarnessCaseSetManifestException(
+                $"The case-set ID must be exactly '{RequiredCaseSetId}'.");
         }
 
-        if (string.IsNullOrWhiteSpace(manifest.Version))
+        if (!string.Equals(manifest.Version, RequiredVersion, StringComparison.Ordinal))
         {
-            throw new HarnessCaseSetManifestException("The manifest is missing a version.");
+            throw new HarnessCaseSetManifestException(
+                $"The case-set version must be exactly '{RequiredVersion}'.");
         }
 
         if (manifest.HostedTrialCount != RequiredHostedTrialCount)
@@ -185,6 +198,12 @@ public sealed partial class HarnessManifestCaseSource : IExperimentCaseSource<Ha
         if (string.IsNullOrWhiteSpace(manifestCase.TaskCategory))
         {
             throw new HarnessCaseSetManifestException($"Case '{manifestCase.Id}' is missing a task category.");
+        }
+
+        if (manifestCase.Tags is null || manifestCase.Tags.Any(string.IsNullOrWhiteSpace))
+        {
+            throw new HarnessCaseSetManifestException(
+                $"Case '{manifestCase.Id}' has a null or blank tag.");
         }
 
         if (manifestCase.DeterministicReferences is null)
@@ -246,17 +265,55 @@ public sealed partial class HarnessManifestCaseSource : IExperimentCaseSource<Ha
 
     private static void ValidateHostedIds(List<string> hostedIds)
     {
-        var hostedSet = new HashSet<string>(hostedIds, StringComparer.Ordinal);
-        var requiredSet = new HashSet<string>(RequiredHostedCaseIds, StringComparer.Ordinal);
-
-        if (!hostedSet.SetEquals(requiredSet))
+        if (!hostedIds.SequenceEqual(RequiredHostedCaseIds, StringComparer.Ordinal))
         {
+            var hostedSet = new HashSet<string>(hostedIds, StringComparer.Ordinal);
+            var requiredSet = new HashSet<string>(RequiredHostedCaseIds, StringComparer.Ordinal);
             var missing = requiredSet.Except(hostedSet).Order(StringComparer.Ordinal);
             var extra = hostedSet.Except(requiredSet).Order(StringComparer.Ordinal);
             throw new HarnessCaseSetManifestException(
-                "The hosted case IDs must be exactly h001-01 through h001-08. " +
+                "The hosted case IDs and order must be exactly h001-01 through h001-08. " +
                 $"Missing: [{string.Join(", ", missing)}]. Unexpected: [{string.Join(", ", extra)}].");
         }
+    }
+
+    private static HarnessCaseSetManifest SnapshotManifest(HarnessCaseSetManifest manifest)
+    {
+        var cases = new HarnessManifestCase[manifest.Cases.Count];
+        for (var caseIndex = 0; caseIndex < manifest.Cases.Count; caseIndex++)
+        {
+            var sourceCase = manifest.Cases[caseIndex];
+            var references = new HarnessDeterministicReference[sourceCase.DeterministicReferences.Count];
+            for (var referenceIndex = 0; referenceIndex < sourceCase.DeterministicReferences.Count; referenceIndex++)
+            {
+                var sourceReference = sourceCase.DeterministicReferences[referenceIndex];
+                references[referenceIndex] = new HarnessDeterministicReference
+                {
+                    Dimension = sourceReference.Dimension,
+                    ReferenceId = sourceReference.ReferenceId,
+                    RelativePath = sourceReference.RelativePath,
+                    Sha256 = sourceReference.Sha256,
+                };
+            }
+
+            cases[caseIndex] = new HarnessManifestCase
+            {
+                Id = sourceCase.Id,
+                TaskCategory = sourceCase.TaskCategory,
+                Development = sourceCase.Development,
+                Tags = Array.AsReadOnly(sourceCase.Tags.ToArray()),
+                DeterministicReferences = Array.AsReadOnly(references),
+            };
+        }
+
+        return new HarnessCaseSetManifest
+        {
+            SchemaVersion = manifest.SchemaVersion,
+            CaseSetId = manifest.CaseSetId,
+            Version = manifest.Version,
+            HostedTrialCount = manifest.HostedTrialCount,
+            Cases = Array.AsReadOnly(cases),
+        };
     }
 
     [GeneratedRegex("^[0-9a-f]{64}$", RegexOptions.CultureInvariant)]

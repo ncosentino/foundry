@@ -54,4 +54,33 @@ public static class ExperimentPairedComparisonEvidence
             cases,
             bootstrapSeed,
             confidenceLevel);
+
+    /// <summary>
+    /// Creates the required pessimistic sensitivity evidence for a paired continuous comparison.
+    /// </summary>
+    /// <param name="xLabel">The stable label for arm X.</param>
+    /// <param name="yLabel">The stable label for arm Y.</param>
+    /// <param name="cases">
+    /// Fully scheduled case-level measurements after substituting each arm's predeclared pessimistic
+    /// bound for scheduled failed or unscorable trials. Cases that were not fully scheduled remain
+    /// explicit and are excluded without substitution.
+    /// </param>
+    /// <param name="bootstrapSeed">
+    /// The deterministic seed for the internal 10,000-resample case-level bootstrap.
+    /// </param>
+    /// <param name="confidenceLevel">The two-sided interval confidence level.</param>
+    /// <returns>Validated pessimistic continuous sensitivity evidence.</returns>
+    public static ExperimentPairedContinuousPessimisticSensitivityEvidence
+        CreateContinuousPessimisticSensitivity(
+            string xLabel,
+            string yLabel,
+            IReadOnlyList<ExperimentPairedContinuousPessimisticCaseMeasurement> cases,
+            ulong bootstrapSeed,
+            double confidenceLevel) =>
+        ExperimentPairedContinuousPessimisticSensitivityEvidence.Create(
+            xLabel,
+            yLabel,
+            cases,
+            bootstrapSeed,
+            confidenceLevel);
 }

@@ -6,8 +6,8 @@ namespace NexusLabs.Foundry.Evaluation.Harness;
 /// <summary>
 /// Deterministic, per-item evaluator that scores progress-event ordering and lifecycle pairing for one
 /// Harness run: the normalized records are globally ordered by strictly increasing sequence number, and
-/// every started span is paired with exactly one completed or terminated record sharing its correlation
-/// identity.
+/// every started span is followed by exactly one completed or terminated record sharing its correlation
+/// identity, and a composed-context record occurs only after successful compaction completion.
 /// </summary>
 /// <remarks>
 /// Reads the lifecycle-events slice from the <see cref="HarnessRunEvaluationContext"/>. A
@@ -22,7 +22,7 @@ public sealed class HarnessEventLifecycleEvaluator : IEvaluator
     /// <summary>Metric name for the lifecycle-pairing rollup.</summary>
     public const string PairedMetricName = "Harness Lifecycle Paired";
 
-    /// <summary>Metric name for the count of unpaired started/completed/terminated records.</summary>
+    /// <summary>Metric name for the count of unpaired or invalidly ordered lifecycle records.</summary>
     public const string UnpairedCountMetricName = "Harness Unpaired Lifecycle Count";
 
     /// <summary>Metric name for the number of normalized records observed.</summary>
@@ -56,7 +56,7 @@ public sealed class HarnessEventLifecycleEvaluator : IEvaluator
         }
 
         var ordered = IsStrictlyOrdered(events);
-        var unpairedCount = CountUnpaired(events);
+        var unpairedCount = CountLifecycleViolations(events);
         var paired = unpairedCount == 0;
 
         var orderedMetric = new BooleanMetric(
@@ -70,13 +70,13 @@ public sealed class HarnessEventLifecycleEvaluator : IEvaluator
             PairedMetricName,
             value: paired,
             reason: paired
-                ? "Every started span was paired with exactly one completed or terminated record."
-                : $"{unpairedCount} lifecycle record(s) were unpaired.");
+                ? "Every lifecycle span and composed-context record followed the required state order."
+                : $"{unpairedCount} lifecycle record(s) were unpaired or invalidly ordered.");
 
         var unpairedMetric = new NumericMetric(
             UnpairedCountMetricName,
             value: unpairedCount,
-            reason: $"{unpairedCount} started/completed/terminated record(s) were unpaired.");
+            reason: $"{unpairedCount} lifecycle record(s) were unpaired or invalidly ordered.");
 
         var eventCountMetric = new NumericMetric(
             EventCountMetricName,
@@ -92,9 +92,16 @@ public sealed class HarnessEventLifecycleEvaluator : IEvaluator
 
     private static bool IsStrictlyOrdered(IReadOnlyList<HarnessLifecycleEventEvidence> events)
     {
+        if (events.Count > 0 && events[0] is null)
+        {
+            return false;
+        }
+
         for (var i = 1; i < events.Count; i++)
         {
-            if (events[i].SequenceNumber <= events[i - 1].SequenceNumber)
+            if (events[i] is null ||
+                events[i - 1] is null ||
+                events[i].SequenceNumber <= events[i - 1].SequenceNumber)
             {
                 return false;
             }
@@ -103,50 +110,82 @@ public sealed class HarnessEventLifecycleEvaluator : IEvaluator
         return true;
     }
 
-    private static int CountUnpaired(IReadOnlyList<HarnessLifecycleEventEvidence> events)
+    private static int CountLifecycleViolations(IReadOnlyList<HarnessLifecycleEventEvidence> events)
     {
-        // Correlation-scoped tallies of started versus completed/terminated records.
-        var startedByKey = new Dictionary<string, int>(StringComparer.Ordinal);
-        var terminalByKey = new Dictionary<string, int>(StringComparer.Ordinal);
+        var stateByKey = new Dictionary<string, HarnessLifecyclePhase>(StringComparer.Ordinal);
+        var violationCount = 0;
 
         foreach (var record in events)
         {
-            switch (record.Phase)
+            if (record is null ||
+                !Enum.IsDefined(record.Kind) ||
+                !Enum.IsDefined(record.Phase) ||
+                string.IsNullOrWhiteSpace(record.CorrelationId))
             {
-                case HarnessLifecyclePhase.Started:
-                    Increment(startedByKey, Key(record));
-                    break;
-                case HarnessLifecyclePhase.Completed:
-                case HarnessLifecyclePhase.Terminated:
-                    Increment(terminalByKey, Key(record));
-                    break;
-                case HarnessLifecyclePhase.Instant:
-                default:
-                    break;
+                violationCount++;
+                continue;
             }
+
+            if (record.Phase == HarnessLifecyclePhase.Instant)
+            {
+                if (record.Kind == HarnessLifecycleEventKind.ContextComposed)
+                {
+                    var compactionKey = Key(
+                        HarnessLifecycleEventKind.ContextCompaction,
+                        record.CorrelationId);
+                    if (!stateByKey.TryGetValue(compactionKey, out var compactionState) ||
+                        compactionState != HarnessLifecyclePhase.Completed)
+                    {
+                        violationCount++;
+                    }
+                }
+                else if (record.Kind != HarnessLifecycleEventKind.ArtifactDecision)
+                {
+                    violationCount++;
+                }
+
+                continue;
+            }
+
+            if (record.Kind is HarnessLifecycleEventKind.ContextComposed
+                or HarnessLifecycleEventKind.ArtifactDecision)
+            {
+                violationCount++;
+                continue;
+            }
+
+            var key = Key(record.Kind, record.CorrelationId);
+            if (record.Phase == HarnessLifecyclePhase.Started)
+            {
+                if (stateByKey.ContainsKey(key))
+                {
+                    violationCount++;
+                }
+                else
+                {
+                    stateByKey[key] = HarnessLifecyclePhase.Started;
+                }
+
+                continue;
+            }
+
+            if (!stateByKey.TryGetValue(key, out var state) ||
+                state != HarnessLifecyclePhase.Started)
+            {
+                violationCount++;
+                continue;
+            }
+
+            stateByKey[key] = record.Phase;
         }
 
-        var unpaired = 0;
-        var keys = new HashSet<string>(StringComparer.Ordinal);
-        keys.UnionWith(startedByKey.Keys);
-        keys.UnionWith(terminalByKey.Keys);
-
-        foreach (var key in keys)
-        {
-            startedByKey.TryGetValue(key, out var started);
-            terminalByKey.TryGetValue(key, out var terminal);
-            unpaired += Math.Abs(started - terminal);
-        }
-
-        return unpaired;
+        violationCount += stateByKey.Values.Count(state => state == HarnessLifecyclePhase.Started);
+        return violationCount;
     }
 
     private static string Key(HarnessLifecycleEventEvidence record) =>
-        $"{record.Kind}::{record.CorrelationId}";
+        Key(record.Kind, record.CorrelationId);
 
-    private static void Increment(Dictionary<string, int> tally, string key)
-    {
-        tally.TryGetValue(key, out var count);
-        tally[key] = count + 1;
-    }
+    private static string Key(HarnessLifecycleEventKind kind, string correlationId) =>
+        $"{kind}::{correlationId}";
 }

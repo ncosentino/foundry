@@ -71,17 +71,50 @@ public sealed class HarnessToolTrajectoryEvaluator : IEvaluator
             return new EvaluationResult();
         }
 
-        var observedTools = contextList?
+        var diagnostics = contextList?
             .OfType<AgentRunDiagnosticsContext>()
             .FirstOrDefault()?
-            .Diagnostics.ToolCalls
-            .Select(call => call.ToolName)
-            .ToArray() ?? [];
+            .Diagnostics;
+        var observedTools = new List<string>();
+        var observedToolsValid = true;
+        if (diagnostics is not null)
+        {
+            foreach (var call in diagnostics.ToolCalls)
+            {
+                if (call is null || string.IsNullOrWhiteSpace(call.ToolName))
+                {
+                    observedToolsValid = false;
+                    continue;
+                }
 
-        var requiredPresent = ContainsInOrder(observedTools, expectation.RequiredToolSequence);
-        var forbiddenSet = new HashSet<string>(expectation.ForbiddenTools, StringComparer.Ordinal);
+                observedTools.Add(call.ToolName);
+            }
+        }
+
+        var expectationValid =
+            IsValidToolList(expectation.RequiredToolSequence) &&
+            IsValidToolList(expectation.ForbiddenTools);
+        var requiredTools = expectation.RequiredToolSequence?
+            .Where(tool => !string.IsNullOrWhiteSpace(tool))
+            .ToArray() ?? [];
+        var forbiddenTools = expectation.ForbiddenTools?
+            .Where(tool => !string.IsNullOrWhiteSpace(tool))
+            .ToArray() ?? [];
+        var forbiddenSet = new HashSet<string>(forbiddenTools, StringComparer.Ordinal);
+        if (requiredTools.Any(forbiddenSet.Contains))
+        {
+            expectationValid = false;
+        }
+
+        var requiredPresent =
+            expectationValid &&
+            observedToolsValid &&
+            ContainsInOrder(observedTools, requiredTools);
         var forbiddenInvocations = observedTools.Count(forbiddenSet.Contains);
-        var forbiddenAbsent = forbiddenInvocations == 0;
+        var forbiddenAbsent =
+            expectationValid &&
+            observedToolsValid &&
+            forbiddenInvocations == 0;
         var compliant = requiredPresent && forbiddenAbsent;
 
         var metrics = new List<EvaluationMetric>
@@ -110,16 +143,23 @@ public sealed class HarnessToolTrajectoryEvaluator : IEvaluator
                 reason: $"{forbiddenInvocations} forbidden tool invocation(s) were observed."),
         };
 
-        var baseResult = await _baseEvaluator.EvaluateAsync(
-            messages,
-            modelResponse,
-            chatConfiguration,
-            contextList,
-            cancellationToken).ConfigureAwait(false);
-        metrics.AddRange(baseResult.Metrics.Values);
+        if (diagnostics is null || observedToolsValid)
+        {
+            var baseResult = await _baseEvaluator.EvaluateAsync(
+                messages,
+                modelResponse,
+                chatConfiguration,
+                contextList,
+                cancellationToken).ConfigureAwait(false);
+            metrics.AddRange(baseResult.Metrics.Values);
+        }
 
         return new EvaluationResult(metrics);
     }
+
+    private static bool IsValidToolList(IReadOnlyList<string>? tools) =>
+        tools is not null &&
+        tools.All(tool => !string.IsNullOrWhiteSpace(tool));
 
     private static bool ContainsInOrder(IReadOnlyList<string> observed, IReadOnlyList<string> required)
     {

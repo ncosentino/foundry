@@ -53,12 +53,23 @@ public sealed class HarnessTelemetryCompletenessEvaluator : IEvaluator
             return new ValueTask<EvaluationResult>(new EvaluationResult());
         }
 
-        var missingFieldCount = telemetry.MissingFields.Count;
+        var missingFieldsValid =
+            telemetry.MissingFields is not null &&
+            telemetry.MissingFields.All(field => !string.IsNullOrWhiteSpace(field));
+        var missingFieldCount = telemetry.MissingFields?.Count ?? 1;
+        var countersValid =
+            telemetry.ExpectedChatCompletionCount >= 0 &&
+            telemetry.ObservedChatCompletionCount >= 0 &&
+            telemetry.ExpectedToolCallCount >= 0 &&
+            telemetry.ObservedToolCallCount >= 0;
         var countsMatch =
+            countersValid &&
             telemetry.ObservedChatCompletionCount == telemetry.ExpectedChatCompletionCount &&
             telemetry.ObservedToolCallCount == telemetry.ExpectedToolCallCount;
 
         var complete =
+            countersValid &&
+            missingFieldsValid &&
             missingFieldCount == 0 &&
             telemetry.HasAggregateTokenUsage &&
             telemetry.HasCallDurations &&

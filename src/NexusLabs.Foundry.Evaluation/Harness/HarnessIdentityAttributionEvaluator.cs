@@ -54,14 +54,31 @@ public sealed class HarnessIdentityAttributionEvaluator : IEvaluator
             return new ValueTask<EvaluationResult>(new EvaluationResult());
         }
 
-        var observed = attribution.ObservedAgentIds;
-        var foreignOwner = observed.Any(id => !string.Equals(id, attribution.ExpectedAgentId, StringComparison.Ordinal));
+        var expectedAgentValid = !string.IsNullOrWhiteSpace(attribution.ExpectedAgentId);
+        var workflowValid = !string.IsNullOrWhiteSpace(attribution.WorkflowId);
+        var observedValid =
+            attribution.ObservedAgentIds is not null &&
+            attribution.ObservedAgentIds.All(id => !string.IsNullOrWhiteSpace(id));
+        var countValid = attribution.UnattributedRecordCount >= 0;
+        var observed = attribution.ObservedAgentIds?
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToArray() ?? [];
+        var foreignOwner =
+            !expectedAgentValid ||
+            observed.Any(id => !string.Equals(id, attribution.ExpectedAgentId, StringComparison.Ordinal));
         var distinctOwners = observed
             .Distinct(StringComparer.Ordinal)
             .Count();
 
-        var attributed = attribution.UnattributedRecordCount == 0 && !foreignOwner;
-        var singleOwner = distinctOwners <= 1;
+        var attributed =
+            workflowValid &&
+            expectedAgentValid &&
+            observedValid &&
+            countValid &&
+            attribution.UnattributedRecordCount == 0 &&
+            !foreignOwner;
+        var singleOwner = observedValid && expectedAgentValid && distinctOwners <= 1;
+        var unattributedRecordCount = Math.Max(0, attribution.UnattributedRecordCount);
 
         var attributedMetric = new BooleanMetric(
             AttributedMetricName,
@@ -81,13 +98,17 @@ public sealed class HarnessIdentityAttributionEvaluator : IEvaluator
 
         var unattributedMetric = new NumericMetric(
             UnattributedCountMetricName,
-            value: attribution.UnattributedRecordCount,
-            reason: $"{attribution.UnattributedRecordCount} record(s) were unattributed.");
+            value: unattributedRecordCount,
+            reason: countValid
+                ? $"{unattributedRecordCount} record(s) were unattributed."
+                : "The unattributed-record count was invalid.");
 
         var expectedAgentMetric = new StringMetric(
             ExpectedAgentMetricName,
-            value: attribution.ExpectedAgentId,
-            reason: $"The expected owning agent identity was '{attribution.ExpectedAgentId}'.");
+            value: expectedAgentValid ? attribution.ExpectedAgentId : "(invalid)",
+            reason: expectedAgentValid
+                ? $"The expected owning agent identity was '{attribution.ExpectedAgentId}'."
+                : "The expected owning agent identity was blank.");
 
         return new ValueTask<EvaluationResult>(new EvaluationResult(
             attributedMetric,

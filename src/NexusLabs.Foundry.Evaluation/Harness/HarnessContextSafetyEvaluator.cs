@@ -61,6 +61,33 @@ public sealed class HarnessContextSafetyEvaluator : IEvaluator
         var structurallyValid = true;
         foreach (var attempt in compactions)
         {
+            if (attempt is null)
+            {
+                structurallyValid = false;
+                continue;
+            }
+
+            var outcomeDefined = Enum.IsDefined(attempt.Outcome);
+            if (!outcomeDefined ||
+                !Enum.IsDefined(attempt.MeasurementUnit) ||
+                attempt.Stages is null ||
+                attempt.Stages.Any(stage => !Enum.IsDefined(stage)) ||
+                attempt.OriginalSize < 0 ||
+                attempt.FinalSize < 0 ||
+                attempt.TriggerThreshold < 0 ||
+                attempt.HardLimit < 0 ||
+                attempt.AttemptCount < 0 ||
+                attempt.CategoryContributionSizeSum < 0 ||
+                attempt.CategoryContributionCount < 0)
+            {
+                structurallyValid = false;
+            }
+
+            if (!outcomeDefined)
+            {
+                continue;
+            }
+
             var isSuccess = HarnessCompactionClassification.IsSuccess(attempt.Outcome);
 
             if (isSuccess && attempt.FinalSize > attempt.HardLimit)
@@ -80,7 +107,9 @@ public sealed class HarnessContextSafetyEvaluator : IEvaluator
             else
             {
                 // A termination never dispatches final entries: no verified sequence, no attribution.
-                if (attempt.FinalSequenceValid is not null || attempt.CategoryContributionCount != 0)
+                if (attempt.FinalSequenceValid is not null ||
+                    attempt.CategoryContributionSizeSum != 0 ||
+                    attempt.CategoryContributionCount != 0)
                 {
                     structurallyValid = false;
                 }

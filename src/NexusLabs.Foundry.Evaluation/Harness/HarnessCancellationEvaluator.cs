@@ -54,9 +54,17 @@ public sealed class HarnessCancellationEvaluator : IEvaluator
             return new ValueTask<EvaluationResult>(new EvaluationResult());
         }
 
-        var categoryMatch = cancellation.ObservedCategory == cancellation.ExpectedCategory;
+        var categoriesDefined =
+            Enum.IsDefined(cancellation.ExpectedCategory) &&
+            Enum.IsDefined(cancellation.ObservedCategory);
+        var categoryMatch =
+            categoriesDefined &&
+            cancellation.ObservedCategory == cancellation.ExpectedCategory;
         var noSuccessShaped = !cancellation.ProducedSuccessShapedOutput;
-        var appropriate = categoryMatch && noSuccessShaped;
+        var appropriate = categoriesDefined && categoryMatch && noSuccessShaped;
+        var observedCategory = Enum.IsDefined(cancellation.ObservedCategory)
+            ? cancellation.ObservedCategory.ToString()
+            : "(invalid)";
 
         var appropriateMetric = new BooleanMetric(
             AppropriateMetricName,
@@ -81,8 +89,10 @@ public sealed class HarnessCancellationEvaluator : IEvaluator
 
         var observedCategoryMetric = new StringMetric(
             ObservedCategoryMetricName,
-            value: cancellation.ObservedCategory.ToString(),
-            reason: $"The observed terminal category was '{cancellation.ObservedCategory}'.");
+            value: observedCategory,
+            reason: categoriesDefined
+                ? $"The observed terminal category was '{observedCategory}'."
+                : "The expected or observed terminal category was undefined.");
 
         return new ValueTask<EvaluationResult>(new EvaluationResult(
             appropriateMetric,

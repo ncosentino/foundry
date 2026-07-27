@@ -217,8 +217,10 @@ public sealed record ExperimentPairedBinaryComparisonEvidence
             delta = (double)(bCount - cCount) / validPairCount;
             exactProbability = CalculateExactTwoSidedMcNemarProbability(bCount, cCount);
             (lowerBound, upperBound) = CalculatePairedInterval(
+                aCount,
                 bCount,
                 cCount,
+                dCount,
                 validPairCount,
                 confidenceLevel);
         }
@@ -246,28 +248,53 @@ public sealed record ExperimentPairedBinaryComparisonEvidence
     }
 
     private static (double LowerBound, double UpperBound) CalculatePairedInterval(
+        int aCount,
         int bCount,
         int cCount,
+        int dCount,
         int validPairCount,
         double confidenceLevel)
     {
-        var (bEstimate, bLower, bUpper) =
+        var xSuccessCount = checked(aCount + bCount);
+        var ySuccessCount = checked(aCount + cCount);
+        var (xEstimate, xLower, xUpper) =
             ExperimentWilsonScoreCalculator.CalculateTwoSided(
-                bCount,
+                xSuccessCount,
                 validPairCount,
                 confidenceLevel);
-        var (cEstimate, cLower, cUpper) =
+        var (yEstimate, yLower, yUpper) =
             ExperimentWilsonScoreCalculator.CalculateTwoSided(
-                cCount,
+                ySuccessCount,
                 validPairCount,
                 confidenceLevel);
-        var delta = (double)(bCount - cCount) / validPairCount;
+
+        var correlationDenominator = Math.Sqrt(
+            (double)(aCount + bCount)
+            * (aCount + cCount)
+            * (cCount + dCount)
+            * (bCount + dCount));
+        var correlation = correlationDenominator == 0
+            ? 0
+            : (((double)aCount * dCount) - ((double)bCount * cCount)) / correlationDenominator;
+        correlation = Math.Clamp(correlation, -1d, 1d);
+
+        var delta = xEstimate - yEstimate;
+        var lowerXDistance = xEstimate - xLower;
+        var upperYDistance = yUpper - yEstimate;
+        var upperXDistance = xUpper - xEstimate;
+        var lowerYDistance = yEstimate - yLower;
         var lowerBound = delta - Math.Sqrt(
-            Math.Pow(bEstimate - bLower, 2)
-            + Math.Pow(cUpper - cEstimate, 2));
+            Math.Max(
+                0,
+                Math.Pow(lowerXDistance, 2)
+                + Math.Pow(upperYDistance, 2)
+                - (2 * correlation * lowerXDistance * upperYDistance)));
         var upperBound = delta + Math.Sqrt(
-            Math.Pow(bUpper - bEstimate, 2)
-            + Math.Pow(cEstimate - cLower, 2));
+            Math.Max(
+                0,
+                Math.Pow(upperXDistance, 2)
+                + Math.Pow(lowerYDistance, 2)
+                - (2 * correlation * upperXDistance * lowerYDistance)));
         return (
             Math.Clamp(lowerBound, -1d, 1d),
             Math.Clamp(upperBound, -1d, 1d));
