@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-01",
+  "referenceId": "harness-001/v1.0/h001-01/diagnostics-parity",
+  "dimension": "DiagnosticsParity",
+  "aggregation": "ExactFixtureComparison",
+  "contractKind": "DiagnosticsParity",
+  "requiredCompletenessMetric": "Harness Diagnostics Schema Complete",
+  "requiredPresentFields": [
+    "ExecutionMode",
+    "AggregateTokenUsage",
+    "TimingBoundaries",
+    "InputMessages"
+  ],
+  "equalAvailabilityFields": [
+    "AggregateTokenUsage",
+    "TimingBoundaries",
+    "InputMessages"
+  ],
+  "comparisonRule": "ExactRequiredFieldAvailabilityComparison",
+  "allowedValueDifferences": [
+    "ExecutionMode",
+    "SupportsContextDiagnostics",
+    "SupportsArtifactDiagnostics"
+  ]
+}
