@@ -25,6 +25,7 @@ public sealed class HostedEvaluationDriverTests
                 MaximumAttempts: 144,
                 MaximumRequests: 1152,
                 MaximumRequestsPerAttempt: 8,
+                MaximumOutputTokens: 2000,
                 SchedulingDeadlineMinutes: 50,
                 AttemptTimeoutSeconds: 1,
                 MaximumConcurrency: 3,
@@ -41,6 +42,15 @@ public sealed class HostedEvaluationDriverTests
             using var ledger = JsonDocument.Parse(
                 File.ReadAllText(Path.Combine(outputDirectory, "ledger", "trial-records.json")));
             Assert.Equal(72, ledger.RootElement.GetArrayLength());
+            Assert.All(ledger.RootElement.EnumerateArray(), row =>
+            {
+                Assert.True(row.GetProperty("Scheduled").GetBoolean());
+                var evidenceReference = row.GetProperty("EvidenceArtifactReference").GetString();
+                Assert.False(string.IsNullOrWhiteSpace(evidenceReference));
+                Assert.True(File.Exists(Path.Combine(
+                    outputDirectory,
+                    evidenceReference!.Replace('/', Path.DirectorySeparatorChar))));
+            });
             using var status = JsonDocument.Parse(
                 File.ReadAllText(Path.Combine(outputDirectory, "run-status.json")));
             Assert.Equal("Completed", status.RootElement.GetProperty("State").GetString());
@@ -50,6 +60,7 @@ public sealed class HostedEvaluationDriverTests
                 low: 1,
                 high: 150);
             Assert.True(File.Exists(Path.Combine(outputDirectory, "comparison-artifact.json")));
+            Assert.True(File.Exists(Path.Combine(outputDirectory, "judge", "omission.json")));
             Assert.True(File.Exists(Path.Combine(outputDirectory, "checksums.sha256")));
         }
         finally

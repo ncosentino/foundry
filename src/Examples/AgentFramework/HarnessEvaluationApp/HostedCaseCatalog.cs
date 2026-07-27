@@ -4,6 +4,9 @@ namespace HarnessEvaluationApp;
 
 internal static class HostedCaseCatalog
 {
+    internal const string CommonInstructions =
+        "Follow the hosted case exactly. Use only the required deterministic tools and do not invent results.";
+
     private const string LongContext =
         "The authoritative sentinel is CONTEXT-SENTINEL-7F3A. " +
         "Ignore repeated filler and use the tools exactly as instructed.\n";

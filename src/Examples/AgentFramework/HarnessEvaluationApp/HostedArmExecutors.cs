@@ -84,7 +84,7 @@ internal sealed class HostedArmExecutors
             new EvaluationCaptureChatClient(
                 providerClient,
                 new FileEvaluationCaptureStore(captureDirectory)),
-            maximumOutputTokens: 2000);
+            _options.MaximumOutputTokens);
         var stopwatch = Stopwatch.StartNew();
         string? responseText = null;
         var terminalCategory = HarnessRunTerminalCategory.Completed;
@@ -158,14 +158,14 @@ internal sealed class HostedArmExecutors
             new IterativeLoopOptions
             {
                 LoopName = $"iterative-{definition.Id}",
-                Instructions = "Follow the hosted case exactly and use only the required deterministic tools.",
+                Instructions = HostedCaseCatalog.CommonInstructions,
                 Tools = tools.Cast<AITool>().ToArray(),
                 PromptFactory = _ => definition.Prompt,
                 MaxIterations = 4,
                 MaxTotalToolCalls = 8,
                 ToolResultMode = ToolResultMode.OneRoundTrip,
                 CheckCompletionAfterToolCalls = ToolCompletionCheckMode.AfterToolRounds,
-                IsComplete = _ => definition.ExpectsTimeout ||
+                IsComplete = _ => !definition.ExpectsTimeout &&
                     workspace.FileExists(definition.OutputPath),
                 ExecutionContext = executionContext,
             },
@@ -194,7 +194,7 @@ internal sealed class HostedArmExecutors
             Id = null,
             Name = $"plain-harness-{definition.Id}",
             Description = "Hosted plain Harness comparison arm.",
-            Instructions = definition.Prompt,
+            Instructions = HostedCaseCatalog.CommonInstructions,
             HarnessInstructionsOverride = string.Empty,
             ChatClient = chatClient,
             Tools = tools.Cast<AITool>().ToArray(),
@@ -213,7 +213,7 @@ internal sealed class HostedArmExecutors
             },
             ProgressAccessor = null,
             MaxContextWindowTokens = 8000,
-            MaxOutputTokens = 2000,
+            MaxOutputTokens = _options.MaximumOutputTokens,
             MaximumIterationsPerRequest = 8,
             FileAccessStore = null,
             FileAccessProviderOptions = null,
@@ -316,7 +316,7 @@ internal sealed class HostedArmExecutors
                 LoggerFactory: NullLoggerFactory.Instance,
                 Name: $"hybrid-{definition.Id}",
                 Description: "Hosted hybrid Harness/workspace comparison arm.",
-                Instructions: definition.Prompt,
+                Instructions: HostedCaseCatalog.CommonInstructions,
                 Profile: profile,
                 HybridProfile: hybridProfile,
                 GeneratedTools: generatedTools,

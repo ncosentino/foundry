@@ -142,6 +142,11 @@ if ([decimal]$modelPricing.reservedWorstCaseUsdPerRequest -ne
     Stop-Preflight -Message 'The workflow request-cost reservation does not match the frozen pricing table.'
 }
 
+if ([int]$modelPricing.maximumOutputTokensPerRequest -ne
+    [int]$env:HARNESS_EVAL_MAX_OUTPUT_TOKENS) {
+    Stop-Preflight -Message 'The workflow output-token cap does not match the frozen pricing table.'
+}
+
 $state = 'QuotaNotConfirmed'
 $reason = 'The paid GitHub Models quota precondition was not affirmed; the reserved worst-case request budget cannot be guaranteed on the free tier.'
 $smokeAttempted = $false

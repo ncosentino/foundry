@@ -50,14 +50,12 @@ internal sealed partial class HostedScriptedChatClient : IChatClient
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var response = await GetResponseAsync(messages, options, cancellationToken).ConfigureAwait(false);
-        foreach (var message in response.Messages)
-        {
-            yield return new ChatResponseUpdate(message.Role, message.Text)
-            {
-                ModelId = response.ModelId,
-            };
-        }
+        await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
+        throw new NotSupportedException("The scripted hosted evaluation client does not support streaming.");
+#pragma warning disable CS0162
+        yield break;
+#pragma warning restore CS0162
     }
 
     public object? GetService(Type serviceType, object? serviceKey = null) => null;

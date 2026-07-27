@@ -10,6 +10,7 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.Evaluation.Experiments;
 using NexusLabs.Foundry.Evaluation.Harness;
+using NexusLabs.Foundry.Evaluation.Harness.Judging;
 
 namespace HarnessEvaluationApp;
 
@@ -34,12 +35,14 @@ internal sealed class HostedEvaluationDriver
     private readonly Dictionary<
         (HarnessComparisonArm Arm, string CaseId, int TrialIndex),
         HostedTrialExecutionResult> _results = [];
+    private readonly Dictionary<HostedBatchKey, string> _batchArtifactReferences = [];
     private int _attemptsUsed;
 
     internal HostedEvaluationDriver(
         HostedEvaluationOptions options,
         Func<IChatClient>? realChatClientFactory)
     {
+        ValidateOptions(options);
         _options = options;
         _requestBudget = new HostedRequestBudget(options.MaximumRequests);
         _executors = new HostedArmExecutors(options, _requestBudget, realChatClientFactory);
@@ -71,6 +74,32 @@ internal sealed class HostedEvaluationDriver
         };
     }
 
+    private static void ValidateOptions(HostedEvaluationOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.OutputDirectory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ModelId);
+        if (options.MaximumAttempts != 144 ||
+            options.MaximumRequests != 1152 ||
+            options.MaximumRequestsPerAttempt != 8 ||
+            options.MaximumOutputTokens != 2000 ||
+            options.SchedulingDeadlineMinutes != 50 ||
+            options.MaximumConcurrency != 3 ||
+            options.CostCapUsd != 25m ||
+            options.EstimatedCostPerRequest != 0.02m ||
+            options.GlobalRunSeed != 137 ||
+            options.BatchOrderingSeed != 104729 ||
+            options.ArmOrderingSeed != 130363 ||
+            options.BootstrapSeed != 155921 ||
+            options.AttemptTimeoutSeconds <= 0 ||
+            (!options.DryRun && options.AttemptTimeoutSeconds != 120))
+        {
+            throw new ArgumentException(
+                "Hosted evaluation options do not match the frozen harness-001 v1.0 protocol.",
+                nameof(options));
+        }
+    }
+
     internal async Task<HarnessHostedRunState> RunAsync(CancellationToken cancellationToken)
     {
         PrepareOutputDirectory();
@@ -99,33 +128,46 @@ internal sealed class HostedEvaluationDriver
 
                 var batch = plan[batchIndex];
                 var armOrder = BuildArmOrder(batch);
-                var attemptsBefore = _attemptsUsed;
+                var attemptsBefore = Volatile.Read(ref _attemptsUsed);
                 var requestsBefore = _requestBudget.Requests;
-                var batchResults = new Dictionary<HarnessComparisonArm, HostedTrialExecutionResult>();
+                var pending = new List<(
+                    HarnessComparisonArm Arm,
+                    Task<HostedTrialExecutionResult> Task)>();
                 foreach (var arm in armOrder)
                 {
-                    var result = await ExecuteSlotAsync(
+                    pending.Add((
                         arm,
-                        batch,
-                        cancellationToken).ConfigureAwait(false);
-                    _results[(arm, batch.CaseId, batch.TrialIndex)] = result;
-                    batchResults[arm] = result;
+                        ExecuteSlotAsync(
+                            arm,
+                            batch,
+                            cancellationToken)));
+                }
+
+                await Task.WhenAll(pending.Select(entry => entry.Task)).ConfigureAwait(false);
+                var batchResults = new Dictionary<HarnessComparisonArm, HostedTrialExecutionResult>();
+                foreach (var entry in pending)
+                {
+                    var result = await entry.Task.ConfigureAwait(false);
+                    _results[(entry.Arm, batch.CaseId, batch.TrialIndex)] = result;
+                    batchResults[entry.Arm] = result;
                 }
 
                 scheduledBatchCount++;
+                var batchRelativePath =
+                    $"batches/{batchIndex + 1:D3}-{batch.CaseId}-t{batch.TrialIndex}.json";
+                _batchArtifactReferences[batch] = batchRelativePath;
                 var batchArtifact = new HostedBatchArtifact(
                     batchIndex + 1,
                     batch,
                     armOrder,
                     batchResults,
-                    _attemptsUsed - attemptsBefore,
+                    Volatile.Read(ref _attemptsUsed) - attemptsBefore,
                     _requestBudget.Requests - requestsBefore,
                     (_requestBudget.Requests - requestsBefore) * _options.EstimatedCostPerRequest);
                 await WriteJsonAtomicAsync(
                     Path.Combine(
                         _options.OutputDirectory,
-                        "batches",
-                        $"{batchIndex + 1:D3}-{batch.CaseId}-t{batch.TrialIndex}.json"),
+                        batchRelativePath.Replace('/', Path.DirectorySeparatorChar)),
                     batchArtifact,
                     cancellationToken).ConfigureAwait(false);
                 await WriteLedgerAsync(cancellationToken).ConfigureAwait(false);
@@ -152,6 +194,18 @@ internal sealed class HostedEvaluationDriver
         var analysisPlanPath = Path.Combine(
             Path.GetDirectoryName(manifestPath)!,
             "analysis-plan.md");
+        var judgeAssets = HarnessJudgeAssetLoader.Load(
+            Path.Combine(Path.GetDirectoryName(manifestPath)!, "judges"));
+        await WriteJsonAtomicAsync(
+            Path.Combine(_options.OutputDirectory, "judge", "omission.json"),
+            new HostedJudgeOmissionArtifact(
+                "1.0",
+                judgeAssets.CalibrationState,
+                judgeAssets.EligibleCalibrationItemCount,
+                judgeAssets.ProvisionalCalibrationItemCount,
+                judgeAssets.UsableForArmRanking,
+                "Judge execution was omitted because the frozen calibration set has no human-attested eligible labels."),
+            finalizationToken).ConfigureAwait(false);
         var request = new HarnessComparisonReportRequest(
             reportId: $"harness-001-{Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? "local"}",
             state,
@@ -188,7 +242,7 @@ internal sealed class HostedEvaluationDriver
                 reason,
                 scheduledBatchCount,
                 plan.Count,
-                _attemptsUsed,
+                Volatile.Read(ref _attemptsUsed),
                 _requestBudget.Requests,
                 _requestBudget.Requests * _options.EstimatedCostPerRequest,
                 AdvisoryOnly: true),
@@ -218,12 +272,11 @@ internal sealed class HostedEvaluationDriver
         for (var attemptNumber = 1; attemptNumber <= 2; attemptNumber++)
         {
             callerCancellationToken.ThrowIfCancellationRequested();
-            if (_attemptsUsed >= _options.MaximumAttempts)
+            var attemptOrdinal = Interlocked.Increment(ref _attemptsUsed);
+            if (attemptOrdinal > _options.MaximumAttempts)
             {
                 throw new InvalidOperationException("The global attempt cap was exhausted after batch reservation.");
             }
-
-            _attemptsUsed++;
             using var attemptCancellation = CancellationTokenSource.CreateLinkedTokenSource(
                 callerCancellationToken);
             attemptCancellation.CancelAfter(TimeSpan.FromSeconds(_options.AttemptTimeoutSeconds));
@@ -388,7 +441,7 @@ internal sealed class HostedEvaluationDriver
 
     private bool CanReserveBatch(TimeSpan elapsed) =>
         elapsed < TimeSpan.FromMinutes(_options.SchedulingDeadlineMinutes) &&
-        _attemptsUsed + AttemptsPerBatchReservation <= _options.MaximumAttempts &&
+        Volatile.Read(ref _attemptsUsed) + AttemptsPerBatchReservation <= _options.MaximumAttempts &&
         _requestBudget.Requests + RequestsPerBatchReservation <= _options.MaximumRequests &&
         (_requestBudget.Requests + RequestsPerBatchReservation) *
             _options.EstimatedCostPerRequest <= _options.CostCapUsd;
@@ -459,7 +512,7 @@ internal sealed class HostedEvaluationDriver
             binary,
             continuous,
             output?.CaptureReference,
-            $"batches/{manifestCase.Id}-t{trialIndex}.json");
+            _batchArtifactReferences[new HostedBatchKey(manifestCase.Id, trialIndex)]);
     }
 
     private static bool BinaryValue(
