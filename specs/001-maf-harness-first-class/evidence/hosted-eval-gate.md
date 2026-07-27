@@ -26,7 +26,7 @@ Commands used:
 
 ```powershell
 gh api repos/ncosentino/foundry/branches/main/protection `
-  --jq '{required_status_checks: .required_status_checks, enforce_admins: .enforce_admins.enabled, required_pull_request_reviews: .required_pull_request_reviews}'
+  --jq '.required_status_checks | {contexts, strict}'
 
 gh api repos/ncosentino/foundry/rulesets `
   --jq '.[] | {id,name,target,enforcement,conditions,rules}'
@@ -54,11 +54,12 @@ Observed required-check payload:
 - requests only `contents: read` and `models: read`;
 - uses a 60-minute job timeout and the pre-registered request, cost, duration,
   output-token, and concurrency caps;
-- marks the provider preflight `continue-on-error`;
+- treats provider authentication and connectivity failures as infrastructure
+  errors;
 - uploads the immutable artifact bundle and writes the advisory summary under
   `if: always()`; and
-- emits `InvalidInput` rather than a success-shaped comparison when paid GitHub
-  Models capacity is not explicitly affirmed.
+- emits `QuotaNotConfirmed` without making a model call when paid GitHub Models
+  capacity is not explicitly affirmed.
 
 The workflow therefore supplies hosted evidence without becoming a branch
 protection or stochastic merge gate.

@@ -68,19 +68,17 @@ jobs:
 
       - name: Run hosted quota and capture preflight
         id: preflight
-        continue-on-error: true
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
           MODEL_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.model_id || vars.HARNESS_EVAL_MODEL_ID || 'openai/gpt-4.1-mini' }}
-          PAID_QUOTA_CONFIRMED: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_paid_models_quota || vars.HARNESS_EVAL_PAID_QUOTA_ENABLED == 'true' }}
+          PAID_QUOTA_CONFIRMED: ${{ (github.event_name == 'workflow_dispatch' && inputs.confirm_paid_models_quota) || (github.event_name == 'schedule' && vars.HARNESS_EVAL_PAID_QUOTA_ENABLED == 'true') }}
         run: |
           $confirmPaidModelsQuota = '${{ env.PAID_QUOTA_CONFIRMED }}' -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `
             -OutputDirectory 'artifacts/eval/hosted-run' `
             -ModelId '${{ env.MODEL_ID }}' `
-            -ConfirmPaidModelsQuota:$confirmPaidModelsQuota `
-            -GitHubToken '${{ env.GITHUB_TOKEN }}'
+            -ConfirmPaidModelsQuota:$confirmPaidModelsQuota
 
       - name: Upload immutable preflight bundle
         if: always()
@@ -95,7 +93,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $statusPath = 'artifacts/eval/hosted-run/run-status.json'
+          $statusPath = 'artifacts/eval/hosted-run/preflight-status.json'
           if (Test-Path $statusPath) {
             $status = Get-Content $statusPath -Raw | ConvertFrom-Json
             "## Harness Evaluation" | Add-Content $env:GITHUB_STEP_SUMMARY
@@ -107,7 +105,7 @@ jobs:
           else {
             "## Harness Evaluation" | Add-Content $env:GITHUB_STEP_SUMMARY
             "" | Add-Content $env:GITHUB_STEP_SUMMARY
-            "- State: ``InvalidInput``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- State: ``Failed``" | Add-Content $env:GITHUB_STEP_SUMMARY
             "- Reason: preflight did not produce a status artifact" | Add-Content $env:GITHUB_STEP_SUMMARY
             "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY
           }

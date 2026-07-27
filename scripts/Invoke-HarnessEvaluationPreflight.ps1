@@ -6,10 +6,7 @@ param(
     [string]$ModelId,
 
     [Parameter(Mandatory = $true)]
-    [bool]$ConfirmPaidModelsQuota,
-
-    [Parameter(Mandatory = $true)]
-    [string]$GitHubToken
+    [bool]$ConfirmPaidModelsQuota
 )
 
 $ErrorActionPreference = 'Stop'
@@ -28,6 +25,7 @@ if (Test-Path -LiteralPath $outputRoot) {
 
 $inputDirectory = Join-Path $outputRoot 'inputs'
 $captureDirectory = Join-Path $outputRoot 'capture'
+$statusPath = Join-Path $outputRoot 'preflight-status.json'
 New-Item -ItemType Directory -Path $inputDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $captureDirectory -Force | Out-Null
 
@@ -53,6 +51,18 @@ function Write-JsonFile {
         $json.ReplaceLineEndings("`n") + "`n",
         [System.Text.UTF8Encoding]::new($false))
 }
+
+Write-JsonFile `
+    -Path $statusPath `
+    -Value ([ordered]@{
+        schemaVersion = '1.0'
+        state = 'Started'
+        reason = 'Hosted evaluation preflight started.'
+        advisoryOnly = $true
+        smokeAttempted = $false
+        smokeSucceeded = $false
+        fullPairedExecutionTask = 'T119'
+    })
 
 $caseSetRoot = Join-Path $repoRoot 'artifacts/eval/case-sets/harness-001/v1.0'
 $manifestPath = Join-Path $caseSetRoot 'manifest.json'
@@ -101,14 +111,18 @@ $immutableInputs = [ordered]@{
 }
 Write-JsonFile -Path (Join-Path $inputDirectory 'immutable-inputs.json') -Value $immutableInputs
 
-$state = 'InvalidInput'
+$state = 'QuotaNotConfirmed'
 $reason = 'The paid GitHub Models quota precondition was not affirmed; the reserved worst-case request budget cannot be guaranteed on the free tier.'
 $smokeAttempted = $false
 $smokeSucceeded = $false
+$failureMessage = $null
 
 if ($ConfirmPaidModelsQuota) {
-    if ([string]::IsNullOrWhiteSpace($GitHubToken)) {
+    $token = $env:GITHUB_TOKEN
+    if ([string]::IsNullOrWhiteSpace($token)) {
+        $state = 'Failed'
         $reason = 'GITHUB_TOKEN was unavailable for the GitHub Models preflight.'
+        $failureMessage = $reason
     }
     else {
         $smokeAttempted = $true
@@ -123,12 +137,13 @@ if ($ConfirmPaidModelsQuota) {
             temperature = 0
             max_tokens = 16
         }
-        $requestPath = Join-Path $captureDirectory 'replay-smoke-request-controls.json'
-        Write-JsonFile -Path $requestPath -Value $request
+        Write-JsonFile `
+            -Path (Join-Path $captureDirectory 'replay-smoke-request-controls.json') `
+            -Value $request
 
         try {
             $headers = @{
-                Authorization = "Bearer $GitHubToken"
+                Authorization = [string]::Join(' ', @('Bearer', $token))
                 Accept = 'application/vnd.github+json'
                 'Content-Type' = 'application/json'
             }
@@ -141,9 +156,11 @@ if ($ConfirmPaidModelsQuota) {
                 -Path (Join-Path $captureDirectory 'replay-smoke-response.json') `
                 -Value $response
             $smokeSucceeded = $true
+            $state = 'Succeeded'
             $reason = 'GitHub Models access and capture/replay artifact writing succeeded; full paired execution remains T119.'
         }
         catch {
+            $state = 'Failed'
             Write-JsonFile `
                 -Path (Join-Path $captureDirectory 'replay-smoke-error.json') `
                 -Value ([ordered]@{
@@ -151,12 +168,13 @@ if ($ConfirmPaidModelsQuota) {
                     message = $_.Exception.Message
                 })
             $reason = "GitHub Models preflight failed: $($_.Exception.Message)"
+            $failureMessage = $reason
         }
     }
 }
 
 Write-JsonFile `
-    -Path (Join-Path $outputRoot 'run-status.json') `
+    -Path $statusPath `
     -Value ([ordered]@{
         schemaVersion = '1.0'
         state = $state
@@ -173,7 +191,7 @@ $checksumLines = Get-ChildItem $outputRoot -Recurse -File |
     Sort-Object FullName |
     ForEach-Object {
         $relativePath = [System.IO.Path]::GetRelativePath($outputRoot, $_.FullName).Replace('\', '/')
-        $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        $hash = Get-CanonicalSha256 -Path $_.FullName
         "$hash  $relativePath"
     }
 [System.IO.File]::WriteAllLines(
@@ -182,9 +200,13 @@ $checksumLines = Get-ChildItem $outputRoot -Recurse -File |
     [System.Text.UTF8Encoding]::new($false))
 
 if ($env:GITHUB_OUTPUT) {
-    "run-status=$state" | Add-Content $env:GITHUB_OUTPUT
+    "preflight-status=$state" | Add-Content $env:GITHUB_OUTPUT
     "artifact-directory=$outputRoot" | Add-Content $env:GITHUB_OUTPUT
 }
 
 Write-Host "Harness evaluation preflight state: $state"
 Write-Host $reason
+
+if ($failureMessage) {
+    throw $failureMessage
+}

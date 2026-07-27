@@ -30,21 +30,27 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains("HARNESS_EVAL_MAX_OUTPUT_TOKENS: 2000", workflow);
         Assert.Contains("HARNESS_EVAL_MAX_CONCURRENCY: 3", workflow);
         Assert.Contains("HARNESS_EVAL_COST_CAP_USD: 25", workflow);
-        Assert.Contains("continue-on-error: true", workflow);
+        Assert.DoesNotContain("continue-on-error: true", workflow);
         Assert.Contains("if: always()", workflow);
+        Assert.Contains("github.event_name == 'schedule'", workflow);
     }
 
     [Fact]
-    public void Preflight_WritesInvalidInputWithoutPaidQuotaAndCapturesSmokeResponseWhenEnabled()
+    public void Preflight_SeparatesQuotaProviderAndSuccessStates()
     {
         var script = ReadRepositoryFile("scripts/Invoke-HarnessEvaluationPreflight.ps1");
+        var workflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
 
         Assert.Contains("https://models.github.ai/inference/chat/completions", script);
-        Assert.Contains("InvalidInput", script);
+        Assert.Contains("QuotaNotConfirmed", script);
+        Assert.Contains("Succeeded", script);
+        Assert.Contains("Failed", script);
         Assert.Contains("confirmPaidModelsQuota", script);
         Assert.Contains("replay-smoke-response.json", script);
         Assert.Contains("checksums.sha256", script);
         Assert.Contains("reserved worst-case request budget", script);
+        Assert.Contains("$env:GITHUB_TOKEN", script);
+        Assert.DoesNotContain("-GitHubToken", workflow);
     }
 
     [Fact]
