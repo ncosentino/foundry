@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "version": "v1.0",
+  "hostedTrialCount": 3,
+  "cases": [
+    {
+      "id": "h001-01",
+      "taskCategory": "tool-orchestration",
+      "development": false,
+      "tags": ["hosted", "tools"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-01/completion", "relativePath": "cases/h001-01/completion.json" },
+        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-01/tool-trajectory", "relativePath": "cases/h001-01/tool-trajectory.json" },
+        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-01/termination", "relativePath": "cases/h001-01/termination.json" },
+        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-01/diagnostics-parity", "relativePath": "cases/h001-01/diagnostics-parity.json" }
+      ]
+    },
+    {
+      "id": "h001-02",
+      "taskCategory": "long-context",
+      "development": false,
+      "tags": ["hosted", "context"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-02/completion", "relativePath": "cases/h001-02/completion.json" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-02/context-safety", "relativePath": "cases/h001-02/context-safety.json" },
+        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-02/cumulative-tokens", "relativePath": "cases/h001-02/cumulative-tokens.json" },
+        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-02/peak-tokens", "relativePath": "cases/h001-02/peak-tokens.json" }
+      ]
+    },
+    {
+      "id": "h001-03",
+      "taskCategory": "artifact-offload",
+      "development": false,
+      "tags": ["hosted", "artifacts"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-03/completion", "relativePath": "cases/h001-03/completion.json" },
+        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-03/artifact-reuse", "relativePath": "cases/h001-03/artifact-reuse.json" },
+        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-03/cost-attribution", "relativePath": "cases/h001-03/cost-attribution.json" }
+      ]
+    },
+    {
+      "id": "h001-04",
+      "taskCategory": "multi-turn-continuity",
+      "development": false,
+      "tags": ["hosted", "continuity"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-04/completion", "relativePath": "cases/h001-04/completion.json" },
+        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-04/continuity", "relativePath": "cases/h001-04/continuity.json" },
+        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-04/latency", "relativePath": "cases/h001-04/latency.json" }
+      ]
+    },
+    {
+      "id": "h001-05",
+      "taskCategory": "cancellation",
+      "development": false,
+      "tags": ["hosted", "cancellation"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-05/completion", "relativePath": "cases/h001-05/completion.json" },
+        { "dimension": "Cancellation", "referenceId": "harness-001/v1.0/h001-05/cancellation", "relativePath": "cases/h001-05/cancellation.json" },
+        { "dimension": "Termination", "referenceId": "harness-001/v1.0/h001-05/termination", "relativePath": "cases/h001-05/termination.json" }
+      ]
+    },
+    {
+      "id": "h001-06",
+      "taskCategory": "hybrid-context-artifacts",
+      "development": false,
+      "tags": ["hosted", "context", "artifacts"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-06/completion", "relativePath": "cases/h001-06/completion.json" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-06/context-safety", "relativePath": "cases/h001-06/context-safety.json" },
+        { "dimension": "ArtifactReuse", "referenceId": "harness-001/v1.0/h001-06/artifact-reuse", "relativePath": "cases/h001-06/artifact-reuse.json" },
+        { "dimension": "DiagnosticsParity", "referenceId": "harness-001/v1.0/h001-06/diagnostics-parity", "relativePath": "cases/h001-06/diagnostics-parity.json" }
+      ]
+    },
+    {
+      "id": "h001-07",
+      "taskCategory": "tool-cost",
+      "development": false,
+      "tags": ["hosted", "tools", "cost"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-07/completion", "relativePath": "cases/h001-07/completion.json" },
+        { "dimension": "ToolTrajectory", "referenceId": "harness-001/v1.0/h001-07/tool-trajectory", "relativePath": "cases/h001-07/tool-trajectory.json" },
+        { "dimension": "CostAttribution", "referenceId": "harness-001/v1.0/h001-07/cost-attribution", "relativePath": "cases/h001-07/cost-attribution.json" },
+        { "dimension": "CumulativeTokens", "referenceId": "harness-001/v1.0/h001-07/cumulative-tokens", "relativePath": "cases/h001-07/cumulative-tokens.json" }
+      ]
+    },
+    {
+      "id": "h001-08",
+      "taskCategory": "end-to-end",
+      "development": false,
+      "tags": ["hosted", "context", "continuity"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-08/completion", "relativePath": "cases/h001-08/completion.json" },
+        { "dimension": "Continuity", "referenceId": "harness-001/v1.0/h001-08/continuity", "relativePath": "cases/h001-08/continuity.json" },
+        { "dimension": "ContextSafety", "referenceId": "harness-001/v1.0/h001-08/context-safety", "relativePath": "cases/h001-08/context-safety.json" },
+        { "dimension": "Latency", "referenceId": "harness-001/v1.0/h001-08/latency", "relativePath": "cases/h001-08/latency.json" },
+        { "dimension": "PeakTokens", "referenceId": "harness-001/v1.0/h001-08/peak-tokens", "relativePath": "cases/h001-08/peak-tokens.json" }
+      ]
+    },
+    {
+      "id": "h001-dev-01",
+      "taskCategory": "development-smoke",
+      "development": true,
+      "tags": ["development"],
+      "deterministicReferences": [
+        { "dimension": "Completion", "referenceId": "harness-001/v1.0/h001-dev-01/completion", "relativePath": "cases/h001-dev-01/completion.json" }
+      ]
+    }
+  ]
+}
