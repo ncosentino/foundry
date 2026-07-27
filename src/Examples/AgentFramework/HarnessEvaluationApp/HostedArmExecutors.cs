@@ -98,6 +98,10 @@ internal sealed class HostedArmExecutors
                 recorder,
                 chatClient,
                 cancellationToken).ConfigureAwait(false);
+            if (definition.ExpectsTimeout && cancellationToken.IsCancellationRequested)
+            {
+                terminalCategory = HarnessRunTerminalCategory.PerAttemptTimeout;
+            }
         }
         catch (OperationCanceledException) when (
             definition.ExpectsTimeout &&
@@ -171,6 +175,14 @@ internal sealed class HostedArmExecutors
             },
             new IterativeContext { Workspace = workspace },
             cancellationToken).ConfigureAwait(false);
+        if (definition.ExpectsTimeout &&
+            !result.Succeeded &&
+            result.Termination == TerminationReason.Cancelled &&
+            cancellationToken.IsCancellationRequested)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
         if (!result.Succeeded && !definition.ExpectsTimeout)
         {
             throw new InvalidOperationException(result.ErrorMessage ?? $"Iterative arm failed: {result.Termination}.");

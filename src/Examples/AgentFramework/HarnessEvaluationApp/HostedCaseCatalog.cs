@@ -50,7 +50,7 @@ internal static class HostedCaseCatalog
                 [HarnessEvaluationDimension.Latency]),
             "h001-05" => new HostedCaseDefinition(
                 caseId,
-                "Call wait_for_cancellation exactly once. Do not produce a success response.",
+                "[CASE_ID:h001-05]\nCall wait_for_cancellation exactly once. Do not produce a success response.",
                 string.Empty,
                 string.Empty,
                 ["wait_for_cancellation"],

@@ -27,7 +27,7 @@ public sealed class HostedEvaluationDriverTests
                 MaximumRequestsPerAttempt: 8,
                 MaximumOutputTokens: 2000,
                 SchedulingDeadlineMinutes: 50,
-                AttemptTimeoutSeconds: 1,
+                AttemptTimeoutSeconds: 3,
                 MaximumConcurrency: 3,
                 CostCapUsd: 25,
                 EstimatedCostPerRequest: 0.02m);
@@ -50,6 +50,20 @@ public sealed class HostedEvaluationDriverTests
                 Assert.True(File.Exists(Path.Combine(
                     outputDirectory,
                     evidenceReference!.Replace('/', Path.DirectorySeparatorChar))));
+            });
+            var iterativeTimeoutRows = ledger.RootElement
+                .EnumerateArray()
+                .Where(row =>
+                    row.GetProperty("Arm").GetString() == "Iterative" &&
+                    row.GetProperty("CaseId").GetString() == "h001-05")
+                .ToArray();
+            Assert.Equal(3, iterativeTimeoutRows.Length);
+            Assert.All(iterativeTimeoutRows, row =>
+            {
+                var completion = Assert.Single(
+                    row.GetProperty("BinaryValues").EnumerateArray(),
+                    value => value.GetProperty("Dimension").GetString() == "Completion");
+                Assert.True(completion.GetProperty("Value").GetBoolean());
             });
             using var status = JsonDocument.Parse(
                 File.ReadAllText(Path.Combine(outputDirectory, "run-status.json")));

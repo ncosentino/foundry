@@ -42,7 +42,7 @@ internal sealed record HostedEvaluationOptions(
             ReadInt32("HARNESS_EVAL_MAX_OUTPUT_TOKENS", 2000),
             ReadInt32("HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES", 50),
             dryRun
-                ? ReadInt32("HARNESS_EVAL_DRY_RUN_ATTEMPT_SECONDS", 2)
+                ? ReadInt32("HARNESS_EVAL_DRY_RUN_ATTEMPT_SECONDS", 3)
                 : ReadInt32("HARNESS_EVAL_MAX_ATTEMPT_SECONDS", 120),
             ReadInt32("HARNESS_EVAL_MAX_CONCURRENCY", 3),
             ReadDecimal("HARNESS_EVAL_COST_CAP_USD", 25m),
