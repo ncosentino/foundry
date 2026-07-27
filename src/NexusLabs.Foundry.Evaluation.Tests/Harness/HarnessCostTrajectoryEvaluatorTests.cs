@@ -66,6 +66,29 @@ public sealed class HarnessCostTrajectoryEvaluatorTests
         Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessCostAttributionEvaluator.AttributionValidMetricName));
     }
 
+    [Fact]
+    public async Task Cost_UndefinedMeasurementUnit_ReportsInvalid()
+    {
+        var evidence = new HarnessRunEvaluationEvidence
+        {
+            CostAttribution = new HarnessCostAttributionEvidence
+            {
+                ArtifactInputUtf8Bytes = 5000,
+                ArtifactOutputUtf8Bytes = 82,
+                ContextOriginalSize = 4000,
+                ContextFinalSize = 900,
+                AttributedTokenCost = 12345,
+                MeasurementUnit = (HarnessContextMeasurementUnit)999,
+            },
+        };
+
+        var result = await HarnessEvaluatorTestHarness.RunAsync(_cost, evidence, _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            result,
+            HarnessCostAttributionEvaluator.AttributionValidMetricName));
+    }
+
     // -------- Tool trajectory --------
 
     [Fact]
@@ -164,6 +187,26 @@ public sealed class HarnessCostTrajectoryEvaluatorTests
         var result = await HarnessEvaluatorTestHarness.RunWithContextsAsync(_trajectory, contexts, _ct);
 
         Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessToolTrajectoryEvaluator.RequiredToolsPresentMetricName));
+    }
+
+    [Fact]
+    public async Task Trajectory_NullExpectationCollections_ScoreInvalidInsteadOfThrowing()
+    {
+        var expectation = new HarnessToolTrajectoryExpectation
+        {
+            RequiredToolSequence = null!,
+            ForbiddenTools = null!,
+        };
+        var contexts = new EvaluationContext[]
+        {
+            new HarnessRunEvaluationContext(new HarnessRunEvaluationEvidence { ToolTrajectory = expectation }),
+        };
+
+        var result = await HarnessEvaluatorTestHarness.RunWithContextsAsync(_trajectory, contexts, _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            result,
+            HarnessToolTrajectoryEvaluator.TrajectoryCompliantMetricName));
     }
 
     private static EvaluationContext[] Contexts(HarnessToolTrajectoryExpectation expectation, params string[] toolNames) =>

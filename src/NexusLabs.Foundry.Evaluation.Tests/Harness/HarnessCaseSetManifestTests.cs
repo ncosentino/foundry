@@ -70,6 +70,21 @@ public sealed class HarnessCaseSetManifestTests
     }
 
     [Fact]
+    public void Construct_WrongFrozenIdentity_Throws()
+    {
+        var schemaEx = Assert.Throws<HarnessCaseSetManifestException>(() =>
+            new HarnessManifestCaseSource(BuildValidManifest() with { SchemaVersion = "2.0" }));
+        var caseSetEx = Assert.Throws<HarnessCaseSetManifestException>(() =>
+            new HarnessManifestCaseSource(BuildValidManifest() with { CaseSetId = "harness-002" }));
+        var versionEx = Assert.Throws<HarnessCaseSetManifestException>(() =>
+            new HarnessManifestCaseSource(BuildValidManifest() with { Version = "v1.1" }));
+
+        Assert.Contains("schema version", schemaEx.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("case-set ID", caseSetEx.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("case-set version", versionEx.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Construct_MissingHostedId_Throws()
     {
         var cases = BuildValidManifest().Cases.Where(c => c.Id != "h001-08").ToArray();
@@ -94,6 +109,18 @@ public sealed class HarnessCaseSetManifestTests
 
         var ex = Assert.Throws<HarnessCaseSetManifestException>(() => new HarnessManifestCaseSource(manifest));
         Assert.Contains("h001-09", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Construct_HostedIdsOutOfOrder_Throws()
+    {
+        var cases = BuildValidManifest().Cases.ToList();
+        (cases[0], cases[1]) = (cases[1], cases[0]);
+        var manifest = BuildValidManifest() with { Cases = cases };
+
+        var ex = Assert.Throws<HarnessCaseSetManifestException>(() => new HarnessManifestCaseSource(manifest));
+
+        Assert.Contains("order", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -149,6 +176,35 @@ public sealed class HarnessCaseSetManifestTests
         var source = new HarnessManifestCaseSource(manifest);
 
         Assert.Equal(digest, source.Manifest.Cases[0].DeterministicReferences[0].Sha256);
+    }
+
+    [Fact]
+    public async Task Construct_SnapshotsManifestCasesReferencesAndTags()
+    {
+        var tags = new List<string> { "hosted" };
+        var references = new List<HarnessDeterministicReference> { CompletionReference("h001-01") };
+        var cases = BuildValidManifest().Cases.ToList();
+        cases[0] = cases[0] with
+        {
+            Tags = tags,
+            DeterministicReferences = references,
+        };
+        var manifest = BuildValidManifest() with { Cases = cases };
+
+        var source = new HarnessManifestCaseSource(manifest);
+
+        tags.Clear();
+        references.Clear();
+        cases.Clear();
+
+        Assert.Equal(8, source.Manifest.Cases.Count);
+        Assert.Equal(["hosted"], source.Manifest.Cases[0].Tags);
+        Assert.Single(source.Manifest.Cases[0].DeterministicReferences);
+
+        var loaded = await source.LoadAsync(_ct);
+        Assert.Equal(8, loaded.Cases.Count);
+        Assert.Equal(["hosted"], loaded.Cases[0].Tags);
+        Assert.Single(loaded.Cases[0].Value.DeterministicReferences);
     }
 
     [Fact]

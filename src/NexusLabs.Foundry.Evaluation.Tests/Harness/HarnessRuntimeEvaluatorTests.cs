@@ -1,4 +1,5 @@
 using NexusLabs.Foundry.Evaluation.Harness;
+using Microsoft.Extensions.AI.Evaluation;
 
 namespace NexusLabs.Foundry.Evaluation.Tests.Harness;
 
@@ -61,6 +62,34 @@ public sealed class HarnessRuntimeEvaluatorTests
 
         Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessTelemetryCompletenessEvaluator.TelemetryCompleteMetricName));
         Assert.Equal(1, HarnessEvaluatorTestHarness.NumericValue(result, HarnessTelemetryCompletenessEvaluator.MissingFieldCountMetricName));
+    }
+
+    [Fact]
+    public async Task Telemetry_NullMissingFields_ScoresIncompleteInsteadOfThrowing()
+    {
+        var evidence = new HarnessRunEvaluationEvidence
+        {
+            Telemetry = new HarnessTelemetryEvidence
+            {
+                ExpectedChatCompletionCount = 1,
+                ObservedChatCompletionCount = 1,
+                ExpectedToolCallCount = 0,
+                ObservedToolCallCount = 0,
+                HasAggregateTokenUsage = true,
+                HasCallDurations = true,
+                HasProgressEvents = true,
+                MissingFields = null!,
+            },
+        };
+
+        var result = await HarnessEvaluatorTestHarness.RunAsync(
+            new HarnessTelemetryCompletenessEvaluator(),
+            evidence,
+            _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            result,
+            HarnessTelemetryCompletenessEvaluator.TelemetryCompleteMetricName));
     }
 
     // -------- Event lifecycle --------
@@ -127,6 +156,68 @@ public sealed class HarnessRuntimeEvaluatorTests
 
         Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
         Assert.Equal(1, HarnessEvaluatorTestHarness.NumericValue(result, HarnessEventLifecycleEvaluator.UnpairedCountMetricName));
+    }
+
+    [Fact]
+    public async Task Lifecycle_TerminalBeforeStart_ReportsInvalid()
+    {
+        var result = await EvaluateLifecycleAsync(
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Completed, 1, "a-1"),
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Started, 2, "a-1"));
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
+    }
+
+    [Fact]
+    public async Task Lifecycle_DuplicateStart_ReportsInvalid()
+    {
+        var result = await EvaluateLifecycleAsync(
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Started, 1, "a-1"),
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Started, 2, "a-1"),
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Completed, 3, "a-1"));
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
+    }
+
+    [Fact]
+    public async Task Lifecycle_DuplicateTerminal_ReportsInvalid()
+    {
+        var result = await EvaluateLifecycleAsync(
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Started, 1, "a-1"),
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Completed, 2, "a-1"),
+            Event(HarnessLifecycleEventKind.Agent, HarnessLifecyclePhase.Terminated, 3, "a-1"));
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
+    }
+
+    [Fact]
+    public async Task Lifecycle_ComposedBeforeCompletion_ReportsInvalid()
+    {
+        var result = await EvaluateLifecycleAsync(
+            Event(HarnessLifecycleEventKind.ContextCompaction, HarnessLifecyclePhase.Started, 1, "asm-1"),
+            Event(HarnessLifecycleEventKind.ContextComposed, HarnessLifecyclePhase.Instant, 2, "asm-1"),
+            Event(HarnessLifecycleEventKind.ContextCompaction, HarnessLifecyclePhase.Completed, 3, "asm-1"));
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
+    }
+
+    [Fact]
+    public async Task Lifecycle_ComposedAfterTermination_ReportsInvalid()
+    {
+        var result = await EvaluateLifecycleAsync(
+            Event(HarnessLifecycleEventKind.ContextCompaction, HarnessLifecyclePhase.Started, 1, "asm-1"),
+            Event(HarnessLifecycleEventKind.ContextCompaction, HarnessLifecyclePhase.Terminated, 2, "asm-1"),
+            Event(HarnessLifecycleEventKind.ContextComposed, HarnessLifecyclePhase.Instant, 3, "asm-1"));
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
+    }
+
+    [Fact]
+    public async Task Lifecycle_NullRecord_ScoresInvalidInsteadOfThrowing()
+    {
+        var result = await EvaluateLifecycleAsync([null!]);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessEventLifecycleEvaluator.PairedMetricName));
     }
 
     // -------- Identity attribution --------
@@ -199,6 +290,30 @@ public sealed class HarnessRuntimeEvaluatorTests
         Assert.Equal(2, HarnessEvaluatorTestHarness.NumericValue(result, HarnessIdentityAttributionEvaluator.UnattributedCountMetricName));
     }
 
+    [Fact]
+    public async Task Identity_NullObservedOwners_ScoresInvalidInsteadOfThrowing()
+    {
+        var evidence = new HarnessRunEvaluationEvidence
+        {
+            IdentityAttribution = new HarnessIdentityAttributionEvidence
+            {
+                WorkflowId = "wf-1",
+                ExpectedAgentId = "agent-1",
+                ObservedAgentIds = null!,
+                UnattributedRecordCount = 0,
+            },
+        };
+
+        var result = await HarnessEvaluatorTestHarness.RunAsync(
+            new HarnessIdentityAttributionEvaluator(),
+            evidence,
+            _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            result,
+            HarnessIdentityAttributionEvaluator.AttributedMetricName));
+    }
+
     // -------- Cancellation --------
 
     [Fact]
@@ -264,6 +379,29 @@ public sealed class HarnessRuntimeEvaluatorTests
         Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessCancellationEvaluator.CategoryMatchMetricName));
     }
 
+    [Fact]
+    public async Task Cancellation_UndefinedCategory_ScoresInvalidInsteadOfThrowing()
+    {
+        var evidence = new HarnessRunEvaluationEvidence
+        {
+            Cancellation = new HarnessCancellationEvidence
+            {
+                ExpectedCategory = HarnessRunTerminalCategory.TaskCanceled,
+                ObservedCategory = (HarnessRunTerminalCategory)999,
+                ProducedSuccessShapedOutput = false,
+            },
+        };
+
+        var result = await HarnessEvaluatorTestHarness.RunAsync(
+            new HarnessCancellationEvaluator(),
+            evidence,
+            _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            result,
+            HarnessCancellationEvaluator.AppropriateMetricName));
+    }
+
     // -------- Session continuity --------
 
     [Fact]
@@ -313,6 +451,36 @@ public sealed class HarnessRuntimeEvaluatorTests
         Assert.False(HarnessEvaluatorTestHarness.BooleanValue(result, HarnessSessionContinuityEvaluator.ContinuityPreservedMetricName));
         Assert.Equal(1, HarnessEvaluatorTestHarness.NumericValue(result, HarnessSessionContinuityEvaluator.MissingDecisionReferencesMetricName));
         Assert.Equal(1, HarnessEvaluatorTestHarness.NumericValue(result, HarnessSessionContinuityEvaluator.MissingStateKeysMetricName));
+    }
+
+    [Fact]
+    public async Task Continuity_NullCollections_ScoreInvalidInsteadOfThrowing()
+    {
+        var evidence = new HarnessRunEvaluationEvidence
+        {
+            SessionContinuity = new HarnessSessionContinuityEvidence
+            {
+                RequiredDecisionReferences = null!,
+                PresentDecisionReferences = null!,
+                RequiredStateKeys = null!,
+                PresentStateKeys = null!,
+            },
+        };
+
+        var result = await HarnessEvaluatorTestHarness.RunAsync(
+            new HarnessSessionContinuityEvaluator(),
+            evidence,
+            _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            result,
+            HarnessSessionContinuityEvaluator.ContinuityPreservedMetricName));
+    }
+
+    private async Task<EvaluationResult> EvaluateLifecycleAsync(params HarnessLifecycleEventEvidence[] events)
+    {
+        var evidence = new HarnessRunEvaluationEvidence { LifecycleEvents = events };
+        return await HarnessEvaluatorTestHarness.RunAsync(new HarnessEventLifecycleEvaluator(), evidence, _ct);
     }
 
     private static HarnessLifecycleEventEvidence Event(

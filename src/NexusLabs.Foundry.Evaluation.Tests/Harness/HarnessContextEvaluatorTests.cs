@@ -71,6 +71,22 @@ public sealed class HarnessContextEvaluatorTests
     }
 
     [Fact]
+    public async Task PresentNullCompaction_ScoresInvalidInsteadOfThrowing()
+    {
+        var evidence = new HarnessRunEvaluationEvidence { ContextCompactions = [null!] };
+
+        var safety = await HarnessEvaluatorTestHarness.RunAsync(_safety, evidence, _ct);
+        var validity = await HarnessEvaluatorTestHarness.RunAsync(_validity, evidence, _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            safety,
+            HarnessContextSafetyEvaluator.StructurallyValidMetricName));
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            validity,
+            HarnessCompactionValidityEvaluator.OutcomeConsistentMetricName));
+    }
+
+    [Fact]
     public async Task Validity_NullSlice_ReturnsEmpty()
     {
         var result = await HarnessEvaluatorTestHarness.RunAsync(

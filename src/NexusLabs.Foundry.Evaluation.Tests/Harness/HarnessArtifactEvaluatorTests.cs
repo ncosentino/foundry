@@ -107,6 +107,22 @@ public sealed class HarnessArtifactEvaluatorTests
     }
 
     [Fact]
+    public async Task PresentNullDecision_ScoresInvalidInsteadOfThrowing()
+    {
+        var evidence = new HarnessRunEvaluationEvidence { ArtifactDecisions = [null!] };
+
+        var reuse = await HarnessEvaluatorTestHarness.RunAsync(_reuse, evidence, _ct);
+        var rehydration = await HarnessEvaluatorTestHarness.RunAsync(_rehydration, evidence, _ct);
+
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            reuse,
+            HarnessArtifactReuseEvaluator.OffloadConsistentMetricName));
+        Assert.False(HarnessEvaluatorTestHarness.BooleanValue(
+            rehydration,
+            HarnessArtifactRehydrationEvaluator.RehydrationConsistentMetricName));
+    }
+
+    [Fact]
     public async Task Rehydration_NullSlice_ReturnsEmpty()
     {
         var result = await HarnessEvaluatorTestHarness.RunAsync(_rehydration, new HarnessRunEvaluationEvidence(), _ct);

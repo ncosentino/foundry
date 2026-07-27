@@ -87,9 +87,52 @@ public sealed class ExperimentPairedComparisonEvidenceTests
         Assert.Equal(5, evidence.DiscordantCount);
         Assert.Equal(0.625, evidence.Delta!.Value);
         Assert.Equal(0.0625, evidence.ExactTwoSidedMcNemarProbability!.Value);
-        Assert.Equal(0.1698454250318649, evidence.LowerBound!.Value, precision: 12);
-        Assert.Equal(0.8631557142872454, evidence.UpperBound!.Value, precision: 12);
+        Assert.Equal(0.19570199787263176, evidence.LowerBound!.Value, precision: 8);
+        Assert.Equal(0.81047330267155815, evidence.UpperBound!.Value, precision: 8);
         Assert.True(evidence.IsUnderpowered);
+    }
+
+    [Fact]
+    public void BinaryEvidence_NegativelyCorrelatedDiscordance_UsesPairedMethod10Interval()
+    {
+        var cases = new List<ExperimentPairedBinaryCaseOutcome>();
+        for (var index = 0; index < 6; index++)
+        {
+            cases.Add(new ExperimentPairedBinaryCaseOutcome(
+                $"x-only-{index}",
+                xOutcome: true,
+                xStatus: ExperimentItemStatus.Succeeded,
+                yOutcome: false,
+                yStatus: ExperimentItemStatus.Succeeded,
+                isComparable: true));
+        }
+
+        for (var index = 0; index < 2; index++)
+        {
+            cases.Add(new ExperimentPairedBinaryCaseOutcome(
+                $"y-only-{index}",
+                xOutcome: false,
+                xStatus: ExperimentItemStatus.Succeeded,
+                yOutcome: true,
+                yStatus: ExperimentItemStatus.Succeeded,
+                isComparable: true));
+        }
+
+        var evidence = ExperimentPairedComparisonEvidence.CreateBinary(
+            "X",
+            "Y",
+            cases,
+            ExperimentUnknownSampleTreatment.CountAsFailure,
+            ConfidenceLevel);
+
+        Assert.Equal(0, evidence.ACount);
+        Assert.Equal(6, evidence.BCount);
+        Assert.Equal(2, evidence.CCount);
+        Assert.Equal(0, evidence.DCount);
+        Assert.Equal(0.5, evidence.Delta);
+        Assert.Equal(-0.18144913937966201, evidence.LowerBound!.Value, precision: 8);
+        Assert.Equal(0.85704157449578189, evidence.UpperBound!.Value, precision: 8);
+        Assert.True(evidence.LowerBound <= 0);
     }
 
     [Fact]
@@ -167,8 +210,8 @@ public sealed class ExperimentPairedComparisonEvidenceTests
         Assert.Equal(0, evidence.DiscordantCount);
         Assert.Equal(0, evidence.Delta!.Value);
         Assert.Equal(1, evidence.ExactTwoSidedMcNemarProbability!.Value);
-        Assert.Equal(-0.3244075652372696, evidence.LowerBound!.Value, precision: 12);
-        Assert.Equal(0.3244075652372696, evidence.UpperBound!.Value, precision: 12);
+        Assert.Equal(0, evidence.LowerBound!.Value, precision: 12);
+        Assert.Equal(0, evidence.UpperBound!.Value, precision: 12);
         Assert.True(evidence.IsUnderpowered);
     }
 
@@ -218,7 +261,10 @@ public sealed class ExperimentPairedComparisonEvidenceTests
         Assert.Equal(0, evidence.DCount);
         Assert.Equal(1, evidence.Delta!.Value);
         Assert.Equal(0.125, evidence.ExactTwoSidedMcNemarProbability!.Value);
-        Assert.Equal(0.3071897344337656, evidence.LowerBound!.Value, precision: 12);
+        Assert.InRange(
+            evidence.LowerBound!.Value,
+            0.3071897350036088 - 0.00000001,
+            0.3071897350036088 + 0.00000001);
         Assert.Equal(1, evidence.UpperBound!.Value);
     }
 
@@ -646,6 +692,94 @@ public sealed class ExperimentPairedComparisonEvidenceTests
         Assert.True(evidence.IsInsufficientSample);
         Assert.Null(evidence.LowerBound);
         Assert.Null(evidence.UpperBound);
+    }
+
+    [Fact]
+    public void ContinuousPessimisticSensitivity_IncludesScheduledAsymmetricSubstitutions()
+    {
+        var evidence = ExperimentPairedComparisonEvidence.CreateContinuousPessimisticSensitivity(
+            "X",
+            "Y",
+            [
+                new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                    "case-1",
+                    xValue: 10,
+                    xUsedSubstitution: false,
+                    yValue: 8,
+                    yUsedSubstitution: false,
+                    isFullyScheduled: true,
+                    isComparable: true),
+                new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                    "case-2",
+                    xValue: 120,
+                    xUsedSubstitution: true,
+                    yValue: 12,
+                    yUsedSubstitution: false,
+                    isFullyScheduled: true,
+                    isComparable: true),
+                new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                    "case-3",
+                    xValue: 15,
+                    xUsedSubstitution: false,
+                    yValue: 100,
+                    yUsedSubstitution: true,
+                    isFullyScheduled: true,
+                    isComparable: true),
+                new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                    "case-4",
+                    xValue: 120,
+                    xUsedSubstitution: true,
+                    yValue: 100,
+                    yUsedSubstitution: true,
+                    isFullyScheduled: true,
+                    isComparable: true),
+                new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                    "case-5",
+                    xValue: null,
+                    xUsedSubstitution: false,
+                    yValue: null,
+                    yUsedSubstitution: false,
+                    isFullyScheduled: false,
+                    isComparable: true),
+                new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                    "case-6",
+                    xValue: 20,
+                    xUsedSubstitution: false,
+                    yValue: 19,
+                    yUsedSubstitution: false,
+                    isFullyScheduled: true,
+                    isComparable: false),
+            ],
+            bootstrapSeed: 123,
+            ConfidenceLevel);
+
+        Assert.Equal(6, evidence.TotalCaseCount);
+        Assert.Equal(4, evidence.ValidPairCount);
+        Assert.Equal(1, evidence.IncompleteCaseCount);
+        Assert.Equal(1, evidence.NonComparableCaseCount);
+        Assert.Equal(2, evidence.XSubstitutionCount);
+        Assert.Equal(2, evidence.YSubstitutionCount);
+        Assert.Equal(2, evidence.AsymmetricSubstitutionCaseCount);
+        Assert.Equal(66.25, evidence.Comparison.XMean);
+        Assert.Equal(55, evidence.Comparison.YMean);
+        Assert.Equal(11.25, evidence.Comparison.MeanDifference);
+        Assert.Equal(11, evidence.Comparison.MedianDifference);
+        Assert.NotNull(evidence.Comparison.LowerBound);
+        Assert.NotNull(evidence.Comparison.UpperBound);
+    }
+
+    [Fact]
+    public void ContinuousPessimisticSensitivity_RejectsSubstitutionForUnscheduledCase()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            new ExperimentPairedContinuousPessimisticCaseMeasurement(
+                "case-1",
+                xValue: 120,
+                xUsedSubstitution: true,
+                yValue: null,
+                yUsedSubstitution: false,
+                isFullyScheduled: false,
+                isComparable: true));
     }
 
     [Fact]
