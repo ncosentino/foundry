@@ -1,0 +1,13 @@
+{
+  "SchemaVersion": "1.0",
+  "AttemptDirectories": [
+    "attempt-1"
+  ],
+  "ResponseFiles": [
+    "attempt-1/27ed1a699b424f59612570100541bc53aa5feff65b73f2f8d3845eadd9f16121.json",
+    "attempt-1/3a1f7c117a01dbc8eac133640d9a9ea597d58434763878ced789fb2365580233.json",
+    "attempt-1/82d7796715444102c91022da4895b8190ee32e6b29c31be5b370e33abb719c12.json",
+    "attempt-1/ac903fde9fc071d96267a8c50273e065a0bda59e91979fe3668940ce50135739.json",
+    "attempt-1/b1c52537aca84ba1090db1dc6ba1f5f6b42cc5dec50875cbedd3042d66a0fa08.json"
+  ]
+}

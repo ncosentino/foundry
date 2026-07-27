@@ -85,8 +85,9 @@ $caseSetRoot = Join-Path $repoRoot 'artifacts/eval/case-sets/harness-001/v1.0'
 $manifestPath = Join-Path $caseSetRoot 'manifest.json'
 $analysisPlanPath = Join-Path $caseSetRoot 'analysis-plan.md'
 $judgeManifestPath = Join-Path $caseSetRoot 'judges/manifest.json'
+$pricingPath = Join-Path $caseSetRoot 'pricing/github-models.v1.json'
 
-foreach ($requiredPath in @($manifestPath, $analysisPlanPath, $judgeManifestPath)) {
+foreach ($requiredPath in @($manifestPath, $analysisPlanPath, $judgeManifestPath, $pricingPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         Stop-Preflight -Message "Required hosted evaluation input '$requiredPath' does not exist."
     }
@@ -125,9 +126,31 @@ $immutableInputs = [ordered]@{
     manifestSha256 = Get-CanonicalSha256 -Path $manifestPath
     analysisPlanSha256 = Get-CanonicalSha256 -Path $analysisPlanPath
     judgeManifestSha256 = Get-CanonicalSha256 -Path $judgeManifestPath
+    pricingTableSha256 = Get-CanonicalSha256 -Path $pricingPath
     caps = $caps
 }
 Write-JsonFile -Path (Join-Path $inputDirectory 'immutable-inputs.json') -Value $immutableInputs
+
+$pricing = Get-Content $pricingPath -Raw | ConvertFrom-Json
+$modelPricing = $pricing.models | Where-Object modelId -eq $ModelId | Select-Object -First 1
+if ($null -eq $modelPricing) {
+    Stop-Preflight -Message "Model '$ModelId' is not present in the frozen pricing table."
+}
+
+if ([decimal]$modelPricing.reservedWorstCaseUsdPerRequest -ne
+    [decimal]$env:HARNESS_EVAL_ESTIMATED_USD_PER_REQUEST) {
+    Stop-Preflight -Message 'The workflow request-cost reservation does not match the frozen pricing table.'
+}
+
+if ([int]$modelPricing.maximumOutputTokensPerRequest -ne
+    [int]$env:HARNESS_EVAL_MAX_OUTPUT_TOKENS) {
+    Stop-Preflight -Message 'The workflow output-token cap does not match the frozen pricing table.'
+}
+
+if ([int]$modelPricing.minimumRequestIntervalMilliseconds -ne
+    [int]$env:HARNESS_EVAL_MIN_REQUEST_INTERVAL_MS) {
+    Stop-Preflight -Message 'The workflow provider pacing does not match the frozen pricing table.'
+}
 
 $state = 'QuotaNotConfirmed'
 $reason = 'The paid GitHub Models quota precondition was not affirmed; the reserved worst-case request budget cannot be guaranteed on the free tier.'

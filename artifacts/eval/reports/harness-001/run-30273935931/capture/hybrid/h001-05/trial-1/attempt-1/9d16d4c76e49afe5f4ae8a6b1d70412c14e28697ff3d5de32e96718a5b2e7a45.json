@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GPFvaEh3Pk3i3YRPCECbGGr1PT3",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_WPKgxvnLaNWOzAcwKIr44YC7",
+          "Name": "wait_for_cancellation",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

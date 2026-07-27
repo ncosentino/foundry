@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GOD5FsvsK4IPxeSbVBjTn9iVW9Y",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "I have called lookup_north, lookup_south, and combine_values in the required order. Then I generated the required large workspace artifact and created its summary. The process is complete, and the required workspace artifact exists.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "I have called lookup_north, lookup_south, and combine_values in the required order. Then I generated the required large workspace artifact and created its summary. The process is complete, and the required workspace artifact exists.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

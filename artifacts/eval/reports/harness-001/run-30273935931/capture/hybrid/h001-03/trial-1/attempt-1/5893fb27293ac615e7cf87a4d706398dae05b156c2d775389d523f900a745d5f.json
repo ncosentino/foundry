@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GTIyqvmyZcPZwu9Obav0XFRxWDn",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "The large artifact has been generated and the artifact summary has been created and saved as \u0022outputs/artifact-summary.json\u0022. The required workspace artifact now exists.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "The large artifact has been generated and the artifact summary has been created and saved as \u0022outputs/artifact-summary.json\u0022. The required workspace artifact now exists.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

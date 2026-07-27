@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GYE3QTtWWCPCLBeJrnTpeJUq6J8",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "The lookup_rate has been called and returned a value of 6. The calculate_total has been called and produced the artifact \u0022outputs/tool-cost.json\u0022. The required workspace artifact now exists. The process is complete.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "The lookup_rate has been called and returned a value of 6. The calculate_total has been called and produced the artifact \u0022outputs/tool-cost.json\u0022. The required workspace artifact now exists. The process is complete.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

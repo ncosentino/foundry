@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-07",
+  "referenceId": "harness-001/v1.0/h001-07/completion",
+  "dimension": "Completion",
+  "aggregation": "ThreeTrialMajority",
+  "contractKind": "DeterministicAssertions",
+  "assertions": [
+    {
+      "source": "WorkspaceArtifact",
+      "path": "outputs/tool-cost.json",
+      "operator": "Exists",
+      "expected": true
+    },
+    {
+      "source": "WorkspaceArtifactJson",
+      "path": "outputs/tool-cost.json",
+      "jsonPointer": "/status",
+      "operator": "Equals",
+      "expected": "complete"
+    },
+    {
+      "source": "WorkspaceArtifactJson",
+      "path": "outputs/tool-cost.json",
+      "jsonPointer": "/total",
+      "operator": "Equals",
+      "expected": 42
+    }
+  ]
+}

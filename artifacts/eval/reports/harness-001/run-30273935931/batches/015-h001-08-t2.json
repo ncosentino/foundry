@@ -1,0 +1,113 @@
+{
+  "BatchSequence": 15,
+  "Batch": {
+    "CaseId": "h001-08",
+    "TrialIndex": 2
+  },
+  "ArmOrder": [
+    "Iterative",
+    "PlainHarness",
+    "Hybrid"
+  ],
+  "Results": {
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-08",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "record_end_to_end"
+        ],
+        "CumulativeTokens": 349,
+        "PeakTokens": 349,
+        "LatencyMilliseconds": 3608.6165,
+        "CaptureReference": "capture/iterative/h001-08/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022decision\u0022:\u0022approved\u0022,\u0022contextSafe\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:23:51.9633033+00:00",
+          "Duration": "00:00:03.6089113",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-08",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The approved delivery workflow has been completed, and the required workspace artifact now exists. If you need any further assistance, please let me know.",
+        "ToolCalls": [
+          "record_end_to_end",
+          "complete_hybrid_context"
+        ],
+        "CumulativeTokens": 1151,
+        "PeakTokens": 424,
+        "LatencyMilliseconds": 23351.7085,
+        "CaptureReference": "capture/plain-harness/h001-08/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022decision\u0022:\u0022approved\u0022,\u0022contextSafe\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:23:51.9638021+00:00",
+          "Duration": "00:00:23.3519051",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-08",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The approved delivery workflow has been completed end-to-end. The required workspace artifact now exists and has been generated and summarized. If you need any further actions or details, please let me know.",
+        "ToolCalls": [
+          "record_end_to_end",
+          "complete_hybrid_context",
+          "read_context",
+          "save_long_context_answer",
+          "generate_large_artifact",
+          "create_artifact_summary"
+        ],
+        "CumulativeTokens": 2854,
+        "PeakTokens": 596,
+        "LatencyMilliseconds": 39774.7677,
+        "CaptureReference": "capture/hybrid/h001-08/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022decision\u0022:\u0022approved\u0022,\u0022contextSafe\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:23:51.9642443+00:00",
+          "Duration": "00:00:39.7749624",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 10,
+  "EstimatedCostUsd": 0.20
+}

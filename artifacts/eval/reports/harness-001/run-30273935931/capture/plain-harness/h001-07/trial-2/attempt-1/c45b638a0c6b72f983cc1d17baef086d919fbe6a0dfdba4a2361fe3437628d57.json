@@ -1,0 +1,28 @@
+{
+  "ResponseId": "chatcmpl-E6GXu2XT131MXtPH9MXwxHvWqW4Yv",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_hEEv3uyCpOJn9zpZg7r5x3WC",
+          "Name": "lookup_rate",
+          "Arguments": "{}",
+          "Result": null
+        },
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_8a3niG7OpKMZL50YCU4SS9ln",
+          "Name": "calculate_total",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

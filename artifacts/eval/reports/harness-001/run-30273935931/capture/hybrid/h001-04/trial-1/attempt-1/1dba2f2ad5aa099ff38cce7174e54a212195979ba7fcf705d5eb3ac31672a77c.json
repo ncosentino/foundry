@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GP7xBPesS07i1JsAYePnoFPSuMY",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "The continuity record has been called and the required workspace artifact has been generated and summarized. The retained destination decision is Seattle. If you need any further actions or information, please let me know.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "The continuity record has been called and the required workspace artifact has been generated and summarized. The retained destination decision is Seattle. If you need any further actions or information, please let me know.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

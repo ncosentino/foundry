@@ -1,0 +1,112 @@
+{
+  "BatchSequence": 14,
+  "Batch": {
+    "CaseId": "h001-07",
+    "TrialIndex": 1
+  },
+  "ArmOrder": [
+    "Iterative",
+    "Hybrid",
+    "PlainHarness"
+  ],
+  "Results": {
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-07",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "lookup_rate",
+          "calculate_total"
+        ],
+        "CumulativeTokens": 372,
+        "PeakTokens": 372,
+        "LatencyMilliseconds": 1748.3556,
+        "CaptureReference": "capture/iterative/h001-07/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022total\u0022:42}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:23:26.0708277+00:00",
+          "Duration": "00:00:01.7485266",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-07",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The lookup_rate has been called and returned a value of 6. The calculate_total has been called and produced the artifact \u0022outputs/tool-cost.json\u0022. The required workspace artifact now exists. The process is complete.",
+        "ToolCalls": [
+          "lookup_rate",
+          "calculate_total",
+          "record_end_to_end"
+        ],
+        "CumulativeTokens": 1238,
+        "PeakTokens": 463,
+        "LatencyMilliseconds": 21847.1617,
+        "CaptureReference": "capture/hybrid/h001-07/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022total\u0022:42}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:23:26.0713112+00:00",
+          "Duration": "00:00:21.8473142",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-07",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The lookup_rate has been called and returned a value of 6. The calculate_total has been called and produced the artifact \u0022outputs/tool-cost.json\u0022. The required workspace artifact now exists. The process is complete.",
+        "ToolCalls": [
+          "lookup_rate",
+          "calculate_total",
+          "record_end_to_end"
+        ],
+        "CumulativeTokens": 1238,
+        "PeakTokens": 463,
+        "LatencyMilliseconds": 25890.262,
+        "CaptureReference": "capture/plain-harness/h001-07/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022total\u0022:42}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:23:26.071855+00:00",
+          "Duration": "00:00:25.8905439",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 7,
+  "EstimatedCostUsd": 0.14
+}

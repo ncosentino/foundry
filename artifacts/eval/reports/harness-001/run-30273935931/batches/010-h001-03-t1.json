@@ -1,0 +1,110 @@
+{
+  "BatchSequence": 10,
+  "Batch": {
+    "CaseId": "h001-03",
+    "TrialIndex": 1
+  },
+  "ArmOrder": [
+    "Iterative",
+    "PlainHarness",
+    "Hybrid"
+  ],
+  "Results": {
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-03",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "generate_large_artifact",
+          "create_artifact_summary"
+        ],
+        "CumulativeTokens": 2222,
+        "PeakTokens": 1873,
+        "LatencyMilliseconds": 15849.4298,
+        "CaptureReference": "capture/iterative/h001-03/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022reusedExistingReference\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:19:22.2368528+00:00",
+          "Duration": "00:00:15.8496468",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-03",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The large artifact has been generated and the artifact summary has been created at \u0022outputs/artifact-summary.json\u0022. The required workspace artifact now exists. Task is complete.",
+        "ToolCalls": [
+          "generate_large_artifact",
+          "create_artifact_summary"
+        ],
+        "CumulativeTokens": 4145,
+        "PeakTokens": 1923,
+        "LatencyMilliseconds": 27090.2166,
+        "CaptureReference": "capture/plain-harness/h001-03/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022reusedExistingReference\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:19:22.2373072+00:00",
+          "Duration": "00:00:27.0903820",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-03",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The large artifact has been generated and the artifact summary has been created and saved as \u0022outputs/artifact-summary.json\u0022. The required workspace artifact now exists.",
+        "ToolCalls": [
+          "generate_large_artifact",
+          "create_artifact_summary"
+        ],
+        "CumulativeTokens": 1221,
+        "PeakTokens": 460,
+        "LatencyMilliseconds": 31298.7145,
+        "CaptureReference": "capture/hybrid/h001-03/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022reusedExistingReference\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:19:22.2377752+00:00",
+          "Duration": "00:00:31.2988456",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 8,
+  "EstimatedCostUsd": 0.16
+}

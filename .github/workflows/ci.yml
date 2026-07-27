@@ -195,6 +195,8 @@ jobs:
       contents: read
       models: read
     env:
+      MODEL_ID: ${{ inputs.harness_model_id }}
+      PAID_QUOTA_CONFIRMED: ${{ inputs.confirm_paid_models_quota }}
       HARNESS_EVAL_PLANNED_RUNS: 72
       HARNESS_EVAL_MAX_ATTEMPTS: 144
       HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8
@@ -203,8 +205,14 @@ jobs:
       HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES: 50
       HARNESS_EVAL_MAX_ATTEMPT_SECONDS: 120
       HARNESS_EVAL_MAX_OUTPUT_TOKENS: 2000
+      HARNESS_EVAL_MIN_REQUEST_INTERVAL_MS: 4000
       HARNESS_EVAL_MAX_CONCURRENCY: 3
       HARNESS_EVAL_COST_CAP_USD: 25
+      HARNESS_EVAL_ESTIMATED_USD_PER_REQUEST: 0.02
+      HARNESS_EVAL_GLOBAL_SEED: 137
+      HARNESS_EVAL_BATCH_ORDERING_SEED: 104729
+      HARNESS_EVAL_ARM_ORDERING_SEED: 130363
+      HARNESS_EVAL_BOOTSTRAP_SEED: 155921
 
     steps:
       - name: Checkout dispatched ref
@@ -230,14 +238,24 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          MODEL_ID: ${{ inputs.harness_model_id }}
-          PAID_QUOTA_CONFIRMED: ${{ inputs.confirm_paid_models_quota }}
         run: |
           $confirmPaidModelsQuota = $env:PAID_QUOTA_CONFIRMED -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `
             -OutputDirectory 'artifacts/eval/hosted-run' `
             -ModelId $env:MODEL_ID `
             -ConfirmPaidModelsQuota:$confirmPaidModelsQuota
+
+      - name: Execute complete paired comparison
+        if: env.PAID_QUOTA_CONFIRMED == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_MODEL_ID: ${{ env.MODEL_ID }}
+        run: >-
+          dotnet run
+          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
+          --configuration Release
+          --
+          --output artifacts/eval/hosted-run
 
       - name: Upload immutable preflight bundle
         if: always()
@@ -252,7 +270,9 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $statusPath = 'artifacts/eval/hosted-run/preflight-status.json'
+          $runStatusPath = 'artifacts/eval/hosted-run/run-status.json'
+          $preflightStatusPath = 'artifacts/eval/hosted-run/preflight-status.json'
+          $statusPath = if (Test-Path $runStatusPath) { $runStatusPath } else { $preflightStatusPath }
           "## Harness Evaluation Dispatch Bridge" | Add-Content $env:GITHUB_STEP_SUMMARY
           "" | Add-Content $env:GITHUB_STEP_SUMMARY
           if (Test-Path $statusPath) {

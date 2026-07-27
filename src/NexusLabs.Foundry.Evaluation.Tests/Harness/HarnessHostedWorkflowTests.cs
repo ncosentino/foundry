@@ -33,6 +33,7 @@ public sealed class HarnessHostedWorkflowTests
         Assert.DoesNotContain("continue-on-error: true", workflow);
         Assert.Contains("if: always()", workflow);
         Assert.Contains("github.event_name == 'schedule'", workflow);
+        Assert.Contains("HarnessEvaluationApp/HarnessEvaluationApp.csproj", workflow);
     }
 
     [Fact]
@@ -80,6 +81,7 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains("runs-on: ubuntu-latest", workflow);
         Assert.Contains("models: read", workflow);
         Assert.Contains("Invoke-HarnessEvaluationPreflight.ps1", workflow);
+        Assert.Contains("HarnessEvaluationApp/HarnessEvaluationApp.csproj", workflow);
         Assert.Contains("if-no-files-found: warn", workflow);
     }
 
