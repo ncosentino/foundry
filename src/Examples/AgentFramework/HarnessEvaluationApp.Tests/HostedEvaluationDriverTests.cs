@@ -52,10 +52,24 @@ public sealed class HostedEvaluationDriverTests
                     evidenceReference!.Replace('/', Path.DirectorySeparatorChar))));
                 var captureReference = row.GetProperty("ResponseCaptureReference").GetString();
                 Assert.False(string.IsNullOrWhiteSpace(captureReference));
-                Assert.True(Directory.Exists(Path.Combine(
+                var capturePath = Path.Combine(
                     outputDirectory,
-                    captureReference!.Replace('/', Path.DirectorySeparatorChar))));
+                    captureReference!.Replace('/', Path.DirectorySeparatorChar));
+                Assert.True(File.Exists(capturePath));
+                using var captureManifest = JsonDocument.Parse(File.ReadAllText(capturePath));
+                Assert.NotEmpty(captureManifest.RootElement.GetProperty("AttemptDirectories").EnumerateArray());
             });
+            var batchReferenceCounts = ledger.RootElement
+                .EnumerateArray()
+                .GroupBy(row => row.GetProperty("EvidenceArtifactReference").GetString())
+                .ToArray();
+            Assert.Equal(24, batchReferenceCounts.Length);
+            Assert.All(batchReferenceCounts, group => Assert.Equal(3, group.Count()));
+            using var runPlan = JsonDocument.Parse(
+                File.ReadAllText(Path.Combine(outputDirectory, "inputs", "run-plan.json")));
+            Assert.Equal(1152, runPlan.RootElement.GetProperty("MaximumRequests").GetInt32());
+            Assert.Equal(2000, runPlan.RootElement.GetProperty("MaximumOutputTokens").GetInt32());
+            Assert.Equal(25, runPlan.RootElement.GetProperty("CostCapUsd").GetDecimal());
             var iterativeTimeoutRows = ledger.RootElement
                 .EnumerateArray()
                 .Where(row =>
@@ -80,6 +94,57 @@ public sealed class HostedEvaluationDriverTests
                 high: 150);
             Assert.True(File.Exists(Path.Combine(outputDirectory, "comparison-artifact.json")));
             Assert.True(File.Exists(Path.Combine(outputDirectory, "judge", "omission.json")));
+            Assert.True(File.Exists(Path.Combine(outputDirectory, "checksums.sha256")));
+        }
+        finally
+        {
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task CanceledCaller_FinalizesExplicitUnscheduledBundle()
+    {
+        var outputDirectory = Path.Combine(
+            Path.GetTempPath(),
+            $"foundry-harness-evaluation-canceled-{Guid.NewGuid():N}");
+        try
+        {
+            var options = new HostedEvaluationOptions(
+                outputDirectory,
+                ModelId: "scripted",
+                DryRun: true,
+                GlobalRunSeed: 137,
+                BatchOrderingSeed: 104729,
+                ArmOrderingSeed: 130363,
+                BootstrapSeed: 155921,
+                MaximumAttempts: 144,
+                MaximumRequests: 1152,
+                MaximumRequestsPerAttempt: 8,
+                MaximumOutputTokens: 2000,
+                SchedulingDeadlineMinutes: 50,
+                AttemptTimeoutSeconds: 3,
+                MaximumConcurrency: 3,
+                CostCapUsd: 25,
+                EstimatedCostPerRequest: 0.02m);
+            var driver = new HostedEvaluationDriver(options, realChatClientFactory: null);
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+
+            var state = await driver.RunAsync(cancellation.Token);
+
+            Assert.Equal(HarnessHostedRunState.CanceledByCaller, state);
+            using var ledger = JsonDocument.Parse(
+                File.ReadAllText(Path.Combine(outputDirectory, "ledger", "trial-records.json")));
+            Assert.Equal(72, ledger.RootElement.GetArrayLength());
+            Assert.All(
+                ledger.RootElement.EnumerateArray(),
+                row => Assert.False(row.GetProperty("Scheduled").GetBoolean()));
+            Assert.True(File.Exists(Path.Combine(outputDirectory, "comparison-artifact.json")));
+            Assert.True(File.Exists(Path.Combine(outputDirectory, "run-status.json")));
             Assert.True(File.Exists(Path.Combine(outputDirectory, "checksums.sha256")));
         }
         finally

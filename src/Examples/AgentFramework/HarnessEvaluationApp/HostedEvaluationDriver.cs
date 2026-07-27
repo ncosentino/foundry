@@ -108,8 +108,24 @@ internal sealed class HostedEvaluationDriver
         var plan = BuildPlan();
         await WriteJsonAtomicAsync(
             Path.Combine(_options.OutputDirectory, "inputs", "run-plan.json"),
-            plan,
-            cancellationToken).ConfigureAwait(false);
+            new HostedRunPlanArtifact(
+                "1.0",
+                _options.ModelId,
+                _options.GlobalRunSeed,
+                _options.BatchOrderingSeed,
+                _options.ArmOrderingSeed,
+                _options.BootstrapSeed,
+                _options.MaximumAttempts,
+                _options.MaximumRequests,
+                _options.MaximumRequestsPerAttempt,
+                _options.MaximumOutputTokens,
+                _options.SchedulingDeadlineMinutes,
+                _options.AttemptTimeoutSeconds,
+                _options.MaximumConcurrency,
+                _options.CostCapUsd,
+                _options.EstimatedCostPerRequest,
+                plan),
+            CancellationToken.None).ConfigureAwait(false);
 
         var state = HarnessHostedRunState.Completed;
         var reason = "All planned complete paired batches reached a terminal state.";
@@ -182,6 +198,10 @@ internal sealed class HostedEvaluationDriver
         stopwatch.Stop();
         var finalizationToken = CancellationToken.None;
         var ledger = BuildLedger();
+        await WriteJsonAtomicAsync(
+            Path.Combine(_options.OutputDirectory, "ledger", "trial-records.json"),
+            ledger,
+            finalizationToken).ConfigureAwait(false);
         var outcomes = BuildArmOutcomes(startedAt, stopwatch.Elapsed);
         var manifestPath = Path.Combine(
             FindRepositoryRoot(),
@@ -519,7 +539,7 @@ internal sealed class HostedEvaluationDriver
         HarnessComparisonArm arm,
         string caseId,
         int trialIndex) =>
-        $"capture/{HarnessComparisonExperiment.GetArmId(arm)}/{caseId}/trial-{trialIndex}";
+        $"capture/{HarnessComparisonExperiment.GetArmId(arm)}/{caseId}/trial-{trialIndex}/capture-manifest.json";
 
     private static bool BinaryValue(
         HostedCaseDefinition definition,

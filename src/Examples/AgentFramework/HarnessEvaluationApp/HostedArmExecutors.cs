@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
@@ -91,6 +92,7 @@ internal sealed class HostedArmExecutors
         var stopwatch = Stopwatch.StartNew();
         string? responseText = null;
         var terminalCategory = HarnessRunTerminalCategory.Completed;
+        string captureManifestReference;
         try
         {
             responseText = await runner(
@@ -115,6 +117,9 @@ internal sealed class HostedArmExecutors
         finally
         {
             (chatClient as IDisposable)?.Dispose();
+            captureManifestReference = WriteCaptureManifest(
+                _options.OutputDirectory,
+                trialCaptureReference);
         }
         stopwatch.Stop();
 
@@ -139,7 +144,7 @@ internal sealed class HostedArmExecutors
             providerClient.CumulativeTokens,
             providerClient.PeakTokens,
             stopwatch.Elapsed.TotalMilliseconds,
-            trialCaptureReference.Replace('\\', '/'),
+            captureManifestReference,
             output is { Success: true } ? output.Value.Content : null);
     }
 
@@ -377,5 +382,31 @@ internal sealed class HostedArmExecutors
 
         return _realChatClientFactory?.Invoke()
             ?? throw new InvalidOperationException("The real GitHub Models chat client was not configured.");
+    }
+
+    private static string WriteCaptureManifest(
+        string outputDirectory,
+        string trialCaptureReference)
+    {
+        var trialDirectory = Path.Combine(outputDirectory, trialCaptureReference);
+        Directory.CreateDirectory(trialDirectory);
+        var manifestPath = Path.Combine(trialDirectory, "capture-manifest.json");
+        var attempts = Directory
+            .EnumerateDirectories(trialDirectory, "attempt-*", SearchOption.TopDirectoryOnly)
+            .Order(StringComparer.Ordinal)
+            .Select(path => Path.GetRelativePath(trialDirectory, path).Replace('\\', '/'))
+            .ToArray();
+        var responses = Directory
+            .EnumerateFiles(trialDirectory, "*.json", SearchOption.AllDirectories)
+            .Where(path => !string.Equals(path, manifestPath, StringComparison.OrdinalIgnoreCase))
+            .Order(StringComparer.Ordinal)
+            .Select(path => Path.GetRelativePath(trialDirectory, path).Replace('\\', '/'))
+            .ToArray();
+        File.WriteAllText(
+            manifestPath,
+            JsonSerializer.Serialize(
+                new HostedCaptureManifest("1.0", attempts, responses),
+                new JsonSerializerOptions { WriteIndented = true }));
+        return $"{trialCaptureReference.Replace('\\', '/')}/capture-manifest.json";
     }
 }
