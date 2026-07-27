@@ -13,7 +13,9 @@ block or authorize a merge.
 Before the dedicated workflow reaches the default branch, the already
 registered `CI` workflow exposes a manual `harness-evaluation-dispatch` bridge.
 That job is also absent from required branch protection and runs only when its
-explicit boolean input is true.
+explicit boolean input is true. When the bridge input is true, the normal
+self-hosted build/AOT jobs are skipped so only the GitHub-hosted evaluation
+bridge runs.
 
 ## Branch-protection evidence
 

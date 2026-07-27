@@ -74,9 +74,13 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains("run_harness_evaluation:", workflow);
         Assert.Contains("harness-evaluation-dispatch:", workflow);
         Assert.Contains("inputs.run_harness_evaluation", workflow);
+        Assert.Contains(
+            "if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation",
+            workflow);
         Assert.Contains("runs-on: ubuntu-latest", workflow);
         Assert.Contains("models: read", workflow);
         Assert.Contains("Invoke-HarnessEvaluationPreflight.ps1", workflow);
+        Assert.Contains("if-no-files-found: warn", workflow);
     }
 
     private static string ReadRepositoryFile(string relativePath)
