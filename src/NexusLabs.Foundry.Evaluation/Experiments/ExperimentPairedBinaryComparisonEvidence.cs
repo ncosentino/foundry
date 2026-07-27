@@ -268,6 +268,8 @@ public sealed record ExperimentPairedBinaryComparisonEvidence
                 validPairCount,
                 confidenceLevel);
 
+        // Use the observed table phi directly; continuity-adjusted positive-correlation variants
+        // define a different interval than the paired Wilson/MOVER contract exposed here.
         var correlationDenominator = Math.Sqrt(
             (double)(aCount + bCount)
             * (aCount + cCount)

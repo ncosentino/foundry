@@ -87,6 +87,7 @@ public sealed class ExperimentPairedComparisonEvidenceTests
         Assert.Equal(5, evidence.DiscordantCount);
         Assert.Equal(0.625, evidence.Delta!.Value);
         Assert.Equal(0.0625, evidence.ExactTwoSidedMcNemarProbability!.Value);
+        // Independently pinned from the paired Wilson/MOVER equations using the standard-normal quantile.
         Assert.Equal(0.19570199787263176, evidence.LowerBound!.Value, precision: 8);
         Assert.Equal(0.81047330267155815, evidence.UpperBound!.Value, precision: 8);
         Assert.True(evidence.IsUnderpowered);
@@ -130,6 +131,7 @@ public sealed class ExperimentPairedComparisonEvidenceTests
         Assert.Equal(2, evidence.CCount);
         Assert.Equal(0, evidence.DCount);
         Assert.Equal(0.5, evidence.Delta);
+        // This anti-correlated table is the critical vector that distinguishes paired from independent MOVER.
         Assert.Equal(-0.18144913937966201, evidence.LowerBound!.Value, precision: 8);
         Assert.Equal(0.85704157449578189, evidence.UpperBound!.Value, precision: 8);
         Assert.True(evidence.LowerBound <= 0);

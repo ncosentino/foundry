@@ -183,9 +183,6 @@ public sealed class HarnessEventLifecycleEvaluator : IEvaluator
         return violationCount;
     }
 
-    private static string Key(HarnessLifecycleEventEvidence record) =>
-        Key(record.Kind, record.CorrelationId);
-
     private static string Key(HarnessLifecycleEventKind kind, string correlationId) =>
         $"{kind}::{correlationId}";
 }
