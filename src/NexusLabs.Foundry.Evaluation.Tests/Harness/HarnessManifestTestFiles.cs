@@ -18,13 +18,23 @@ internal static class HarnessManifestTestFiles
     /// <returns>The manifest JSON text, or <see langword="null"/> when not found.</returns>
     public static string? TryReadManifestJson()
     {
+        var manifestPath = TryFindManifestPath();
+        return manifestPath is null ? null : File.ReadAllText(manifestPath);
+    }
+
+    /// <summary>
+    /// Attempts to locate the frozen manifest path by walking up from the test output directory.
+    /// </summary>
+    /// <returns>The absolute manifest path, or <see langword="null"/> when not found.</returns>
+    public static string? TryFindManifestPath()
+    {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
             var candidate = Path.Combine(directory.FullName, RelativeManifestPath.Replace('/', Path.DirectorySeparatorChar));
             if (File.Exists(candidate))
             {
-                return File.ReadAllText(candidate);
+                return candidate;
             }
 
             directory = directory.Parent;
