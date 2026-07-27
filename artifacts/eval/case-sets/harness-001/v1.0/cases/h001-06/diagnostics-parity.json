@@ -7,14 +7,21 @@
   "dimension": "DiagnosticsParity",
   "aggregation": "ExactFixtureComparison",
   "contractKind": "DiagnosticsParity",
-  "requiredCoreFields": [
+  "requiredCompletenessMetric": "Harness Diagnostics Schema Complete",
+  "requiredPresentFields": [
     "ExecutionMode",
     "AggregateTokenUsage",
     "TimingBoundaries",
     "InputMessages"
   ],
-  "comparisonRule": "ExactCoreFieldComparison",
-  "requiredHybridFields": [
+  "equalAvailabilityFields": [
+    "AggregateTokenUsage",
+    "TimingBoundaries",
+    "InputMessages"
+  ],
+  "comparisonRule": "ExactRequiredFieldAvailabilityComparison",
+  "allowedValueDifferences": [
+    "ExecutionMode",
     "SupportsContextDiagnostics",
     "SupportsArtifactDiagnostics"
   ]

@@ -23,6 +23,7 @@ public sealed class HarnessCaseReferenceTests
         HarnessCompactionValidityEvaluator.ReducedMonotonicMetricName,
         HarnessContextSafetyEvaluator.NoOverflowMetricName,
         HarnessContextSafetyEvaluator.StructurallyValidMetricName,
+        HarnessCostAttributionEvaluator.AttributedTokenCostMetricName,
         HarnessCostAttributionEvaluator.AttributionValidMetricName,
         HarnessDiagnosticsSchemaProfileEvaluator.SchemaCompleteMetricName,
         HarnessSessionContinuityEvaluator.ContinuityPreservedMetricName,
@@ -90,29 +91,39 @@ public sealed class HarnessCaseReferenceTests
 
     private static void ValidateContract(JsonElement root, string relativePath)
     {
+        var dimension = root.GetProperty("dimension").GetString();
+        if (dimension is "ToolTrajectory" or "CumulativeTokens" or "PeakTokens" or "CostAttribution" or "Latency")
+        {
+            var prerequisite = root.GetProperty("comparabilityPrerequisite");
+            Assert.Equal(
+                HarnessDiagnosticsSchemaProfileEvaluator.SchemaCompleteMetricName,
+                prerequisite.GetProperty("requiredMetricName").GetString());
+            Assert.Equal(
+                "ExactRequiredFieldAvailabilityComparison",
+                prerequisite.GetProperty("comparisonRule").GetString());
+            Assert.Equal("NonComparable", prerequisite.GetProperty("failureTreatment").GetString());
+        }
+
+        if (dimension == "Cancellation")
+        {
+            Assert.False(string.IsNullOrWhiteSpace(
+                root.GetProperty("expectedCancellationCategory").GetString()));
+        }
+
         var contractKind = root.GetProperty("contractKind").GetString();
         switch (contractKind)
         {
             case "DeterministicAssertions":
                 var assertions = root.GetProperty("assertions").EnumerateArray().ToArray();
                 Assert.NotEmpty(assertions);
-                foreach (var assertion in assertions)
-                {
-                    Assert.Contains(
-                        assertion.GetProperty("operator").GetString(),
-                        new[] { "Contains", "Equals", "Exists", "GreaterThanOrEqual" });
-                    if (assertion.GetProperty("source").GetString() == "EvaluationMetric")
-                    {
-                        var metricName = assertion.GetProperty("metricName").GetString();
-                        Assert.NotNull(metricName);
-                        Assert.Contains(metricName, KnownMetricNames);
-                    }
-                }
+                ValidateAssertions(assertions);
 
                 break;
 
             case "ContinuousMeasurement":
                 var measurement = root.GetProperty("measurement");
+                Assert.False(string.IsNullOrWhiteSpace(measurement.GetProperty("source").GetString()));
+                Assert.False(string.IsNullOrWhiteSpace(measurement.GetProperty("unit").GetString()));
                 Assert.Equal("LowerIsBetter", measurement.GetProperty("direction").GetString());
                 Assert.Equal("DualFullSuccess", measurement.GetProperty("conditionalEligibility").GetString());
                 Assert.Equal(
@@ -120,18 +131,56 @@ public sealed class HarnessCaseReferenceTests
                     measurement.GetProperty("unscheduledTreatment").GetString());
                 Assert.False(string.IsNullOrWhiteSpace(
                     measurement.GetProperty("pessimisticScheduledFailureValueSource").GetString()));
+                if (measurement.GetProperty("source").GetString() == "EvaluationMetric")
+                {
+                    var metricName = measurement.GetProperty("metricName").GetString();
+                    Assert.NotNull(metricName);
+                    Assert.Contains(metricName, KnownMetricNames);
+                }
+
+                if (root.TryGetProperty("prerequisiteAssertions", out var prerequisiteAssertions))
+                {
+                    ValidateAssertions(prerequisiteAssertions.EnumerateArray().ToArray());
+                }
+
                 break;
 
             case "DiagnosticsParity":
-                Assert.NotEmpty(root.GetProperty("requiredCoreFields").EnumerateArray());
                 Assert.Equal(
-                    "ExactCoreFieldComparison",
+                    HarnessDiagnosticsSchemaProfileEvaluator.SchemaCompleteMetricName,
+                    root.GetProperty("requiredCompletenessMetric").GetString());
+                Assert.NotEmpty(root.GetProperty("requiredPresentFields").EnumerateArray());
+                Assert.NotEmpty(root.GetProperty("equalAvailabilityFields").EnumerateArray());
+                Assert.Equal(
+                    "ExactRequiredFieldAvailabilityComparison",
                     root.GetProperty("comparisonRule").GetString());
+                Assert.Contains(
+                    "ExecutionMode",
+                    root.GetProperty("allowedValueDifferences")
+                        .EnumerateArray()
+                        .Select(value => value.GetString()!)
+                        .ToArray());
                 break;
 
             default:
                 Assert.Fail($"Reference '{relativePath}' has unknown contract kind '{contractKind}'.");
                 break;
+        }
+    }
+
+    private static void ValidateAssertions(IReadOnlyList<JsonElement> assertions)
+    {
+        foreach (var assertion in assertions)
+        {
+            Assert.Contains(
+                assertion.GetProperty("operator").GetString(),
+                new[] { "Contains", "Equals", "Exists", "GreaterThanOrEqual" });
+            if (assertion.GetProperty("source").GetString() == "EvaluationMetric")
+            {
+                var metricName = assertion.GetProperty("metricName").GetString();
+                Assert.NotNull(metricName);
+                Assert.Contains(metricName, KnownMetricNames);
+            }
         }
     }
 

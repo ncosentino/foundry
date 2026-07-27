@@ -7,6 +7,27 @@
   "dimension": "PeakTokens",
   "aggregation": "DualFullSuccessCaseMean",
   "contractKind": "ContinuousMeasurement",
+  "comparabilityPrerequisite": {
+    "requiredMetricName": "Harness Diagnostics Schema Complete",
+    "comparisonRule": "ExactRequiredFieldAvailabilityComparison",
+    "requiredPresentFields": [
+      "ExecutionMode",
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "equalAvailabilityFields": [
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "allowedValueDifferences": [
+      "ExecutionMode",
+      "SupportsContextDiagnostics",
+      "SupportsArtifactDiagnostics"
+    ],
+    "failureTreatment": "NonComparable"
+  },
   "measurement": {
     "source": "AgentRunDiagnostics.ChatCompletions.MaxTotalTokens",
     "unit": "Tokens",

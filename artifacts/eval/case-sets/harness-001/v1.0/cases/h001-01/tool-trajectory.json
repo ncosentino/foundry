@@ -7,6 +7,27 @@
   "dimension": "ToolTrajectory",
   "aggregation": "ThreeTrialMajority",
   "contractKind": "DeterministicAssertions",
+  "comparabilityPrerequisite": {
+    "requiredMetricName": "Harness Diagnostics Schema Complete",
+    "comparisonRule": "ExactRequiredFieldAvailabilityComparison",
+    "requiredPresentFields": [
+      "ExecutionMode",
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "equalAvailabilityFields": [
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "allowedValueDifferences": [
+      "ExecutionMode",
+      "SupportsContextDiagnostics",
+      "SupportsArtifactDiagnostics"
+    ],
+    "failureTreatment": "NonComparable"
+  },
   "assertions": [
     {
       "source": "EvaluationMetric",

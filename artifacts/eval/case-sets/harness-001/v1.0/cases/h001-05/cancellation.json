@@ -27,5 +27,6 @@
       "expected": true
     }
   ],
+  "expectedCancellationCategory": "PerAttemptTimeout",
   "expectedTerminalCategory": "PerAttemptTimeout"
 }
