@@ -4,11 +4,11 @@ description: Build AI agent systems with Foundry in .NET using generated discove
 
 # AI Integrations
 
-Foundry provides first-class integrations for AI agent frameworks, taking care of function discovery, workflow wiring, and factory lifecycle so that you focus on writing agent logic rather than plumbing.
+Foundry provides first-class integrations for AI agent frameworks, taking care of function discovery, workflow wiring, Harness composition, and factory lifecycle so that you focus on writing agent logic rather than plumbing.
 
-Three integrations are supported:
+Three upstream ecosystems are supported:
 
-- **Microsoft Agent Framework** (`NexusLabs.Foundry.MicrosoftAgentFramework`) — for `[AgentFunction]`-annotated tools wired into `AIAgent` instances via `Microsoft.Extensions.AI`
+- **Microsoft Agent Framework package family** — core generated tools and agents, with separate packages for workflows, testing, the optional complete Harness bundle, and Needlr integration
 - **Semantic Kernel** (`NexusLabs.Foundry.Needlr.SemanticKernel`) — for `[KernelFunction]`-annotated plugin classes wired into a `Kernel` via `Microsoft.SemanticKernel`
 - **GitHub Copilot** (`NexusLabs.Foundry.Copilot`) — an `IChatClient` backed by the GitHub Copilot API, plus a web search `AIFunction`. See the [Copilot integration page](copilot.md) for details.
 
@@ -35,23 +35,23 @@ Foundry provides two paths for this layer:
 
 The reflection overloads (`AddAgentFunctionsFromAssemblies()`, `AddSemanticKernelPluginsFromAssemblies()`, etc.) are annotated with `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]` to surface this at the call site.
 
-### Layer 2 — Instantiation (upstream framework)
+### Layer 2 — Function wrapper construction
 
-**What**: Taking the discovered types and turning them into actual tool objects with JSON schemas that the LLM understands.
+**What**: Turning annotated methods into `AIFunction` objects with JSON schemas and argument marshalling.
 
-For MAF this is `AIFunctionFactory.Create(MethodInfo, target)` from `Microsoft.Extensions.AI`. For SK this is `KernelPlugin.CreateFromObject(instance)` from `Microsoft.SemanticKernel`. Both use reflection internally to build JSON schemas from method signatures.
+Foundry's MAF source generator emits concrete `AIFunction` implementations, including schemas and argument coercion, and registers an `IAIFunctionProvider` through a module initializer. This path does not call reflection-based `AIFunctionFactory.Create(MethodInfo, target)` at runtime.
 
-**This layer is not controlled by Foundry.** Both MAF and SK use reflection here regardless of which Foundry discovery path you choose. Neither `Microsoft.Extensions.AI` nor `Microsoft.SemanticKernel` are fully AOT-safe for tool/plugin schema generation at this time.
+The MAF reflection path still uses `AIFunctionFactory.Create(MethodInfo, target)`. Semantic Kernel plugin construction remains upstream-owned and may use reflection even when Foundry generated discovery supplies the plugin types.
 
 ### What this means in practice
 
-If you use the source generation path, you eliminate reflection from Layer 1 (Foundry's responsibility). You do not eliminate reflection from Layer 2 (the upstream framework's responsibility). The practical effect is:
+For Foundry MAF tools, source generation removes runtime assembly scanning and reflection-based function wrapper construction. The practical effect is:
 
 - No `[RequiresUnreferencedCode]` warnings from Foundry's own discovery code
-- Faster startup (no runtime assembly scanning)
-- The upstream framework may still emit its own reflection-related warnings
+- No dynamic `MethodInfo`-based wrapper construction for generated functions
+- Faster startup and a NativeAOT-compatible minimum Harness profile
 
-If full AOT support is important to you, watch the upstream framework's own AOT roadmap — Foundry will update its Layer 1 surface as those paths become available.
+Dynamic skills, scripts, reflection fallbacks, and other provider features can still carry their own trimming constraints. See [Microsoft Agent Framework Harness](maf-harness.md#nativeaot) for the tested minimum profile.
 
 ---
 
@@ -60,14 +60,41 @@ If full AOT support is important to you, watch the upstream framework's own AOT 
 ### Packages
 
 ```xml
-<!-- Runtime -->
+<!-- Core runtime: agents, generated tools, diagnostics, progress, workspace -->
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework" />
+
+<!-- Add only when you use workflow APIs such as UsingResilience -->
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows" />
+
+<!-- Add only when you use deterministic scenario runners -->
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Testing" />
+
+<!-- Add only when you use the complete upstream Harness bundle -->
+<PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Harness" />
+
+<!-- Required by the Syringe/UsingAgentFramework sample below -->
+<PackageReference Include="NexusLabs.Foundry.Needlr.MicrosoftAgentFramework" />
 
 <!-- Source generator (add as analyzer — no runtime dep) -->
 <PackageReference Include="NexusLabs.Foundry.MicrosoftAgentFramework.Generators"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```
+
+### Agent construction choices
+
+| Choice | Use when | Ownership |
+|---|---|---|
+| Plain Foundry MAF agent | You want generated agents/tools and ordinary `AIAgent` construction | Foundry |
+| Optional complete Harness bundle | You want the official batteries-included upstream pipeline | Harness owns loop and OpenTelemetry; Foundry can add progress |
+| Selected-provider candidate | You are contributing conformance work inside Foundry | Internal, not a consumer API |
+| Iterative loop | Workspace files should drive fresh per-iteration prompts | Foundry outer loop |
+
+See [Microsoft Agent Framework Harness](maf-harness.md) for complete-bundle configuration, effective defaults, progress, AOT, and current limitations.
+
+The packages are independent choices. Installing the core runtime alone does
+not provide `UsingAgentFramework`, workflow middleware, scenario runners, or
+the complete Harness factory.
 
 ### Quick start
 
@@ -100,32 +127,30 @@ var agent = agentFactory.CreateAgent(opts =>
 
 ### Source gen path (recommended)
 
-When `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` is referenced as an analyzer, it runs at compile time and emits a class in your assembly's namespace:
+When `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` is referenced as an analyzer, it emits a generated `IAIFunctionProvider` and registers it through a module initializer:
 
 ```csharp
-// Generated: AgentFrameworkFunctionRegistry.g.cs
-namespace YourAssemblyName.Generated;
-
-public static class AgentFrameworkFunctionRegistry
-{
-    public static IReadOnlyList<Type> AllFunctionTypes { get; } = new Type[]
-    {
+if (!AgentFrameworkGeneratedBootstrap.TryGetAIFunctionProvider(
+        out var functionProvider) ||
+    !functionProvider.TryGetFunctions(
         typeof(WeatherTools),
-        // ... all other types with [AgentFunction] methods
-    };
+        services,
+        out var functions))
+{
+    throw new InvalidOperationException("Generated weather tools were unavailable.");
 }
 ```
 
-Pass this to `AddAgentFunctionsFromGenerated` instead of the assembly scanning overload:
+`AddFoundryAgentFramework` and generated factory paths consume the registered provider automatically. Lower-level callers, including the optional Harness bundle, can pass the resolved functions directly through `ChatOptions.Tools`.
 
 ```csharp
-.UsingAgentFramework(af => af
-    .UsingChatClient(sp => sp.GetRequiredService<IChatClient>())
-    .AddAgentFunctionsFromGenerated(
-        YourAssemblyName.Generated.AgentFrameworkFunctionRegistry.AllFunctionTypes))
+var chatOptions = new ChatOptions
+{
+    Tools = [.. functions],
+};
 ```
 
-`AddAgentFunctionsFromGenerated` carries no `[RequiresUnreferencedCode]` annotation — it is the AOT-safe discovery path.
+The generated provider path carries no reflection fallback and is used by the executed `AotHarnessApp` NativeAOT fixture.
 
 ### Per-agent tool scoping
 

@@ -1,16 +1,16 @@
 ---
-description: Run multi-step agentic workloads with O(n) token cost using Foundry's iterative agent loop -- workspace-driven prompt construction eliminates conversation history accumulation.
+description: Run workspace-driven agent iterations with bounded conversation growth and choose between iterative, Harness bundle, and hybrid context strategies.
 ---
 
 # Iterative Agent Loop
 
-The **iterative agent loop** (`IIterativeAgentLoop`) is an alternative execution model for agentic LLM workloads that eliminates the O(n²) token accumulation inherent in `FunctionInvokingChatClient`'s conversation-history approach.
+The **iterative agent loop** (`IIterativeAgentLoop`) is an alternative execution model for agentic LLM workloads that avoids carrying one ever-growing tool conversation across every outer iteration.
 
-Instead of appending every tool call and result to a growing conversation, the iterative loop constructs a **fresh prompt each iteration** from workspace files. The workspace IS the memory — not the conversation.
+Instead of appending every prior tool call and result to the next outer iteration, the loop constructs a **fresh prompt each iteration** from workspace files. The workspace is the authoritative working state for this execution model; each iteration still has its own bounded model/tool conversation.
 
 ---
 
-## The Problem: O(n²) Token Cost
+## The Problem: Repeated Conversation Retransmission
 
 When an agent makes tool calls through `FunctionInvokingChatClient` (FIC), every call and result is appended to the conversation history. Each subsequent LLM call re-sends the entire history:
 
@@ -22,7 +22,7 @@ When an agent makes tool calls through `FunctionInvokingChatClient` (FIC), every
 | ... | ... | ... |
 | 30 | ~30,000 | **465,000** |
 
-For complex agentic workloads (article writers, code generators, trip planners) this produces catastrophic token bills. A real-world article pipeline measured **2.26 million tokens** in a single writer stage.
+For complex agentic workloads (article writers, code generators, trip planners), retransmitting old tool exchanges can dominate token usage.
 
 ## The Solution: Workspace-Driven Iterations
 
@@ -43,7 +43,25 @@ The iterative loop decouples agent memory from conversation history:
 └─────────────────────────────────────────────────┘
 ```
 
-Each iteration's input token count is bounded by the workspace size, not the conversation history. Total cost grows **linearly** with work done.
+Each iteration's input is rebuilt from selected workspace state rather than the prior outer-iteration transcript. Cost still depends on prompt/workspace growth and tool rounds, but conversation retransmission no longer grows automatically across outer iterations.
+
+## Choosing a context strategy
+
+| Strategy | Choose it when | Conversation behavior | Public status |
+|---|---|---|---|
+| Plain Foundry MAF agent | The run is short or ordinary chat continuity is sufficient | MAF/MEAI conversation history | Public |
+| Optional complete Harness bundle | You want upstream providers and opinionated defaults | Upstream history plus optional upstream compaction | Public prerelease |
+| Iterative agent loop | Files are the authoritative work state and fresh outer iterations are desirable | Fresh workspace-derived prompt per iteration | Public |
+| Experimental Foundry hybrid context | You need structurally verified compaction plus workspace artifact references on every provider call | Bounded conversation with selective offload/rehydration | Internal experimental candidate |
+
+Do not treat workspace-only iteration and conversational compaction as interchangeable:
+
+- Iterative execution intentionally rebuilds the next outer prompt.
+- Harness history preserves conversational continuity.
+- Upstream bundle compaction follows upstream strategy semantics.
+- Foundry hybrid compaction additionally verifies required-content and tool-exchange preservation, but is not a public configuration surface.
+
+See [Microsoft Agent Framework Harness](maf-harness.md) for bundle configuration and the current hybrid-context disposition.
 
 ---
 

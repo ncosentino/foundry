@@ -2,6 +2,7 @@
   <Folder Name="/Examples/" />
   <Folder Name="/Examples/AgentFramework/">
     <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
+    <Project Path="Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj" />
     <Project Path="Examples/AgentFramework/CodeReviewPipelineApp/CodeReviewPipelineApp.csproj" />
     <Project Path="Examples/AgentFramework/DagRoutingApp.Agents/DagRoutingApp.Agents.csproj" />
     <Project Path="Examples/AgentFramework/DagRoutingApp/DagRoutingApp.csproj" />
@@ -16,6 +17,7 @@
     <Project Path="Examples/AgentFramework/GroupChatAgentFrameworkApp.Agents/GroupChatAgentFrameworkApp.Agents.csproj" />
     <Project Path="Examples/AgentFramework/GroupChatAgentFrameworkApp/GroupChatAgentFrameworkApp.csproj" />
     <Project Path="Examples/AgentFramework/HarnessCompatibilityProbe/HarnessCompatibilityProbe.csproj" />
+    <Project Path="Examples/AgentFramework/HarnessHybridApp/HarnessHybridApp.csproj" />
     <Project Path="Examples/AgentFramework/IterativeLoopDiagnosticsApp/IterativeLoopDiagnosticsApp.csproj" />
     <Project Path="Examples/AgentFramework/IterativeTripPlannerApp.Core/IterativeTripPlannerApp.Core.csproj" />
     <Project Path="Examples/AgentFramework/IterativeTripPlannerApp.Evaluation/IterativeTripPlannerApp.Evaluation.csproj" />
