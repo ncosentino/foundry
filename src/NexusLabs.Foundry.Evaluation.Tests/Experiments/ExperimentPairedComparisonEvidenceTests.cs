@@ -436,7 +436,7 @@ public sealed class ExperimentPairedComparisonEvidenceTests
     [Fact]
     public void ContinuousEvidence_Create_ComputesDeterministicBootstrapAndStructuralStats()
     {
-        var cases =
+        ExperimentPairedContinuousCaseMeasurement[] cases =
         [
             new ExperimentPairedContinuousCaseMeasurement(
                 "case-1",
