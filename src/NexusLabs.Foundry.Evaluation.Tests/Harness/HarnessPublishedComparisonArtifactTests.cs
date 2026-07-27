@@ -26,6 +26,42 @@ public sealed class HarnessPublishedComparisonArtifactTests
     }
 
     [Fact]
+    public void PublicationManifest_HashesEveryFrozenInput()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var reportRoot = FindReportRoot();
+        using var manifest = JsonDocument.Parse(
+            File.ReadAllText(Path.Combine(reportRoot, "run-30273935931-publication-manifest.json")));
+        var inputs = manifest.RootElement.GetProperty("inputs").EnumerateArray().ToArray();
+        var expectedPaths = new[]
+        {
+            "artifacts/eval/case-sets/harness-001/v1.0/manifest.json",
+            "artifacts/eval/case-sets/harness-001/v1.0/analysis-plan.md",
+            "artifacts/eval/case-sets/harness-001/v1.0/pricing/github-models.v1.json",
+            "artifacts/eval/case-sets/harness-001/v1.0/judges/manifest.json",
+        };
+
+        Assert.Equal(
+            expectedPaths,
+            inputs.Select(input => input.GetProperty("path").GetString()).ToArray());
+
+        var publication = File.ReadAllText(
+            Path.Combine(reportRoot, "run-30273935931-publication.md"));
+        foreach (var input in inputs)
+        {
+            var relativePath = input.GetProperty("path").GetString()!;
+            var path = Path.Combine(
+                repositoryRoot,
+                relativePath.Replace('/', Path.DirectorySeparatorChar));
+            var expectedHash = input.GetProperty("sha256").GetString()!;
+
+            Assert.True(File.Exists(path), $"Frozen input '{relativePath}' does not exist.");
+            Assert.Equal(expectedHash, CanonicalSha256(path));
+            Assert.Contains(expectedHash, publication);
+        }
+    }
+
+    [Fact]
     public void HumanReviewBlock_IsCompleteButUnsigned()
     {
         var reportRoot = FindReportRoot();
@@ -65,6 +101,16 @@ public sealed class HarnessPublishedComparisonArtifactTests
 
     private static string FindReportRoot()
     {
+        return Path.Combine(
+            FindRepositoryRoot(),
+            "artifacts",
+            "eval",
+            "reports",
+            "harness-001");
+    }
+
+    private static string FindRepositoryRoot()
+    {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
@@ -73,16 +119,17 @@ public sealed class HarnessPublishedComparisonArtifactTests
                 "artifacts",
                 "eval",
                 "reports",
-                "harness-001");
-            if (File.Exists(Path.Combine(candidate, "run-30273935931-summary.md")))
+                "harness-001",
+                "run-30273935931-summary.md");
+            if (File.Exists(candidate))
             {
-                return candidate;
+                return directory.FullName;
             }
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate the harness-001 report publication.");
+        throw new DirectoryNotFoundException("Could not locate the Foundry repository root.");
     }
 
     private static string CanonicalSha256(string path)
