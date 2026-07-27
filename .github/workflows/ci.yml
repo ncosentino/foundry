@@ -6,6 +6,22 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_harness_evaluation:
+        description: Run the hosted Harness evaluation preflight on the dispatched ref.
+        required: true
+        type: boolean
+        default: false
+      confirm_paid_models_quota:
+        description: Confirm paid GitHub Models capacity can reserve the protocol worst case.
+        required: true
+        type: boolean
+        default: false
+      harness_model_id:
+        description: GitHub Models generator model identifier.
+        required: true
+        type: string
+        default: openai/gpt-4.1-mini
 
 env:
   DOTNET_VERSION: 10.0.x
@@ -15,6 +31,7 @@ env:
 
 jobs:
   build-test-pack:
+    if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation
     # PitCrew default. Set CI_RUNNER=ubuntu-latest for the manual cloud fallback.
     # Untrusted fork pull requests always use GitHub-hosted infrastructure.
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
@@ -88,6 +105,7 @@ jobs:
           path: artifacts/packages/*
 
   aot:
+    if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
 
     steps:
@@ -128,6 +146,7 @@ jobs:
           path: artifacts/aot/AotAgentFrameworkApp
 
   aot-harness:
+    if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
 
     steps:
@@ -167,3 +186,82 @@ jobs:
         with:
           name: foundry-aot-harness-linux-x64
           path: artifacts/aot-harness/AotHarnessApp
+
+  harness-evaluation-dispatch:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      models: read
+    env:
+      HARNESS_EVAL_PLANNED_RUNS: 72
+      HARNESS_EVAL_MAX_ATTEMPTS: 144
+      HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8
+      HARNESS_EVAL_MAX_RESERVED_REQUESTS: 1152
+      HARNESS_EVAL_WORKFLOW_TIMEOUT_MINUTES: 60
+      HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES: 50
+      HARNESS_EVAL_MAX_ATTEMPT_SECONDS: 120
+      HARNESS_EVAL_MAX_OUTPUT_TOKENS: 2000
+      HARNESS_EVAL_MAX_CONCURRENCY: 3
+      HARNESS_EVAL_COST_CAP_USD: 25
+
+    steps:
+      - name: Checkout dispatched ref
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Validate deterministic evaluation contracts
+        run: >-
+          dotnet test
+          src/NexusLabs.Foundry.Evaluation.Tests/NexusLabs.Foundry.Evaluation.Tests.csproj
+          --configuration Release
+          --filter
+          "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessJudgeCalibrationTests|FullyQualifiedName~HarnessComparison"
+          --verbosity minimal
+
+      - name: Run hosted quota and capture preflight
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MODEL_ID: ${{ inputs.harness_model_id }}
+          PAID_QUOTA_CONFIRMED: ${{ inputs.confirm_paid_models_quota }}
+        run: |
+          $confirmPaidModelsQuota = $env:PAID_QUOTA_CONFIRMED -eq 'true'
+          scripts/Invoke-HarnessEvaluationPreflight.ps1 `
+            -OutputDirectory 'artifacts/eval/hosted-run' `
+            -ModelId $env:MODEL_ID `
+            -ConfirmPaidModelsQuota:$confirmPaidModelsQuota
+
+      - name: Upload immutable preflight bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-evaluation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/eval/hosted-run/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish non-gating summary
+        if: always()
+        shell: pwsh
+        run: |
+          $statusPath = 'artifacts/eval/hosted-run/preflight-status.json'
+          "## Harness Evaluation Dispatch Bridge" | Add-Content $env:GITHUB_STEP_SUMMARY
+          "" | Add-Content $env:GITHUB_STEP_SUMMARY
+          if (Test-Path $statusPath) {
+            $status = Get-Content $statusPath -Raw | ConvertFrom-Json
+            "- State: ``$($status.state)``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Reason: $($status.reason)" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
+          else {
+            "- State: ``Failed``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Reason: preflight did not produce a status artifact" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
+          "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY

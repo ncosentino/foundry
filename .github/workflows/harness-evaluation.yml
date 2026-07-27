@@ -1,0 +1,111 @@
+name: Harness Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_paid_models_quota:
+        description: Confirm paid GitHub Models capacity can reserve the protocol worst case.
+        required: true
+        type: boolean
+        default: false
+      model_id:
+        description: GitHub Models generator model identifier.
+        required: true
+        type: string
+        default: openai/gpt-4.1-mini
+  schedule:
+    - cron: '17 5 1 * *'
+
+permissions:
+  contents: read
+  models: read
+
+concurrency:
+  group: harness-evaluation
+  cancel-in-progress: false
+
+env:
+  DOTNET_VERSION: 10.0.x
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  HARNESS_EVAL_PLANNED_RUNS: 72
+  HARNESS_EVAL_MAX_ATTEMPTS: 144
+  HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8
+  HARNESS_EVAL_MAX_RESERVED_REQUESTS: 1152
+  HARNESS_EVAL_WORKFLOW_TIMEOUT_MINUTES: 60
+  HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES: 50
+  HARNESS_EVAL_MAX_ATTEMPT_SECONDS: 120
+  HARNESS_EVAL_MAX_OUTPUT_TOKENS: 2000
+  HARNESS_EVAL_MAX_CONCURRENCY: 3
+  HARNESS_EVAL_COST_CAP_USD: 25
+
+jobs:
+  evaluate:
+    name: advisory-harness-evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Validate deterministic evaluation contracts
+        run: >-
+          dotnet test
+          src/NexusLabs.Foundry.Evaluation.Tests/NexusLabs.Foundry.Evaluation.Tests.csproj
+          --configuration Release
+          --filter
+          "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessJudgeCalibrationTests|FullyQualifiedName~HarnessComparison"
+          --verbosity minimal
+
+      - name: Run hosted quota and capture preflight
+        id: preflight
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MODEL_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.model_id || vars.HARNESS_EVAL_MODEL_ID || 'openai/gpt-4.1-mini' }}
+          PAID_QUOTA_CONFIRMED: ${{ (github.event_name == 'workflow_dispatch' && inputs.confirm_paid_models_quota) || (github.event_name == 'schedule' && vars.HARNESS_EVAL_PAID_QUOTA_ENABLED == 'true') }}
+        run: |
+          $confirmPaidModelsQuota = '${{ env.PAID_QUOTA_CONFIRMED }}' -eq 'true'
+          scripts/Invoke-HarnessEvaluationPreflight.ps1 `
+            -OutputDirectory 'artifacts/eval/hosted-run' `
+            -ModelId $env:MODEL_ID `
+            -ConfirmPaidModelsQuota:$confirmPaidModelsQuota
+
+      - name: Upload immutable preflight bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-evaluation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/eval/hosted-run/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish non-gating summary
+        if: always()
+        shell: pwsh
+        run: |
+          $statusPath = 'artifacts/eval/hosted-run/preflight-status.json'
+          if (Test-Path $statusPath) {
+            $status = Get-Content $statusPath -Raw | ConvertFrom-Json
+            "## Harness Evaluation" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- State: ``$($status.state)``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Reason: $($status.reason)" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
+          else {
+            "## Harness Evaluation" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- State: ``Failed``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Reason: preflight did not produce a status artifact" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
