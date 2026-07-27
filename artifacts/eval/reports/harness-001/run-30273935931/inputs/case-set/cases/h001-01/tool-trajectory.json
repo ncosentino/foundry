@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-01",
+  "referenceId": "harness-001/v1.0/h001-01/tool-trajectory",
+  "dimension": "ToolTrajectory",
+  "aggregation": "ThreeTrialMajority",
+  "contractKind": "DeterministicAssertions",
+  "comparabilityPrerequisite": {
+    "requiredMetricName": "Harness Diagnostics Schema Complete",
+    "comparisonRule": "ExactRequiredFieldAvailabilityComparison",
+    "requiredPresentFields": [
+      "ExecutionMode",
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "equalAvailabilityFields": [
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "allowedValueDifferences": [
+      "ExecutionMode",
+      "SupportsContextDiagnostics",
+      "SupportsArtifactDiagnostics"
+    ],
+    "failureTreatment": "NonComparable"
+  },
+  "assertions": [
+    {
+      "source": "EvaluationMetric",
+      "metricName": "Harness Tool Trajectory Compliant",
+      "operator": "Equals",
+      "expected": true
+    }
+  ],
+  "requiredToolSequence": [
+    "lookup_north",
+    "lookup_south",
+    "combine_values"
+  ],
+  "forbiddenTools": [
+    "delete_workspace",
+    "write_outside_workspace"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GSBN7mUZK8pcPZhqaiQOLfrZEZL",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "The values from lookup_north and lookup_south have been combined, and the required workspace artifact has been generated and saved. The process is complete.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "The values from lookup_north and lookup_south have been combined, and the required workspace artifact has been generated and saved. The process is complete.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

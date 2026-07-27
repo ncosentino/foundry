@@ -1,0 +1,106 @@
+{
+  "BatchSequence": 18,
+  "Batch": {
+    "CaseId": "h001-02",
+    "TrialIndex": 1
+  },
+  "ArmOrder": [
+    "Iterative",
+    "Hybrid",
+    "PlainHarness"
+  ],
+  "Results": {
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-02",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "read_context",
+          "save_long_context_answer"
+        ],
+        "CumulativeTokens": 4696,
+        "PeakTokens": 4696,
+        "LatencyMilliseconds": 2846.0711,
+        "CaptureReference": "capture/iterative/h001-02/trial-1/capture-manifest.json",
+        "OutputContent": "CONTEXT-SENTINEL-7F3A"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:25:32.7641854+00:00",
+          "Duration": "00:00:02.8462629",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "ExecutionFailed",
+      "Output": null,
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Failed",
+          "StartedAt": "2026-07-27T14:25:32.7649307+00:00",
+          "Duration": "00:00:00.0007377",
+          "Failure": {
+            "Code": "ExecutionFailed",
+            "Stage": "Execution",
+            "ExceptionType": "NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context.HarnessCompactionIrreducibleException",
+            "Message": "Hybrid compaction could not produce dispatch-eligible context for this provider call (outcome \u0027Irreducible\u0027, estimated size 18849 against hard limit 18000). Over-budget or invalid context is never forwarded to the provider.",
+            "IsRetryable": false
+          },
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": {
+        "Code": "ExecutionFailed",
+        "Stage": "Execution",
+        "ExceptionType": "NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context.HarnessCompactionIrreducibleException",
+        "Message": "Hybrid compaction could not produce dispatch-eligible context for this provider call (outcome \u0027Irreducible\u0027, estimated size 18849 against hard limit 18000). Over-budget or invalid context is never forwarded to the provider.",
+        "IsRetryable": false
+      }
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-02",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The context has been read and the long context answer has been saved as requested. The required workspace artifact \u0022outputs/long-context-answer.txt\u0022 now exists.",
+        "ToolCalls": [
+          "read_context",
+          "save_long_context_answer"
+        ],
+        "CumulativeTokens": 9455,
+        "PeakTokens": 4759,
+        "LatencyMilliseconds": 10931.7968,
+        "CaptureReference": "capture/plain-harness/h001-02/trial-1/capture-manifest.json",
+        "OutputContent": "CONTEXT-SENTINEL-7F3A"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:25:32.7656917+00:00",
+          "Duration": "00:00:10.9319352",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 3,
+  "EstimatedCostUsd": 0.06
+}

@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GNpgg4yJq1kzzK6xsv7l2T42AIj",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_sV3jYyVt3lLYIMwlRWOuGP0v",
+          "Name": "combine_values",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

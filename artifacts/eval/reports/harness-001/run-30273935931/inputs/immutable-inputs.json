@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "workflowRunId": "30273935931",
+  "workflowRunAttempt": "1",
+  "gitSha": "8fd8f427f1d9c64cc5aeee318c47a3f6823f80c3",
+  "modelId": "openai/gpt-4.1-mini",
+  "githubModelsEndpoint": "https://models.github.ai/inference",
+  "confirmPaidModelsQuota": true,
+  "manifestSha256": "ae3fb57aaba55865047fc4b83ccf08f071f706047de127f3498a63f90a60de48",
+  "analysisPlanSha256": "fd75e42c576c78b16bd13c06bf51db889963ce99a29bbab4028fc3ef93de2263",
+  "judgeManifestSha256": "b9915f357bfcde9b4635d9927dfada051e962ea73826797b6487380ec409cfd9",
+  "pricingTableSha256": "74fd11bee9794560f14ffd6b17faaac88bfce20695af860ab5c829f7489ce0a7",
+  "caps": {
+    "plannedRuns": 72,
+    "maximumAttempts": 144,
+    "maximumRequestsPerAttempt": 8,
+    "maximumReservedRequests": 1152,
+    "workflowTimeoutMinutes": 60,
+    "schedulingDeadlineMinutes": 50,
+    "maximumAttemptSeconds": 120,
+    "maximumOutputTokens": 2000,
+    "maximumConcurrency": 3,
+    "estimatedCostCapUsd": 25.0
+  }
+}
