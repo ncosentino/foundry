@@ -52,6 +52,23 @@ function Write-JsonFile {
         [System.Text.UTF8Encoding]::new($false))
 }
 
+function Stop-Preflight {
+    param([Parameter(Mandatory = $true)][string]$Message)
+
+    Write-JsonFile `
+        -Path $statusPath `
+        -Value ([ordered]@{
+            schemaVersion = '1.0'
+            state = 'Failed'
+            reason = $Message
+            advisoryOnly = $true
+            smokeAttempted = $false
+            smokeSucceeded = $false
+            fullPairedExecutionTask = 'T119'
+        })
+    throw $Message
+}
+
 Write-JsonFile `
     -Path $statusPath `
     -Value ([ordered]@{
@@ -71,7 +88,7 @@ $judgeManifestPath = Join-Path $caseSetRoot 'judges/manifest.json'
 
 foreach ($requiredPath in @($manifestPath, $analysisPlanPath, $judgeManifestPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
-        throw "Required hosted evaluation input '$requiredPath' does not exist."
+        Stop-Preflight -Message "Required hosted evaluation input '$requiredPath' does not exist."
     }
 }
 
@@ -91,7 +108,8 @@ $caps = [ordered]@{
 }
 
 if ($caps.maximumAttempts * $caps.maximumRequestsPerAttempt -ne $caps.maximumReservedRequests) {
-    throw 'The reserved worst-case request budget does not match attempts multiplied by requests per attempt.'
+    Stop-Preflight `
+        -Message 'The reserved worst-case request budget does not match attempts multiplied by requests per attempt.'
 }
 
 $immutableInputs = [ordered]@{

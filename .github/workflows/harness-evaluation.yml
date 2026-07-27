@@ -77,7 +77,7 @@ jobs:
           $confirmPaidModelsQuota = '${{ env.PAID_QUOTA_CONFIRMED }}' -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `
             -OutputDirectory 'artifacts/eval/hosted-run' `
-            -ModelId '${{ env.MODEL_ID }}' `
+            -ModelId $env:MODEL_ID `
             -ConfirmPaidModelsQuota:$confirmPaidModelsQuota
 
       - name: Upload immutable preflight bundle
