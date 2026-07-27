@@ -13,14 +13,23 @@ namespace NexusLabs.Foundry.Evaluation.Harness;
 /// </summary>
 public static class HarnessComparisonExperiment
 {
+    /// <summary>The stable arm identifier for the iterative arm.</summary>
+    public const string IterativeArmId = "iterative";
+
+    /// <summary>The stable arm identifier for the plain Harness arm.</summary>
+    public const string PlainHarnessArmId = "plain-harness";
+
+    /// <summary>The stable arm identifier for the hybrid arm.</summary>
+    public const string HybridArmId = "hybrid";
+
     /// <summary>The stable experiment name for the iterative arm.</summary>
-    public const string IterativeExperimentName = "harness-001/v1.0/iterative";
+    public const string IterativeExperimentName = "harness-001/v1.0/" + IterativeArmId;
 
     /// <summary>The stable experiment name for the plain Harness arm.</summary>
-    public const string PlainHarnessExperimentName = "harness-001/v1.0/plain-harness";
+    public const string PlainHarnessExperimentName = "harness-001/v1.0/" + PlainHarnessArmId;
 
     /// <summary>The stable experiment name for the hybrid Harness/workspace arm.</summary>
-    public const string HybridExperimentName = "harness-001/v1.0/hybrid";
+    public const string HybridExperimentName = "harness-001/v1.0/" + HybridArmId;
 
     /// <summary>
     /// Creates the current Foundry iterative-loop arm.
@@ -111,6 +120,18 @@ public static class HarnessComparisonExperiment
                     cancellationToken),
         };
     }
+
+    internal static string GetArmId(HarnessComparisonArm arm) =>
+        arm switch
+        {
+            HarnessComparisonArm.Iterative => IterativeArmId,
+            HarnessComparisonArm.PlainHarness => PlainHarnessArmId,
+            HarnessComparisonArm.Hybrid => HybridArmId,
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(arm),
+                arm,
+                "The comparison arm is not defined."),
+        };
 
     private static ulong DeriveTrialSeed(
         ulong globalRunSeed,
