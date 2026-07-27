@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="NexusLabs.Foundry.Evaluation.Tests" />
+    <!-- Non-packable hosted evaluation driver; friend access is not a security boundary. -->
+    <InternalsVisibleTo Include="HarnessEvaluationApp" />
   </ItemGroup>
 
   <ItemGroup>

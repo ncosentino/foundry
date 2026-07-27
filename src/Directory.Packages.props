@@ -35,6 +35,7 @@
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.6.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.6.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
+    <PackageVersion Include="OpenAI" Version="2.10.0" />
     <!-- Microsoft.Extensions.AI.Evaluation stable 10.x line -->
     <PackageVersion Include="Microsoft.Extensions.AI.Evaluation" Version="10.6.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.6.0" />
