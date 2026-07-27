@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace NexusLabs.Foundry.Evaluation.Tests.Harness.Judging;
@@ -224,7 +225,11 @@ public sealed class HarnessJudgeCalibrationTests
         JsonDocument.Parse(File.ReadAllText(JudgePath(relativePath)));
 
     private static string ComputeSha256(string path) =>
-        Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+        Convert.ToHexString(
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(
+                    File.ReadAllText(path).ReplaceLineEndings("\n"))))
+            .ToLowerInvariant();
 
     private static string JudgePath(string relativePath) =>
         Path.Combine(

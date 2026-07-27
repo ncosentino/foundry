@@ -11,19 +11,19 @@
       "kind": "Nominal",
       "version": "v1.0",
       "relativePath": "rubrics/nominal-pairwise-preference.v1.json",
-      "sha256": "58102ac6a9f64fc4d11184e2d748d79dbd08505b6cb61709136d4c80e7c624d5"
+      "sha256": "ed39fcf321e10f33ac63a5fd9edd77c42cff0f5c970410ae9dfd32e71036763d"
     },
     {
       "rubricId": "harness-ordinal-response-quality",
       "kind": "Ordinal",
       "version": "v1.0",
       "relativePath": "rubrics/ordinal-response-quality.v1.json",
-      "sha256": "1e955706d161b6a8d7f62d357b71b2cc3bbd4df08cbd613203dc51e3bd93850a"
+      "sha256": "94196e2ad78b494b8a2a4036247053d53a2facf559aefa043aeeb4fe2e82a448"
     }
   ],
   "calibration": {
     "manifestPath": "calibration/manifest.json",
-    "manifestSha256": "cb8a9bc60ef816a4d842d6b353b272cfa6656a6cab0e427bca26a745808d3f28",
+    "manifestSha256": "af794b396ad05fa8e0ebd246cdccabbab08a45d1236f9f73bdc37c3ff1f0fa3f",
     "labelStatus": "PROVISIONAL",
     "publishableAsCalibrated": false
   },
