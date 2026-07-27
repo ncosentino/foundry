@@ -469,15 +469,17 @@ exclusion is permitted.
 Provider request/response capture and the full evidence bundle are separate
 surfaces.
 
-`EvaluationCaptureChatClient` captures provider request/response payloads only.
-Each arm/case/trial/attempt uses its own capture-store namespace, and replay is
-allowed only after validating the complete pinned-input tuple hash. The chat
+`EvaluationCaptureChatClient` persists provider response payloads under opaque
+request hashes. It does not persist raw request messages. Each
+arm/case/trial/attempt uses its own capture-store namespace, and response replay
+is allowed only after validating the complete pinned-input tuple hash. The chat
 capture key is never treated as proof that non-captured options match.
 
 The hosted driver and reporter write an incremental attempt/batch evidence
 bundle, using the existing JSON artifact writer, containing:
 
-- request/response payloads;
+- request hash plus normalized request controls from the immutable input tuple;
+- response payload capture reference;
 - tool calls/results;
 - workspace before/after references;
 - diagnostics/progress records;
@@ -504,10 +506,12 @@ The report bundle contains:
 - diagnostics-parity report; and
 - checksums for every published artifact.
 
-Deterministic evaluators rescore normalized evidence records and chat captures;
-advisory judges replay captured transcripts. Workspace state, retry state,
-progress, and diagnostics are retained as observed evidence and are not
-reconstructed from the chat-response store.
+Deterministic evaluators rescore normalized evidence records and response
+captures. Advisory judges score the versioned case prompt/reference plus the
+captured final response artifact; this protocol does not claim replay of raw
+intermediate provider requests. Workspace state, retry state, progress, and
+diagnostics are retained as observed evidence and are not reconstructed from
+the chat-response store.
 
 ## Stopping, peeking, and truncation
 
