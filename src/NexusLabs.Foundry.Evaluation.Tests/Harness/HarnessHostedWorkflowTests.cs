@@ -66,6 +66,19 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains("not a required status", evidence, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void RegisteredCiWorkflow_ProvidesManualIntegrationDispatchBridge()
+    {
+        var workflow = ReadRepositoryFile(".github/workflows/ci.yml");
+
+        Assert.Contains("run_harness_evaluation:", workflow);
+        Assert.Contains("harness-evaluation-dispatch:", workflow);
+        Assert.Contains("inputs.run_harness_evaluation", workflow);
+        Assert.Contains("runs-on: ubuntu-latest", workflow);
+        Assert.Contains("models: read", workflow);
+        Assert.Contains("Invoke-HarnessEvaluationPreflight.ps1", workflow);
+    }
+
     private static string ReadRepositoryFile(string relativePath)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

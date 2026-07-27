@@ -10,6 +10,11 @@ The `Harness Evaluation` workflow is not a required status check for the
 protected `main` branch. It is advisory, dispatch/schedule-only, and cannot
 block or authorize a merge.
 
+Before the dedicated workflow reaches the default branch, the already
+registered `CI` workflow exposes a manual `harness-evaluation-dispatch` bridge.
+That job is also absent from required branch protection and runs only when its
+explicit boolean input is true.
+
 ## Branch-protection evidence
 
 The GitHub branch-protection API reported strict required status checks:
@@ -19,8 +24,8 @@ The GitHub branch-protection API reported strict required status checks:
 - `aot`
 
 `Harness Evaluation` and its `advisory-harness-evaluation` job are not in the
-required status-check list. The repository rulesets endpoint returned no
-additional rulesets.
+required status-check list. The `harness-evaluation-dispatch` bridge is also not
+required. The repository rulesets endpoint returned no additional rulesets.
 
 Commands used:
 
