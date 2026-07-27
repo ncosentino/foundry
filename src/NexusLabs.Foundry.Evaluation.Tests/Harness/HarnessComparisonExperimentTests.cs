@@ -47,7 +47,7 @@ public sealed class HarnessComparisonExperimentTests
         Assert.Equal("harness-001/v1.0/plain-harness", plainHarness.Name);
         Assert.Equal("harness-001/v1.0/hybrid", hybrid.Name);
 
-        var taskContext = CreateTaskContext(source, caseIndex: 0, trialIndex: 1, attemptNumber: 1);
+        var taskContext = CreateTaskContext(source, "h001-01", trialIndex: 1, attemptNumber: 1);
         var iterativeSeed = await iterative.Task(taskContext, _ct);
         var plainHarnessSeed = await plainHarness.Task(taskContext, _ct);
         var hybridSeed = await hybrid.Task(taskContext, _ct);
@@ -74,25 +74,50 @@ public sealed class HarnessComparisonExperimentTests
             (context, _) => ValueTask.FromResult(context.TrialSeed));
 
         var firstAttempt = await seed123.Task(
-            CreateTaskContext(source, caseIndex: 0, trialIndex: 1, attemptNumber: 1),
+            CreateTaskContext(source, "h001-01", trialIndex: 1, attemptNumber: 1),
             _ct);
         var retry = await seed123.Task(
-            CreateTaskContext(source, caseIndex: 0, trialIndex: 1, attemptNumber: 2),
+            CreateTaskContext(source, "h001-01", trialIndex: 1, attemptNumber: 2),
             _ct);
         var nextTrial = await seed123.Task(
-            CreateTaskContext(source, caseIndex: 0, trialIndex: 2, attemptNumber: 1),
+            CreateTaskContext(source, "h001-01", trialIndex: 2, attemptNumber: 1),
             _ct);
         var nextCase = await seed123.Task(
-            CreateTaskContext(source, caseIndex: 1, trialIndex: 1, attemptNumber: 1),
+            CreateTaskContext(source, "h001-02", trialIndex: 1, attemptNumber: 1),
             _ct);
         var differentGlobalSeed = await seed124.Task(
-            CreateTaskContext(source, caseIndex: 0, trialIndex: 1, attemptNumber: 1),
+            CreateTaskContext(source, "h001-01", trialIndex: 1, attemptNumber: 1),
             _ct);
 
         Assert.Equal(firstAttempt, retry);
         Assert.NotEqual(firstAttempt, nextTrial);
         Assert.NotEqual(firstAttempt, nextCase);
         Assert.NotEqual(firstAttempt, differentGlobalSeed);
+    }
+
+    [Fact]
+    public async Task Executor_ReceivesExactCancellationToken()
+    {
+        var source = CreateSource();
+        CancellationToken observedToken = default;
+        var definition = HarnessComparisonExperiment.CreateHybrid(
+            source,
+            globalRunSeed: 123,
+            (context, cancellationToken) =>
+            {
+                observedToken = cancellationToken;
+                cancellationToken.ThrowIfCancellationRequested();
+                return ValueTask.FromResult(context.TrialSeed);
+            });
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            definition.Task(
+                CreateTaskContext(source, "h001-01", trialIndex: 1, attemptNumber: 1),
+                cancellation.Token).AsTask());
+
+        Assert.Equal(cancellation.Token, observedToken);
     }
 
     [Fact]
@@ -109,6 +134,10 @@ public sealed class HarnessComparisonExperimentTests
         Assert.Throws<ArgumentNullException>(() =>
             HarnessComparisonExperiment.CreatePlainHarness<ulong>(null!, 123, executor));
         Assert.Throws<ArgumentNullException>(() =>
+            HarnessComparisonExperiment.CreatePlainHarness<ulong>(source, 123, null!));
+        Assert.Throws<ArgumentNullException>(() =>
+            HarnessComparisonExperiment.CreateHybrid<ulong>(null!, 123, executor));
+        Assert.Throws<ArgumentNullException>(() =>
             HarnessComparisonExperiment.CreateHybrid<ulong>(source, 123, null!));
     }
 
@@ -121,11 +150,15 @@ public sealed class HarnessComparisonExperimentTests
 
     private static ExperimentTaskContext<HarnessManifestCase> CreateTaskContext(
         HarnessManifestCaseSource source,
-        int caseIndex,
+        string caseId,
         int trialIndex,
         int attemptNumber)
     {
-        var manifestCase = source.Manifest.Cases[caseIndex];
+        var manifestCase = source.Manifest.Cases.Single(@case => @case.Id == caseId);
+        var caseIndex = source.Manifest.Cases
+            .Select(@case => @case.Id)
+            .ToList()
+            .IndexOf(caseId);
         var @case = new ExperimentCase<HarnessManifestCase>
         {
             Id = manifestCase.Id,
