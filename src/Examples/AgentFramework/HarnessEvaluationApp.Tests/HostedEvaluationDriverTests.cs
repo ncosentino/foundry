@@ -27,6 +27,7 @@ public sealed class HostedEvaluationDriverTests
                 MaximumRequestsPerAttempt: 8,
                 MaximumOutputTokens: 2000,
                 MinimumProviderRequestIntervalMilliseconds: 0,
+                WorkflowTimeoutMinutes: 60,
                 SchedulingDeadlineMinutes: 50,
                 AttemptTimeoutSeconds: 3,
                 MaximumConcurrency: 3,
@@ -127,6 +128,7 @@ public sealed class HostedEvaluationDriverTests
                 MaximumRequestsPerAttempt: 8,
                 MaximumOutputTokens: 2000,
                 MinimumProviderRequestIntervalMilliseconds: 0,
+                WorkflowTimeoutMinutes: 60,
                 SchedulingDeadlineMinutes: 50,
                 AttemptTimeoutSeconds: 3,
                 MaximumConcurrency: 3,
@@ -156,5 +158,27 @@ public sealed class HostedEvaluationDriverTests
                 Directory.Delete(outputDirectory, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public void TransientProviderFailure_RecognizesWrappedStatusCodes()
+    {
+        var wrapped429 = new InvalidOperationException(
+            "wrapped",
+            new HttpRequestException(
+                "rate limited",
+                inner: null,
+                System.Net.HttpStatusCode.TooManyRequests));
+        var wrapped503 = new InvalidOperationException(
+            "wrapped",
+            new HttpRequestException(
+                "unavailable",
+                inner: null,
+                System.Net.HttpStatusCode.ServiceUnavailable));
+
+        Assert.True(HostedEvaluationDriver.IsTransientProviderFailure(wrapped429));
+        Assert.True(HostedEvaluationDriver.IsTransientProviderFailure(wrapped503));
+        Assert.False(HostedEvaluationDriver.IsTransientProviderFailure(
+            new InvalidOperationException("deterministic failure")));
     }
 }

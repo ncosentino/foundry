@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using System.ClientModel;
 
 using Microsoft.Extensions.AI;
 
@@ -87,6 +88,7 @@ internal sealed class HostedEvaluationDriver
             options.MaximumOutputTokens != 2000 ||
             options.MinimumProviderRequestIntervalMilliseconds < 0 ||
             (!options.DryRun && options.MinimumProviderRequestIntervalMilliseconds != 4000) ||
+            options.WorkflowTimeoutMinutes != 60 ||
             options.SchedulingDeadlineMinutes != 50 ||
             options.MaximumConcurrency != 3 ||
             options.CostCapUsd != 25m ||
@@ -124,6 +126,7 @@ internal sealed class HostedEvaluationDriver
                 _options.MaximumRequestsPerAttempt,
                 _options.MaximumOutputTokens,
                 _options.MinimumProviderRequestIntervalMilliseconds,
+                _options.WorkflowTimeoutMinutes,
                 _options.SchedulingDeadlineMinutes,
                 _options.AttemptTimeoutSeconds,
                 _options.MaximumConcurrency,
@@ -471,10 +474,17 @@ internal sealed class HostedEvaluationDriver
 
     private bool CanReserveBatch(TimeSpan elapsed) =>
         elapsed < TimeSpan.FromMinutes(_options.SchedulingDeadlineMinutes) &&
+        elapsed + WorstCaseBatchDuration() <= TimeSpan.FromMinutes(_options.WorkflowTimeoutMinutes) &&
         Volatile.Read(ref _attemptsUsed) + AttemptsPerBatchReservation <= _options.MaximumAttempts &&
         _requestBudget.Requests + RequestsPerBatchReservation <= _options.MaximumRequests &&
         (_requestBudget.Requests + RequestsPerBatchReservation) *
             _options.EstimatedCostPerRequest <= _options.CostCapUsd;
+
+    private TimeSpan WorstCaseBatchDuration() =>
+        TimeSpan.FromSeconds(_options.AttemptTimeoutSeconds * 2) +
+        TimeSpan.FromMilliseconds(
+            RequestsPerBatchReservation *
+            _options.MinimumProviderRequestIntervalMilliseconds);
 
     private IReadOnlyList<HarnessComparisonTrialRecord> BuildLedger()
     {
@@ -804,18 +814,35 @@ internal sealed class HostedEvaluationDriver
         }
     }
 
-    private static bool IsTransientProviderFailure(Exception exception)
+    internal static bool IsTransientProviderFailure(Exception exception)
     {
-        if (exception is HttpRequestException)
+        for (var current = exception; current is not null; current = current.InnerException)
         {
-            return true;
+            if (current is ClientResultException clientResult &&
+                (clientResult.Status == 429 || clientResult.Status >= 500))
+            {
+                return true;
+            }
+
+            if (current is HttpRequestException httpRequest &&
+                (httpRequest.StatusCode is null ||
+                 httpRequest.StatusCode == System.Net.HttpStatusCode.TooManyRequests ||
+                 (int)httpRequest.StatusCode >= 500))
+            {
+                return true;
+            }
+
+            if (current.Message.Contains("Status: 429", StringComparison.OrdinalIgnoreCase) ||
+                current.Message.Contains("Status: 500", StringComparison.OrdinalIgnoreCase) ||
+                current.Message.Contains("Status: 502", StringComparison.OrdinalIgnoreCase) ||
+                current.Message.Contains("Status: 503", StringComparison.OrdinalIgnoreCase) ||
+                current.Message.Contains("Status: 504", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
         }
 
-        return exception.Message.Contains("Status: 429", StringComparison.OrdinalIgnoreCase) ||
-            exception.Message.Contains("Status: 500", StringComparison.OrdinalIgnoreCase) ||
-            exception.Message.Contains("Status: 502", StringComparison.OrdinalIgnoreCase) ||
-            exception.Message.Contains("Status: 503", StringComparison.OrdinalIgnoreCase) ||
-            exception.Message.Contains("Status: 504", StringComparison.OrdinalIgnoreCase);
+        return false;
     }
 
     private static bool ContainsInOrder(
