@@ -14,7 +14,7 @@
   "files": [
     {
       "relativePath": "run-30273935931-publication.md",
-      "sha256": "1057a21cef6300062341143fb95c211229dcd5f5c426bd26275ae733af80b664"
+      "sha256": "c1f6f841aabe644511b692853f73f47d19035026ff4e089cb2ae499c05c579a2"
     },
     {
       "relativePath": "run-30273935931-summary.md",
@@ -51,8 +51,22 @@
       "sha256": "74fd11bee9794560f14ffd6b17faaac88bfce20695af860ab5c829f7489ce0a7"
     },
     {
-      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/manifest.json",
+      "path": "artifacts/eval/reports/harness-001/run-30273935931/inputs/case-set/judges/manifest.json",
       "sha256": "b9915f357bfcde9b4635d9927dfada051e962ea73826797b6487380ec409cfd9"
+    }
+  ],
+  "postRunEvidence": [
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/manifest.json",
+      "sha256": "8df3ee0afcf8bf856e7ba14ed7358bb0a912f56d002b6ac783609bd57e156dc4"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/manifest.json",
+      "sha256": "a02baa5ad18a035e5a6a2acbdbe9c75a2e727c63cf749cec50218c49877a2ae2"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/heldout.human-attested.jsonl",
+      "sha256": "98323a323b03a20c4e9f0bd6cc42a84d33d46f67c84b2dfc6c42ae8ae610e776"
     }
   ]
 }
