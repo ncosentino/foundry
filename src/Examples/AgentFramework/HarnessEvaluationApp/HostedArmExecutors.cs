@@ -381,7 +381,7 @@ internal sealed class HostedArmExecutors
         }
 
         return _realChatClientFactory?.Invoke()
-            ?? throw new InvalidOperationException("The real GitHub Models chat client was not configured.");
+            ?? throw new InvalidOperationException("The GitHub Copilot chat client was not configured.");
     }
 
     private static string WriteCaptureManifest(

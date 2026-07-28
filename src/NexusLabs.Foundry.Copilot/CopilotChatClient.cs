@@ -473,10 +473,13 @@ public sealed class CopilotChatClient : IChatClient
                 continue;
             }
 
+            var statusCode = httpResponse.StatusCode;
             var errorBody = await httpResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             httpResponse.Dispose();
             throw new HttpRequestException(
-                $"Copilot API request failed ({httpResponse.StatusCode}): {errorBody}");
+                $"Copilot API request failed ({statusCode}): {errorBody}",
+                inner: null,
+                statusCode);
         }
     }
 

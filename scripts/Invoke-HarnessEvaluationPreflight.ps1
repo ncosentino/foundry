@@ -6,7 +6,7 @@ param(
     [string]$ModelId,
 
     [Parameter(Mandatory = $true)]
-    [bool]$ConfirmPaidModelsQuota
+    [bool]$ConfirmCopilotEnterpriseBilling
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,10 +24,8 @@ if (Test-Path -LiteralPath $outputRoot) {
 }
 
 $inputDirectory = Join-Path $outputRoot 'inputs'
-$captureDirectory = Join-Path $outputRoot 'capture'
 $statusPath = Join-Path $outputRoot 'preflight-status.json'
 New-Item -ItemType Directory -Path $inputDirectory -Force | Out-Null
-New-Item -ItemType Directory -Path $captureDirectory -Force | Out-Null
 
 function Get-CanonicalSha256 {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -62,8 +60,9 @@ function Stop-Preflight {
             state = 'Failed'
             reason = $Message
             advisoryOnly = $true
-            smokeAttempted = $false
-            smokeSucceeded = $false
+            provider = 'github-copilot'
+            runnerEnvironment = $env:HARNESS_EVAL_RUNNER_ENVIRONMENT
+            inferenceAttempted = $false
             fullPairedExecutionTask = 'T119'
         })
     throw $Message
@@ -76,8 +75,9 @@ Write-JsonFile `
         state = 'Started'
         reason = 'Hosted evaluation preflight started.'
         advisoryOnly = $true
-        smokeAttempted = $false
-        smokeSucceeded = $false
+        provider = 'github-copilot'
+        runnerEnvironment = $env:HARNESS_EVAL_RUNNER_ENVIRONMENT
+        inferenceAttempted = $false
         fullPairedExecutionTask = 'T119'
     })
 
@@ -85,7 +85,7 @@ $caseSetRoot = Join-Path $repoRoot 'artifacts/eval/case-sets/harness-001/v1.0'
 $manifestPath = Join-Path $caseSetRoot 'manifest.json'
 $analysisPlanPath = Join-Path $caseSetRoot 'analysis-plan.md'
 $judgeManifestPath = Join-Path $caseSetRoot 'judges/manifest.json'
-$pricingPath = Join-Path $caseSetRoot 'pricing/github-models.v1.json'
+$pricingPath = Join-Path $caseSetRoot 'pricing/github-copilot.v1.json'
 
 foreach ($requiredPath in @($manifestPath, $analysisPlanPath, $judgeManifestPath, $pricingPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
@@ -121,8 +121,12 @@ $immutableInputs = [ordered]@{
     workflowRunAttempt = $env:GITHUB_RUN_ATTEMPT
     gitSha = $env:GITHUB_SHA
     modelId = $ModelId
-    githubModelsEndpoint = 'https://models.github.ai/inference'
-    confirmPaidModelsQuota = $ConfirmPaidModelsQuota
+    provider = 'github-copilot'
+    authentication = 'GITHUB_TOKEN with copilot-requests:write'
+    billingProduct = 'GitHub Copilot Enterprise'
+    runnerEnvironment = $env:HARNESS_EVAL_RUNNER_ENVIRONMENT
+    runnerLabels = $env:HARNESS_EVAL_RUNNER_LABELS
+    confirmCopilotEnterpriseBilling = $ConfirmCopilotEnterpriseBilling
     manifestSha256 = Get-CanonicalSha256 -Path $manifestPath
     analysisPlanSha256 = Get-CanonicalSha256 -Path $analysisPlanPath
     judgeManifestSha256 = Get-CanonicalSha256 -Path $judgeManifestPath
@@ -152,65 +156,28 @@ if ([int]$modelPricing.minimumRequestIntervalMilliseconds -ne
     Stop-Preflight -Message 'The workflow provider pacing does not match the frozen pricing table.'
 }
 
-$state = 'QuotaNotConfirmed'
-$reason = 'The paid GitHub Models quota precondition was not affirmed; the reserved worst-case request budget cannot be guaranteed on the free tier.'
-$smokeAttempted = $false
-$smokeSucceeded = $false
+$state = 'CopilotBillingNotConfirmed'
+$reason = 'GitHub Copilot Enterprise billing was not explicitly affirmed; no inference request was made.'
 $failureMessage = $null
 
-if ($ConfirmPaidModelsQuota) {
+if ($ConfirmCopilotEnterpriseBilling) {
     $token = $env:GITHUB_TOKEN
-    if ([string]::IsNullOrWhiteSpace($token)) {
+    if (-not [string]::Equals(
+        $env:HARNESS_EVAL_RUNNER_ENVIRONMENT,
+        'self-hosted',
+        [System.StringComparison]::OrdinalIgnoreCase)) {
         $state = 'Failed'
-        $reason = 'GITHUB_TOKEN was unavailable for the GitHub Models preflight.'
+        $reason = 'Harness evaluation is restricted to a PitCrew self-hosted runner.'
+        $failureMessage = $reason
+    }
+    elseif ([string]::IsNullOrWhiteSpace($token)) {
+        $state = 'Failed'
+        $reason = 'GITHUB_TOKEN was unavailable for GitHub Copilot authentication.'
         $failureMessage = $reason
     }
     else {
-        $smokeAttempted = $true
-        $request = [ordered]@{
-            model = $ModelId
-            messages = @(
-                [ordered]@{
-                    role = 'user'
-                    content = 'Return exactly: foundry-harness-preflight'
-                }
-            )
-            temperature = 0
-            max_tokens = 16
-        }
-        Write-JsonFile `
-            -Path (Join-Path $captureDirectory 'replay-smoke-request-controls.json') `
-            -Value $request
-
-        try {
-            $headers = @{
-                Authorization = [string]::Join(' ', @('Bearer', $token))
-                Accept = 'application/vnd.github+json'
-                'Content-Type' = 'application/json'
-            }
-            $response = Invoke-RestMethod `
-                -Method Post `
-                -Uri 'https://models.github.ai/inference/chat/completions' `
-                -Headers $headers `
-                -Body ($request | ConvertTo-Json -Depth 10)
-            Write-JsonFile `
-                -Path (Join-Path $captureDirectory 'replay-smoke-response.json') `
-                -Value $response
-            $smokeSucceeded = $true
-            $state = 'Succeeded'
-            $reason = 'GitHub Models access and capture/replay artifact writing succeeded; full paired execution remains T119.'
-        }
-        catch {
-            $state = 'Failed'
-            Write-JsonFile `
-                -Path (Join-Path $captureDirectory 'replay-smoke-error.json') `
-                -Value ([ordered]@{
-                    exceptionType = $_.Exception.GetType().FullName
-                    message = $_.Exception.Message
-                })
-            $reason = "GitHub Models preflight failed: $($_.Exception.Message)"
-            $failureMessage = $reason
-        }
+        $state = 'Ready'
+        $reason = 'PitCrew self-hosted execution, GitHub Copilot Enterprise billing, token presence, pricing, and protocol caps were validated; no preflight inference request was made.'
     }
 }
 
@@ -221,8 +188,9 @@ Write-JsonFile `
         state = $state
         reason = $reason
         advisoryOnly = $true
-        smokeAttempted = $smokeAttempted
-        smokeSucceeded = $smokeSucceeded
+        provider = 'github-copilot'
+        runnerEnvironment = $env:HARNESS_EVAL_RUNNER_ENVIRONMENT
+        inferenceAttempted = $false
         fullPairedExecutionTask = 'T119'
     })
 

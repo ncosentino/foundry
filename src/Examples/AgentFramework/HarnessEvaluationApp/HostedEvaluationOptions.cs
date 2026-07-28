@@ -27,9 +27,8 @@ internal sealed record HostedEvaluationOptions(
         var outputDirectory = outputIndex >= 0 && outputIndex + 1 < args.Length
             ? Path.GetFullPath(args[outputIndex + 1])
             : Path.GetFullPath("artifacts/eval/hosted-run");
-        var modelId = Environment.GetEnvironmentVariable("HARNESS_EVAL_MODEL_ID")
-            ?? Environment.GetEnvironmentVariable("MODEL_ID")
-            ?? "openai/gpt-4.1-mini";
+        var modelId = Environment.GetEnvironmentVariable("HARNESS_EVAL_COPILOT_MODEL_ID")
+            ?? "gpt-5-mini";
         return new HostedEvaluationOptions(
             outputDirectory,
             modelId,

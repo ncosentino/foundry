@@ -1,10 +1,7 @@
 using Microsoft.Extensions.AI;
 
-using OpenAI;
-
-using System.ClientModel;
-
 using HarnessEvaluationApp;
+using NexusLabs.Foundry.Copilot;
 
 var options = HostedEvaluationOptions.Load(args);
 Func<IChatClient>? realChatClientFactory = null;
@@ -18,14 +15,14 @@ if (!options.DryRun)
     }
 
     realChatClientFactory = () =>
-        new OpenAIClient(
-                new ApiKeyCredential(token),
-                new OpenAIClientOptions
-                {
-                    Endpoint = new Uri("https://models.github.ai/inference"),
-                })
-            .GetChatClient(options.ModelId)
-            .AsIChatClient();
+        new CopilotChatClient(
+            new CopilotChatClientOptions
+            {
+                DefaultModel = options.ModelId,
+                GitHubToken = token,
+                IntegrationId = "foundry-harness-evaluation",
+                EditorVersion = "NexusLabs.Foundry.HarnessEvaluation/0.1.0",
+            });
 }
 
 var driver = new HostedEvaluationDriver(options, realChatClientFactory);
