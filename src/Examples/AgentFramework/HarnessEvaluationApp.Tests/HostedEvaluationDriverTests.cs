@@ -182,9 +182,16 @@ public sealed class HostedEvaluationDriverTests
                 "unavailable",
                 inner: null,
                 System.Net.HttpStatusCode.ServiceUnavailable));
+        var wrapped401 = new InvalidOperationException(
+            "wrapped",
+            new HttpRequestException(
+                "unauthorized",
+                inner: null,
+                System.Net.HttpStatusCode.Unauthorized));
 
         Assert.True(HostedEvaluationDriver.IsTransientProviderFailure(wrapped429));
         Assert.True(HostedEvaluationDriver.IsTransientProviderFailure(wrapped503));
+        Assert.False(HostedEvaluationDriver.IsTransientProviderFailure(wrapped401));
         Assert.False(HostedEvaluationDriver.IsTransientProviderFailure(
             new InvalidOperationException("deterministic failure")));
     }

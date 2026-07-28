@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace NexusLabs.Foundry.Evaluation.Tests.Harness;
 
 public sealed class HarnessHostedWorkflowTests
@@ -9,6 +11,8 @@ public sealed class HarnessHostedWorkflowTests
 
         Assert.Contains("workflow_dispatch:", workflow);
         Assert.Contains("schedule:", workflow);
+        Assert.Contains("confirm_copilot_enterprise_billing:", workflow);
+        Assert.DoesNotContain("confirm_paid_models_quota:", workflow);
         Assert.DoesNotContain("pull_request:", workflow);
         Assert.DoesNotContain("push:", workflow);
     }
@@ -18,9 +22,12 @@ public sealed class HarnessHostedWorkflowTests
     {
         var workflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
 
-        Assert.Contains("runs-on: ubuntu-latest", workflow);
+        Assert.Contains("runs-on: [self-hosted, linux, x64, general-purpose]", workflow);
+        Assert.DoesNotContain("runs-on: ubuntu-latest", workflow);
         Assert.Contains("timeout-minutes: 60", workflow);
-        Assert.Contains("models: read", workflow);
+        Assert.Contains("copilot-requests: write", workflow);
+        Assert.DoesNotContain("models: read", workflow);
+        Assert.Contains("default: gpt-5-mini", workflow);
         Assert.Contains("HARNESS_EVAL_PLANNED_RUNS: 72", workflow);
         Assert.Contains("HARNESS_EVAL_MAX_ATTEMPTS: 144", workflow);
         Assert.Contains("HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8", workflow);
@@ -37,20 +44,39 @@ public sealed class HarnessHostedWorkflowTests
     }
 
     [Fact]
-    public void Preflight_SeparatesQuotaProviderAndSuccessStates()
+    public void CopilotPricing_FreezesModelAndConservativeReservation()
+    {
+        using var pricing = JsonDocument.Parse(ReadRepositoryFile(
+            "artifacts/eval/case-sets/harness-001/v1.0/pricing/github-copilot.v1.json"));
+        var root = pricing.RootElement;
+        var model = Assert.Single(root.GetProperty("models").EnumerateArray());
+
+        Assert.Equal("GitHub Copilot Enterprise", root.GetProperty("billingProduct").GetString());
+        Assert.Equal("gpt-5-mini", model.GetProperty("modelId").GetString());
+        Assert.Equal(2000, model.GetProperty("maximumOutputTokensPerRequest").GetInt32());
+        Assert.Equal(4000, model.GetProperty("minimumRequestIntervalMilliseconds").GetInt32());
+        Assert.Equal(0.02m, model.GetProperty("reservedWorstCaseUsdPerRequest").GetDecimal());
+    }
+
+    [Fact]
+    public void Preflight_RequiresPitCrewAndCopilotBillingWithoutInferenceSmoke()
     {
         var script = ReadRepositoryFile("scripts/Invoke-HarnessEvaluationPreflight.ps1");
         var workflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
 
-        Assert.Contains("https://models.github.ai/inference/chat/completions", script);
-        Assert.Contains("QuotaNotConfirmed", script);
-        Assert.Contains("Succeeded", script);
+        Assert.Contains("CopilotBillingNotConfirmed", script);
+        Assert.Contains("Ready", script);
         Assert.Contains("Failed", script);
-        Assert.Contains("confirmPaidModelsQuota", script);
-        Assert.Contains("replay-smoke-response.json", script);
+        Assert.Contains("confirmCopilotEnterpriseBilling", script);
+        Assert.Contains("github-copilot.v1.json", script);
+        Assert.Contains("HARNESS_EVAL_RUNNER_ENVIRONMENT", script);
+        Assert.Contains("self-hosted", script);
         Assert.Contains("checksums.sha256", script);
         Assert.Contains("reserved worst-case request budget", script);
         Assert.Contains("$env:GITHUB_TOKEN", script);
+        Assert.DoesNotContain("Invoke-RestMethod", script);
+        Assert.DoesNotContain("models.github.ai", script);
+        Assert.DoesNotContain("replay-smoke-response.json", script);
         Assert.DoesNotContain("-GitHubToken", workflow);
     }
 
@@ -73,16 +99,62 @@ public sealed class HarnessHostedWorkflowTests
         var workflow = ReadRepositoryFile(".github/workflows/ci.yml");
 
         Assert.Contains("run_harness_evaluation:", workflow);
+        Assert.Contains("confirm_copilot_enterprise_billing:", workflow);
+        Assert.DoesNotContain("confirm_paid_models_quota:", workflow);
         Assert.Contains("harness-evaluation-dispatch:", workflow);
         Assert.Contains("inputs.run_harness_evaluation", workflow);
         Assert.Contains(
             "if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation",
             workflow);
-        Assert.Contains("runs-on: ubuntu-latest", workflow);
-        Assert.Contains("models: read", workflow);
+        Assert.Contains("runs-on: [self-hosted, linux, x64, general-purpose]", workflow);
+        Assert.DoesNotContain("runs-on: ubuntu-latest", workflow);
+        Assert.Contains("copilot-requests: write", workflow);
+        Assert.DoesNotContain("models: read", workflow);
         Assert.Contains("Invoke-HarnessEvaluationPreflight.ps1", workflow);
         Assert.Contains("HarnessEvaluationApp/HarnessEvaluationApp.csproj", workflow);
         Assert.Contains("if-no-files-found: warn", workflow);
+    }
+
+    [Fact]
+    public void HostedDriver_UsesCopilotProviderWithExplicitWorkflowToken()
+    {
+        var program = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/Program.cs");
+        var project = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj");
+
+        Assert.Contains("new CopilotChatClient", program);
+        Assert.Contains("GitHubToken = token", program);
+        Assert.Contains("DefaultModel = options.ModelId", program);
+        Assert.DoesNotContain("OpenAIClient", program);
+        Assert.DoesNotContain("models.github.ai", program);
+        Assert.Contains("NexusLabs.Foundry.Copilot.csproj", project);
+        Assert.DoesNotContain("<PackageReference Include=\"OpenAI\"", project);
+        Assert.DoesNotContain("<PackageReference Include=\"Microsoft.Extensions.AI.OpenAI\"", project);
+    }
+
+    [Fact]
+    public void LiveCopilotTests_RequireExplicitPitCrewActionsOptIn()
+    {
+        var copilotTests = ReadRepositoryFile(
+            "src/NexusLabs.Foundry.Copilot.Tests/IntegrationSmokeTests.cs");
+        var evaluationTest = ReadRepositoryFile(
+            "src/NexusLabs.Foundry.Evaluation.Tests/CopilotSmokeTests.cs");
+        var copilotGuard = ReadRepositoryFile(
+            "src/NexusLabs.Foundry.Copilot.Tests/LiveCopilotTestGuard.cs");
+        var evaluationGuard = ReadRepositoryFile(
+            "src/NexusLabs.Foundry.Evaluation.Tests/LiveCopilotTestGuard.cs");
+
+        Assert.Contains("LiveCopilotTestGuard.RequirePitCrewOptIn();", copilotTests);
+        Assert.Contains("LiveCopilotTestGuard.RequirePitCrewOptIn();", evaluationTest);
+        foreach (var guard in new[] { copilotGuard, evaluationGuard })
+        {
+            Assert.Contains("GITHUB_ACTIONS", guard);
+            Assert.Contains("FOUNDRY_LIVE_COPILOT_RUNNER", guard);
+            Assert.Contains("FOUNDRY_ALLOW_LIVE_COPILOT_TESTS", guard);
+            Assert.Contains("\"pitcrew\"", guard);
+            Assert.Contains("Assert.Skip", guard);
+        }
     }
 
     private static string ReadRepositoryFile(string relativePath)

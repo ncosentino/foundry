@@ -7,10 +7,8 @@ namespace NexusLabs.Foundry.Evaluation.Tests;
 
 /// <summary>
 /// Smoke test that exercises a real <see cref="RelevanceEvaluator"/> run against a
-/// live Copilot-backed judge. Requires a logged-in Copilot CLI or a
-/// <c>GH_TOKEN</c>/<c>GITHUB_TOKEN</c> environment variable. If the token cannot
-/// be resolved, the test fails loudly with the underlying exception — there is
-/// no skip path.
+/// live Copilot-backed judge. Runs only in GitHub Actions when explicit live-test
+/// approval identifies the runner as PitCrew.
 /// </summary>
 [Trait("Category", "Integration")]
 public sealed class CopilotSmokeTests
@@ -20,6 +18,7 @@ public sealed class CopilotSmokeTests
     [Fact]
     public async Task RelevanceEvaluator_WithCopilotJudge_ProducesMetric()
     {
+        LiveCopilotTestGuard.RequirePitCrewOptIn();
         using var judge = new CopilotChatClient(new CopilotChatClientOptions
         {
             DefaultModel = "claude-sonnet-4.5",
