@@ -78,6 +78,8 @@ public sealed class HarnessHostedWorkflowTests
         Assert.DoesNotContain("models.github.ai", script);
         Assert.DoesNotContain("replay-smoke-response.json", script);
         Assert.DoesNotContain("-GitHubToken", workflow);
+        Assert.Contains("Run Copilot SDK provider probe", workflow);
+        Assert.Contains("--provider-probe", workflow);
     }
 
     [Fact]
@@ -116,19 +118,32 @@ public sealed class HarnessHostedWorkflowTests
     }
 
     [Fact]
-    public void HostedDriver_UsesCopilotProviderWithExplicitWorkflowToken()
+    public void HostedDriver_UsesOfficialCopilotSdkWithExplicitWorkflowToken()
     {
         var program = ReadRepositoryFile(
             "src/Examples/AgentFramework/HarnessEvaluationApp/Program.cs");
         var project = ReadRepositoryFile(
             "src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj");
+        var client = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/CopilotSdkChatClient.cs");
+        var executor = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/CopilotSdkTurnExecutor.cs");
+        var collector = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/CopilotSdkTurnCollector.cs");
 
-        Assert.Contains("new CopilotChatClient", program);
+        Assert.Contains("new CopilotClient", program);
+        Assert.Contains("new CopilotSdkChatClient", program);
         Assert.Contains("GitHubToken = token", program);
-        Assert.Contains("DefaultModel = options.ModelId", program);
+        Assert.Contains("CopilotClientMode.Empty", program);
+        Assert.Contains("GitHub.Copilot.SDK", project);
+        Assert.DoesNotContain("NexusLabs.Foundry.Copilot.csproj", project);
+        Assert.Contains("AsDeclarationOnly", executor);
+        Assert.Contains("ExternalToolRequestedEvent", collector);
+        Assert.Contains("ModelCapabilitiesOverrideLimits", executor);
+        Assert.Contains("BuildTranscriptJson", client);
         Assert.DoesNotContain("OpenAIClient", program);
         Assert.DoesNotContain("models.github.ai", program);
-        Assert.Contains("NexusLabs.Foundry.Copilot.csproj", project);
+        Assert.DoesNotContain("new CopilotChatClient", program);
         Assert.DoesNotContain("<PackageReference Include=\"OpenAI\"", project);
         Assert.DoesNotContain("<PackageReference Include=\"Microsoft.Extensions.AI.OpenAI\"", project);
     }
