@@ -78,6 +78,8 @@ public sealed class CopilotSdkChatClientTests
                 .GetProperty("toolCalls")[0]
                 .GetProperty("name")
                 .GetString());
+        Assert.False(serializedMessages[2].TryGetProperty("text", out _));
+        Assert.False(serializedMessages[3].TryGetProperty("text", out _));
         Assert.Equal(
             "value-alpha",
             serializedMessages[3]

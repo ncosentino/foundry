@@ -140,6 +140,8 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains("AsDeclarationOnly", executor);
         Assert.Contains("ExternalToolRequestedEvent", collector);
         Assert.Contains("ModelCapabilitiesOverrideLimits", executor);
+        Assert.Contains("PermissionDecision.Reject", executor);
+        Assert.DoesNotContain("PermissionHandler.ApproveAll", executor);
         Assert.Contains("BuildTranscriptJson", client);
         Assert.DoesNotContain("OpenAIClient", program);
         Assert.DoesNotContain("models.github.ai", program);

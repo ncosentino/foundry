@@ -62,7 +62,7 @@ public sealed class CopilotSdkTurnCollectorTests
     }
 
     [Fact]
-    public async Task Completion_WaitsForIdleWhenNoToolIsRequested()
+    public async Task Completion_CompletesAfterMessageAndUsageWhenNoToolIsRequested()
     {
         var collector = new CopilotSdkTurnCollector("fallback-model");
         collector.Observe(new AssistantUsageEvent
@@ -83,12 +83,6 @@ public sealed class CopilotSdkTurnCollectorTests
                 Model = "gpt-5-mini",
                 Content = "done",
             },
-        });
-
-        Assert.False(collector.Completion.IsCompleted);
-        collector.Observe(new SessionIdleEvent
-        {
-            Data = new SessionIdleData(),
         });
 
         var result = await collector.Completion;
