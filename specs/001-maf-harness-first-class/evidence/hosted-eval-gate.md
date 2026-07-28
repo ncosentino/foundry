@@ -60,8 +60,10 @@ Observed required-check payload:
 - runs only on PitCrew runners labeled
   `self-hosted`, `linux`, `x64`, and `general-purpose`;
 - requests only `contents: read` and `copilot-requests: write`;
-- uses Foundry's `CopilotChatClient` with the workflow-scoped `GITHUB_TOKEN`
-  explicitly supplied to the client;
+- uses the official `GitHub.Copilot.SDK` runtime with the workflow-scoped
+  `GITHUB_TOKEN` explicitly supplied to the SDK;
+- runs one declaration-only-tool provider probe before scheduling any paired
+  batch;
 - contains no GitHub Models endpoint, permission, or hosted-runner fallback;
 - uses a 60-minute job timeout and the pre-registered request, cost, duration,
   output-token, and concurrency caps;

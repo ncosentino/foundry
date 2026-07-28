@@ -248,6 +248,19 @@ jobs:
             -ModelId $env:MODEL_ID `
             -ConfirmCopilotEnterpriseBilling:$confirmCopilotEnterpriseBilling
 
+      - name: Run Copilot SDK provider probe
+        if: steps.preflight.outputs.preflight-status == 'Ready'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
+        run: >-
+          dotnet run
+          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
+          --configuration Release
+          --
+          --provider-probe
+          --output artifacts/eval/hosted-run
+
       - name: Execute complete paired comparison
         if: steps.preflight.outputs.preflight-status == 'Ready'
         env:
@@ -257,6 +270,7 @@ jobs:
           dotnet run
           --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
           --configuration Release
+          --no-build
           --
           --output artifacts/eval/hosted-run
 
