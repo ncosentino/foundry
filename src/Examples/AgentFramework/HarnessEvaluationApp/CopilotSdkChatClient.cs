@@ -110,7 +110,10 @@ internal sealed class CopilotSdkChatClient : IChatClient
             {
                 writer.WriteStartObject();
                 writer.WriteString("role", message.Role.Value);
-                writer.WriteString("text", message.Text);
+                if (!string.IsNullOrEmpty(message.Text))
+                {
+                    writer.WriteString("text", message.Text);
+                }
                 var toolCalls = message.Contents.OfType<FunctionCallContent>().ToArray();
                 if (toolCalls.Length > 0)
                 {
@@ -135,7 +138,18 @@ internal sealed class CopilotSdkChatClient : IChatClient
                     {
                         writer.WriteStartObject();
                         writer.WriteString("callId", result.CallId);
-                        writer.WriteString("result", result.Result?.ToString());
+                        writer.WritePropertyName("result");
+                        if (result.Result is null)
+                        {
+                            writer.WriteNullValue();
+                        }
+                        else
+                        {
+                            JsonSerializer.Serialize(
+                                writer,
+                                result.Result,
+                                result.Result.GetType());
+                        }
                         writer.WriteEndObject();
                     }
                     writer.WriteEndArray();

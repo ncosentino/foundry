@@ -34,10 +34,15 @@ internal sealed class CopilotSdkTurnExecutor
         var declarations = request.Tools
             .Select(tool => tool.AsDeclarationOnly())
             .ToArray();
+        var allowedToolNames = declarations
+            .Select(tool => tool.Name)
+            .ToHashSet(StringComparer.Ordinal);
 #pragma warning disable GHCP001
         var configuration = new SessionConfig
         {
             Model = request.ModelId,
+            // This is the common provider cap. Each arm has already transformed
+            // its transcript through its own context and compaction policy.
             ModelCapabilities = new ModelCapabilitiesOverride
             {
                 Limits = new ModelCapabilitiesOverrideLimits
@@ -47,8 +52,14 @@ internal sealed class CopilotSdkTurnExecutor
                 },
             },
             Tools = declarations,
-            AvailableTools = declarations.Select(tool => tool.Name).ToArray(),
-            OnPermissionRequest = PermissionHandler.ApproveAll,
+            AvailableTools = allowedToolNames.ToArray(),
+            OnPermissionRequest = (permission, _) =>
+                Task.FromResult<PermissionDecision>(
+                    permission is PermissionRequestCustomTool customTool &&
+                    allowedToolNames.Contains(customTool.ToolName)
+                        ? PermissionDecision.ApproveOnce()
+                        : PermissionDecision.Reject(
+                            "Only the declaration-only tools supplied by Foundry are allowed.")),
             SystemMessage = new SystemMessageConfig
             {
                 Mode = SystemMessageMode.Replace,

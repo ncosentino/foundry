@@ -16,20 +16,19 @@ internal static class CopilotSdkProviderProbe
                 Name = "foundry_harness_probe",
                 Description = "Verifies declaration-only tool calling through the Copilot SDK.",
             });
-        var response = await chatClient.GetResponseAsync(
-            [
-                new ChatMessage(
-                    ChatRole.User,
-                    "Call foundry_harness_probe exactly once with value ready. " +
-                    "Do not answer with text."),
-            ],
+        var userMessage = new ChatMessage(
+            ChatRole.User,
+            "Call foundry_harness_probe exactly once with value ready. " +
+            "After its result, return exactly probe-complete.");
+        var firstResponse = await chatClient.GetResponseAsync(
+            [userMessage],
             new ChatOptions
             {
                 Tools = [tool],
                 MaxOutputTokens = 128,
             },
             cancellationToken).ConfigureAwait(false);
-        var calls = response.Messages
+        var calls = firstResponse.Messages
             .SelectMany(message => message.Contents)
             .OfType<FunctionCallContent>()
             .ToArray();
@@ -39,6 +38,31 @@ internal static class CopilotSdkProviderProbe
         {
             throw new InvalidOperationException(
                 "Copilot SDK provider probe did not return the required declaration-only tool call.");
+        }
+
+        var finalResponse = await chatClient.GetResponseAsync(
+            [
+                userMessage,
+                .. firstResponse.Messages,
+                new ChatMessage(
+                    ChatRole.Tool,
+                    [new FunctionResultContent(calls[0].CallId, "probe-complete")]),
+            ],
+            new ChatOptions
+            {
+                Tools = [tool],
+                MaxOutputTokens = 128,
+            },
+            cancellationToken).ConfigureAwait(false);
+        var repeatedCalls = finalResponse.Messages
+            .SelectMany(message => message.Contents)
+            .OfType<FunctionCallContent>()
+            .ToArray();
+        if (repeatedCalls.Length > 0 ||
+            !string.Equals(finalResponse.Text, "probe-complete", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "Copilot SDK provider probe did not preserve the tool result across turns.");
         }
     }
 }

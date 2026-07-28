@@ -62,8 +62,14 @@ Observed required-check payload:
 - requests only `contents: read` and `copilot-requests: write`;
 - uses the official `GitHub.Copilot.SDK` runtime with the workflow-scoped
   `GITHUB_TOKEN` explicitly supplied to the SDK;
+- creates a fresh SDK session for every provider request and serializes the
+  exact transcript produced by the active Foundry arm, so no hidden SDK session
+  history crosses requests;
+- exposes only declaration-only Foundry tools and rejects every unexpected SDK
+  permission request;
 - runs one declaration-only-tool provider probe before scheduling any paired
-  batch;
+  batch; the probe verifies tool-call return, external tool-result replay, and
+  final grounded text;
 - contains no GitHub Models endpoint, permission, or hosted-runner fallback;
 - uses a 60-minute job timeout and the pre-registered request, cost, duration,
   output-token, and concurrency caps;

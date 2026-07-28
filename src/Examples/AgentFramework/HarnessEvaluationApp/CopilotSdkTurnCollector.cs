@@ -18,7 +18,6 @@ internal sealed class CopilotSdkTurnCollector
     private long _inputTokens;
     private long _outputTokens;
     private ChatFinishReason? _finishReason;
-    private bool _idle;
     private bool _usageObserved;
 
     internal CopilotSdkTurnCollector(string fallbackModelId)
@@ -49,9 +48,6 @@ internal sealed class CopilotSdkTurnCollector
                 case SessionErrorEvent error:
                     _completion.TrySetException(CreateException(error.Data));
                     return;
-                case SessionIdleEvent:
-                    _idle = true;
-                    break;
             }
 
             TryComplete();
@@ -73,11 +69,6 @@ internal sealed class CopilotSdkTurnCollector
         var toolRequests = _assistant.ToolRequests ?? [];
         if (toolRequests.Length > 0 &&
             toolRequests.Any(tool => !_externalToolCallIds.Contains(tool.ToolCallId)))
-        {
-            return;
-        }
-
-        if (toolRequests.Length == 0 && !_idle)
         {
             return;
         }
