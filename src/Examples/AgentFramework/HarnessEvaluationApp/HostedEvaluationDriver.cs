@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using System.ClientModel;
 
 using Microsoft.Extensions.AI;
 
@@ -226,6 +225,9 @@ internal sealed class HostedEvaluationDriver
             "analysis-plan.md");
         var judgeAssets = HarnessJudgeAssetLoader.Load(
             Path.Combine(Path.GetDirectoryName(manifestPath)!, "judges"));
+        var judgeOmissionReason = judgeAssets.EligibleCalibrationItemCount == 0
+            ? "Judge execution was omitted because the frozen calibration set has no human-attested eligible labels."
+            : "Judge execution was omitted because human-attested labels exist, but observed agreement has not been established.";
         await WriteJsonAtomicAsync(
             Path.Combine(_options.OutputDirectory, "judge", "omission.json"),
             new HostedJudgeOmissionArtifact(
@@ -234,7 +236,7 @@ internal sealed class HostedEvaluationDriver
                 judgeAssets.EligibleCalibrationItemCount,
                 judgeAssets.ProvisionalCalibrationItemCount,
                 judgeAssets.UsableForArmRanking,
-                "Judge execution was omitted because the frozen calibration set has no human-attested eligible labels."),
+                judgeOmissionReason),
             finalizationToken).ConfigureAwait(false);
         var request = new HarnessComparisonReportRequest(
             reportId: $"harness-001-{Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? "local"}",
@@ -819,12 +821,6 @@ internal sealed class HostedEvaluationDriver
     {
         for (var current = exception; current is not null; current = current.InnerException)
         {
-            if (current is ClientResultException clientResult &&
-                IsRetryableStatus(clientResult.Status))
-            {
-                return true;
-            }
-
             if (current is HttpRequestException httpRequest &&
                 (httpRequest.StatusCode is null ||
                  IsRetryableStatus((int)httpRequest.StatusCode)))

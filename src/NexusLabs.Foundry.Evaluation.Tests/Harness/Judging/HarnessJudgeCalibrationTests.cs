@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -41,7 +42,7 @@ public sealed class HarnessJudgeCalibrationTests
         }
 
         var calibration = root.GetProperty("calibration");
-        Assert.Equal("PROVISIONAL", calibration.GetProperty("labelStatus").GetString());
+        Assert.Equal("HUMAN_ATTESTED", calibration.GetProperty("labelStatus").GetString());
         Assert.False(calibration.GetProperty("publishableAsCalibrated").GetBoolean());
         Assert.Equal(
             calibration.GetProperty("manifestSha256").GetString(),
@@ -49,23 +50,30 @@ public sealed class HarnessJudgeCalibrationTests
     }
 
     [Fact]
-    public void CalibrationSet_ExcludesProvisionalLabelsUntilHumanAttested()
+    public void CalibrationSet_BindsHumanAttestedLabelsWithoutClaimingAgreement()
     {
         using var manifest = ReadJson("calibration/manifest.json");
         var root = manifest.RootElement;
         var items = ReadCalibrationItems();
 
         Assert.Equal("heldout-calibration", root.GetProperty("split").GetString());
-        Assert.Equal("PROVISIONAL", root.GetProperty("status").GetString());
+        Assert.Equal("HUMAN_ATTESTED", root.GetProperty("status").GetString());
         Assert.Equal("UNCALIBRATED", root.GetProperty("judgeCalibrationState").GetString());
         Assert.Equal(items.Count, root.GetProperty("itemCount").GetInt32());
-        Assert.Equal(0, root.GetProperty("eligibleItemCount").GetInt32());
-        Assert.Equal(items.Count, root.GetProperty("provisionalItemCount").GetInt32());
-        Assert.Equal(JsonValueKind.Null, root.GetProperty("humanAttestation").ValueKind);
-        Assert.False(root.GetProperty("labelProvenance").GetProperty("isHumanLabel").GetBoolean());
+        Assert.Equal(items.Count, root.GetProperty("eligibleItemCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("provisionalItemCount").GetInt32());
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("observedKappa").ValueKind);
+        var labelProvenance = root.GetProperty("labelProvenance");
+        Assert.Equal("human-attestation", labelProvenance.GetProperty("type").GetString());
+        Assert.Equal("@ncosentino", labelProvenance.GetProperty("attestedBy").GetString());
+        Assert.True(labelProvenance.GetProperty("isHumanLabel").GetBoolean());
+        Assert.True(labelProvenance.GetProperty("provisionalLabelsRetainedForAudit").GetBoolean());
         Assert.Equal(
             root.GetProperty("heldoutSha256").GetString(),
             ComputeSha256(JudgePath(root.GetProperty("heldoutPath").GetString()!)));
+        Assert.Equal(
+            root.GetProperty("provisionalSourceSha256").GetString(),
+            ComputeSha256(JudgePath(root.GetProperty("provisionalSourcePath").GetString()!)));
         Assert.All(root.GetProperty("rubricBindings").EnumerateArray(), binding =>
         {
             var rubricId = binding.GetProperty("rubricId").GetString();
@@ -80,12 +88,65 @@ public sealed class HarnessJudgeCalibrationTests
                 ComputeSha256(JudgePath(relativePath)));
         });
 
+        var subsetAttestation = root.GetProperty("humanAttestation");
+        Assert.Equal("@ncosentino", subsetAttestation.GetProperty("attestedBy").GetString());
+        Assert.True(DateTimeOffset.TryParse(
+            subsetAttestation.GetProperty("attestedAtUtc").GetString(),
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeUniversal,
+            out _));
+        Assert.Equal(
+            root.GetProperty("requiredHumanAttestation").GetProperty("subsetStatement").GetString(),
+            subsetAttestation.GetProperty("statement").GetString());
+        Assert.Equal(items.Count, subsetAttestation.GetProperty("eligibleItemCount").GetInt32());
+
+        var itemStatement = root
+            .GetProperty("requiredHumanAttestation")
+            .GetProperty("itemStatement")
+            .GetString();
+        var attestedAtUtc = subsetAttestation.GetProperty("attestedAtUtc").GetString();
         Assert.All(items, item =>
         {
             Assert.Equal("heldout-calibration", item.GetProperty("split").GetString());
             Assert.Equal("ai-bootstrap", item.GetProperty("provisionalLabels").GetProperty("source").GetString());
-            Assert.Equal(JsonValueKind.Null, item.GetProperty("humanAttestation").ValueKind);
-            Assert.False(item.GetProperty("eligibleForCalibration").GetBoolean());
+            Assert.Equal("human-attested", item.GetProperty("finalLabels").GetProperty("source").GetString());
+            Assert.True(item.GetProperty("eligibleForCalibration").GetBoolean());
+
+            var attestations = item.GetProperty("humanAttestation").EnumerateArray().ToArray();
+            Assert.Equal(3, attestations.Length);
+            Assert.All(attestations, attestation =>
+            {
+                Assert.Equal("@ncosentino", attestation.GetProperty("attestedBy").GetString());
+                Assert.Equal(attestedAtUtc, attestation.GetProperty("attestedAtUtc").GetString());
+                Assert.Equal(itemStatement, attestation.GetProperty("statement").GetString());
+                Assert.Equal("v1.0", attestation.GetProperty("rubricVersion").GetString());
+            });
+
+            var finalLabels = item.GetProperty("finalLabels");
+            var nominal = Assert.Single(
+                attestations,
+                attestation => attestation.GetProperty("target").GetString() == "pairwisePreference");
+            Assert.Equal("harness-nominal-pairwise-preference", nominal.GetProperty("rubricId").GetString());
+            Assert.Equal(
+                "ed39fcf321e10f33ac63a5fd9edd77c42cff0f5c970410ae9dfd32e71036763d",
+                nominal.GetProperty("rubricSha256").GetString());
+            Assert.Equal(
+                finalLabels.GetProperty("pairwisePreference").GetString(),
+                nominal.GetProperty("finalLabel").GetString());
+
+            foreach (var target in new[] { "leftOrdinalQuality", "rightOrdinalQuality" })
+            {
+                var ordinal = Assert.Single(
+                    attestations,
+                    attestation => attestation.GetProperty("target").GetString() == target);
+                Assert.Equal("harness-ordinal-response-quality", ordinal.GetProperty("rubricId").GetString());
+                Assert.Equal(
+                    "94196e2ad78b494b8a2a4036247053d53a2facf559aefa043aeeb4fe2e82a448",
+                    ordinal.GetProperty("rubricSha256").GetString());
+                Assert.Equal(
+                    finalLabels.GetProperty(target).GetInt32(),
+                    ordinal.GetProperty("finalLabel").GetInt32());
+            }
         });
     }
 
@@ -109,14 +170,14 @@ public sealed class HarnessJudgeCalibrationTests
         Assert.Equal(
             canonical.GetProperty("right").GetProperty("candidateId").GetString(),
             reversed.GetProperty("left").GetProperty("candidateId").GetString());
-        Assert.Equal("Left", canonical.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
-        Assert.Equal("Right", reversed.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
-        Assert.Equal(
-            canonical.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32(),
-            reversed.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32());
-        Assert.Equal(
-            canonical.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32(),
-            reversed.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32());
+        var canonicalLabels = canonical.GetProperty("finalLabels");
+        var reversedLabels = reversed.GetProperty("finalLabels");
+        Assert.Equal("Left", canonicalLabels.GetProperty("pairwisePreference").GetString());
+        Assert.Equal(3, canonicalLabels.GetProperty("leftOrdinalQuality").GetInt32());
+        Assert.Equal(1, canonicalLabels.GetProperty("rightOrdinalQuality").GetInt32());
+        Assert.Equal("Right", reversedLabels.GetProperty("pairwisePreference").GetString());
+        Assert.Equal(1, reversedLabels.GetProperty("leftOrdinalQuality").GetInt32());
+        Assert.Equal(4, reversedLabels.GetProperty("rightOrdinalQuality").GetInt32());
     }
 
     [Fact]
@@ -137,10 +198,10 @@ public sealed class HarnessJudgeCalibrationTests
             Assert.NotEqual(
                 left.GetProperty("text").GetString()!.Length,
                 right.GetProperty("text").GetString()!.Length);
-            Assert.Equal("Tie", item.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
-            Assert.Equal(
-                item.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32(),
-                item.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32());
+            var finalLabels = item.GetProperty("finalLabels");
+            Assert.Equal("Tie", finalLabels.GetProperty("pairwisePreference").GetString());
+            Assert.Equal(3, finalLabels.GetProperty("leftOrdinalQuality").GetInt32());
+            Assert.Equal(3, finalLabels.GetProperty("rightOrdinalQuality").GetInt32());
         });
     }
 
@@ -163,10 +224,11 @@ public sealed class HarnessJudgeCalibrationTests
                 left.GetProperty("surfaceStyle").GetString(),
                 right.GetProperty("surfaceStyle").GetString());
             Assert.NotEqual(left.GetProperty("text").GetString(), right.GetProperty("text").GetString());
-            Assert.Equal("Tie", item.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
-            Assert.Equal(
-                item.GetProperty("provisionalLabels").GetProperty("leftOrdinalQuality").GetInt32(),
-                item.GetProperty("provisionalLabels").GetProperty("rightOrdinalQuality").GetInt32());
+            var finalLabels = item.GetProperty("finalLabels");
+            var formattedIsLeft = left.GetProperty("surfaceStyle").GetString() == "formatted";
+            Assert.Equal(formattedIsLeft ? "Left" : "Right", finalLabels.GetProperty("pairwisePreference").GetString());
+            Assert.Equal(formattedIsLeft ? 4 : 3, finalLabels.GetProperty("leftOrdinalQuality").GetInt32());
+            Assert.Equal(formattedIsLeft ? 3 : 4, finalLabels.GetProperty("rightOrdinalQuality").GetInt32());
         });
     }
 
@@ -185,7 +247,9 @@ public sealed class HarnessJudgeCalibrationTests
         Assert.NotEqual(deterministicWinner, judgeWinner);
         Assert.Equal(
             deterministicWinner,
-            item.GetProperty("provisionalLabels").GetProperty("pairwisePreference").GetString());
+            item.GetProperty("finalLabels").GetProperty("pairwisePreference").GetString());
+        Assert.Equal(5, item.GetProperty("finalLabels").GetProperty("leftOrdinalQuality").GetInt32());
+        Assert.Equal(1, item.GetProperty("finalLabels").GetProperty("rightOrdinalQuality").GetInt32());
     }
 
     [Fact]
@@ -212,7 +276,7 @@ public sealed class HarnessJudgeCalibrationTests
             .Any(value => value.GetString() == kind);
 
     private static IReadOnlyList<JsonElement> ReadCalibrationItems() =>
-        File.ReadLines(JudgePath("calibration/heldout.provisional.jsonl"))
+        File.ReadLines(JudgePath("calibration/heldout.human-attested.jsonl"))
             .Where(line => !string.IsNullOrWhiteSpace(line))
             .Select(line =>
             {

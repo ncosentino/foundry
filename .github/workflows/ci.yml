@@ -12,16 +12,16 @@ on:
         required: true
         type: boolean
         default: false
-      confirm_paid_models_quota:
-        description: Confirm paid GitHub Models capacity can reserve the protocol worst case.
+      confirm_copilot_enterprise_billing:
+        description: Confirm this PitCrew run is authorized to use GitHub Copilot Enterprise billing.
         required: true
         type: boolean
         default: false
       harness_model_id:
-        description: GitHub Models generator model identifier.
+        description: GitHub Copilot generator model identifier.
         required: true
         type: string
-        default: openai/gpt-4.1-mini
+        default: gpt-5-mini
 
 env:
   DOTNET_VERSION: 10.0.x
@@ -189,14 +189,14 @@ jobs:
 
   harness-evaluation-dispatch:
     if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, general-purpose]
     timeout-minutes: 60
     permissions:
       contents: read
-      models: read
+      copilot-requests: write
     env:
       MODEL_ID: ${{ inputs.harness_model_id }}
-      PAID_QUOTA_CONFIRMED: ${{ inputs.confirm_paid_models_quota }}
+      COPILOT_BILLING_CONFIRMED: ${{ inputs.confirm_copilot_enterprise_billing }}
       HARNESS_EVAL_PLANNED_RUNS: 72
       HARNESS_EVAL_MAX_ATTEMPTS: 144
       HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8
@@ -234,22 +234,25 @@ jobs:
           "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessJudgeCalibrationTests|FullyQualifiedName~HarnessComparison"
           --verbosity minimal
 
-      - name: Run hosted quota and capture preflight
+      - name: Run PitCrew and Copilot preflight
+        id: preflight
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          HARNESS_EVAL_RUNNER_LABELS: self-hosted,linux,x64,general-purpose
         run: |
-          $confirmPaidModelsQuota = $env:PAID_QUOTA_CONFIRMED -eq 'true'
+          $confirmCopilotEnterpriseBilling = $env:COPILOT_BILLING_CONFIRMED -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `
             -OutputDirectory 'artifacts/eval/hosted-run' `
             -ModelId $env:MODEL_ID `
-            -ConfirmPaidModelsQuota:$confirmPaidModelsQuota
+            -ConfirmCopilotEnterpriseBilling:$confirmCopilotEnterpriseBilling
 
       - name: Execute complete paired comparison
-        if: env.PAID_QUOTA_CONFIRMED == 'true'
+        if: steps.preflight.outputs.preflight-status == 'Ready'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          HARNESS_EVAL_MODEL_ID: ${{ env.MODEL_ID }}
+          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
         run: >-
           dotnet run
           --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj

@@ -214,6 +214,33 @@ public class CopilotChatClientTests
     }
 
     [Fact]
+    public async Task GetResponseAsync_NonSuccess_PreservesStatusCode()
+    {
+        using var client = CreateClient(req =>
+        {
+            if (req.RequestUri!.PathAndQuery.Contains("copilot_internal"))
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(TokenExchangeResponse, Encoding.UTF8, "application/json"),
+                });
+            }
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Content = new StringContent("unauthorized", Encoding.UTF8, "text/plain"),
+            });
+        });
+
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(() =>
+            client.GetResponseAsync(
+                [new(ChatRole.User, "test")],
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, exception.StatusCode);
+    }
+
+    [Fact]
     public async Task GetStreamingResponseAsync_ParsesSSEChunks()
     {
         var sseData = new StringBuilder();

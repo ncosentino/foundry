@@ -23,8 +23,8 @@
   ],
   "calibration": {
     "manifestPath": "calibration/manifest.json",
-    "manifestSha256": "af794b396ad05fa8e0ebd246cdccabbab08a45d1236f9f73bdc37c3ff1f0fa3f",
-    "labelStatus": "PROVISIONAL",
+    "manifestSha256": "a02baa5ad18a035e5a6a2acbdbe9c75a2e727c63cf749cec50218c49877a2ae2",
+    "labelStatus": "HUMAN_ATTESTED",
     "publishableAsCalibrated": false
   },
   "biasChecks": [

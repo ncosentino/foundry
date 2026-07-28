@@ -3,13 +3,15 @@
   "calibrationSetId": "harness-001/v1.0/judge-calibration-001",
   "version": "v1.0",
   "split": "heldout-calibration",
-  "status": "PROVISIONAL",
+  "status": "HUMAN_ATTESTED",
   "judgeCalibrationState": "UNCALIBRATED",
   "itemCount": 7,
-  "eligibleItemCount": 0,
-  "provisionalItemCount": 7,
-  "heldoutPath": "calibration/heldout.provisional.jsonl",
-  "heldoutSha256": "120716f749aa47c297bf1ab65d486f883bb2e51f6cb9ffec0e838ce53eca94d3",
+  "eligibleItemCount": 7,
+  "provisionalItemCount": 0,
+  "heldoutPath": "calibration/heldout.human-attested.jsonl",
+  "heldoutSha256": "98323a323b03a20c4e9f0bd6cc42a84d33d46f67c84b2dfc6c42ae8ae610e776",
+  "provisionalSourcePath": "calibration/heldout.provisional.jsonl",
+  "provisionalSourceSha256": "120716f749aa47c297bf1ab65d486f883bb2e51f6cb9ffec0e838ce53eca94d3",
   "rubricBindings": [
     {
       "rubricId": "harness-nominal-pairwise-preference",
@@ -23,13 +25,25 @@
     }
   ],
   "labelProvenance": {
-    "type": "ai-bootstrap",
-    "createdBy": "GitHub Copilot CLI",
-    "createdAtUtc": "2026-07-27T03:59:35Z",
-    "isHumanLabel": false,
-    "calibrationEligibility": "Excluded until item-level and subset-level human attestation."
+    "type": "human-attestation",
+    "attestedBy": "@ncosentino",
+    "attestedAtUtc": "2026-07-28T17:49:35.020Z",
+    "isHumanLabel": true,
+    "provisionalLabelsRetainedForAudit": true,
+    "calibrationEligibility": "Eligible for agreement statistics after item-level and subset-level human attestation.",
+    "provisionalSource": {
+      "type": "ai-bootstrap",
+      "createdBy": "GitHub Copilot CLI",
+      "createdAtUtc": "2026-07-27T03:59:35Z"
+    }
   },
-  "humanAttestation": null,
+  "humanAttestation": {
+    "attestedBy": "@ncosentino",
+    "attestedAtUtc": "2026-07-28T17:49:35.020Z",
+    "eligibleItemCount": 7,
+    "statement": "I attest that every eligible calibration item has a named human reviewer, timestamp, rubric version and digest, and final human label."
+  },
+  "observedKappa": null,
   "requiredHumanAttestation": {
     "itemStatement": "I personally reviewed this item under the identified rubric version and SHA-256 digest and set or confirmed the final label. Any AI-produced draft label was treated only as provisional.",
     "subsetStatement": "I attest that every eligible calibration item has a named human reviewer, timestamp, rubric version and digest, and final human label.",
@@ -43,5 +57,5 @@
       "statement"
     ]
   },
-  "publicationRule": "Judge results remain UNCALIBRATED and cannot rank arms until human-attested labels produce the required agreement, kappa, confusion counts, and denominators."
+  "publicationRule": "Human-attested labels are eligible for agreement statistics, but judge results remain UNCALIBRATED and cannot rank arms until a scored judge run records the required agreement, kappa, confusion counts, and denominators."
 }

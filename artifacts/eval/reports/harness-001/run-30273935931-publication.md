@@ -117,12 +117,29 @@ No efficiency, token, latency, or cost ranking is supported.
 
 Judge evidence is `UNCALIBRATED`.
 
-- Human-attested eligible calibration items: 0;
+At authoritative run execution:
+
+- human-attested eligible calibration items: 0;
 - provisional calibration items: 7; and
 - usable for arm ranking: `false`.
 
-Judge execution was omitted. No judge preference or disagreement is used to
-support any result.
+Post-run calibration status:
+
+- Post-run human-attested calibration items: 7;
+- attested by: `@ncosentino`;
+- Observed judge agreement: not yet measured;
+- calibration state: `UNCALIBRATED`; and
+- usable for arm ranking: `false`.
+
+| Post-run calibration artifact | SHA-256 |
+|---|---|
+| Judge manifest | `8df3ee0afcf8bf856e7ba14ed7358bb0a912f56d002b6ac783609bd57e156dc4` |
+| Calibration manifest | `a02baa5ad18a035e5a6a2acbdbe9c75a2e727c63cf749cec50218c49877a2ae2` |
+| Human-attested held-out labels | `98323a323b03a20c4e9f0bd6cc42a84d33d46f67c84b2dfc6c42ae8ae610e776` |
+
+Judge execution remains omitted. Human labels establish calibration ground
+truth; they do not establish judge agreement. No judge preference or
+disagreement is used to support any arm result.
 
 ## Human-review signature block
 

@@ -11,15 +11,16 @@ public sealed class HarnessJudgeEvaluatorTests
     private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
 
     [Fact]
-    public void AssetLoader_ProvisionalCalibration_RemainsUncalibratedAndNonRanking()
+    public void AssetLoader_HumanLabelsWithoutObservedAgreement_RemainsUncalibratedAndNonRanking()
     {
         var assets = HarnessJudgeAssetLoader.Load(FindJudgeDirectory());
 
         Assert.Equal(HarnessJudgeCalibrationState.Uncalibrated, assets.CalibrationState);
         Assert.False(assets.UsableForArmRanking);
         Assert.Equal(0.6, assets.MinimumKappa);
-        Assert.Equal(0, assets.EligibleCalibrationItemCount);
-        Assert.Equal(7, assets.ProvisionalCalibrationItemCount);
+        Assert.Equal(7, assets.EligibleCalibrationItemCount);
+        Assert.Equal(0, assets.ProvisionalCalibrationItemCount);
+        Assert.Null(assets.ObservedKappa);
         Assert.Equal("harness-nominal-pairwise-preference", assets.NominalRubric.Id);
         Assert.Equal("harness-ordinal-response-quality", assets.OrdinalRubric.Id);
     }

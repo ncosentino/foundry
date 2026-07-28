@@ -1,7 +1,7 @@
 # Hosted Evaluation Gate Evidence
 
 **Task:** T118  
-**Verified:** 2026-07-27  
+**Verified:** 2026-07-28
 **Repository:** `ncosentino/foundry`
 
 ## Result
@@ -14,7 +14,7 @@ Before the dedicated workflow reaches the default branch, the already
 registered `CI` workflow exposes a manual `harness-evaluation-dispatch` bridge.
 That job is also absent from required branch protection and runs only when its
 explicit boolean input is true. When the bridge input is true, the normal
-self-hosted build/AOT jobs are skipped so only the GitHub-hosted evaluation
+self-hosted build/AOT jobs are skipped so only the PitCrew evaluation
 bridge runs.
 
 ## Branch-protection evidence
@@ -57,16 +57,23 @@ Observed required-check payload:
 `.github/workflows/harness-evaluation.yml`:
 
 - has only `workflow_dispatch` and `schedule` triggers;
-- runs on GitHub-hosted `ubuntu-latest`;
-- requests only `contents: read` and `models: read`;
+- runs only on PitCrew runners labeled
+  `self-hosted`, `linux`, `x64`, and `general-purpose`;
+- requests only `contents: read` and `copilot-requests: write`;
+- uses Foundry's `CopilotChatClient` with the workflow-scoped `GITHUB_TOKEN`
+  explicitly supplied to the client;
+- contains no GitHub Models endpoint, permission, or hosted-runner fallback;
 - uses a 60-minute job timeout and the pre-registered request, cost, duration,
   output-token, and concurrency caps;
 - treats provider authentication and connectivity failures as infrastructure
   errors;
 - uploads the immutable artifact bundle and writes the advisory summary under
   `if: always()`; and
-- emits `QuotaNotConfirmed` without making a model call when paid GitHub Models
-  capacity is not explicitly affirmed.
+- emits `CopilotBillingNotConfirmed` without making a model call when GitHub
+  Copilot Enterprise billing is not explicitly affirmed.
 
-The workflow therefore supplies hosted evidence without becoming a branch
-protection or stochastic merge gate.
+The preflight makes no inference request. A live comparison can start only after
+the job has been assigned to the exact PitCrew labels, the runner reports
+`self-hosted`, and Copilot Enterprise billing has been explicitly affirmed. The
+workflow remains advisory and does not become a branch-protection or stochastic
+merge gate.
