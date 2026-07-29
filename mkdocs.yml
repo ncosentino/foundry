@@ -107,6 +107,7 @@ nav:
       - Stable: api/stable/index.md
   - Operations:
       - Local CI Runners: local-runners.md
+      - Repository-Owned Runner Image: runner-image.md
       - Documentation Publishing: publishing.md
       - Releasing: releasing.md
   - Architecture Decisions:
@@ -118,6 +119,7 @@ nav:
       - ADR-0006 Hybrid Context and Workspace Authority: adr/adr-0006-hybrid-context-and-workspace-authority.md
       - ADR-0007 Experimental Hybrid Context Compaction: adr/adr-0007-experimental-hybrid-context-compaction.md
       - ADR-0008 Optional Harness Bundle: adr/adr-0008-optional-harness-bundle.md
+      - ADR-0009 Repository-Owned CI Runner Image: adr/adr-0009-repository-owned-ci-runner-image.md
 
 plugins:
   - search
