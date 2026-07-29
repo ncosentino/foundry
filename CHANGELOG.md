@@ -7,6 +7,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+
+- Repository-owned, digest-pinned Foundry CI runner image contract with exact
+  .NET SDKs, NativeAOT prerequisites, GitHub-hosted pull request validation,
+  and trusted-main GHCR publication evidence.
+
 ## [0.1.0-alpha.1] - 2026-07-19
 
 ### Added

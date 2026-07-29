@@ -25,3 +25,9 @@ run on self-hosted infrastructure.
 PitCrew workers are socketless Linux containers. Workloads requiring Docker,
 service containers, Testcontainers, Windows, or macOS must remain on an
 appropriate hosted or isolated runner profile.
+
+Foundry also publishes a repository-owned worker image for a dedicated
+`foundry-ci` profile. The image and profile are delivered in separate reviewed
+changes because the profile must pin the real public manifest digest produced
+after trusted publication. See [Repository-Owned Runner Image](runner-image.md)
+for publication, activation, update, fallback, and rollback boundaries.
