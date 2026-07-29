@@ -31,3 +31,9 @@ Foundry also publishes a repository-owned worker image for a dedicated
 changes because the profile must pin the real public manifest digest produced
 after trusted publication. See [Repository-Owned Runner Image](runner-image.md)
 for publication, activation, update, fallback, and rollback boundaries.
+
+The approved profile is stored at `.pitcrew/runner-profile.json` and preserves
+two repository workers. Until operator activation is complete, keep
+`CI_RUNNER=ubuntu-latest` for the hosted fallback. Activation changes that
+repository variable to `foundry-ci` only after the dedicated profile is online
+and verified.
