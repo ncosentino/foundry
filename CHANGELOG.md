@@ -12,6 +12,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Repository-owned Foundry CI runner image source and trusted GHCR publication
   workflow with exact .NET SDKs, NativeAOT prerequisites, GitHub-hosted pull
   request validation, provenance, SBOM generation, and retained digest evidence.
+- Digest-pinned `foundry-ci` PitCrew profile and portable exact-SDK setup action
+  that skips downloads only when every required SDK is already installed.
 
 ## [0.1.0-alpha.1] - 2026-07-19
 

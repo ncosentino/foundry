@@ -149,6 +149,12 @@ The decision will be considered confirmed only after all staged evidence exists:
 - anonymous retrieval of the selected public manifest digest; and
 - later activation evidence proving the dedicated profile and hosted fallback.
 
+The trusted publication evidence now exists at workflow run `30495344544`.
+Source SHA `7aa13e31d4eda724f362fdadc446661ca28ca74a` published public manifest
+`sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8`,
+which was independently resolved without registry credentials. Live profile
+activation remains pending.
+
 ## References
 
 - `global.json` and `.github/dotnet/sdk-9/global.json` define exact SDK
