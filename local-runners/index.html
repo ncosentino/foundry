@@ -18,7 +18,7 @@
         <link rel="prev" href="../api/stable/">
       
       
-        <link rel="next" href="../publishing/">
+        <link rel="next" href="../runner-image/">
       
       
         
@@ -2575,6 +2575,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../runner-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository-Owned Runner Image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../publishing/" class="md-nav__link">
         
   
@@ -2965,6 +2993,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0009-repository-owned-ci-runner-image/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0009 Repository-Owned CI Runner Image
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3010,6 +3073,11 @@ run on self-hosted infrastructure.</p>
 <p>PitCrew workers are socketless Linux containers. Workloads requiring Docker,
 service containers, Testcontainers, Windows, or macOS must remain on an
 appropriate hosted or isolated runner profile.</p>
+<p>Foundry also publishes a repository-owned worker image for a dedicated
+<code>foundry-ci</code> profile. The image and profile are delivered in separate reviewed
+changes because the profile must pin the real public manifest digest produced
+after trusted publication. See <a href="../runner-image/">Repository-Owned Runner Image</a>
+for publication, activation, update, fallback, and rollback boundaries.</p>
 
 
 

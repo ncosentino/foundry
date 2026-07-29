@@ -82,6 +82,7 @@ Author: Nick Cosentino (https://www.devleader.ca).
 ## Operations
 
 - [Local CI Runners](https://www.devleader.ca/projects/foundry/local-runners/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Repository-Owned Runner Image](https://www.devleader.ca/projects/foundry/runner-image/) -- Understand how Foundry builds, publishes, pins, activates, updates, and rolls back its repository-owned CI runner image.
 - [Documentation Publishing](https://www.devleader.ca/projects/foundry/publishing/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [Releasing](https://www.devleader.ca/projects/foundry/releasing/) -- Build reliable, observable, and testable AI agent systems in .NET
 
@@ -95,3 +96,4 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [ADR-0006 Hybrid Context and Workspace Authority](https://www.devleader.ca/projects/foundry/adr/adr-0006-hybrid-context-and-workspace-authority/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0007 Experimental Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0007-experimental-hybrid-context-compaction/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0008 Optional Harness Bundle](https://www.devleader.ca/projects/foundry/adr/adr-0008-optional-harness-bundle/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0009 Repository-Owned CI Runner Image](https://www.devleader.ca/projects/foundry/adr/adr-0009-repository-owned-ci-runner-image/) -- Build reliable, observable, and testable AI agent systems in .NET
