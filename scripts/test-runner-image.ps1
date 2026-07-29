@@ -111,6 +111,16 @@ function Test-RunnerImageContract {
     Assert-Contract ($dockerfile -match 'org\.opencontainers\.image\.revision') 'The image must carry an OCI revision label.'
 
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
+    $usesLines = @(
+        $workflow -split "\r?\n" |
+            Where-Object { $_ -match '^\s*uses:\s*' }
+    )
+    Assert-Contract ($usesLines.Count -gt 0) 'The runner image workflow must use reviewed actions.'
+    foreach ($usesLine in $usesLines) {
+        Assert-Contract (
+            $usesLine -match '@[0-9a-f]{40}(?:\s+#.*)?$'
+        ) "Every runner image action must be pinned to an immutable commit SHA: '$usesLine'."
+    }
     Assert-Contract ($workflow -match '(?m)^\s*pull_request:\s*$') 'Runner image validation must run for pull requests.'
     Assert-Contract ($workflow -match '(?m)^\s*push:\s*$') 'Runner image publication must run for trusted main pushes.'
     Assert-Contract ($workflow -notmatch '(?m)^\s*pull_request_target:\s*$') 'Runner image validation must never use pull_request_target.'
@@ -222,6 +232,13 @@ if ($SelfTest) {
         $path = Join-Path $root '.github/workflows/runner-image.yml'
         (Get-Content -LiteralPath $path -Raw) `
             -replace 'runs-on: ubuntu-24\.04', 'runs-on: [self-hosted, linux, x64]' |
+            Set-Content -LiteralPath $path -NoNewline
+    }
+    Assert-MutationRejected 'mutable workflow action tag' {
+        param($root)
+        $path = Join-Path $root '.github/workflows/runner-image.yml'
+        (Get-Content -LiteralPath $path -Raw) `
+            -replace '@[0-9a-f]{40}', '@v4' |
             Set-Content -LiteralPath $path -NoNewline
     }
     Assert-MutationRejected 'source-copying Docker instruction' {
