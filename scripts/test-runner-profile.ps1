@@ -113,8 +113,8 @@ function Test-RunnerProfileContract {
         $action -match 'actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9'
     ) 'The hosted fallback must pin actions/setup-dotnet to the reviewed commit.'
     Assert-Contract (
-        $action -match 'RUNNER_TOOL_CACHE:\s*\$\{\{\s*runner\.temp\s*\}\}/foundry-dotnet-tool-cache'
-    ) 'Missing SDKs must install into one RUNNER_TEMP-backed tool cache.'
+        $action -match 'DOTNET_INSTALL_DIR:\s*\$\{\{\s*runner\.temp\s*\}\}/foundry-dotnet'
+    ) 'Missing SDKs must install into one RUNNER_TEMP-backed directory.'
     Assert-Contract ($action -match 'setup-performed') 'The setup action must report whether installation occurred.'
     Assert-Contract ($action -match 'required-versions') 'The setup action must report the exact required SDK set.'
 
@@ -237,6 +237,44 @@ function Assert-MutationRejected {
     }
 }
 
+function Assert-ResolverRejected {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Content
+    )
+
+    $fixture = Join-Path ([IO.Path]::GetTempPath()) "foundry-sdk-contract-$([Guid]::NewGuid().ToString('N'))"
+    try {
+        New-Item -ItemType Directory -Path $fixture | Out-Null
+        $contractPath = Join-Path $fixture 'global.json'
+        [IO.File]::WriteAllText(
+            $contractPath,
+            $Content,
+            [Text.UTF8Encoding]::new($false))
+        $rejected = $false
+        try {
+            $resolver = Get-RepositoryFile $RepositoryRoot 'scripts/resolve-dotnet-sdk-contract.ps1'
+            & $resolver `
+                -RepositoryRoot $fixture `
+                -GlobalJsonFiles @('global.json') `
+                -InstalledSdks @('10.0.302') |
+                Out-Null
+        }
+        catch {
+            $rejected = $true
+        }
+        Assert-Contract $rejected "SDK resolver mutation '$Name' was not rejected."
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture) {
+            Remove-Item -LiteralPath $fixture -Recurse -Force
+        }
+    }
+}
+
 Test-RunnerProfileContract ([IO.Path]::GetFullPath($RepositoryRoot))
 
 if ($SelfTest) {
@@ -275,6 +313,19 @@ if ($SelfTest) {
         $content.Replace($original, $mutated) |
             Set-Content -LiteralPath $path -NoNewline
     }
+    $missingRejected = $false
+    try {
+        Invoke-SdkResolver $RepositoryRoot @('missing-global.json') @('10.0.302') | Out-Null
+    }
+    catch {
+        $missingRejected = $true
+    }
+    Assert-Contract $missingRejected 'A missing SDK contract was not rejected.'
+    Assert-ResolverRejected 'malformed JSON' '{'
+    Assert-ResolverRejected 'floating SDK range' '{"sdk":{"version":"10.0.x","rollForward":"disable","allowPrerelease":false}}'
+    Assert-ResolverRejected 'prerelease SDK drift' '{"sdk":{"version":"10.0.302-preview.1","rollForward":"disable","allowPrerelease":false}}'
+    Assert-ResolverRejected 'roll-forward drift' '{"sdk":{"version":"10.0.302","rollForward":"latestPatch","allowPrerelease":false}}'
+    Assert-ResolverRejected 'prerelease opt-in' '{"sdk":{"version":"10.0.302","rollForward":"disable","allowPrerelease":true}}'
 }
 
 Write-Host 'Foundry runner profile and SDK setup contract passed.'
