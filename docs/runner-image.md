@@ -141,9 +141,22 @@ The existing general-purpose route remains intact until CI and Documentation
 have passed on the dedicated profile. Fork pull requests remain GitHub-hosted,
 and `CI_RUNNER=ubuntu-latest` remains the hosted fallback.
 
-Only after the dedicated route is proven should the operator replay the
-general-purpose profile without Foundry while preserving every unrelated
-repository and capacity entry.
+Only after the dedicated route is proven should the operator remove Foundry
+from the general-purpose profile. First record that profile's non-secret
+`desired-capacity.json`, `acknowledged-capacity.json`, and `observed-state.json`.
+Then use the exact running profile and PitCrew's capacity-only removal path:
+
+```powershell
+.\Setup-Runner.ps1 `
+    -Profile <general-purpose-profile> `
+    -RemoveRepos https://github.com/ncosentino/foundry `
+    -CapacityOnly
+```
+
+If the stored profile is autoscaled, replay its existing `-Autoscale`,
+`-MinimumIdle`, and `-ScaleDownDelaySeconds` values unchanged. Verify the
+manager container ID did not change and every unrelated repository/count
+remains in desired and acknowledged state.
 
 ## Updating the image
 
