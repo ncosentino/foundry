@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ncosentino/pitcrew/87162e6fad6a961b9bc2f026639f2fa7df0795ba/runner-profile.schema.json",
+  "schemaVersion": 1,
+  "name": "foundry-ci",
+  "description": "Foundry repository CI workers with exact .NET SDKs and NativeAOT prerequisites.",
+  "image": "ghcr.io/ncosentino/foundry-runner@sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8",
+  "labels": [
+    "foundry"
+  ],
+  "replicas": 2,
+  "pullImage": true,
+  "disableDefaultLabels": true,
+  "verificationCommands": [
+    "test -x /actions-runner/bin/Runner.Listener",
+    "dotnet --list-sdks | grep -F '9.0.316'",
+    "dotnet --list-sdks | grep -F '10.0.302'",
+    "clang --version",
+    "pwsh --version",
+    "git --version",
+    "gh --version"
+  ]
+}
