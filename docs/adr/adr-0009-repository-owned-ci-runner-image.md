@@ -67,10 +67,11 @@ GitHub-hosted `ubuntu-24.04`. Pull requests never publish. A trusted push to
 and retains the manifest digest as workflow evidence.
 
 Delivery uses two reviewed repository changes. The first establishes the image
-and trusted publication. After that publication succeeds and anonymous access
-to the exact digest is verified, a second change may pin that digest in an
-external PitCrew profile and add portable conditional SDK setup. The operator
-activates that profile only after the second change merges.
+and trusted publication. After that publication succeeds and anonymous access to the exact digest is
+verified, a second change in this repository may pin that digest in the external
+PitCrew profile manifest at `.pitcrew/runner-profile.json` and add portable
+conditional SDK setup. The operator activates that profile only after the
+second change merges.
 
 The image workflow never changes `CI_RUNNER`, branch protection, runner
 capacity, or host configuration. Update and rollback are performed by restoring
@@ -137,14 +138,15 @@ fallback and explicitly hosted workflows remain independent.
 
 ## Confirmation
 
-The decision is confirmed by:
+The decision will be considered confirmed only after all staged evidence exists:
 
 - mutation tests rejecting mutable or unpinned bases, floating SDK versions,
   source-copying Docker instructions, credential-bearing inputs, broad
   self-hosted image builds, and fork-routing regressions;
 - GitHub-hosted image construction and execution on pull requests;
 - trusted-main GHCR publication with provenance, SBOM, immutable digest, and
-  retained publication evidence; and
+  retained publication evidence;
+- anonymous retrieval of the selected public manifest digest; and
 - later activation evidence proving the dedicated profile and hosted fallback.
 
 ## References

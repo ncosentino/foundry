@@ -51,8 +51,29 @@ trusted publication produces its real public manifest digest.
 3. Record the source SHA, immutable tag, and manifest digest.
 4. Make the GHCR package public if its initial visibility is private.
 5. Verify anonymous retrieval of the exact digest.
-6. Commit a second pull request that pins that digest in
-   `.pitcrew/runner-profile.json`.
+6. From this Foundry repository, commit a second pull request that pins that
+   digest in `.pitcrew/runner-profile.json`.
+
+Use a clean Docker client configuration to prove that the selected digest is
+publicly readable without cached GHCR credentials:
+
+```powershell
+$originalDockerConfig = $env:DOCKER_CONFIG
+$anonymousDockerConfig = Join-Path $env:TEMP "foundry-ghcr-anonymous"
+try {
+    New-Item -ItemType Directory -Path $anonymousDockerConfig -Force | Out-Null
+    $env:DOCKER_CONFIG = $anonymousDockerConfig
+    docker buildx imagetools inspect `
+        ghcr.io/ncosentino/foundry-runner@sha256:<manifest-digest>
+}
+finally {
+    $env:DOCKER_CONFIG = $originalDockerConfig
+    Remove-Item -LiteralPath $anonymousDockerConfig -Recurse -Force
+}
+```
+
+Record that output with the trusted publication run before pull request 2 is
+treated as ready.
 
 Mutable tags are never used as the deployed profile identity.
 
