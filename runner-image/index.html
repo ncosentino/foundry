@@ -2647,6 +2647,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#portable-sdk-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portable SDK setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#activation-boundary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3171,6 +3182,14 @@ the image.</p>
 </code></pre></div>
 <p>Publication includes provenance and an SBOM. The workflow records the resulting
 manifest digest as both a job summary and a retained artifact.</p>
+<p>The first trusted publication completed in
+<a href="https://github.com/ncosentino/foundry/actions/runs/30495344544">workflow run 30495344544</a>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>source SHA: 7aa13e31d4eda724f362fdadc446661ca28ca74a
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>manifest:   sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>image:      ghcr.io/ncosentino/foundry-runner@sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8
+</code></pre></div>
+<p>The exact digest was also resolved successfully with a clean anonymous Docker
+configuration.</p>
 <p>The image build context is <code>.github/runner-images/foundry-ci/</code>. It contains no
 repository source, credentials, runner registration token, or generated
 workload output.</p>
@@ -3188,30 +3207,75 @@ trusted publication produces its real public manifest digest.</p>
 </ol>
 <p>Use a clean Docker client configuration to prove that the selected digest is
 publicly readable without cached GHCR credentials:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">$originalDockerConfig</span> <span class="p">=</span> <span class="nv">$env:DOCKER_CONFIG</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nv">$anonymousDockerConfig</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$env:TEMP</span> <span class="s2">&quot;foundry-ghcr-anonymous&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">try</span> <span class="p">{</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Path</span> <span class="nv">$anonymousDockerConfig</span> <span class="n">-Force</span> <span class="p">|</span> <span class="nb">Out-Null</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="nv">$env:DOCKER_CONFIG</span> <span class="p">=</span> <span class="nv">$anonymousDockerConfig</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">docker</span> <span class="n">buildx</span> <span class="n">imagetools</span> <span class="n">inspect</span> <span class="p">`</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="n">ghcr</span><span class="p">.</span><span class="n">io</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry-runner</span><span class="nv">@sha256</span><span class="p">:&lt;</span><span class="n">manifest-digest</span><span class="p">&gt;</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">}</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">finally</span> <span class="p">{</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="nv">$env:DOCKER_CONFIG</span> <span class="p">=</span> <span class="nv">$originalDockerConfig</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="nb">Remove-Item</span> <span class="n">-LiteralPath</span> <span class="nv">$anonymousDockerConfig</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">$originalDockerConfig</span> <span class="p">=</span> <span class="nv">$env:DOCKER_CONFIG</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">$anonymousDockerConfig</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$env:TEMP</span> <span class="s2">&quot;foundry-ghcr-anonymous&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">try</span> <span class="p">{</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Path</span> <span class="nv">$anonymousDockerConfig</span> <span class="n">-Force</span> <span class="p">|</span> <span class="nb">Out-Null</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="nv">$env:DOCKER_CONFIG</span> <span class="p">=</span> <span class="nv">$anonymousDockerConfig</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">docker</span> <span class="n">buildx</span> <span class="n">imagetools</span> <span class="n">inspect</span> <span class="p">`</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">ghcr</span><span class="p">.</span><span class="n">io</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry-runner</span><span class="nv">@sha256</span><span class="p">:&lt;</span><span class="n">manifest-digest</span><span class="p">&gt;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">finally</span> <span class="p">{</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="nv">$env:DOCKER_CONFIG</span> <span class="p">=</span> <span class="nv">$originalDockerConfig</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="nb">Remove-Item</span> <span class="n">-LiteralPath</span> <span class="nv">$anonymousDockerConfig</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p">}</span>
 </code></pre></div>
 <p>Record that output with the trusted publication run before pull request 2 is
 treated as ready.</p>
 <p>Mutable tags are never used as the deployed profile identity.</p>
+<h2 id="portable-sdk-setup">Portable SDK setup<a class="headerlink" href="#portable-sdk-setup" title="Permanent link">&para;</a></h2>
+<p>Affected workflows call the repository action:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Setup exact .NET SDKs</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./.github/actions/setup-dotnet</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">global-json-files</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="no">global.json</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">      </span><span class="no">.github/dotnet/sdk-9/global.json</span>
+</code></pre></div>
+<p>The action validates every contract, inventories installed SDKs, and skips
+installation only when the complete requested set is present. If any SDK is
+missing, pinned <code>actions/setup-dotnet</code> installs the full set into
+<code>$RUNNER_TEMP/foundry-dotnet</code>, preserving hosted portability without allowing
+one SDK root to hide another.</p>
 <h2 id="activation-boundary">Activation boundary<a class="headerlink" href="#activation-boundary" title="Permanent link">&para;</a></h2>
 <p>Repository workflows do not install or update PitCrew. After the profile pull
 request merges, an operator applies the profile from an approved PitCrew
 checkout, verifies manager and worker convergence, then sets <code>CI_RUNNER</code> to the
 dedicated profile label.</p>
+<p>Apply the committed profile with the existing capacity:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">.\</span><span class="n">Setup-Runner</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">-ProfilePath</span> <span class="p">&lt;</span><span class="n">foundry-checkout</span><span class="p">&gt;\.</span><span class="n">pitcrew</span><span class="p">\</span><span class="n">runner-profile</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">-Repos</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry</span><span class="p">=</span><span class="n">2</span>
+</code></pre></div>
+<p>Before changing routing, verify:</p>
+<ul>
+<li>the replacement manager reports the current manager contract;</li>
+<li><code>observed-state.json</code> is fresh and reports <code>managerStatus: running</code>;</li>
+<li>the desired generation is accepted;</li>
+<li>the target image and image ID match the committed digest;</li>
+<li>two configured slots remain available; and</li>
+<li>a repository runner carrying label <code>foundry-ci</code> is online.</li>
+</ul>
+<p>Then set <code>CI_RUNNER=foundry-ci</code>, run CI and Documentation from <code>main</code>, and prove
+the exact SDK action reports <code>Setup performed: false</code> for every SDK baked into
+the image. Required checks <code>build-test-pack</code>, <code>docs</code>, and <code>aot</code> must pass on the
+activation SHA. Do not dispatch Release from a non-tag as a smoke test.</p>
 <p>The existing general-purpose route remains intact until CI and Documentation
 have passed on the dedicated profile. Fork pull requests remain GitHub-hosted,
 and <code>CI_RUNNER=ubuntu-latest</code> remains the hosted fallback.</p>
+<p>Only after the dedicated route is proven should the operator remove Foundry
+from the general-purpose profile. First record that profile's non-secret
+<code>desired-capacity.json</code>, <code>acknowledged-capacity.json</code>, and <code>observed-state.json</code>.
+Then use the exact running profile and PitCrew's capacity-only removal path:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">.\</span><span class="n">Setup-Runner</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">-Profile</span> <span class="p">&lt;</span><span class="n">general-purpose-profile</span><span class="p">&gt;</span> <span class="p">`</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">-RemoveRepos</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry</span> <span class="p">`</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">-CapacityOnly</span>
+</code></pre></div>
+<p>If the stored profile is autoscaled, replay its existing <code>-Autoscale</code>,
+<code>-MinimumIdle</code>, and <code>-ScaleDownDelaySeconds</code> values unchanged. Verify the
+manager container ID did not change and every unrelated repository/count
+remains in desired and acknowledged state.</p>
 <h2 id="updating-the-image">Updating the image<a class="headerlink" href="#updating-the-image" title="Permanent link">&para;</a></h2>
 <p>Every update repeats the same sequence:</p>
 <ol>

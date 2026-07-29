@@ -3078,6 +3078,11 @@ appropriate hosted or isolated runner profile.</p>
 changes because the profile must pin the real public manifest digest produced
 after trusted publication. See <a href="../runner-image/">Repository-Owned Runner Image</a>
 for publication, activation, update, fallback, and rollback boundaries.</p>
+<p>The approved profile is stored at <code>.pitcrew/runner-profile.json</code> and preserves
+two repository workers. Until operator activation is complete, keep
+<code>CI_RUNNER=ubuntu-latest</code> for the hosted fallback. Activation changes that
+repository variable to <code>foundry-ci</code> only after the dedicated profile is online
+and verified.</p>
 
 
 
