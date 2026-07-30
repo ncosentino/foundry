@@ -150,8 +150,8 @@ function Test-RunnerProfileContract {
         ) "Workflow '$($entry.Key)' does not use the repository setup action."
     }
     Assert-Contract (
-        ([regex]::Matches($workflows['ci.yml'], 'uses: \./\.github/actions/setup-dotnet')).Count -eq 3
-    ) 'CI must set up exact SDKs in build-test-pack, aot, and aot-harness.'
+        ([regex]::Matches($workflows['ci.yml'], 'uses: \./\.github/actions/setup-dotnet')).Count -eq 4
+    ) 'CI must set up exact SDKs in build-test-pack, aot, aot-harness, and harness-evaluation-dispatch.'
     Assert-Contract (
         $workflows['docs.yml'].Contains('.github/dotnet/sdk-9/global.json')
     ) 'Documentation must request both exact SDK contracts.'

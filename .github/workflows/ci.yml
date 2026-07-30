@@ -223,10 +223,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup exact .NET SDKs
+        uses: ./.github/actions/setup-dotnet
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          global-json-files: global.json
 
       - name: Validate deterministic evaluation contracts
         run: >-
