@@ -1,0 +1,20 @@
+{
+  "ResponseId": "fDMiU6ljkUOsVK5bYwv5eJf\u002BbK\u002B7NhnGovMpLLGB230HYG/CPohGndFzhRoXnwYEx\u002BC1eXryx9uY8QoJU5IfAyKJrmSyNfvQSc07\u002BrQZU7gXv8jIft4akXrfFdKGBGnSpo60O7GJUnNgroDwaYE\u002BOAZ/pEdWclOGqbospwOydswg2Tdkr/5k69G/dTzeHkcdPwvxNDjUUe7Fq0BYUe7bbSGMQqXw/VJes\u002Bt\u002B5x3MauE2dCP2DCv0pcVUGpcWi5bB321spHPfXIQvaaHLawKmw9nPqWFEA93x\u002Bar8J0hFWM8RotT4rmRCFanpELZDReSE7oDMQTEcLFZGNVOk3v7ayDhORVdg41HO70gj7oAGGc\u002BGsoIb5nCm0\u002BFMMojLeJQ5MiVv64Cy\u002BKSHhbPOJDLDRkkwVfUy",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_DFitcJR3J1rfyPtHaIFPQbLk",
+          "Name": "create_artifact_summary",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

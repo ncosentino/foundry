@@ -1,0 +1,28 @@
+{
+  "ResponseId": "p8qhr84vpsW03MpFGEtmi1ie7\u002Bgwc7rtxNerzm2wM3XfgXaoVT9v0ZOY\u002BGALnI9iS7YcMyen5Y8YgPKohNN9CsaCPUCeNXUEIt5MOUXNrQS2EyxNayMAlrU1fjNXXkcFsbANNtvsCFn9X0t558xlxTfxbP8wweBJqVF\u002B4w4q4IauFo1T8b2D44j0P4wdAgvTnS1gx7\u002B\u002Br9XzIX2njdG5eqQDW3C/2fTVABIxtqG7OSNahWokT2Tbi8X5oyyepXBNQlyE6DD\u002BvibGuA4E2v7ArO2v8aqqnsffx1\u002BPw8YFg5KeFK5wnseCpq0ExL2w\u002BmTrLMGdjpMDhsBBsfvd4kCpg4NO8kU9idw3ZBTK6IIte2z9kWYV2j\u002B0upwkP9aDLWt/LY\u002BzhJvOHjaoZJhiIP6CanoaKr7X",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_sIV4lfuL4tCrfoGGblCTbExD",
+          "Name": "record_continuity",
+          "Arguments": "{}",
+          "Result": null
+        },
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_MOLZBWgBqPiTk2GnbeqvwOeb",
+          "Name": "generate_large_artifact",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

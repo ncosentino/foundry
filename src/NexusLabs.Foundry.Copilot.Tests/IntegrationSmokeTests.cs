@@ -4,8 +4,8 @@ namespace NexusLabs.Foundry.Copilot.Tests;
 
 /// <summary>
 /// Integration tests that call the real Copilot API.
-/// Requires a logged-in Copilot CLI or GH_TOKEN environment variable.
-/// Run manually: dotnet test --filter "Category=Integration"
+/// Runs only in GitHub Actions when explicit live-test approval identifies the
+/// runner as PitCrew.
 /// </summary>
 [Trait("Category", "Integration")]
 public class IntegrationSmokeTests
@@ -13,6 +13,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task GetResponseAsync_ReturnsTextResponse()
     {
+        LiveCopilotTestGuard.RequirePitCrewOptIn();
         using var client = CreateClient();
 
         var response = await client.GetResponseAsync(
@@ -36,6 +37,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task GetStreamingResponseAsync_YieldsUpdates()
     {
+        LiveCopilotTestGuard.RequirePitCrewOptIn();
         using var client = CreateClient();
 
         var updates = new List<ChatResponseUpdate>();
@@ -60,6 +62,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task GetResponseAsync_NoExtraToolsLeaked()
     {
+        LiveCopilotTestGuard.RequirePitCrewOptIn();
         using var client = CreateClient();
 
         var response = await client.GetResponseAsync(
@@ -80,6 +83,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task WebSearchFunction_ReturnsResults()
     {
+        LiveCopilotTestGuard.RequirePitCrewOptIn();
         var options = new CopilotChatClientOptions();
         var oauthProvider = new GitHubOAuthTokenProvider(options);
         using var mcpClient = new CopilotMcpToolClient(oauthProvider, options);

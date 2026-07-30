@@ -1,0 +1,20 @@
+{
+  "ResponseId": "yq1J6o8sbP8nvM7FgN0R5qcjtWhsgtHXwtSbsRzDg5rJ8QranOZQ5vHJahTTbsbcfilzYXendvNWSJNTfijiBXSsV9dIsdA8\u002BbogLHjvLUVKAApZGPoMiPNwDWMI0jvKFh5Er4ktmkdZro5adBPda5rry0ZZ4QVtlMwUFL7zWkPawuDSy8ZOy2amKDhRoo8F9YH2l9NnXJ\u002BfjkktouPQt2mIh8ylr1FHnlIuw\u002B0EHdv1Nw6gzKbjDZsnqa/vehyxMPESKfqD9M7WG5yQKQ2Po9XmW2AyYNxrp/i5kJRGFaNU2k7fAmwYx\u002B5R7HDDGM/teM6NewVZ1Rzs\u002B6gAoPbzm3qnCSLUgBhkohIYBAwI79C\u002BEfs7PVvNwreQlDXlcQpyWAXgg28sMt0FEJlaFWK\u002BuOazekwg",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_D1kLn7kkwiGASaAIewxPtYit",
+          "Name": "record_continuity",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

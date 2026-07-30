@@ -27,6 +27,28 @@ internal static class ExperimentWilsonScoreCalculator
         return (estimate, lower, upper);
     }
 
+    internal static (double Estimate, double Lower, double Upper) CalculateTwoSided(
+        int successCount,
+        int sampleCount,
+        double confidenceLevel)
+    {
+        var estimate = (double)successCount / sampleCount;
+        var z = InverseStandardNormal(1 - ((1 - confidenceLevel) / 2));
+        var zSquared = z * z;
+        var denominator = 1 + zSquared / sampleCount;
+        var center = estimate + zSquared / (2 * sampleCount);
+        var margin = z * Math.Sqrt(
+            estimate * (1 - estimate) / sampleCount
+            + zSquared / (4d * sampleCount * sampleCount));
+        var lower = successCount == 0
+            ? 0
+            : Math.Max(0, (center - margin) / denominator);
+        var upper = successCount == sampleCount
+            ? 1
+            : Math.Min(1, (center + margin) / denominator);
+        return (estimate, lower, upper);
+    }
+
     private static double InverseStandardNormal(double probability)
     {
         const double a1 = -3.969683028665376e+01;

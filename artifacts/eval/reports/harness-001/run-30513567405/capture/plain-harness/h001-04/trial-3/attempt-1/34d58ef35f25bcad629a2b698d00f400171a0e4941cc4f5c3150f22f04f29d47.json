@@ -1,0 +1,20 @@
+{
+  "ResponseId": "u60e82pQNjLJomQAZ6RrMZYCxzwD6U/11NKGdQO3XrzEJ1Z1sMuXW2ljskvvLWwbJvDj/Wl6S6RLO7rOZmac9IEYfzGtXYota9vslKW6iiz7AJU6FSOacY8kvtUP/hsHquZNVCz1yuiSdJMb8GSmO8PmKhd37xY7dFoIJZxP6a9k5S4SO2GrlkRgZkNJjrizzI0R97RxGZAqPBEAlXKvpkxTl6W9Ia5Q2va35ozAVrjvlW1L8M8hCcjElSOf3pfgDtB/VlZzFFKEVB07awrDxQfmmEam7cOgkbtSiRt7\u002B0H1vR9XcSx4/7BvoRxomMHqle1qMKLmfevvFYF4HG\u002B5GzL857wzfyiSqLqU6ZQ0OuPlc6igwIh8XDHOR0aYYVOAGP2ujAVBbdbS4caBtrYKeXAIt3rO",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "Retained destination: Seattle.\n\nrecord_continuity completed \u2014 continuity saved to: outputs/continuity.json.\n\nThe required workspace artifact has been generated and is present. Would you like me to return the artifact contents here or provide a download/reference?",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "Retained destination: Seattle.\n\nrecord_continuity completed \u2014 continuity saved to: outputs/continuity.json.\n\nThe required workspace artifact has been generated and is present. Would you like me to return the artifact contents here or provide a download/reference?",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

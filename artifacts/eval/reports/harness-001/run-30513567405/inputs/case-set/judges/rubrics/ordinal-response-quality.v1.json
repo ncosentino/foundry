@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "rubricId": "harness-ordinal-response-quality",
+  "version": "v1.0",
+  "kind": "Ordinal",
+  "dimensionId": "response-quality",
+  "weighting": "Quadratic",
+  "instructions": [
+    "Score one captured response using only the supplied case prompt, deterministic reference summary, normalized tool trajectory, and final response artifact.",
+    "Score task-relevant correctness, continuity, grounded use of evidence, and clarity together as one ordinal quality judgment.",
+    "Do not raise a score merely for greater length, formatting, confidence, or conversational style.",
+    "If deterministic evidence shows the response is incorrect or incomplete, the response cannot receive a score above 2.",
+    "The score is exploratory and cannot override deterministic evidence."
+  ],
+  "scale": [
+    {
+      "value": 1,
+      "label": "Unusable",
+      "anchor": "Incorrect, non-responsive, unsupported, or materially misleading."
+    },
+    {
+      "value": 2,
+      "label": "Poor",
+      "anchor": "Partially relevant but materially incomplete, incorrect, or difficult to use."
+    },
+    {
+      "value": 3,
+      "label": "Adequate",
+      "anchor": "Substantively usable with minor omissions or clarity problems."
+    },
+    {
+      "value": 4,
+      "label": "Good",
+      "anchor": "Correct, complete, grounded, and clear with no material defect."
+    },
+    {
+      "value": 5,
+      "label": "Exceptional",
+      "anchor": "Fully correct and unusually clear or efficient without unnecessary verbosity."
+    }
+  ],
+  "outputSchema": {
+    "score": "Integer from 1 through 5.",
+    "reason": "Short evidence-grounded explanation without hidden chain-of-thought."
+  }
+}

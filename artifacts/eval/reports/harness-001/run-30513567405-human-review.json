@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0",
+  "status": "HumanReviewed",
+  "reviewerIdentity": "@ncosentino",
+  "reviewedAtUtc": "2026-07-30T14:32:59Z",
+  "artifactBundleChecksumSha256": "f76e31d9424e15b8d0b56b12b75a1020626284adb361c609a659a07dfa370d29",
+  "deterministicAnchorsAcknowledged": true,
+  "pairedUncertaintyAcknowledged": true,
+  "diagnosticsParityAcknowledged": true,
+  "judgeCalibrationAcknowledged": true,
+  "truncationStatusAcknowledged": true,
+  "retentionRecommendation": "RetainAllPendingStrongerEvidence",
+  "signature": "I reviewed run 30513567405 and acknowledge bundle checksum f76e31d9424e15b8d0b56b12b75a1020626284adb361c609a659a07dfa370d29, the deterministic anchors, paired uncertainty, diagnostics parity, judge omission because observed agreement is not established, and the cap/truncation treatment. I recommend retaining Iterative, Plain Harness, and experimental Hybrid overlap pending stronger evidence, with no default or removal change. Signed @ncosentino."
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-02",
+  "referenceId": "harness-001/v1.0/h001-02/completion",
+  "dimension": "Completion",
+  "aggregation": "ThreeTrialMajority",
+  "contractKind": "DeterministicAssertions",
+  "assertions": [
+    {
+      "source": "WorkspaceArtifact",
+      "path": "outputs/long-context-answer.txt",
+      "operator": "Exists",
+      "expected": true
+    },
+    {
+      "source": "WorkspaceArtifactText",
+      "path": "outputs/long-context-answer.txt",
+      "operator": "Equals",
+      "expected": "CONTEXT-SENTINEL-7F3A"
+    }
+  ]
+}

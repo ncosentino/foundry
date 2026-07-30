@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-05",
+  "referenceId": "harness-001/v1.0/h001-05/completion",
+  "dimension": "Completion",
+  "aggregation": "ThreeTrialMajority",
+  "contractKind": "DeterministicAssertions",
+  "assertions": [
+    {
+      "source": "EvaluationMetric",
+      "metricName": "Harness Cancellation Appropriate",
+      "operator": "Equals",
+      "expected": true
+    },
+    {
+      "source": "EvaluationMetric",
+      "metricName": "Harness No Success Shaped Output",
+      "operator": "Equals",
+      "expected": true
+    }
+  ]
+}

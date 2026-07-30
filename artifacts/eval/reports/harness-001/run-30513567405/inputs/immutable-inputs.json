@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "workflowRunId": "30513567405",
+  "workflowRunAttempt": "1",
+  "gitSha": "2ac9d32cdf31d17e2fb937ffca567562a6d069c5",
+  "modelId": "gpt-5-mini",
+  "provider": "github-copilot",
+  "authentication": "GITHUB_TOKEN with copilot-requests:write",
+  "billingProduct": "GitHub Copilot Enterprise",
+  "runnerEnvironment": "self-hosted",
+  "runnerLabels": "foundry,foundry-ci",
+  "confirmCopilotEnterpriseBilling": true,
+  "manifestSha256": "ae3fb57aaba55865047fc4b83ccf08f071f706047de127f3498a63f90a60de48",
+  "analysisPlanSha256": "fd75e42c576c78b16bd13c06bf51db889963ce99a29bbab4028fc3ef93de2263",
+  "judgeManifestSha256": "8df3ee0afcf8bf856e7ba14ed7358bb0a912f56d002b6ac783609bd57e156dc4",
+  "pricingTableSha256": "272dea841b50891966df3a1cba9e6b7126b407cc2ebf7e7e90ef4595194467ea",
+  "caps": {
+    "plannedRuns": 72,
+    "maximumAttempts": 144,
+    "maximumRequestsPerAttempt": 8,
+    "maximumReservedRequests": 1152,
+    "workflowTimeoutMinutes": 60,
+    "schedulingDeadlineMinutes": 50,
+    "maximumAttemptSeconds": 120,
+    "maximumOutputTokens": 2000,
+    "maximumConcurrency": 3,
+    "estimatedCostCapUsd": 25.0
+  }
+}

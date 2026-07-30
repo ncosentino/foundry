@@ -1,0 +1,20 @@
+{
+  "ResponseId": "9AjBEYYEp7yQia3dFIzaD\u002B0WtHyGetZoak573W5gaSNsInGMFb64HtMcXZismHxal2hTlo7kstznmUUceQ0G1I4dbjpTON1f/wHh9Dnpk7DZwATiyzsF6KZSM/WyXUFgeFNMYiD4mtZTSDgu53vof8C5PCUuXC\u002BCdOTkKSOffHnXYSuSagizX/JGRid6h9aHAcLiedwDXjGTyyVSvJogsl/6xy/8XSJHMpgtERXYXC2Xx/fk4p2pa1KKTsnkV\u002Bkmw99aKKCRFywLPkcNTp8LynJ4CiozTaYn3Hva7jWYY6091PWl\u002BnXAnVDZojEFCT5wi2O3NUt34y4okcaEhMRBIwHsdOGpbTpALiGo\u002BsaFe1AG5btg\u002BllKv5pZaBkPX4Jk26s42vKt7QCEBsxvVrNsxC7yzJ5u",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "outputs/tool-orchestration.json",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "outputs/tool-orchestration.json",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

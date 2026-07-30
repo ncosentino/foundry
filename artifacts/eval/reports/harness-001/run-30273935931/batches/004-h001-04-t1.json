@@ -1,0 +1,110 @@
+{
+  "BatchSequence": 4,
+  "Batch": {
+    "CaseId": "h001-04",
+    "TrialIndex": 1
+  },
+  "ArmOrder": [
+    "Hybrid",
+    "Iterative",
+    "PlainHarness"
+  ],
+  "Results": {
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-04",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The continuity record has been called and the required workspace artifact has been generated and summarized. The retained destination decision is Seattle. If you need any further actions or information, please let me know.",
+        "ToolCalls": [
+          "record_continuity",
+          "generate_large_artifact",
+          "create_artifact_summary"
+        ],
+        "CumulativeTokens": 1669,
+        "PeakTokens": 498,
+        "LatencyMilliseconds": 32439.9404,
+        "CaptureReference": "capture/hybrid/h001-04/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022destination\u0022:\u0022seattle\u0022,\u0022constraintsPreserved\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:15:03.1132349+00:00",
+          "Duration": "00:00:32.4402637",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-04",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "record_continuity"
+        ],
+        "CumulativeTokens": 350,
+        "PeakTokens": 350,
+        "LatencyMilliseconds": 7564.1571,
+        "CaptureReference": "capture/iterative/h001-04/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022destination\u0022:\u0022seattle\u0022,\u0022constraintsPreserved\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:15:03.1141061+00:00",
+          "Duration": "00:00:07.5643393",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-04",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The call to record_continuity has been made and the required workspace artifact has been generated successfully. The retained destination decision is Seattle. If you need any further assistance, please let me know.",
+        "ToolCalls": [
+          "record_continuity",
+          "generate_large_artifact"
+        ],
+        "CumulativeTokens": 2660,
+        "PeakTokens": 1931,
+        "LatencyMilliseconds": 28401.6005,
+        "CaptureReference": "capture/plain-harness/h001-04/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022destination\u0022:\u0022seattle\u0022,\u0022constraintsPreserved\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:15:03.1144539+00:00",
+          "Duration": "00:00:28.4018075",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 8,
+  "EstimatedCostUsd": 0.16
+}

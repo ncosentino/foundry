@@ -221,39 +221,39 @@ removing existing behavior.
 
 ### Pre-registration and tests first
 
-- [ ] T095 [US4] Publish the pre-registered hosted analysis protocol in `artifacts/eval/case-sets/harness-001/v1.0/analysis-plan.md`, including trial count rationale, retry-versus-trial semantics, exclusions, per-metric paired method, uncertainty, unknown-sample treatment, and non-gating status
-- [ ] T096 [P] [US4] Add case-set manifest schema and round-trip tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessCaseSetManifestTests.cs`
-- [ ] T097 [P] [US4] Add diagnostics-schema parity tests across iterative, plain Harness, and hybrid fixtures in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessDiagnosticsParityTests.cs`
-- [ ] T098 [P] [US4] Add context-safety and compaction-validity evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessContextEvaluatorTests.cs`
-- [ ] T099 [P] [US4] Add artifact-reuse and rehydration evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessArtifactEvaluatorTests.cs`
-- [ ] T100 [P] [US4] Add telemetry, ordering, identity, cancellation, and session-continuity evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessRuntimeEvaluatorTests.cs`
-- [ ] T101 [P] [US4] Add cost-attribution and trajectory evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessCostTrajectoryEvaluatorTests.cs`
-- [ ] T102 [P] [US4] Add known-answer paired binary and continuous comparison tests in `src/NexusLabs.Foundry.Evaluation.Tests/Experiments/ExperimentPairedComparisonEvidenceTests.cs`
-- [ ] T103 [P] [US4] Author versioned advisory judge rubrics in `artifacts/eval/case-sets/harness-001/v1.0/judges/`
-- [ ] T104 [P] [US4] Curate the held-out human-labeled judge calibration subset in `artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/`
-- [ ] T105 [P] [US4] Add position, verbosity, style, and deterministic-disagreement judge fixtures in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/Judging/HarnessJudgeCalibrationTests.cs`
+- [x] T095 [US4] Publish the pre-registered hosted analysis protocol in `artifacts/eval/case-sets/harness-001/v1.0/analysis-plan.md`, including trial count rationale, retry-versus-trial semantics, exclusions, per-metric paired method, uncertainty, unknown-sample treatment, and non-gating status
+- [x] T096 [P] [US4] Add case-set manifest schema and round-trip tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessCaseSetManifestTests.cs`
+- [x] T097 [P] [US4] Add diagnostics-schema parity tests across iterative, plain Harness, and hybrid fixtures in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessDiagnosticsParityTests.cs`
+- [x] T098 [P] [US4] Add context-safety and compaction-validity evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessContextEvaluatorTests.cs`
+- [x] T099 [P] [US4] Add artifact-reuse and rehydration evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessArtifactEvaluatorTests.cs`
+- [x] T100 [P] [US4] Add telemetry, ordering, identity, cancellation, and session-continuity evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessRuntimeEvaluatorTests.cs`
+- [x] T101 [P] [US4] Add cost-attribution and trajectory evaluator tests in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/HarnessCostTrajectoryEvaluatorTests.cs`
+- [x] T102 [P] [US4] Add known-answer paired binary and continuous comparison tests in `src/NexusLabs.Foundry.Evaluation.Tests/Experiments/ExperimentPairedComparisonEvidenceTests.cs`
+- [x] T103 [P] [US4] Author versioned advisory judge rubrics in `artifacts/eval/case-sets/harness-001/v1.0/judges/`
+- [x] T104 [P] [US4] Curate the held-out human-labeled judge calibration subset in `artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/`
+- [x] T105 [P] [US4] Add position, verbosity, style, and deterministic-disagreement judge fixtures in `src/NexusLabs.Foundry.Evaluation.Tests/Harness/Judging/HarnessJudgeCalibrationTests.cs`
 
 ### Evaluation implementation
 
-- [ ] T106 [US4] Define the versioned case-set manifest and loader, reusing `IExperimentCaseSource`, in `artifacts/eval/case-sets/harness-001/v1.0/manifest.json` and `src/NexusLabs.Foundry.Evaluation/Harness/HarnessManifestCaseSource.cs`
-- [ ] T107 [US4] Author deterministic completion and dimension references in `artifacts/eval/case-sets/harness-001/v1.0/cases/`
-- [ ] T108 [P] [US4] Implement context-safety and compaction-validity per-item evaluators in `src/NexusLabs.Foundry.Evaluation/Harness/`
-- [ ] T109 [P] [US4] Implement artifact-reuse and rehydration per-item evaluators in `src/NexusLabs.Foundry.Evaluation/Harness/`
-- [ ] T110 [P] [US4] Implement telemetry, ordering, identity, cancellation, and session-continuity evaluators with explicit per-item or run-level contracts in `src/NexusLabs.Foundry.Evaluation/Harness/`
-- [ ] T111 [P] [US4] Implement cost-attribution and trajectory evaluators by extending existing Foundry evaluator evidence in `src/NexusLabs.Foundry.Evaluation/Harness/`
-- [ ] T112 [US4] Implement reusable paired binary and continuous evidence primitives in `src/NexusLabs.Foundry.Evaluation/Experiments/ExperimentPairedComparisonEvidence.cs`
-- [ ] T113 [US4] Add the three-arm case source and `ExperimentDefinition` factories in `src/NexusLabs.Foundry.Evaluation/Harness/HarnessComparisonExperiment.cs`
-- [ ] T114 [US4] Add the Harness-specific reporter under `src/NexusLabs.Foundry.Evaluation/Harness/HarnessComparisonReporter.cs`, using `ExperimentPairedComparisonEvidence` and `ExperimentJsonArtifactWriter`
-- [ ] T115 [US4] Add advisory judge evaluators in `src/NexusLabs.Foundry.Evaluation/Harness/Judging/` using the versioned rubrics and calibration evidence
-- [ ] T116 [US4] Add deterministic-versus-judge disagreement reporting to `src/NexusLabs.Foundry.Evaluation/Harness/HarnessComparisonReporter.cs`
+- [x] T106 [US4] Define the versioned case-set manifest and loader, reusing `IExperimentCaseSource`, in `artifacts/eval/case-sets/harness-001/v1.0/manifest.json` and `src/NexusLabs.Foundry.Evaluation/Harness/HarnessManifestCaseSource.cs`
+- [x] T107 [US4] Author deterministic completion and dimension references in `artifacts/eval/case-sets/harness-001/v1.0/cases/`
+- [x] T108 [P] [US4] Implement context-safety and compaction-validity per-item evaluators in `src/NexusLabs.Foundry.Evaluation/Harness/`
+- [x] T109 [P] [US4] Implement artifact-reuse and rehydration per-item evaluators in `src/NexusLabs.Foundry.Evaluation/Harness/`
+- [x] T110 [P] [US4] Implement telemetry, ordering, identity, cancellation, and session-continuity evaluators with explicit per-item or run-level contracts in `src/NexusLabs.Foundry.Evaluation/Harness/`
+- [x] T111 [P] [US4] Implement cost-attribution and trajectory evaluators by extending existing Foundry evaluator evidence in `src/NexusLabs.Foundry.Evaluation/Harness/`
+- [x] T112 [US4] Implement reusable paired binary and continuous evidence primitives in `src/NexusLabs.Foundry.Evaluation/Experiments/ExperimentPairedComparisonEvidence.cs`
+- [x] T113 [US4] Add the three-arm case source and `ExperimentDefinition` factories in `src/NexusLabs.Foundry.Evaluation/Harness/HarnessComparisonExperiment.cs`
+- [x] T114 [US4] Add the Harness-specific reporter under `src/NexusLabs.Foundry.Evaluation/Harness/HarnessComparisonReporter.cs`, using `ExperimentPairedComparisonEvidence` and `ExperimentJsonArtifactWriter`
+- [x] T115 [US4] Add advisory judge evaluators in `src/NexusLabs.Foundry.Evaluation/Harness/Judging/` using the versioned rubrics and calibration evidence
+- [x] T116 [US4] Add deterministic-versus-judge disagreement reporting to `src/NexusLabs.Foundry.Evaluation/Harness/HarnessComparisonReporter.cs`
 
 ### Hosted execution and human decision
 
-- [ ] T117 [US4] Add `.github/workflows/harness-evaluation.yml` with only `workflow_dispatch` and `schedule` triggers, explicit wall-clock/request/cost caps, capture/replay artifacts, and non-failing stochastic summaries
-- [ ] T118 [US4] Verify the hosted workflow is not a required branch-protection status and record the result in `specs/001-maf-harness-first-class/evidence/hosted-eval-gate.md`
-- [ ] T119 [US4] Execute the hosted paired comparison, ingest immutable inputs and outputs, and retain the decision artifact bundle under `artifacts/eval/reports/harness-001/`
-- [ ] T120 [US4] Publish the comparison artifact conforming to `contracts/evaluation-evidence.md`, including deterministic dimensions, paired uncertainty, judge disagreement, diagnostics parity, and a human-review signature block
-- [ ] T121 Record the human-reviewed overlap retention/removal decisions and supersede affected ADR guidance where necessary in `specs/001-maf-harness-first-class/evidence/retention-decisions.md` and `docs/adr/`
+- [x] T117 [US4] Add `.github/workflows/harness-evaluation.yml` with only `workflow_dispatch` and `schedule` triggers, explicit wall-clock/request/cost caps, capture/replay artifacts, and non-failing stochastic summaries
+- [x] T118 [US4] Verify the hosted workflow is not a required branch-protection status and record the result in `specs/001-maf-harness-first-class/evidence/hosted-eval-gate.md`
+- [x] T119 [US4] Execute the hosted paired comparison, ingest immutable inputs and outputs, and retain the decision artifact bundle under `artifacts/eval/reports/harness-001/`
+- [x] T120 [US4] Publish the comparison artifact conforming to `contracts/evaluation-evidence.md`, including deterministic dimensions, paired uncertainty, judge disagreement, diagnostics parity, and a human-review signature block
+- [x] T121 Record the human-reviewed overlap retention/removal decisions and supersede affected ADR guidance where necessary in `specs/001-maf-harness-first-class/evidence/retention-decisions.md` and `docs/adr/`
 
 **Checkpoint G8**: Every recommendation or removal has deterministic anchors,
 paired evidence, uncertainty, migration guidance, and human review.

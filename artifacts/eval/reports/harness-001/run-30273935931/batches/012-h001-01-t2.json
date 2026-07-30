@@ -1,0 +1,112 @@
+{
+  "BatchSequence": 12,
+  "Batch": {
+    "CaseId": "h001-01",
+    "TrialIndex": 2
+  },
+  "ArmOrder": [
+    "Hybrid",
+    "PlainHarness",
+    "Iterative"
+  ],
+  "Results": {
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-01",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The values from lookup_north and lookup_south have been combined, and the required workspace artifact has been generated and saved. The process is complete.",
+        "ToolCalls": [
+          "lookup_north",
+          "lookup_south",
+          "combine_values",
+          "generate_large_artifact"
+        ],
+        "CumulativeTokens": 2076,
+        "PeakTokens": 511,
+        "LatencyMilliseconds": 44364.4637,
+        "CaptureReference": "capture/hybrid/h001-01/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022result\u0022:\u0022north:17|south:29\u0022}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:20:28.9293861+00:00",
+          "Duration": "00:00:44.3652051",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-01",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "The required workspace artifact has been generated and saved. The process of calling lookup_north, lookup_south, and then combine_values has been completed as requested. The artifact summary and long context answer have also been saved. If you need any further actions or details, please let me know.",
+        "ToolCalls": [
+          "lookup_north",
+          "lookup_south",
+          "combine_values",
+          "generate_large_artifact",
+          "create_artifact_summary",
+          "save_long_context_answer"
+        ],
+        "CumulativeTokens": 7510,
+        "PeakTokens": 2031,
+        "LatencyMilliseconds": 57136.4152,
+        "CaptureReference": "capture/plain-harness/h001-01/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022result\u0022:\u0022north:17|south:29\u0022}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-27T14:20:28.9305023+00:00",
+          "Duration": "00:00:57.1365734",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Iterative": {
+      "Status": "ExecutionFailed",
+      "Output": null,
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Failed",
+          "StartedAt": "2026-07-27T14:20:28.930792+00:00",
+          "Duration": "00:00:23.9758708",
+          "Failure": {
+            "Code": "ExecutionFailed",
+            "Stage": "Execution",
+            "ExceptionType": "System.InvalidOperationException",
+            "Message": "Cumulative tool call count (8) reached MaxTotalToolCalls (8).",
+            "IsRetryable": false
+          },
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": {
+        "Code": "ExecutionFailed",
+        "Stage": "Execution",
+        "ExceptionType": "System.InvalidOperationException",
+        "Message": "Cumulative tool call count (8) reached MaxTotalToolCalls (8).",
+        "IsRetryable": false
+      }
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 14,
+  "EstimatedCostUsd": 0.28
+}

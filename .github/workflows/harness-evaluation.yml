@@ -1,0 +1,147 @@
+name: Harness Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_copilot_enterprise_billing:
+        description: Confirm this PitCrew run is authorized to use GitHub Copilot Enterprise billing.
+        required: true
+        type: boolean
+        default: false
+      model_id:
+        description: GitHub Copilot generator model identifier.
+        required: true
+        type: string
+        default: gpt-5-mini
+  schedule:
+    - cron: '17 5 1 * *'
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+concurrency:
+  group: harness-evaluation
+  cancel-in-progress: false
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  HARNESS_EVAL_PLANNED_RUNS: 72
+  HARNESS_EVAL_MAX_ATTEMPTS: 144
+  HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8
+  HARNESS_EVAL_MAX_RESERVED_REQUESTS: 1152
+  HARNESS_EVAL_WORKFLOW_TIMEOUT_MINUTES: 60
+  HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES: 50
+  HARNESS_EVAL_MAX_ATTEMPT_SECONDS: 120
+  HARNESS_EVAL_MAX_OUTPUT_TOKENS: 2000
+  HARNESS_EVAL_MIN_REQUEST_INTERVAL_MS: 4000
+  HARNESS_EVAL_MAX_CONCURRENCY: 3
+  HARNESS_EVAL_COST_CAP_USD: 25
+  HARNESS_EVAL_ESTIMATED_USD_PER_REQUEST: 0.02
+  HARNESS_EVAL_GLOBAL_SEED: 137
+  HARNESS_EVAL_BATCH_ORDERING_SEED: 104729
+  HARNESS_EVAL_ARM_ORDERING_SEED: 130363
+  HARNESS_EVAL_BOOTSTRAP_SEED: 155921
+
+jobs:
+  evaluate:
+    name: advisory-harness-evaluation
+    runs-on: foundry-ci
+    timeout-minutes: 60
+    env:
+      MODEL_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.model_id || vars.HARNESS_EVAL_COPILOT_MODEL_ID || 'gpt-5-mini' }}
+      COPILOT_BILLING_CONFIRMED: ${{ (github.event_name == 'workflow_dispatch' && inputs.confirm_copilot_enterprise_billing) || (github.event_name == 'schedule' && vars.HARNESS_EVAL_COPILOT_ENTERPRISE_ENABLED == 'true') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup exact .NET SDKs
+        uses: ./.github/actions/setup-dotnet
+        with:
+          global-json-files: global.json
+
+      - name: Validate deterministic evaluation contracts
+        run: >-
+          dotnet test
+          src/NexusLabs.Foundry.Evaluation.Tests/NexusLabs.Foundry.Evaluation.Tests.csproj
+          --configuration Release
+          --filter
+          "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessJudgeCalibrationTests|FullyQualifiedName~HarnessComparison"
+          --verbosity minimal
+
+      - name: Run PitCrew and Copilot preflight
+        id: preflight
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci
+        run: |
+          $confirmCopilotEnterpriseBilling = '${{ env.COPILOT_BILLING_CONFIRMED }}' -eq 'true'
+          scripts/Invoke-HarnessEvaluationPreflight.ps1 `
+            -OutputDirectory 'artifacts/eval/hosted-run' `
+            -ModelId $env:MODEL_ID `
+            -ConfirmCopilotEnterpriseBilling:$confirmCopilotEnterpriseBilling
+
+      - name: Run Copilot SDK provider probe
+        if: steps.preflight.outputs.preflight-status == 'Ready'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
+        run: >-
+          dotnet run
+          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
+          --configuration Release
+          --
+          --provider-probe
+          --output artifacts/eval/hosted-run
+
+      - name: Execute complete paired comparison
+        if: steps.preflight.outputs.preflight-status == 'Ready'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
+        run: >-
+          dotnet run
+          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
+          --configuration Release
+          --no-build
+          --
+          --output artifacts/eval/hosted-run
+
+      - name: Upload immutable evaluation bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-evaluation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/eval/hosted-run/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish non-gating summary
+        if: always()
+        shell: pwsh
+        run: |
+          $runStatusPath = 'artifacts/eval/hosted-run/run-status.json'
+          $preflightStatusPath = 'artifacts/eval/hosted-run/preflight-status.json'
+          $statusPath = if (Test-Path $runStatusPath) { $runStatusPath } else { $preflightStatusPath }
+          if (Test-Path $statusPath) {
+            $status = Get-Content $statusPath -Raw | ConvertFrom-Json
+            "## Harness Evaluation" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- State: ``$($status.state)``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Reason: $($status.reason)" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
+          else {
+            "## Harness Evaluation" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- State: ``Failed``" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Reason: preflight did not produce a status artifact" | Add-Content $env:GITHUB_STEP_SUMMARY
+            "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }

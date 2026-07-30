@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "rubricId": "harness-nominal-pairwise-preference",
+  "version": "v1.0",
+  "kind": "Nominal",
+  "dimensionId": "qualitative-preference",
+  "labels": [
+    "Left",
+    "Tie",
+    "Right",
+    "Abstain"
+  ],
+  "instructions": [
+    "Evaluate only the captured case prompt, deterministic reference summary, normalized tool trajectory, and final response artifacts supplied for the pair.",
+    "Judge the candidates independently of their left or right position. Reverse presentation order is a required bias check.",
+    "Do not prefer a candidate merely because it is longer, more polished, more conversational, or uses richer formatting.",
+    "Prefer task-relevant correctness, continuity, grounded use of available evidence, and clear communication.",
+    "Return Tie when differences are only verbosity or style and do not change task-relevant meaning or usability.",
+    "Return Abstain when the supplied artifacts are insufficient for a defensible qualitative comparison.",
+    "A judge preference is advisory. It cannot override a deterministic reference or resolve an order-inconsistent pair."
+  ],
+  "decisionPolicy": {
+    "allowTie": true,
+    "allowAbstain": true,
+    "orderInconsistentResult": "Disagreement",
+    "deterministicConflictAuthority": "DeterministicReference"
+  },
+  "biasControls": {
+    "requireBothPresentationOrders": true,
+    "measurePositionFlipRate": true,
+    "measureVerbosityCorrelation": true,
+    "includeStyleOnlyPerturbations": true
+  },
+  "outputSchema": {
+    "preference": "Left|Tie|Right|Abstain",
+    "reason": "Short evidence-grounded explanation without hidden chain-of-thought."
+  }
+}

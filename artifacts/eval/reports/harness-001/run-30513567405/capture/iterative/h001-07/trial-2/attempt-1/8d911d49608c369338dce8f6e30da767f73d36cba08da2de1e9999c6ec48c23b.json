@@ -1,0 +1,20 @@
+{
+  "ResponseId": "a6O1IagBl6GDHMbz2GeOPIt0sVyobLlIViUzEEDXZT4pqFK9al4OWW5OKvErvy\u002BUyGQX8nMyDV94OXRHtEI2PtW8boUhncJXInzgBsrVNZ4KqZ4yigTQqpaS2BVEqD5fkO0F6CLtHBlKKeT4ciIH\u002BzoUukDZ6VAEcUGeTt\u002By/zhqfKFtmtVqDop8KeTuTzDowKlZzUtYqVK54z3GiQEfEv4uFex1ldjTf//cf/64V\u002BA5wJK0jRp0tMC2WZSAdIk4W8TIbBa6vz5MSaBkjwAo8IL\u002BeuWSYZVyCCbkB9KUwajYGQt1wRQaXfIoc1zsjrR1NQ5cSNMmuvtrUChHNSi53C74x2xRbNH5gcHhiOo\u002BhXffLPy44a3lUwdiZrJt7A3YnZvsVnSKP7VnAD5UnYXMb4leKFW7",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_caH9PbzcihFlQLyroG4OXbEu",
+          "Name": "calculate_total",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

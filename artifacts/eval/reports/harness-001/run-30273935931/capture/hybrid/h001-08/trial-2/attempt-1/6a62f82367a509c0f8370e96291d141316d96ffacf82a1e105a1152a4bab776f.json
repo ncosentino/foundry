@@ -1,0 +1,20 @@
+{
+  "ResponseId": "chatcmpl-E6GXmyW6pxcS0ZMk6lrRnu7aaq5LD",
+  "ModelId": "gpt-4.1-mini-2025-04-14",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "The approved delivery workflow has been completed end-to-end. The required workspace artifact now exists and has been generated and summarized. If you need any further actions or details, please let me know.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "The approved delivery workflow has been completed end-to-end. The required workspace artifact now exists and has been generated and summarized. If you need any further actions or details, please let me know.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

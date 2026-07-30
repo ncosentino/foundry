@@ -1,0 +1,110 @@
+{
+  "BatchSequence": 9,
+  "Batch": {
+    "CaseId": "h001-02",
+    "TrialIndex": 3
+  },
+  "ArmOrder": [
+    "Hybrid",
+    "Iterative",
+    "PlainHarness"
+  ],
+  "Results": {
+    "Hybrid": {
+      "Status": "ExecutionFailed",
+      "Output": null,
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Failed",
+          "StartedAt": "2026-07-30T04:27:06.6617586+00:00",
+          "Duration": "00:00:00.0013543",
+          "Failure": {
+            "Code": "ExecutionFailed",
+            "Stage": "Execution",
+            "ExceptionType": "NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context.HarnessCompactionIrreducibleException",
+            "Message": "Hybrid compaction could not produce dispatch-eligible context for this provider call (outcome \u0027Irreducible\u0027, estimated size 18849 against hard limit 18000). Over-budget or invalid context is never forwarded to the provider.",
+            "IsRetryable": false
+          },
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": {
+        "Code": "ExecutionFailed",
+        "Stage": "Execution",
+        "ExceptionType": "NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context.HarnessCompactionIrreducibleException",
+        "Message": "Hybrid compaction could not produce dispatch-eligible context for this provider call (outcome \u0027Irreducible\u0027, estimated size 18849 against hard limit 18000). Over-budget or invalid context is never forwarded to the provider.",
+        "IsRetryable": false
+      }
+    },
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-02",
+        "TrialIndex": 3,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "read_context",
+          "read_context",
+          "save_long_context_answer",
+          "save_long_context_answer"
+        ],
+        "CumulativeTokens": 10399,
+        "PeakTokens": 5299,
+        "LatencyMilliseconds": 11644.3192,
+        "CaptureReference": "capture/iterative/h001-02/trial-3/capture-manifest.json",
+        "OutputContent": "CONTEXT-SENTINEL-7F3A"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:27:06.6631342+00:00",
+          "Duration": "00:00:11.6445210",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-02",
+        "TrialIndex": 3,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/long-context-answer.txt",
+        "ToolCalls": [
+          "read_context",
+          "read_context",
+          "save_long_context_answer",
+          "save_long_context_answer"
+        ],
+        "CumulativeTokens": 16118,
+        "PeakTokens": 5640,
+        "LatencyMilliseconds": 26845.6428,
+        "CaptureReference": "capture/plain-harness/h001-02/trial-3/capture-manifest.json",
+        "OutputContent": "CONTEXT-SENTINEL-7F3A"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:27:06.6638056+00:00",
+          "Duration": "00:00:26.8458263",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 5,
+  "EstimatedCostUsd": 0.10
+}
