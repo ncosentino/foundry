@@ -31,6 +31,8 @@ internal sealed class CopilotSdkTurnExecutor
         CopilotSdkTurnRequest request,
         CancellationToken cancellationToken)
     {
+        using var sessionDirectory = CopilotSdkSessionDirectory.Create(
+            _workingDirectory);
         var declarations = request.Tools
             .Select(tool => tool.AsDeclarationOnly())
             .ToArray();
@@ -79,7 +81,7 @@ internal sealed class CopilotSdkTurnExecutor
             SkipEmbeddingRetrieval = true,
             EmbeddingCacheStorage = EmbeddingCacheStorageMode.InMemory,
             McpOAuthTokenStorage = McpOAuthTokenStorageMode.InMemory,
-            WorkingDirectory = _workingDirectory,
+            WorkingDirectory = sessionDirectory.DirectoryPath,
             Streaming = false,
         };
 #pragma warning restore GHCP001

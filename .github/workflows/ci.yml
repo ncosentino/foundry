@@ -189,7 +189,7 @@ jobs:
 
   harness-evaluation-dispatch:
     if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation
-    runs-on: [self-hosted, linux, x64, general-purpose]
+    runs-on: foundry-ci
     timeout-minutes: 60
     permissions:
       contents: read
@@ -240,7 +240,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HARNESS_EVAL_RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          HARNESS_EVAL_RUNNER_LABELS: self-hosted,linux,x64,general-purpose
+          HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci
         run: |
           $confirmCopilotEnterpriseBilling = $env:COPILOT_BILLING_CONFIRMED -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `

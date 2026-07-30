@@ -41,6 +41,13 @@ internal sealed class CopilotSdkTurnCollector
                     _inputTokens += usage.Data.InputTokens ?? 0;
                     _outputTokens += usage.Data.OutputTokens ?? 0;
                     _finishReason = MapFinishReason(usage.Data.FinishReason);
+                    if (_finishReason is null)
+                    {
+                        _completion.TrySetException(new InvalidOperationException(
+                            $"Copilot SDK returned unsupported finish reason " +
+                            $"'{usage.Data.FinishReason ?? "<null>"}'."));
+                        return;
+                    }
                     break;
                 case ExternalToolRequestedEvent tool:
                     _externalToolCallIds.Add(tool.Data.ToolCallId);
@@ -88,7 +95,8 @@ internal sealed class CopilotSdkTurnCollector
             _outputTokens,
             calls.Length > 0
                 ? ChatFinishReason.ToolCalls
-                : _finishReason ?? ChatFinishReason.Stop));
+                : _finishReason ?? throw new InvalidOperationException(
+                    "Copilot SDK usage completed without a finish reason.")));
     }
 
     private static IReadOnlyDictionary<string, object?> DeserializeArguments(JsonElement? arguments)

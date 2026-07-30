@@ -49,7 +49,7 @@ env:
 jobs:
   evaluate:
     name: advisory-harness-evaluation
-    runs-on: [self-hosted, linux, x64, general-purpose]
+    runs-on: foundry-ci
     timeout-minutes: 60
     env:
       MODEL_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.model_id || vars.HARNESS_EVAL_COPILOT_MODEL_ID || 'gpt-5-mini' }}
@@ -81,7 +81,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HARNESS_EVAL_RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          HARNESS_EVAL_RUNNER_LABELS: self-hosted,linux,x64,general-purpose
+          HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci
         run: |
           $confirmCopilotEnterpriseBilling = '${{ env.COPILOT_BILLING_CONFIRMED }}' -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `

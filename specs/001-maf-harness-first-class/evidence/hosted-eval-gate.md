@@ -57,14 +57,14 @@ Observed required-check payload:
 `.github/workflows/harness-evaluation.yml`:
 
 - has only `workflow_dispatch` and `schedule` triggers;
-- runs only on PitCrew runners labeled
-  `self-hosted`, `linux`, `x64`, and `general-purpose`;
+- runs only on the dedicated PitCrew `foundry-ci` profile, whose repository
+  runner labels are `foundry` and `foundry-ci`;
 - requests only `contents: read` and `copilot-requests: write`;
 - uses the official `GitHub.Copilot.SDK` runtime with the workflow-scoped
   `GITHUB_TOKEN` explicitly supplied to the SDK;
-- creates a fresh SDK session for every provider request and serializes the
-  exact transcript produced by the active Foundry arm, so no hidden SDK session
-  history crosses requests;
+- creates a fresh SDK session and isolated working directory for every provider
+  request and serializes the exact transcript produced by the active Foundry
+  arm, so no hidden SDK session or filesystem history crosses requests;
 - exposes only declaration-only Foundry tools and rejects every unexpected SDK
   permission request;
 - runs one declaration-only-tool provider probe before scheduling any paired
@@ -80,8 +80,8 @@ Observed required-check payload:
 - emits `CopilotBillingNotConfirmed` without making a model call when GitHub
   Copilot Enterprise billing is not explicitly affirmed.
 
-The preflight makes no inference request. A live comparison can start only after
-the job has been assigned to the exact PitCrew labels, the runner reports
-`self-hosted`, and Copilot Enterprise billing has been explicitly affirmed. The
-workflow remains advisory and does not become a branch-protection or stochastic
-merge gate.
+The preflight makes no inference request. A live comparison can start only
+after the job has been assigned to the dedicated `foundry-ci` profile, the
+runner reports `self-hosted`, and Copilot Enterprise billing has been explicitly
+affirmed. The workflow remains advisory and does not become a branch-protection
+or stochastic merge gate.
