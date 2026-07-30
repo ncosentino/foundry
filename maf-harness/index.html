@@ -959,6 +959,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#shell-is-a-separate-opt-in-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell is a separate opt-in package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#inspect-effective-defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1007,6 +1018,17 @@
     <span class="md-ellipsis">
       
         Internal selected-provider conformance example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-and-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration and compatibility
       
     </span>
   </a>
@@ -3331,6 +3353,22 @@ generated functions through the public bootstrap and pass them through
 </code></pre></div>
 <p>Generated tools are validated by the same duplicate and built-in collision
 rules as hand-authored <code>AITool</code> instances.</p>
+<h2 id="shell-is-a-separate-opt-in-package">Shell is a separate opt-in package<a class="headerlink" href="#shell-is-a-separate-opt-in-package" title="Permanent link">&para;</a></h2>
+<p>Shell is not part of the Harness bundle and is not a bundle configuration
+dimension. The upstream <code>HarnessAgentOptions</code> type exposes no shell property,
+and <code>FoundryHarnessAgentConfiguration</code> deliberately does not invent one. No
+Foundry package depends on a shell package, so no consumer acquires shell
+execution transitively.</p>
+<p>To give an agent shell access, take it as a deliberate opt-in:</p>
+<ol>
+<li>reference the separate shell package yourself;</li>
+<li>expose the commands you want as ordinary <code>AITool</code> or source-generated
+   functions; and</li>
+<li>pass them through <code>Tools</code>, or supply them from a context provider.</li>
+</ol>
+<p>Shell tools then flow through the same duplicate-name, built-in-collision, and
+approval checks as any other tool. Treat shell as an authorization decision:
+Foundry does not grant it, bound it, or sandbox it on your behalf.</p>
 <h2 id="inspect-effective-defaults">Inspect effective defaults<a class="headerlink" href="#inspect-effective-defaults" title="Permanent link">&para;</a></h2>
 <p>Use <code>DescribeEffectiveDefaults</code> before construction to see:</p>
 <ul>
@@ -3422,6 +3460,41 @@ should choose a public path from the table at the start of this guide.</p>
 where experimental hybrid context can attach. The example itself uses the
 stable-only profile and proves that compaction remains disabled; it does not
 claim to execute hybrid compaction.</p>
+<h2 id="migration-and-compatibility">Migration and compatibility<a class="headerlink" href="#migration-and-compatibility" title="Permanent link">&para;</a></h2>
+<p>There is <strong>no compatibility shim</strong> for the former alpha Harness APIs. The
+package family is alpha, so superseded APIs are replaced directly; update call
+sites rather than expecting a forwarding type.</p>
+<p>Adopting Harness is additive. Existing Foundry MAF agents keep working
+unchanged, and nothing is deprecated by this release. The iterative loop, plain
+Harness, and hybrid execution modes are all retained: the hosted comparison was
+underpowered and supports no default change or removal. See
+<a href="https://github.com/ncosentino/foundry/blob/main/specs/001-maf-harness-first-class/evidence/retention-decisions.md">the retention decision</a>.</p>
+<p>Choose exactly one supported path:</p>
+<table>
+<thead>
+<tr>
+<th>You want</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain Foundry MAF agents</td>
+<td>The core package, unchanged</td>
+</tr>
+<tr>
+<td>The upstream complete bundle</td>
+<td>The optional Harness package</td>
+</tr>
+<tr>
+<td>Foundry-owned iterative execution</td>
+<td>The iterative loop</td>
+</tr>
+</tbody>
+</table>
+<p>Selected-provider composition is <strong>internal and unsupported</strong>. It is not a
+public consumption path, and <code>InternalsVisibleTo</code> grants in this repository are
+not a security boundary because the assemblies are unsigned.</p>
 <h2 id="current-limitations">Current limitations<a class="headerlink" href="#current-limitations" title="Permanent link">&para;</a></h2>
 <ul>
 <li>The optional bundle API remains prerelease.</li>

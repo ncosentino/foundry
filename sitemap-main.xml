@@ -5,7 +5,31 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/testing-tools/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/maf-harness/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/pipeline-metrics/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/tiered-provider-selector/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/local-runners/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/api/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/guides/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -13,7 +37,7 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/getting-started/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/langfuse/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -21,11 +45,23 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/stage-termination/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/evaluation/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/releasing/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/copilot/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/progress-reporting/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/tool-result-middleware/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/stage-termination/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -37,59 +73,7 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/gen-ai-token-metrics/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/langfuse/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/guides/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/maf-harness/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/evaluation/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/local-runners/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/configuration/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/workspace/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/publishing/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/iterative-agent-loop/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/copilot/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/pipeline-metrics/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/tool-result-middleware/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -97,19 +81,31 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/tiered-provider-selector/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/releasing/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/progress-reporting/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/workspace/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/getting-started/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/gen-ai-token-metrics/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/publishing/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/testing-tools/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/iterative-agent-loop/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -121,15 +117,11 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0005-first-class-maf-harness-integration/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/adr/adr-0002-build-scriptedchatclient-locally/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0001-dag-graph-workflow-support/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -137,27 +129,31 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0001-dag-graph-workflow-support/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/adr/adr-0006-hybrid-context-and-workspace-authority/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0005-first-class-maf-harness-integration/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF025/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF003/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF022/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF020/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF015/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF010/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF005/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -165,15 +161,7 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF006/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF014/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF009/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF017/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -185,55 +173,7 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF018/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF020/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF008/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF002/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF029/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF012/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF011/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF030/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF005/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF017/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF016/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF003/</loc>
-    <lastmod>2026-07-30</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF013/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF006/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -241,11 +181,47 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF012/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF018/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF015/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF009/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF027/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF021/</loc>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF014/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF022/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF029/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF002/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF013/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF030/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
@@ -253,7 +229,31 @@
     <lastmod>2026-07-30</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF016/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF008/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF021/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF028/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF011/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF010/</loc>
+    <lastmod>2026-07-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF025/</loc>
     <lastmod>2026-07-30</lastmod>
   </url>
 </urlset>
