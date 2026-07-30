@@ -14,7 +14,6 @@ on:
         type: boolean
 
 env:
-  DOTNET_VERSION: 10.0.x
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -35,12 +34,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup exact .NET SDKs
+        uses: ./.github/actions/setup-dotnet
         with:
-          dotnet-version: |
-            9.0.x
-            ${{ env.DOTNET_VERSION }}
+          global-json-files: |
+            global.json
+            .github/dotnet/sdk-9/global.json
 
       - name: Setup Python
         uses: actions/setup-python@v6

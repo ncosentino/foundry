@@ -1,0 +1,77 @@
+name: Setup exact .NET SDKs
+description: Validate exact SDK contracts and install the complete required set only when any SDK is missing.
+
+inputs:
+  global-json-files:
+    description: Newline-separated repository-relative global.json contract files.
+    required: true
+
+outputs:
+  required-versions:
+    description: Exact SDK versions required by the supplied contracts.
+    value: ${{ steps.contract.outputs.required-versions }}
+  setup-performed:
+    description: Whether actions/setup-dotnet installed the complete required set.
+    value: ${{ steps.verify.outputs.setup-performed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve exact SDK contracts
+      id: contract
+      shell: pwsh
+      env:
+        GLOBAL_JSON_FILES: ${{ inputs.global-json-files }}
+      run: |
+        $files = @(
+          $env:GLOBAL_JSON_FILES -split "\r?\n" |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ }
+        )
+        $result = & "$env:GITHUB_WORKSPACE/scripts/resolve-dotnet-sdk-contract.ps1" `
+          -RepositoryRoot $env:GITHUB_WORKSPACE `
+          -GlobalJsonFiles $files |
+          ConvertFrom-Json
+        $delimiter = "VERSIONS_$([Guid]::NewGuid().ToString('N'))"
+        "required-versions<<$delimiter" | Add-Content $env:GITHUB_OUTPUT
+        $result.requiredVersions | Add-Content $env:GITHUB_OUTPUT
+        $delimiter | Add-Content $env:GITHUB_OUTPUT
+        "setup-required=$($result.setupRequired.ToString().ToLowerInvariant())" |
+          Add-Content $env:GITHUB_OUTPUT
+        "Required .NET SDKs: $($result.requiredVersions -join ', ')" |
+          Add-Content $env:GITHUB_STEP_SUMMARY
+        "Installed before setup: $($result.installedVersions -join ', ')" |
+          Add-Content $env:GITHUB_STEP_SUMMARY
+
+    - name: Install complete exact SDK set
+      if: steps.contract.outputs.setup-required == 'true'
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+      env:
+        DOTNET_INSTALL_DIR: ${{ runner.temp }}/foundry-dotnet
+      with:
+        dotnet-version: ${{ steps.contract.outputs.required-versions }}
+
+    - name: Verify exact SDK set
+      id: verify
+      shell: pwsh
+      env:
+        GLOBAL_JSON_FILES: ${{ inputs.global-json-files }}
+        SETUP_REQUIRED: ${{ steps.contract.outputs.setup-required }}
+      run: |
+        $files = @(
+          $env:GLOBAL_JSON_FILES -split "\r?\n" |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ }
+        )
+        $result = & "$env:GITHUB_WORKSPACE/scripts/resolve-dotnet-sdk-contract.ps1" `
+          -RepositoryRoot $env:GITHUB_WORKSPACE `
+          -GlobalJsonFiles $files |
+          ConvertFrom-Json
+        if ($result.setupRequired) {
+          throw "Exact .NET SDK setup is incomplete. Missing: $($result.missingVersions -join ', ')."
+        }
+        "setup-performed=$env:SETUP_REQUIRED" | Add-Content $env:GITHUB_OUTPUT
+        "Installed after setup: $($result.installedVersions -join ', ')" |
+          Add-Content $env:GITHUB_STEP_SUMMARY
+        "Setup performed: $env:SETUP_REQUIRED" |
+          Add-Content $env:GITHUB_STEP_SUMMARY

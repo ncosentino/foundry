@@ -24,7 +24,6 @@ on:
         default: gpt-5-mini
 
 env:
-  DOTNET_VERSION: 10.0.x
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -42,10 +41,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup exact .NET SDKs
+        uses: ./.github/actions/setup-dotnet
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          global-json-files: global.json
+
+      - name: Validate runner profile contract
+        shell: pwsh
+        run: scripts/test-runner-profile.ps1 -SelfTest
 
       - name: Restore
         run: dotnet restore src/NexusLabs.Foundry.slnx
@@ -114,10 +117,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup exact .NET SDKs
+        uses: ./.github/actions/setup-dotnet
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          global-json-files: global.json
 
       - name: Install NativeAOT dependencies
         run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev file
@@ -155,10 +158,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup exact .NET SDKs
+        uses: ./.github/actions/setup-dotnet
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          global-json-files: global.json
 
       - name: Install NativeAOT dependencies
         run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev file
