@@ -1,0 +1,20 @@
+{
+  "ResponseId": "L0VU/H89g8tk5X0qhthCu/dVjMsmtBwhipERhkGlE2k0B1t8mulRE260njfjPweoIOiYMBwf6EO1/AVtKVYYdAEmyCKpMoBaWe0KjNMD/rv/JbVGufK3WAy/kOX91YEz/Tx0522PeGeIvSq1BCHRohCNG4PsPMh/b9HBsS8T8dVswaspEmdmlcYl6D7D41TDskIh8pggwnK7uU/OUvrGsr6xE2K8FMBZ4U6tDzeBjOP7STvPAbi5i7R\u002BeGOvUmMdo2XzKApGeuvShsX3Rk/aie70ApBJ22K/ufxxJerBToAxZWSA5hkQBCmSxnUe6nlonXIoiuiAELShOu4wjtrEDFtcvdc360HjkIZTMWtL6XUDj/TbJtFiA8NKaIPlRTrByfnxuFApyYmse7dN1wKPeXxYvuIW",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_zRWX89rGeZ9eBxjkC2vyMljI",
+          "Name": "complete_hybrid_context",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

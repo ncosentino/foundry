@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "authoritativeWorkflowRunId": "30513567405",
+  "workflowUrl": "https://github.com/ncosentino/foundry/actions/runs/30513567405",
+  "workflowConclusion": "success",
+  "workflowCreatedAtUtc": "2026-07-30T04:19:26Z",
+  "workflowUpdatedAtUtc": "2026-07-30T04:39:44Z",
+  "sourceBranch": "harness/g8-integration",
+  "sourceGitSha": "2ac9d32cdf31d17e2fb937ffca567562a6d069c5",
+  "pullRequest": "https://github.com/ncosentino/foundry/pull/138",
+  "provider": "github-copilot",
+  "billingProduct": "GitHub Copilot Enterprise",
+  "runnerProfile": "foundry-ci",
+  "bundleRelativePath": "run-30513567405/",
+  "bundleChecksumFile": "run-30513567405/checksums.sha256",
+  "bundleChecksumEntryCount": 307,
+  "bundleVerification": {
+    "verifiedAtIngestionUtc": "2026-07-30T05:10:33Z",
+    "missingFiles": 0,
+    "hashMismatches": 0,
+    "malformedChecksumEntries": 0
+  },
+  "excludedRuns": [
+    {
+      "workflowRunId": "30270567078",
+      "workflowUrl": "https://github.com/ncosentino/foundry/actions/runs/30270567078",
+      "sourceGitSha": "e8b1301f3c98b3116e106386dcdcba7e17a03a90",
+      "reason": "Unpaced GitHub Models driver defect; HTTP 429 responses were not handled according to the frozen retry policy."
+    },
+    {
+      "workflowRunId": "30273935931",
+      "workflowUrl": "https://github.com/ncosentino/foundry/actions/runs/30273935931",
+      "sourceGitSha": "8fd8f427f1d9c64cc5aeee318c47a3f6823f80c3",
+      "reason": "Completed historical GitHub Models evidence used an unapproved provider and billing path and is not pooled with the Copilot SDK run."
+    },
+    {
+      "workflowRunId": "30400286731",
+      "workflowUrl": "https://github.com/ncosentino/foundry/actions/runs/30400286731",
+      "sourceGitSha": "c2ff372b",
+      "reason": "Legacy raw Copilot token exchange returned HTTP 404 before inference; no arm output was produced."
+    },
+    {
+      "workflowRunId": "30511810798",
+      "workflowUrl": "https://github.com/ncosentino/foundry/actions/runs/30511810798",
+      "sourceGitSha": "f187e7cc50c4a3349bf6d635c073f30674444ccd",
+      "reason": "The original two-request provider probe did not independently prove external tool-result replay; the paired scheduler did not start."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "SchemaVersion": "1.0",
+  "State": "Completed",
+  "Reason": "All planned complete paired batches reached a terminal state.",
+  "ScheduledBatchCount": 24,
+  "TotalBatchCount": 24,
+  "AttemptsUsed": 72,
+  "ProviderRequestsUsed": 164,
+  "EstimatedCostUsd": 3.28,
+  "AdvisoryOnly": true
+}

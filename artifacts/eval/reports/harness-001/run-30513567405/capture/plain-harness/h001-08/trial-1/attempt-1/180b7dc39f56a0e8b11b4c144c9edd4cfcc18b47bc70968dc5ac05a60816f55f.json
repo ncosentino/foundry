@@ -1,0 +1,20 @@
+{
+  "ResponseId": "84i3To\u002BbY3ox38\u002BYNguaotgE44NR0YIw83SSh\u002Bmc3GrLThr01AuynuFcD6bSxt8bimgpvBxGRY0J\u002BLPbpySLmdDVq3FzggE/O1yMQ4sey\u002BHHqQfKgDh15OO1IPce2MGN0I\u002BaBELmtkAi3RGma\u002BhQ6Kt9Nx2v77p6smNdoceTYP9LoN\u002BhPPFkBRy\u002BOMb9nT3oUACCbQbsEHVHZVV7/0co2BinvujIo8bv7HpM2w\u002B8zvD5cmAsgm2BOm\u002B0FPZT7V5F4EeuBSix\u002BRRTTlzd1mmijz\u002BgUh26SK86e\u002BW723taH28c7IR/UPd0PdZMNO30tqUsq/vMVBOiyliIpYJJPoUL0wv\u002BluHwY3C8FfkrftjZFFTEvt\u002BV1pst67bUZgG8oS6HfyHdbYikfty525AyUxf2SW8HDzum",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "Completed: the approved delivery workflow is finished and the required workspace artifact exists.\n\n- End-to-end record: outputs/end-to-end.json\n- Workspace artifact: produced by generate_large_artifact (tool result present in the transcript)\n- Artifact summary: outputs/artifact-summary.json\n\nIf you want me to display the generated artifact content or open any of the JSON outputs, tell me which one.",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "Completed: the approved delivery workflow is finished and the required workspace artifact exists.\n\n- End-to-end record: outputs/end-to-end.json\n- Workspace artifact: produced by generate_large_artifact (tool result present in the transcript)\n- Artifact summary: outputs/artifact-summary.json\n\nIf you want me to display the generated artifact content or open any of the JSON outputs, tell me which one.",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "ResponseId": "2/257LyaMmkoltQzL5HuuW80XKTzYaoeD4wfKh7V6I1tselUI/MtnAq37Uk3xYgkMXWbHnvP89y1o0wSFQzbNgcbwvAOl7BgLQoafYD9sFN0\u002Ba4UC5tT5uK0nItOP0OIP3bSqIMdAKRxrWHORbkzjhIyrBz/75ARtNE2H6nlJCO/yZk8NmdAjtVQKw14Iu6p4WKGL57T9Jasb6ezw5d1xKtPl3Ewx2br/ZMQVQcHzt39rJabr\u002BNzEn5bBxhtZutMx1RS6\u002BJwEpdlpmBH9/ZRDz/nPRN5q5\u002BekJVjOa\u002BFDrJFd\u002BziPItwPRveaUiEP/3Td9Me3AfnOuHNrq2iew0LDHcUxCyt8PxF9pGZ5ULl1/e4p64zcVqzvuLD596sp36EBBIhgCelIMyCN4bFQpUh4hEu9vxi",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_1eTIm72msdgE5iWBTxA6pUTK",
+          "Name": "record_end_to_end",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

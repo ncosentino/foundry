@@ -1,0 +1,116 @@
+{
+  "BatchSequence": 19,
+  "Batch": {
+    "CaseId": "h001-06",
+    "TrialIndex": 1
+  },
+  "ArmOrder": [
+    "PlainHarness",
+    "Hybrid",
+    "Iterative"
+  ],
+  "Results": {
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-06",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/hybrid-context.json",
+        "ToolCalls": [
+          "generate_large_artifact",
+          "generate_large_artifact",
+          "complete_hybrid_context",
+          "complete_hybrid_context"
+        ],
+        "CumulativeTokens": 5751,
+        "PeakTokens": 2725,
+        "LatencyMilliseconds": 31659.6898,
+        "CaptureReference": "capture/plain-harness/h001-06/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022rehydrated\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:34:20.843248+00:00",
+          "Duration": "00:00:31.6599600",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-06",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "artifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b\noutputs/hybrid-context.json",
+        "ToolCalls": [
+          "generate_large_artifact",
+          "generate_large_artifact",
+          "complete_hybrid_context",
+          "complete_hybrid_context"
+        ],
+        "CumulativeTokens": 2810,
+        "PeakTokens": 1368,
+        "LatencyMilliseconds": 36289.6775,
+        "CaptureReference": "capture/hybrid/h001-06/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022rehydrated\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:34:20.8438856+00:00",
+          "Duration": "00:00:36.2898356",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-06",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "generate_large_artifact",
+          "generate_large_artifact",
+          "complete_hybrid_context",
+          "complete_hybrid_context"
+        ],
+        "CumulativeTokens": 2981,
+        "PeakTokens": 2339,
+        "LatencyMilliseconds": 23818.734,
+        "CaptureReference": "capture/iterative/h001-06/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022rehydrated\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:34:20.8446132+00:00",
+          "Duration": "00:00:23.8188973",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 8,
+  "EstimatedCostUsd": 0.16
+}

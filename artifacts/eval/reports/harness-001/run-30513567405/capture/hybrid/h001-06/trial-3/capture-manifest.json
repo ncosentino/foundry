@@ -1,0 +1,11 @@
+{
+  "SchemaVersion": "1.0",
+  "AttemptDirectories": [
+    "attempt-1"
+  ],
+  "ResponseFiles": [
+    "attempt-1/71764ff9a084527b6cb0d57616e1a8412e72af79189f378f7944e325e8cec138.json",
+    "attempt-1/eb2b69ecbec39f2752761abbce098b4b7acdfe3d4aa4863ede821e8b14f2b6a2.json",
+    "attempt-1/fdb8ceb26012b7fea5e07ada43cf3e57280f23f6b8fd07d7ddaabb450f2f91d8.json"
+  ]
+}

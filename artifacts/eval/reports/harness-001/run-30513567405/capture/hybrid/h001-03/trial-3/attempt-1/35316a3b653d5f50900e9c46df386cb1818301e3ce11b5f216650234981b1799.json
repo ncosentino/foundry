@@ -1,0 +1,20 @@
+{
+  "ResponseId": "qdGUvZTCOKb5jjPpPXQtyz2/OzscDkuwOZUOe98f\u002Bw44lu5aBtKErJLllk89VuRLvJ3tQNnf2K13wO0BkV50NzLZxGczvHTz4483HZYVzoQrHcYmCyjNRtpq4LeVWPciutePPSPeFb5BMAb7EMELrSpgQmM5IHTHnM\u002BfKCC/r/CdDhP\u002B3ep9TANj0BdBH\u002B75KXQxNLFAjLBYWJMEYLm9ZboZPOlZ8t7Ss5KFJvAX\u002Bm1iwVJtvpKOOa\u002BHvWfbzJFh4AErk\u002Bkau\u002BTQHTH/50/5b5E9WaV/RPBqKJT15OM2SVT\u002BYDBmHiF0aCm9AEffZf7lclHCvbQPbF9mj/l87x4deMTFipmW1tvjA6AjyF0Xn3vohyqroQPNDgBaY9kwmolHoCSi9tih3mo3K8zekjgJxTv0LPvm",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "artifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b\noutputs/artifact-summary.json",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "artifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b\noutputs/artifact-summary.json",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

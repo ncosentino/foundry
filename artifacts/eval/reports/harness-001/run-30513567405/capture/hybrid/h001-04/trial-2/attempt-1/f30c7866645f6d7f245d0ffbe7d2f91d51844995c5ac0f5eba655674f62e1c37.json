@@ -1,0 +1,20 @@
+{
+  "ResponseId": "LORGamYboMulcdaRYIcfipk7CodziYBmgV/2I2IlfiPrXcAmzlTDqTV95g8tScgFKAGw8VB1z\u002BWoHWOvGy3vFg8PShovvzVWREX7SchYhwXs2gswJ0qCHp4ZYueHA2HrQISOgPZU7dGb6twDw0YDVi6VvpZwfiu5zW8gY7SNFKbbgQ62iSGZnUYiMxjEWWqGg1iwCOkvnj/nCrfo6JItYoVCYs0hLv6UGQO3js83PdgIdmC5LRzYBIWHlsRW8/PMamkemv6Hk7r1fd/UBL2Z9NrZhgRo3k7Un43mPsPT8PPHKFsTZIpV56arZbN9VLsH3poH15SBBOmqGpHelQmrzpUDy8HbGsnZYsdFV\u002BI132pwKVK7Gh3nBMg/0ZfERwMwz\u002BRBzb\u002B2JzsQ1x33TJhNKooFSRh6",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "outputs/continuity.json\nartifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "outputs/continuity.json\nartifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

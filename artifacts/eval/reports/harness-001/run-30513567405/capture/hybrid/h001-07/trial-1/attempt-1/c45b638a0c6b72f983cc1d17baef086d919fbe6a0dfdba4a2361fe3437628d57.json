@@ -1,0 +1,20 @@
+{
+  "ResponseId": "Z7sOJxY16X0Qlg\u002BCLXtWKi/nvUmFBgkqyDWd2SL3RfMShp6EVULZu6MT\u002B6gqCQ6WTmdKqxV5qNioE66p8ZDGjgkdQ865hGGf0Vq1boyKjr8e\u002BkMj47dCQRyG\u002BWYCT1TvuYt8H8Swglwv8VMdf\u002BkUDekFfHhTqKrb8VbGIPeNh09K0KnqU16Wbsjei60wFCFGRHRr3LObgAmOvAJyS2sRNLLFnpDhWmmPMD6Vw5Wcn/lzbSzN2GhXL0o9ebYMeqhNX16HqfOyyEeujxC33T0aw11X7gzZmz15TtGHkW\u002BvOus4k3cdr5cy0rVv1jfNE4FW4YBvk/RHvptwaYc3hXM9/fTtNzdkMYKX92eNVQNxk/baYkomftMaXyOtwzXEwIEaaHDOt6bgZciQCO6UXPefoUxCqbw6",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_KKGwdcu3vnwHBfVOoKgaxFz6",
+          "Name": "lookup_rate",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}
