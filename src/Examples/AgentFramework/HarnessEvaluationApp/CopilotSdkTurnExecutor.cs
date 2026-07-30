@@ -11,8 +11,11 @@ internal sealed class CopilotSdkTurnExecutor
         "conversation transcript. Continue exactly one assistant turn. Use only " +
         "the declared tools. Do not use ambient files, shell commands, web access, " +
         "skills, memory, subagents, or undeclared tools. When a tool is required, " +
-        "invoke it with exact arguments and wait for the external loop. Otherwise, " +
-        "return only the final assistant response.";
+        "invoke it with exact arguments and wait for the external loop. Treat tool " +
+        "results in the transcript as authoritative outputs from calls that already " +
+        "occurred; never repeat those calls. If the transcript requires returning a " +
+        "tool result, reproduce its value exactly without prose or formatting. " +
+        "Otherwise, return only the final assistant response.";
 
     private readonly CopilotClient _client;
     private readonly string _workingDirectory;

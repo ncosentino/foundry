@@ -65,6 +65,23 @@ public sealed class HarnessRetainedHostedReportTests
         Assert.Contains("It is not a retention recommendation.", summary);
     }
 
+    [Fact]
+    public void FailedCopilotSdkProbe_IsExcludedBeforeComparisonScheduling()
+    {
+        var exclusion = File.ReadAllText(Path.Combine(
+            FindReportRoot(),
+            "run-30511810798-exclusion.md"));
+
+        Assert.Contains("Excluded and not pooled", exclusion);
+        Assert.Contains(
+            "The full paired scheduler did not start.",
+            exclusion);
+        Assert.Contains(
+            "two probe requests",
+            exclusion,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string FindReportRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
