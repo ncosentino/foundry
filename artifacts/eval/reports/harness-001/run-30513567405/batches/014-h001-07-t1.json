@@ -1,0 +1,116 @@
+{
+  "BatchSequence": 14,
+  "Batch": {
+    "CaseId": "h001-07",
+    "TrialIndex": 1
+  },
+  "ArmOrder": [
+    "Iterative",
+    "Hybrid",
+    "PlainHarness"
+  ],
+  "Results": {
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-07",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "lookup_rate",
+          "lookup_rate",
+          "calculate_total",
+          "calculate_total"
+        ],
+        "CumulativeTokens": 2279,
+        "PeakTokens": 1203,
+        "LatencyMilliseconds": 19977.8427,
+        "CaptureReference": "capture/iterative/h001-07/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022total\u0022:42}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:31:23.6096706+00:00",
+          "Duration": "00:00:19.9780219",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-07",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/tool-cost.json",
+        "ToolCalls": [
+          "lookup_rate",
+          "lookup_rate",
+          "calculate_total",
+          "calculate_total"
+        ],
+        "CumulativeTokens": 3240,
+        "PeakTokens": 1256,
+        "LatencyMilliseconds": 33266.2645,
+        "CaptureReference": "capture/hybrid/h001-07/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022total\u0022:42}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:31:23.6101936+00:00",
+          "Duration": "00:00:33.2664237",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-07",
+        "TrialIndex": 1,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/tool-cost.json",
+        "ToolCalls": [
+          "lookup_rate",
+          "lookup_rate",
+          "calculate_total",
+          "calculate_total"
+        ],
+        "CumulativeTokens": 3513,
+        "PeakTokens": 1669,
+        "LatencyMilliseconds": 40983.7004,
+        "CaptureReference": "capture/plain-harness/h001-07/trial-1/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022total\u0022:42}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:31:23.6106457+00:00",
+          "Duration": "00:00:40.9838587",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 8,
+  "EstimatedCostUsd": 0.16
+}

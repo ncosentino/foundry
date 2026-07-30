@@ -1,0 +1,110 @@
+{
+  "BatchSequence": 13,
+  "Batch": {
+    "CaseId": "h001-05",
+    "TrialIndex": 3
+  },
+  "ArmOrder": [
+    "PlainHarness",
+    "Hybrid",
+    "Iterative"
+  ],
+  "Results": {
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-05",
+        "TrialIndex": 3,
+        "TerminalCategory": "PerAttemptTimeout",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "wait_for_cancellation",
+          "wait_for_cancellation"
+        ],
+        "CumulativeTokens": 849,
+        "PeakTokens": 849,
+        "LatencyMilliseconds": 119999.8954,
+        "CaptureReference": "capture/plain-harness/h001-05/trial-3/capture-manifest.json",
+        "OutputContent": null
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:29:23.6122235+00:00",
+          "Duration": "00:02:00.0002275",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-05",
+        "TrialIndex": 3,
+        "TerminalCategory": "PerAttemptTimeout",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "wait_for_cancellation",
+          "wait_for_cancellation"
+        ],
+        "CumulativeTokens": 929,
+        "PeakTokens": 929,
+        "LatencyMilliseconds": 120001.3342,
+        "CaptureReference": "capture/hybrid/h001-05/trial-3/capture-manifest.json",
+        "OutputContent": null
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:29:23.6130539+00:00",
+          "Duration": "00:02:00.0014931",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-05",
+        "TrialIndex": 3,
+        "TerminalCategory": "PerAttemptTimeout",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "wait_for_cancellation",
+          "wait_for_cancellation"
+        ],
+        "CumulativeTokens": 808,
+        "PeakTokens": 808,
+        "LatencyMilliseconds": 120001.0699,
+        "CaptureReference": "capture/iterative/h001-05/trial-3/capture-manifest.json",
+        "OutputContent": null
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:29:23.6135758+00:00",
+          "Duration": "00:02:00.0012132",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 3,
+  "EstimatedCostUsd": 0.06
+}

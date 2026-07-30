@@ -1,0 +1,20 @@
+{
+  "ResponseId": "aU/SkqHVVfsg2vTD3E78JVyLTu9GZBRlp3eJBtjgL6DX21Jr2Yxckech/RjwdouBq4oHo1x50kg34lCVk9CT1rjJ3V5J0u/EUzRuHgDV/HQEPkMvDSFCw7StPcfJ8Zd/hJDEmog2oMpPN8ieMWzmRc\u002BZw\u002BFo/0lPTPKiKTKy9w7dbia0Tr4fWh5UUMmiEaMFrQ13QFERY2SKyykct5KLLkkPGSNvVFh7wrrRcAkrE523JDRlpi55xLMMvyKGYUVU91SLFVghNVX/UXMcihyA/bwGZQCKJBhc94kAOK8N8P64K2nbBrUN85zQBgS7utDkK\u002BLLtEpMIbH1jmHjzeUz1rR1jrA3tG3Echt0LJlNnUhjPha9rncFBy8hK\u002BCTlOo0M2rHrPJqnrCYBnp3lKI7HMoeuCzC",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_SsA15QXsPcd3fTTOwBtS6zmx",
+          "Name": "lookup_south",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

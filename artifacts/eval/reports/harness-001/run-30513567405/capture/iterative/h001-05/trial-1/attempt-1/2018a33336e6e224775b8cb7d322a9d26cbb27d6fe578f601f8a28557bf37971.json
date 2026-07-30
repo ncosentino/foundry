@@ -1,0 +1,20 @@
+{
+  "ResponseId": "a0iGMNUXxJZ7\u002BB38U\u002BTJ0\u002BZxjHmJ\u002BxFDB1NW6CGmQgiymDjrmsQxoSjhpqrNjD6dR/TaPKEkenbfbzUxCUcY2L6ApFNoDxU\u002Bcl6lgAop3QC80QsWzgTk0IzTdKoKgptkksA2fyfCECoBaWirJzhHG1wZ8SoHKzvtgo4rthbJeOuhNe4CQNntSsoCffOwyNu//mvV1BbmA78JtWek8DeNp0N4NbPV66HDEI9P6oxfAidFWRn46ziMiu\u002B2srPdAZU5ZKfWb0MV1Lid\u002BBr4BzjFJRVLFHgruxonScjrzXN6y927yTiKzOzx0jLKG/BeI7MT9KxyoMlpLW4Efzu5TsbJh2oEj6qSIwhEqhAV/y4uI\u002BfKBnZscgcPnF5Aesbj9dK0jCia8Yxvfn3JpP9SceGttcvxw80c",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "",
+      "Contents": [
+        {
+          "Kind": 1,
+          "Text": null,
+          "CallId": "call_kKINyPl4zdpzGg1zlkABL78A",
+          "Name": "wait_for_cancellation",
+          "Arguments": "{}",
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

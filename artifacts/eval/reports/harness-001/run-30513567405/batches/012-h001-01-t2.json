@@ -1,0 +1,114 @@
+{
+  "BatchSequence": 12,
+  "Batch": {
+    "CaseId": "h001-01",
+    "TrialIndex": 2
+  },
+  "ArmOrder": [
+    "Hybrid",
+    "PlainHarness",
+    "Iterative"
+  ],
+  "Results": {
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-01",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/tool-orchestration.json",
+        "ToolCalls": [
+          "lookup_north",
+          "lookup_north",
+          "lookup_south",
+          "lookup_south",
+          "combine_values",
+          "combine_values"
+        ],
+        "CumulativeTokens": 4290,
+        "PeakTokens": 1284,
+        "LatencyMilliseconds": 38556.1912,
+        "CaptureReference": "capture/hybrid/h001-01/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022result\u0022:\u0022north:17|south:29\u0022}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:28:37.8068384+00:00",
+          "Duration": "00:00:38.5565825",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-01",
+        "TrialIndex": 2,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/tool-orchestration.json",
+        "ToolCalls": [
+          "lookup_north",
+          "lookup_north",
+          "lookup_south",
+          "lookup_south",
+          "combine_values",
+          "combine_values"
+        ],
+        "CumulativeTokens": 3840,
+        "PeakTokens": 1202,
+        "LatencyMilliseconds": 45802.6943,
+        "CaptureReference": "capture/plain-harness/h001-01/trial-2/capture-manifest.json",
+        "OutputContent": "{\u0022status\u0022:\u0022complete\u0022,\u0022result\u0022:\u0022north:17|south:29\u0022}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:28:37.8078087+00:00",
+          "Duration": "00:00:45.8032333",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Iterative": {
+      "Status": "ExecutionFailed",
+      "Output": null,
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Failed",
+          "StartedAt": "2026-07-30T04:28:37.8082679+00:00",
+          "Duration": "00:00:24.4469535",
+          "Failure": {
+            "Code": "ExecutionFailed",
+            "Stage": "Execution",
+            "ExceptionType": "System.InvalidOperationException",
+            "Message": "Cumulative tool call count (8) reached MaxTotalToolCalls (8).",
+            "IsRetryable": false
+          },
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": {
+        "Code": "ExecutionFailed",
+        "Stage": "Execution",
+        "ExceptionType": "System.InvalidOperationException",
+        "Message": "Cumulative tool call count (8) reached MaxTotalToolCalls (8).",
+        "IsRetryable": false
+      }
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 10,
+  "EstimatedCostUsd": 0.20
+}

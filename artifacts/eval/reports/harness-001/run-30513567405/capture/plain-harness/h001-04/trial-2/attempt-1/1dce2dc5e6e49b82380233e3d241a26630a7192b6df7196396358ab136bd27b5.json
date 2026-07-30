@@ -1,0 +1,20 @@
+{
+  "ResponseId": "ozN471pmpVh5qZpGSUwtUDb43tvsr6mQ\u002BH9m1BbVZM8VtUAQ5sKGBsId/ebSmF05NB0TYpCPxTE/iEF2B07VEEjyhjjvzOxX1sPRKy/ShuxK7BhV2XGiZ3lUey3\u002BGaLQi5JcBf5TzhUD0LFgFa/a3x1WpVtlsrRj6gCm\u002BSWXtVKJIz31jLa/wiQ09XZg5\u002BbCMt7uIKY/ppivPYCKzRv\u002BEC5kZ5rVSO5yEICcl08p0aVZc6pPeOCTe/jpqU5RKhLXRveFWOaWT3dzhDJ\u002BAiISVrJAl1ou886oCQ0nLze5RoKwfM7flwgS0kaH/ziiFReb84q0M1Za8zXS7NgUrJ49Z1kGsYfSvA7YtYdB\u002B6\u002ByFnrVb7CwN1HDhxZFwzfBW8wNIy2ON6rGG0LC6tRrgYtGIgLpGVvU",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "outputs/continuity.json",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "outputs/continuity.json",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

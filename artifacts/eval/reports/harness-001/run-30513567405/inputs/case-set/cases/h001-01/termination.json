@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-01",
+  "referenceId": "harness-001/v1.0/h001-01/termination",
+  "dimension": "Termination",
+  "aggregation": "ThreeTrialMajority",
+  "contractKind": "DeterministicAssertions",
+  "assertions": [
+    {
+      "source": "EvaluationMetric",
+      "metricName": "Run Succeeded",
+      "operator": "Equals",
+      "expected": true
+    },
+    {
+      "source": "EvaluationMetric",
+      "metricName": "Termination Consistent",
+      "operator": "Equals",
+      "expected": true
+    }
+  ],
+  "expectedTerminalCategory": "Completed"
+}

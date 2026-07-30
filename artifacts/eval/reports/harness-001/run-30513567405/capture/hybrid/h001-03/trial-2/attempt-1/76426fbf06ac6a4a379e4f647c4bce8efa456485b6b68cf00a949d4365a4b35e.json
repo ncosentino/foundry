@@ -1,0 +1,20 @@
+{
+  "ResponseId": "mWiappJRpquw3nxOnBYS7cv341phxd0n/IDlryiXKPE8mVMD1H6F5Mev63735bwBzxK2s\u002BB2d1vCMEzpNFoTi7cnVbPbp/tIqKzfL4Fj8hozq2vT31C/UmbdJ3ANuGOIbhrOurIqv4Spj4rKTeAFYlXTjr21dbDQTQ0XlEo/QLhTiH5XD/E8zkMW0/ktUTo5yC7tacS89EoNU7JaYoFxBu95OMiXiQj/wwXHGexu7k33fhAGXPAun9L5nzglbfv2LG1tpy0bS89n\u002BQoWMJYitkZ/syFw0cIfiyfsQ\u002BEias/Huuk21f5kCMXuDkMm3\u002BBhDe5DN1XmherbuqIiDyxpBE5lSXQ4pbECgodmU9UjtufKWBz280J31iXmfFdrLxOLKQ/tcRSniteGsX8gqnIyaTPnz4Ch",
+  "ModelId": "gpt-5-mini",
+  "Messages": [
+    {
+      "Role": "assistant",
+      "Text": "artifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b\noutputs/artifact-summary.json",
+      "Contents": [
+        {
+          "Kind": 0,
+          "Text": "artifact://sha256/069e5b2cc6421e723ab38905158bb05fea97810eb8dd0c5aa6c9e7157c96833b\noutputs/artifact-summary.json",
+          "CallId": null,
+          "Name": null,
+          "Arguments": null,
+          "Result": null
+        }
+      ]
+    }
+  ]
+}

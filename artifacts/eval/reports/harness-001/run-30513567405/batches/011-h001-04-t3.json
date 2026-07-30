@@ -1,0 +1,112 @@
+{
+  "BatchSequence": 11,
+  "Batch": {
+    "CaseId": "h001-04",
+    "TrialIndex": 3
+  },
+  "ArmOrder": [
+    "Hybrid",
+    "PlainHarness",
+    "Iterative"
+  ],
+  "Results": {
+    "Hybrid": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Hybrid",
+        "CaseId": "h001-04",
+        "TrialIndex": 3,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "outputs/continuity.json",
+        "ToolCalls": [
+          "record_continuity",
+          "record_continuity"
+        ],
+        "CumulativeTokens": 2379,
+        "PeakTokens": 1406,
+        "LatencyMilliseconds": 21756.3037,
+        "CaptureReference": "capture/hybrid/h001-04/trial-3/capture-manifest.json",
+        "OutputContent": "{\u0022destination\u0022:\u0022seattle\u0022,\u0022constraintsPreserved\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:28:09.0243899+00:00",
+          "Duration": "00:00:21.7565306",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "PlainHarness": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "PlainHarness",
+        "CaseId": "h001-04",
+        "TrialIndex": 3,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": "Retained destination: Seattle.\n\nrecord_continuity completed \u2014 continuity saved to: outputs/continuity.json.\n\nThe required workspace artifact has been generated and is present. Would you like me to return the artifact contents here or provide a download/reference?",
+        "ToolCalls": [
+          "record_continuity",
+          "generate_large_artifact",
+          "record_continuity",
+          "generate_large_artifact"
+        ],
+        "CumulativeTokens": 4265,
+        "PeakTokens": 3370,
+        "LatencyMilliseconds": 28781.9776,
+        "CaptureReference": "capture/plain-harness/h001-04/trial-3/capture-manifest.json",
+        "OutputContent": "{\u0022destination\u0022:\u0022seattle\u0022,\u0022constraintsPreserved\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:28:09.0251345+00:00",
+          "Duration": "00:00:28.7821427",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    },
+    "Iterative": {
+      "Status": "Succeeded",
+      "Output": {
+        "Arm": "Iterative",
+        "CaseId": "h001-04",
+        "TrialIndex": 3,
+        "TerminalCategory": "Completed",
+        "Completion": true,
+        "ResponseText": null,
+        "ToolCalls": [
+          "record_continuity",
+          "record_continuity"
+        ],
+        "CumulativeTokens": 1264,
+        "PeakTokens": 1264,
+        "LatencyMilliseconds": 17394.996,
+        "CaptureReference": "capture/iterative/h001-04/trial-3/capture-manifest.json",
+        "OutputContent": "{\u0022destination\u0022:\u0022seattle\u0022,\u0022constraintsPreserved\u0022:true}"
+      },
+      "Attempts": [
+        {
+          "AttemptNumber": 1,
+          "Status": "Succeeded",
+          "StartedAt": "2026-07-30T04:28:09.0255326+00:00",
+          "Duration": "00:00:17.3952630",
+          "Failure": null,
+          "DelayBeforeNextAttempt": null
+        }
+      ],
+      "Failure": null
+    }
+  },
+  "AttemptsUsed": 3,
+  "ProviderRequestsUsed": 5,
+  "EstimatedCostUsd": 0.10
+}

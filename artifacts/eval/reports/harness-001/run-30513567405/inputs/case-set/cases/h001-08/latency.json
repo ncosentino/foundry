@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "caseId": "h001-08",
+  "referenceId": "harness-001/v1.0/h001-08/latency",
+  "dimension": "Latency",
+  "aggregation": "DualFullSuccessCaseMean",
+  "contractKind": "ContinuousMeasurement",
+  "comparabilityPrerequisite": {
+    "requiredMetricName": "Harness Diagnostics Schema Complete",
+    "comparisonRule": "ExactRequiredFieldAvailabilityComparison",
+    "requiredPresentFields": [
+      "ExecutionMode",
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "equalAvailabilityFields": [
+      "AggregateTokenUsage",
+      "TimingBoundaries",
+      "InputMessages"
+    ],
+    "allowedValueDifferences": [
+      "ExecutionMode",
+      "SupportsContextDiagnostics",
+      "SupportsArtifactDiagnostics"
+    ],
+    "failureTreatment": "NonComparable"
+  },
+  "measurement": {
+    "source": "AgentRunDiagnostics.TotalDuration.TotalMilliseconds",
+    "unit": "Milliseconds",
+    "direction": "LowerIsBetter",
+    "validMinimum": 0,
+    "conditionalEligibility": "DualFullSuccess",
+    "pessimisticScheduledFailureValueSource": "RunManifest.FullTrialTimeoutIncludingRetryMilliseconds",
+    "unscheduledTreatment": "ExcludeSymmetrically"
+  }
+}
