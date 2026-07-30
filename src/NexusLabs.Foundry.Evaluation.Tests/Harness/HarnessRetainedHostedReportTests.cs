@@ -83,6 +83,11 @@ public sealed class HarnessRetainedHostedReportTests
         Assert.Equal(
             "30513567405",
             provenance.RootElement.GetProperty("authoritativeWorkflowRunId").GetString());
+        var excludedRunIds = provenance.RootElement.GetProperty("excludedRuns")
+            .EnumerateArray()
+            .Select(run => Assert.IsType<string>(
+                run.GetProperty("workflowRunId").GetString()))
+            .ToArray();
         Assert.Equal(
             [
                 "30270567078",
@@ -90,10 +95,7 @@ public sealed class HarnessRetainedHostedReportTests
                 "30400286731",
                 "30511810798",
             ],
-            provenance.RootElement.GetProperty("excludedRuns")
-                .EnumerateArray()
-                .Select(run => run.GetProperty("workflowRunId").GetString())
-                .ToArray());
+            excludedRunIds);
         Assert.Equal(
             0,
             provenance.RootElement.GetProperty("bundleVerification")
