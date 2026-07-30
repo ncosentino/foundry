@@ -3106,6 +3106,34 @@
 <td style="text-align: left;">Provides an immutable Foundry-owned projection of one MEAI evaluation metric.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><a href="../ExperimentPairedBinaryCaseOutcome/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedBinaryCaseOutcome">ExperimentPairedBinaryCaseOutcome</a></td>
+<td style="text-align: left;">Describes one paired case outcome for a binary X-minus-Y comparison.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../ExperimentPairedBinaryComparisonEvidence/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedBinaryComparisonEvidence">ExperimentPairedBinaryComparisonEvidence</a></td>
+<td style="text-align: left;">Describes paired binary X-minus-Y comparison evidence and its paired uncertainty summary.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../ExperimentPairedComparisonEvidence/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedComparisonEvidence">ExperimentPairedComparisonEvidence</a></td>
+<td style="text-align: left;">Creates paired X-minus-Y comparison evidence for binary and continuous case-level analyses.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../ExperimentPairedContinuousCaseMeasurement/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedContinuousCaseMeasurement">ExperimentPairedContinuousCaseMeasurement</a></td>
+<td style="text-align: left;">Describes one paired case measurement for a continuous X-minus-Y comparison.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../ExperimentPairedContinuousComparisonEvidence/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedContinuousComparisonEvidence">ExperimentPairedContinuousComparisonEvidence</a></td>
+<td style="text-align: left;">Describes paired continuous X-minus-Y comparison evidence and its case-level bootstrap summary.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../ExperimentPairedContinuousPessimisticCaseMeasurement/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedContinuousPessimisticCaseMeasurement">ExperimentPairedContinuousPessimisticCaseMeasurement</a></td>
+<td style="text-align: left;">Describes one case-level paired continuous measurement for the required pessimistic sensitivity. Values for fully scheduled, comparable cases are the arm's observed case-level value after replacing each scheduled failed or unscorable trial with the metric's predeclared pessimistic bound. Cases that were not fully scheduled remain explicit and must not use substitution.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../ExperimentPairedContinuousPessimisticSensitivityEvidence/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPairedContinuousPessimisticSensitivityEvidence">ExperimentPairedContinuousPessimisticSensitivityEvidence</a></td>
+<td style="text-align: left;">Describes the protocol-required pessimistic sensitivity adjacent to a conditional paired continuous comparison. Only fully scheduled, comparable cases are analyzed; scheduled failures remain in the analysis through caller-supplied predeclared bound substitutions, while cases truncated by a global scheduling cap are excluded without imputation.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><a href="../ExperimentPolicyContext_TCase%2CTOutput_/" title="NexusLabs.Foundry.Evaluation.Experiments.ExperimentPolicyContext\&lt;TCase,TOutput&gt;">ExperimentPolicyContext&lt;TCase,TOutput&gt;</a></td>
 <td style="text-align: left;">Provides immutable run measurements to an experiment policy.</td>
 </tr>
