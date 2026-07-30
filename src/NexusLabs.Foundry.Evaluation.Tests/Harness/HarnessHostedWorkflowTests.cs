@@ -22,7 +22,9 @@ public sealed class HarnessHostedWorkflowTests
     {
         var workflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
 
-        Assert.Contains("runs-on: [self-hosted, linux, x64, general-purpose]", workflow);
+        Assert.Contains("runs-on: foundry-ci", workflow);
+        Assert.Contains("HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci", workflow);
+        Assert.DoesNotContain("general-purpose", workflow);
         Assert.DoesNotContain("runs-on: ubuntu-latest", workflow);
         Assert.Contains("timeout-minutes: 60", workflow);
         Assert.Contains("copilot-requests: write", workflow);
@@ -78,6 +80,8 @@ public sealed class HarnessHostedWorkflowTests
         Assert.DoesNotContain("models.github.ai", script);
         Assert.DoesNotContain("replay-smoke-response.json", script);
         Assert.DoesNotContain("-GitHubToken", workflow);
+        Assert.Contains("Run Copilot SDK provider probe", workflow);
+        Assert.Contains("--provider-probe", workflow);
     }
 
     [Fact]
@@ -106,7 +110,8 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains(
             "if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation",
             workflow);
-        Assert.Contains("runs-on: [self-hosted, linux, x64, general-purpose]", workflow);
+        Assert.Contains("runs-on: foundry-ci", workflow);
+        Assert.Contains("HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci", workflow);
         Assert.DoesNotContain("runs-on: ubuntu-latest", workflow);
         Assert.Contains("copilot-requests: write", workflow);
         Assert.DoesNotContain("models: read", workflow);
@@ -116,19 +121,35 @@ public sealed class HarnessHostedWorkflowTests
     }
 
     [Fact]
-    public void HostedDriver_UsesCopilotProviderWithExplicitWorkflowToken()
+    public void HostedDriver_UsesOfficialCopilotSdkWithExplicitWorkflowToken()
     {
         var program = ReadRepositoryFile(
             "src/Examples/AgentFramework/HarnessEvaluationApp/Program.cs");
         var project = ReadRepositoryFile(
             "src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj");
+        var client = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/CopilotSdkChatClient.cs");
+        var executor = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/CopilotSdkTurnExecutor.cs");
+        var collector = ReadRepositoryFile(
+            "src/Examples/AgentFramework/HarnessEvaluationApp/CopilotSdkTurnCollector.cs");
 
-        Assert.Contains("new CopilotChatClient", program);
+        Assert.Contains("new CopilotClient", program);
+        Assert.Contains("new CopilotSdkChatClient", program);
         Assert.Contains("GitHubToken = token", program);
-        Assert.Contains("DefaultModel = options.ModelId", program);
+        Assert.Contains("CopilotClientMode.Empty", program);
+        Assert.Contains("GitHub.Copilot.SDK", project);
+        Assert.DoesNotContain("NexusLabs.Foundry.Copilot.csproj", project);
+        Assert.Contains("AsDeclarationOnly", executor);
+        Assert.Contains("ExternalToolRequestedEvent", collector);
+        Assert.Contains("ModelCapabilitiesOverrideLimits", executor);
+        Assert.Contains("PermissionDecision.Reject", executor);
+        Assert.Contains("CopilotSdkSessionDirectory.Create", executor);
+        Assert.DoesNotContain("PermissionHandler.ApproveAll", executor);
+        Assert.Contains("BuildTranscriptJson", client);
         Assert.DoesNotContain("OpenAIClient", program);
         Assert.DoesNotContain("models.github.ai", program);
-        Assert.Contains("NexusLabs.Foundry.Copilot.csproj", project);
+        Assert.DoesNotContain("new CopilotChatClient", program);
         Assert.DoesNotContain("<PackageReference Include=\"OpenAI\"", project);
         Assert.DoesNotContain("<PackageReference Include=\"Microsoft.Extensions.AI.OpenAI\"", project);
     }

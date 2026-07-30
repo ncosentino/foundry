@@ -189,7 +189,7 @@ jobs:
 
   harness-evaluation-dispatch:
     if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation
-    runs-on: [self-hosted, linux, x64, general-purpose]
+    runs-on: foundry-ci
     timeout-minutes: 60
     permissions:
       contents: read
@@ -240,13 +240,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HARNESS_EVAL_RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          HARNESS_EVAL_RUNNER_LABELS: self-hosted,linux,x64,general-purpose
+          HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci
         run: |
           $confirmCopilotEnterpriseBilling = $env:COPILOT_BILLING_CONFIRMED -eq 'true'
           scripts/Invoke-HarnessEvaluationPreflight.ps1 `
             -OutputDirectory 'artifacts/eval/hosted-run' `
             -ModelId $env:MODEL_ID `
             -ConfirmCopilotEnterpriseBilling:$confirmCopilotEnterpriseBilling
+
+      - name: Run Copilot SDK provider probe
+        if: steps.preflight.outputs.preflight-status == 'Ready'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
+        run: >-
+          dotnet run
+          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
+          --configuration Release
+          --
+          --provider-probe
+          --output artifacts/eval/hosted-run
 
       - name: Execute complete paired comparison
         if: steps.preflight.outputs.preflight-status == 'Ready'
@@ -257,6 +270,7 @@ jobs:
           dotnet run
           --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
           --configuration Release
+          --no-build
           --
           --output artifacts/eval/hosted-run
 

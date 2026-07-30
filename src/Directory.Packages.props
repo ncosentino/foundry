@@ -68,6 +68,6 @@
     <!-- UI packages -->
     <PackageVersion Include="Spectre.Console" Version="0.55.0" />
     <!-- GitHub Copilot SDK (used only by CopilotComparisonExample) -->
-    <PackageVersion Include="GitHub.Copilot.SDK" Version="1.0.7" />
+    <PackageVersion Include="GitHub.Copilot.SDK" Version="1.0.8" />
   </ItemGroup>
 </Project>
