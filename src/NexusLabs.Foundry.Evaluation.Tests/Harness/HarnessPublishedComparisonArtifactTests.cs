@@ -136,6 +136,92 @@ public sealed class HarnessPublishedComparisonArtifactTests
         Assert.Contains("Observed judge agreement: not yet measured", publication);
     }
 
+    [Fact]
+    public void ApprovedPublicationManifest_HashesEveryPublishedArtifactAndInput()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var reportRoot = FindReportRoot();
+        using var manifest = JsonDocument.Parse(
+            File.ReadAllText(Path.Combine(reportRoot, "run-30513567405-publication-manifest.json")));
+        var root = manifest.RootElement;
+
+        Assert.Equal("HumanReviewed", root.GetProperty("status").GetString());
+        Assert.Equal(
+            "RetainAllPendingStrongerEvidence",
+            root.GetProperty("decisionStatus").GetString());
+        foreach (var collectionName in new[] { "files", "inputs" })
+        {
+            foreach (var item in root.GetProperty(collectionName).EnumerateArray())
+            {
+                var relativePath = collectionName == "files"
+                    ? Path.Combine(
+                        "artifacts",
+                        "eval",
+                        "reports",
+                        "harness-001",
+                        item.GetProperty("relativePath").GetString()!)
+                    : item.GetProperty("path").GetString()!;
+                var path = Path.Combine(
+                    repositoryRoot,
+                    relativePath.Replace('/', Path.DirectorySeparatorChar));
+                Assert.True(File.Exists(path), $"Published artifact '{relativePath}' does not exist.");
+                Assert.Equal(item.GetProperty("sha256").GetString(), CanonicalSha256(path));
+            }
+        }
+    }
+
+    [Fact]
+    public void ApprovedHumanReview_IsSignedAndBoundToBundleChecksum()
+    {
+        var reportRoot = FindReportRoot();
+        using var signature = JsonDocument.Parse(
+            File.ReadAllText(Path.Combine(reportRoot, "run-30513567405-human-review.json")));
+        var root = signature.RootElement;
+
+        Assert.Equal("HumanReviewed", root.GetProperty("status").GetString());
+        Assert.Equal("@ncosentino", root.GetProperty("reviewerIdentity").GetString());
+        Assert.Equal("2026-07-30T14:32:59Z", root.GetProperty("reviewedAtUtc").GetString());
+        Assert.True(root.GetProperty("deterministicAnchorsAcknowledged").GetBoolean());
+        Assert.True(root.GetProperty("pairedUncertaintyAcknowledged").GetBoolean());
+        Assert.True(root.GetProperty("diagnosticsParityAcknowledged").GetBoolean());
+        Assert.True(root.GetProperty("judgeCalibrationAcknowledged").GetBoolean());
+        Assert.True(root.GetProperty("truncationStatusAcknowledged").GetBoolean());
+        Assert.Equal(
+            "RetainAllPendingStrongerEvidence",
+            root.GetProperty("retentionRecommendation").GetString());
+        Assert.Contains(
+            "Signed @ncosentino.",
+            root.GetProperty("signature").GetString());
+
+        var checksumPath = Path.Combine(reportRoot, "run-30513567405", "checksums.sha256");
+        Assert.Equal(
+            CanonicalSha256(checksumPath),
+            root.GetProperty("artifactBundleChecksumSha256").GetString());
+    }
+
+    [Fact]
+    public void ApprovedPublication_RecordsHumanReviewedRetentionDecision()
+    {
+        var reportRoot = FindReportRoot();
+        var publication = File.ReadAllText(
+            Path.Combine(reportRoot, "run-30513567405-publication.md"));
+        var retention = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "specs",
+            "001-maf-harness-first-class",
+            "evidence",
+            "retention-decisions.md"));
+
+        Assert.Contains("Human review status: `HumanReviewed`", publication);
+        Assert.Contains("Every completion interval includes zero", publication);
+        Assert.Contains("Judge evidence is `UNCALIBRATED`", publication);
+        Assert.Contains("RetainAllPendingStrongerEvidence", publication);
+        Assert.Contains("DUP-002", retention);
+        Assert.Contains("DUP-006", retention);
+        Assert.Contains("DUP-008", retention);
+        Assert.Contains("No accepted ADR is superseded", retention);
+    }
+
     private static string FindReportRoot()
     {
         return Path.Combine(
