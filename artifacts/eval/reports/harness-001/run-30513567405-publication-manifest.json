@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "status": "HumanReviewed",
+  "caseSetId": "harness-001",
+  "caseSetVersion": "v1.0",
+  "workflowRunId": 30513567405,
+  "sourceCommit": "2ac9d32cdf31d17e2fb937ffca567562a6d069c5",
+  "provider": "github-copilot",
+  "billingProduct": "GitHub Copilot Enterprise",
+  "runnerProfile": "foundry-ci",
+  "humanReviewStatus": "HumanReviewed",
+  "decisionStatus": "RetainAllPendingStrongerEvidence",
+  "publicationAdvisoryOnly": true,
+  "underpowered": true,
+  "judgeStatus": "UNCALIBRATED",
+  "bundleChecksumSha256": "f76e31d9424e15b8d0b56b12b75a1020626284adb361c609a659a07dfa370d29",
+  "files": [
+    {
+      "relativePath": "run-30513567405-publication.md",
+      "sha256": "83c89a0a1f7502c2099335cc36e65908f6319fdf4e898e9ed0db2bac975759f2"
+    },
+    {
+      "relativePath": "run-30513567405-summary.md",
+      "sha256": "8075aca1c0741362b2b17878635929b6da477b59bb7955e52f61e33bf538fa4b"
+    },
+    {
+      "relativePath": "run-30513567405-provenance.json",
+      "sha256": "43431d086f70bab7c04b2c7142fb3cc854c0e614ff55d88e50d3639d28662e4f"
+    },
+    {
+      "relativePath": "run-30513567405-attempt-metadata.json",
+      "sha256": "2a534d03419489648cfa2a9cb6be92c0d5d690354eff7bad84856316e5deb812"
+    },
+    {
+      "relativePath": "run-30513567405-human-review.json",
+      "sha256": "679bff3c7b64d3c4a64357215bf0ddca123e34d4abd856633e2980c7f985846a"
+    },
+    {
+      "relativePath": "run-30513567405/checksums.sha256",
+      "sha256": "f76e31d9424e15b8d0b56b12b75a1020626284adb361c609a659a07dfa370d29"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/manifest.json",
+      "sha256": "ae3fb57aaba55865047fc4b83ccf08f071f706047de127f3498a63f90a60de48"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/analysis-plan.md",
+      "sha256": "fd75e42c576c78b16bd13c06bf51db889963ce99a29bbab4028fc3ef93de2263"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/pricing/github-copilot.v1.json",
+      "sha256": "272dea841b50891966df3a1cba9e6b7126b407cc2ebf7e7e90ef4595194467ea"
+    },
+    {
+      "path": "artifacts/eval/reports/harness-001/run-30513567405/inputs/case-set/judges/manifest.json",
+      "sha256": "8df3ee0afcf8bf856e7ba14ed7358bb0a912f56d002b6ac783609bd57e156dc4"
+    }
+  ],
+  "postRunEvidence": [
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/manifest.json",
+      "sha256": "8df3ee0afcf8bf856e7ba14ed7358bb0a912f56d002b6ac783609bd57e156dc4"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/manifest.json",
+      "sha256": "a02baa5ad18a035e5a6a2acbdbe9c75a2e727c63cf749cec50218c49877a2ae2"
+    },
+    {
+      "path": "artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/heldout.human-attested.jsonl",
+      "sha256": "98323a323b03a20c4e9f0bd6cc42a84d33d46f67c84b2dfc6c42ae8ae610e776"
+    }
+  ]
+}
