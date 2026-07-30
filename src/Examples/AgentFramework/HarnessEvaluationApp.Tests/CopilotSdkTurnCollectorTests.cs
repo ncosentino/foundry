@@ -90,4 +90,36 @@ public sealed class CopilotSdkTurnCollectorTests
         Assert.Equal(ChatFinishReason.Stop, result.FinishReason);
         Assert.Empty(result.ToolCalls);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("future_reason")]
+    public async Task Completion_RejectsUnsupportedFinishReason(string? finishReason)
+    {
+        var collector = new CopilotSdkTurnCollector("fallback-model");
+        collector.Observe(new AssistantMessageEvent
+        {
+            Data = new AssistantMessageData
+            {
+                MessageId = "message-3",
+                Model = "gpt-5-mini",
+                Content = "done",
+            },
+        });
+        collector.Observe(new AssistantUsageEvent
+        {
+            Data = new AssistantUsageData
+            {
+                Model = "gpt-5-mini",
+                InputTokens = 20,
+                OutputTokens = 5,
+                FinishReason = finishReason,
+            },
+        });
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await collector.Completion);
+        Assert.Contains("unsupported finish reason", exception.Message);
+    }
 }

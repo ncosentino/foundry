@@ -22,7 +22,9 @@ public sealed class HarnessHostedWorkflowTests
     {
         var workflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
 
-        Assert.Contains("runs-on: [self-hosted, linux, x64, general-purpose]", workflow);
+        Assert.Contains("runs-on: foundry-ci", workflow);
+        Assert.Contains("HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci", workflow);
+        Assert.DoesNotContain("general-purpose", workflow);
         Assert.DoesNotContain("runs-on: ubuntu-latest", workflow);
         Assert.Contains("timeout-minutes: 60", workflow);
         Assert.Contains("copilot-requests: write", workflow);
@@ -108,7 +110,8 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains(
             "if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation",
             workflow);
-        Assert.Contains("runs-on: [self-hosted, linux, x64, general-purpose]", workflow);
+        Assert.Contains("runs-on: foundry-ci", workflow);
+        Assert.Contains("HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci", workflow);
         Assert.DoesNotContain("runs-on: ubuntu-latest", workflow);
         Assert.Contains("copilot-requests: write", workflow);
         Assert.DoesNotContain("models: read", workflow);
@@ -141,6 +144,7 @@ public sealed class HarnessHostedWorkflowTests
         Assert.Contains("ExternalToolRequestedEvent", collector);
         Assert.Contains("ModelCapabilitiesOverrideLimits", executor);
         Assert.Contains("PermissionDecision.Reject", executor);
+        Assert.Contains("CopilotSdkSessionDirectory.Create", executor);
         Assert.DoesNotContain("PermissionHandler.ApproveAll", executor);
         Assert.Contains("BuildTranscriptJson", client);
         Assert.DoesNotContain("OpenAIClient", program);
