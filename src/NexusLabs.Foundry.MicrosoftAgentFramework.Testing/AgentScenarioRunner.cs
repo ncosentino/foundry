@@ -140,6 +140,26 @@ public sealed class AgentScenarioRunner
 /// <summary>
 /// Result of running a single <see cref="IAgentScenario"/>.
 /// </summary>
+/// <param name="ScenarioName">The name of the scenario that was run.</param>
+/// <param name="Workspace">The workspace the scenario executed against.</param>
+/// <param name="Diagnostics">
+/// Run diagnostics, or <see langword="null"/> when the agent produced none.
+/// </param>
+/// <param name="ResponseText">
+/// The agent's final response text, or <see langword="null"/> when execution failed
+/// before producing one.
+/// </param>
+/// <param name="ExecutionError">
+/// The exception thrown while running the agent, or <see langword="null"/> when
+/// execution completed.
+/// </param>
+/// <param name="VerificationError">
+/// The exception thrown while verifying the scenario, or <see langword="null"/> when
+/// verification passed or never ran.
+/// </param>
+/// <param name="Succeeded">
+/// <see langword="true"/> when neither execution nor verification reported an error.
+/// </param>
 public sealed record ScenarioRunResult(
     string ScenarioName,
     IWorkspace Workspace,

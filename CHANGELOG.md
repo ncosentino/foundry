@@ -9,11 +9,63 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Harness` package that
+  builds the official upstream `Microsoft.Agents.AI.Harness` complete-bundle
+  pipeline from fully explicit configuration and reports requested-versus-
+  effective bundle defaults. The package is opt-in: the core
+  `NexusLabs.Foundry.MicrosoftAgentFramework` package never references it, and
+  no other Foundry package acquires it transitively.
+- Harness scenario testing surface (`IHarnessScenario`,
+  `HarnessScenarioRunner`, and their context and result types) in
+  `NexusLabs.Foundry.MicrosoftAgentFramework.Testing`, so Harness scenarios can
+  be authored without referencing the optional bundle.
+- Foundry workspace authority for Harness runs, including eager artifact
+  offload, selective rehydration, and content-addressed artifact references.
+- Harness diagnostics progress events for approvals, artifact offload and
+  rehydration, and context composition and compaction.
+- Experimental internal hybrid context compaction that fails closed rather than
+  forwarding over-budget context to a provider.
+- NativeAOT Harness profile with source-generated tools, no reflection fallback,
+  and a published-and-executed native application in CI.
+- Pre-registered hosted comparison of the iterative loop, plain Harness, and
+  hybrid Harness execution modes, with an immutable checksum-verified evidence
+  bundle, paired uncertainty, diagnostics parity, and a human-signed decision.
 - Repository-owned Foundry CI runner image source and trusted GHCR publication
   workflow with exact .NET SDKs, NativeAOT prerequisites, GitHub-hosted pull
   request validation, provenance, SBOM generation, and retained digest evidence.
 - Digest-pinned `foundry-ci` PitCrew profile and portable exact-SDK setup action
   that skips downloads only when every required SDK is already installed.
+
+### Changed
+
+- The Harness bundle owns the tool-invocation loop and OpenTelemetry for
+  complete-bundle agents; Foundry emits no duplicate spans or metrics for that
+  profile.
+
+### Deprecated
+
+- Nothing. The iterative loop, plain Harness, and hybrid execution modes are all
+  retained. The hosted comparison was underpowered and supports no default
+  change or removal.
+
+### Migration
+
+- **No compatibility shim exists.** The former
+  `NexusLabs.Foundry.MicrosoftAgentFramework` alpha Harness APIs, the former
+  `NexusLabs.Foundry.Copilot` alpha APIs, and the former
+  `NexusLabs.Foundry.Needlr.SemanticKernel` alpha APIs are not shimmed. Update
+  call sites directly.
+- **Adopting the bundle is additive.** Existing Foundry MAF agents keep working
+  unchanged. Add the optional Harness package only when you want the upstream
+  complete bundle.
+- **Selected-provider composition is internal and unsupported.** Public
+  consumers choose plain Foundry MAF agents, the optional Harness bundle, or the
+  Foundry iterative loop. Do not depend on the internal seam.
+- **Shell is a separate opt-in package.** Upstream `HarnessAgentOptions` exposes
+  no shell property and Foundry does not add one. Reference a shell package
+  yourself and pass shell commands as ordinary tools or from a context provider.
+- **The optional bundle and Harness testing APIs are prerelease.** They may
+  change before a stable release.
 
 ## [0.1.0-alpha.1] - 2026-07-19
 

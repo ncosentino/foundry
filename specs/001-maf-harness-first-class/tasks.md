@@ -275,11 +275,11 @@ T095
 
 ## Phase 9: Final Integration and Release Review
 
-- [ ] T122 Add shell-specific package-boundary and manual-composition tests in `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessShellCompositionTests.cs` and document the absence of a Harness options shell property in `docs/maf-harness.md`
-- [ ] T123 Re-run the Spec Kit cross-artifact analysis against the implemented profile and resolve all critical findings in `specs/001-maf-harness-first-class/reviews/pre-release-analysis.md`
-- [ ] T124 Perform a public API review, verify XML documentation for every promoted public member, and record promoted versus internal candidates in `specs/001-maf-harness-first-class/evidence/api-review.md`
-- [ ] T125 Verify every temporary duplication entry has a release-bound disposition in `specs/001-maf-harness-first-class/evidence/duplication-ledger.md`
-- [ ] T126 Prepare release notes and migration guidance in `CHANGELOG.md` and `docs/maf-harness.md`
+- [x] T122 Add shell-specific package-boundary and manual-composition tests in `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessShellCompositionTests.cs` and document the absence of a Harness options shell property in `docs/maf-harness.md`
+- [x] T123 Re-run the Spec Kit cross-artifact analysis against the implemented profile and resolve all critical findings in `specs/001-maf-harness-first-class/reviews/pre-release-analysis.md`
+- [x] T124 Perform a public API review, verify XML documentation for every promoted public member, and record promoted versus internal candidates in `specs/001-maf-harness-first-class/evidence/api-review.md`
+- [x] T125 Verify every temporary duplication entry has a release-bound disposition in `specs/001-maf-harness-first-class/evidence/duplication-ledger.md`
+- [x] T126 Prepare release notes and migration guidance in `CHANGELOG.md` and `docs/maf-harness.md`
 
 ## Phase 10: Post-Implementation Reconciliation and Specification Cleanup
 

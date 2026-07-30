@@ -128,6 +128,25 @@ configuration = configuration with
 Generated tools are validated by the same duplicate and built-in collision
 rules as hand-authored `AITool` instances.
 
+## Shell is a separate opt-in package
+
+Shell is not part of the Harness bundle and is not a bundle configuration
+dimension. The upstream `HarnessAgentOptions` type exposes no shell property,
+and `FoundryHarnessAgentConfiguration` deliberately does not invent one. No
+Foundry package depends on a shell package, so no consumer acquires shell
+execution transitively.
+
+To give an agent shell access, take it as a deliberate opt-in:
+
+1. reference the separate shell package yourself;
+2. expose the commands you want as ordinary `AITool` or source-generated
+   functions; and
+3. pass them through `Tools`, or supply them from a context provider.
+
+Shell tools then flow through the same duplicate-name, built-in-collision, and
+approval checks as any other tool. Treat shell as an authorization decision:
+Foundry does not grant it, bound it, or sandbox it on your behalf.
+
 ## Inspect effective defaults
 
 Use `DescribeEffectiveDefaults` before construction to see:
@@ -233,6 +252,30 @@ The task-defined name `HarnessHybridApp` refers to the selected-provider seam
 where experimental hybrid context can attach. The example itself uses the
 stable-only profile and proves that compaction remains disabled; it does not
 claim to execute hybrid compaction.
+
+## Migration and compatibility
+
+There is **no compatibility shim** for the former alpha Harness APIs. The
+package family is alpha, so superseded APIs are replaced directly; update call
+sites rather than expecting a forwarding type.
+
+Adopting Harness is additive. Existing Foundry MAF agents keep working
+unchanged, and nothing is deprecated by this release. The iterative loop, plain
+Harness, and hybrid execution modes are all retained: the hosted comparison was
+underpowered and supports no default change or removal. See
+[the retention decision](https://github.com/ncosentino/foundry/blob/main/specs/001-maf-harness-first-class/evidence/retention-decisions.md).
+
+Choose exactly one supported path:
+
+| You want | Use |
+|---|---|
+| Plain Foundry MAF agents | The core package, unchanged |
+| The upstream complete bundle | The optional Harness package |
+| Foundry-owned iterative execution | The iterative loop |
+
+Selected-provider composition is **internal and unsupported**. It is not a
+public consumption path, and `InternalsVisibleTo` grants in this repository are
+not a security boundary because the assemblies are unsigned.
 
 ## Current limitations
 
