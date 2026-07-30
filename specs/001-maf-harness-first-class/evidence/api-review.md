@@ -100,10 +100,16 @@ FR-060 is satisfied and now enforced by
 `src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessShellCompositionTests.cs`:
 
 - `HarnessCapability` exposes no shell toggle;
-- no `.csproj` in `src` references a shell package;
+- no `.csproj`, `Directory.Build.*`, or `.targets` file in `src` references a
+  shell package, which covers the shared MSBuild files where this repository
+  centralizes most `PackageReference` items;
 - `src/Directory.Packages.props` pins no shell package; and
 - `docs/maf-harness.md` documents the absent `HarnessAgentOptions` shell
   property and the manual tool/context-provider composition path.
+
+A separate test asserts that the scan set actually includes both the shared
+`Directory.Build.props` and project files, so the boundary check cannot silently
+degrade into a vacuous pass.
 
 ## Disposition
 

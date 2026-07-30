@@ -26,19 +26,32 @@ public sealed class HarnessShellCompositionTests
     public void NoFoundryProject_ReferencesAShellPackage()
     {
         var offenders = new List<string>();
-        foreach (var project in EnumerateProjectFiles())
+        foreach (var buildFile in EnumeratePackageDeclaringFiles())
         {
             foreach (var reference in EnumeratePackageReferenceNames(
-                File.ReadAllText(project)))
+                File.ReadAllText(buildFile)))
             {
                 if (IsShellPackage(reference))
                 {
-                    offenders.Add($"{Path.GetFileName(project)} -> {reference}");
+                    offenders.Add($"{Path.GetFileName(buildFile)} -> {reference}");
                 }
             }
         }
 
         Assert.Empty(offenders);
+    }
+
+    [Fact]
+    public void ShellBoundaryScan_CoversSharedBuildFiles()
+    {
+        var scanned = EnumeratePackageDeclaringFiles()
+            .Select(Path.GetFileName)
+            .ToArray();
+
+        Assert.Contains("Directory.Build.props", scanned);
+        Assert.Contains(
+            scanned,
+            name => name!.EndsWith(".csproj", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -84,11 +97,19 @@ public sealed class HarnessShellCompositionTests
                 TimeSpan.FromSeconds(5))
             .Select(match => match.Groups["name"].Value);
 
-    private static IEnumerable<string> EnumerateProjectFiles() =>
-        Directory.EnumerateFiles(
-            Path.Combine(FindRepositoryRoot(), "src"),
-            "*.csproj",
-            SearchOption.AllDirectories);
+    private static IEnumerable<string> EnumeratePackageDeclaringFiles()
+    {
+        var sourceRoot = Path.Combine(FindRepositoryRoot(), "src");
+        return Directory.EnumerateFiles(sourceRoot, "*.csproj", SearchOption.AllDirectories)
+            .Concat(Directory.EnumerateFiles(
+                sourceRoot,
+                "Directory.Build.*",
+                SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(
+                sourceRoot,
+                "*.targets",
+                SearchOption.AllDirectories));
+    }
 
     private static string FindRepositoryRoot()
     {

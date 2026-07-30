@@ -73,10 +73,18 @@ separate opt-in package, and that the bundle and testing APIs are prerelease.
 ## Shell disposition
 
 FR-060 is enforced, not merely asserted. `HarnessShellCompositionTests` proves
-that `HarnessCapability` exposes no shell toggle, that no `src` project
-references a shell package, that `src/Directory.Packages.props` pins no shell
-package, and that the documentation records the absent `HarnessAgentOptions`
-shell property alongside the manual tool and context-provider composition path.
+that `HarnessCapability` exposes no shell toggle, that no `.csproj`,
+`Directory.Build.*`, or `.targets` file in `src` references a shell package,
+that `src/Directory.Packages.props` pins no shell package, and that the
+documentation records the absent `HarnessAgentOptions` shell property alongside
+the manual tool and context-provider composition path.
+
+An isolated review of this gate found that the original scan covered only
+`*.csproj` files, which would have missed a shell dependency added to the shared
+`Directory.Build.props` where this repository centralizes most
+`PackageReference` items. The scan now includes the shared MSBuild files, and a
+companion test asserts the scan set contains them so the check cannot degrade
+into a vacuous pass.
 
 ## Accepted limitations carried into release
 
