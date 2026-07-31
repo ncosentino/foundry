@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics;
@@ -144,12 +145,12 @@ public sealed class GenAiTokenMetricsTests
     [Fact]
     public void DefaultMeterName_IsExperimentalMicrosoftExtensionsAI()
     {
-        var listener = new MeterListener();
-        var meterNamesSeen = new List<string>();
+        using var listener = new MeterListener();
+        var meterNamesSeen = new ConcurrentQueue<string>();
         listener.InstrumentPublished = (instrument, l) =>
         {
             if (instrument.Name == "gen_ai.client.token.usage")
-                meterNamesSeen.Add(instrument.Meter.Name);
+                meterNamesSeen.Enqueue(instrument.Meter.Name);
         };
         listener.Start();
 
@@ -161,12 +162,12 @@ public sealed class GenAiTokenMetricsTests
     [Fact]
     public void ConfiguredMeterName_OverridesDefault()
     {
-        var listener = new MeterListener();
-        var meterNamesSeen = new List<string>();
+        using var listener = new MeterListener();
+        var meterNamesSeen = new ConcurrentQueue<string>();
         listener.InstrumentPublished = (instrument, l) =>
         {
             if (instrument.Name == "gen_ai.client.token.usage")
-                meterNamesSeen.Add(instrument.Meter.Name);
+                meterNamesSeen.Enqueue(instrument.Meter.Name);
         };
         listener.Start();
 
@@ -179,7 +180,7 @@ public sealed class GenAiTokenMetricsTests
     [Fact]
     public void Histogram_HasName_genAiClientTokenUsage()
     {
-        var listener = new MeterListener();
+        using var listener = new MeterListener();
         Instrument? captured = null;
         var meterName = $"NexusLabs.Tests.{Guid.NewGuid():N}";
         listener.InstrumentPublished = (instrument, l) =>
@@ -198,7 +199,7 @@ public sealed class GenAiTokenMetricsTests
     [Fact]
     public void Histogram_HasUnit_TokensPerCurlyBraces()
     {
-        var listener = new MeterListener();
+        using var listener = new MeterListener();
         Instrument? captured = null;
         var meterName = $"NexusLabs.Tests.{Guid.NewGuid():N}";
         listener.InstrumentPublished = (instrument, l) =>
@@ -217,7 +218,7 @@ public sealed class GenAiTokenMetricsTests
     [Fact]
     public void Histogram_HasDescription_MatchingMeai()
     {
-        var listener = new MeterListener();
+        using var listener = new MeterListener();
         Instrument? captured = null;
         var meterName = $"NexusLabs.Tests.{Guid.NewGuid():N}";
         listener.InstrumentPublished = (instrument, l) =>
@@ -236,7 +237,7 @@ public sealed class GenAiTokenMetricsTests
     [Fact]
     public void Histogram_IsHistogramOfInt_NotLongOrDouble()
     {
-        var listener = new MeterListener();
+        using var listener = new MeterListener();
         Instrument? captured = null;
         var meterName = $"NexusLabs.Tests.{Guid.NewGuid():N}";
         listener.InstrumentPublished = (instrument, l) =>

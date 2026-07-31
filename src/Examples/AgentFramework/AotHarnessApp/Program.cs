@@ -71,4 +71,33 @@ if (!result.Succeeded || scenario.EffectiveDefaults is null)
 Console.WriteLine(
     $"AotHarnessApp:{result.SessionId}:{result.ResponseText}:" +
     $"{string.Join(',', result.ExecutedGeneratedToolNames)}");
+
+var capabilityScenario = new AotHarnessCapabilityScenario();
+HarnessScenarioRunResult capabilityResult;
+try
+{
+    capabilityResult = await runner.RunAsync(capabilityScenario);
+}
+catch (HarnessScenarioToolResolutionException exception)
+{
+    Console.Error.WriteLine(exception.Message);
+    return 7;
+}
+finally
+{
+    capabilityScenario.Cleanup();
+}
+
+if (!capabilityResult.Succeeded)
+{
+    Console.Error.WriteLine(
+        capabilityResult.ExecutionError?.Message
+        ?? capabilityResult.VerificationError?.Message
+        ?? capabilityResult.HarnessVerificationError?.Message
+        ?? "The capability scenario failed without an error.");
+    return 8;
+}
+
+Console.WriteLine(
+    $"AotHarnessCapabilities:{capabilityResult.SessionId}:verified");
 return 0;

@@ -5,9 +5,16 @@ using Microsoft.Extensions.AI;
 namespace AotHarnessApp;
 
 internal sealed class AotHarnessScriptedChatClient(
-    string functionName) : IChatClient
+    string functionName,
+    string toolArgumentValue) : IChatClient
 {
+    private readonly string _callId = $"aot-harness-call-{Guid.NewGuid():N}";
     private int _callCount;
+
+    internal AotHarnessScriptedChatClient(string functionName)
+        : this(functionName, AotHarnessScenario.ExpectedWorkspaceContent)
+    {
+    }
 
     Task<ChatResponse> IChatClient.GetResponseAsync(
         IEnumerable<ChatMessage> chatMessages,
@@ -31,11 +38,11 @@ internal sealed class AotHarnessScriptedChatClient(
                         ChatRole.Assistant,
                         [
                             new FunctionCallContent(
-                                "aot-harness-call",
+                                _callId,
                                 functionName,
                                 new Dictionary<string, object?>
                                 {
-                                    ["value"] = AotHarnessScenario.ExpectedWorkspaceContent,
+                                    ["value"] = toolArgumentValue,
                                 }),
                         ])));
         }
@@ -46,7 +53,7 @@ internal sealed class AotHarnessScriptedChatClient(
             .SingleOrDefault(content =>
                 string.Equals(
                     content.CallId,
-                    "aot-harness-call",
+                    _callId,
                     StringComparison.Ordinal));
         string? resultText = result?.Result switch
         {
