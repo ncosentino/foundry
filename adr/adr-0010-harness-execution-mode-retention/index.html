@@ -120,7 +120,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#adr-0010-retain-all-harness-execution-modes-pending-stronger-evidence" class="md-skip">
+        <a href="#adr-0010-retain-all-harness-execution-modes" class="md-skip">
           Skip to content
         </a>
       
@@ -3105,10 +3105,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#evidence" class="md-nav__link">
+  <a href="#what-we-tried" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Evidence
+        What we tried
       
     </span>
   </a>
@@ -3127,10 +3127,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#human-review" class="md-nav__link">
+  <a href="#a-second-more-durable-decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Human review
+        A second, more durable decision
       
     </span>
   </a>
@@ -3142,28 +3142,6 @@
     <span class="md-ellipsis">
       
         Consequences
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#reversal-criteria" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reversal criteria
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#provenance-note" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Provenance note
       
     </span>
   </a>
@@ -3206,7 +3184,7 @@
   
 
 
-<h1 id="adr-0010-retain-all-harness-execution-modes-pending-stronger-evidence">ADR-0010: Retain all Harness execution modes pending stronger evidence<a class="headerlink" href="#adr-0010-retain-all-harness-execution-modes-pending-stronger-evidence" title="Permanent link">&para;</a></h1>
+<h1 id="adr-0010-retain-all-harness-execution-modes">ADR-0010: Retain all Harness execution modes<a class="headerlink" href="#adr-0010-retain-all-harness-execution-modes" title="Permanent link">&para;</a></h1>
 <h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h2>
 <p>Accepted — 2026-07-30</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
@@ -3214,134 +3192,75 @@
 <ol>
 <li>the Foundry workspace-driven iterative loop;</li>
 <li>plain Harness with explicit compaction; and</li>
-<li>an experimental hybrid of Harness compaction plus the Foundry workspace.</li>
+<li>an experimental internal hybrid of Harness compaction plus the Foundry
+   workspace.</li>
 </ol>
-<p>That overlap was accepted deliberately during Harness integration, on the
-condition that a later comparison would decide whether to select a default or
-remove a surface.</p>
-<p>A pre-registered hosted comparison was executed and published. Workflow run
-<a href="https://github.com/ncosentino/foundry/actions/runs/30513567405">30513567405</a>
-ran on a dedicated PitCrew runner through the official GitHub Copilot SDK with
-Copilot Enterprise billing: 24/24 complete paired batches, 72/72 scheduled arm
-trials, 164 provider requests, 8/8 fully scheduled cases, and 307/307 verified
-checksums.</p>
-<h2 id="evidence">Evidence<a class="headerlink" href="#evidence" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>X minus Y</th>
-<th style="text-align: right;">Completion difference</th>
-<th style="text-align: right;">95% paired interval</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Plain Harness minus Iterative</td>
-<td style="text-align: right;">+0.125</td>
-<td style="text-align: right;">[-0.215, 0.471]</td>
-</tr>
-<tr>
-<td>Hybrid minus Iterative</td>
-<td style="text-align: right;">0.000</td>
-<td style="text-align: right;">[-0.375, 0.375]</td>
-</tr>
-<tr>
-<td>Hybrid minus Plain Harness</td>
-<td style="text-align: right;">-0.125</td>
-<td style="text-align: right;">[-0.471, 0.215]</td>
-</tr>
-</tbody>
-</table>
-<p>Every completion interval includes zero and every contrast is underpowered at
-eight cases. Every secondary binary interval includes zero. All twelve
-continuous comparisons are <code>insufficient-sample</code>, retaining at most two paired
-cases. Diagnostics parity is 8/8 comparable cases for every contrast. Judge
-evidence remains <code>UNCALIBRATED</code> and unusable for arm ranking because observed
-judge agreement was never measured.</p>
-<p>Plain Harness completed 24/24 item executions while Iterative and Hybrid each
-completed 21/24, driven by two systematic failures: Iterative exhausted the
-eight-tool-call cap on one case, and Hybrid failed closed on irreducible
-compaction on another. Those differences are not statistically separable at this
-case count.</p>
+<p>That overlap was accepted during Harness integration on the assumption that a
+later comparison would show which one should become the default and which could
+be removed.</p>
+<h2 id="what-we-tried">What we tried<a class="headerlink" href="#what-we-tried" title="Permanent link">&para;</a></h2>
+<p>We built a hosted agent evaluation to answer that question: a frozen case set,
+three execution arms, paired trials, and statistical comparison. It ran to
+completion against a real provider.</p>
+<p><strong>It could not answer the question.</strong> Eight test cases is far too small a
+population to separate the three approaches. Every completion interval included
+zero, every continuous measure was an insufficient sample, and every contrast
+was formally underpowered. The comparison produced no actionable signal.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>Retain all three execution modes. Change no default and remove nothing.</p>
+<p><strong>Retain all three execution modes. Change no default. Remove nothing.</strong></p>
+<p>These overlaps are retained:</p>
 <table>
 <thead>
 <tr>
 <th>Overlap</th>
-<th>Decision</th>
 <th>Rationale</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Foundry <code>IWorkspace</code> and upstream file stores</td>
-<td>Retain</td>
-<td>Workspace remains the authoritative bulk-content store; artifact-reuse differences were zero</td>
+<td>Foundry <code>IWorkspace</code> alongside upstream file stores</td>
+<td>Workspace remains the authoritative bulk-content store</td>
 </tr>
 <tr>
-<td>Iterative loop and Harness/LoopAgent</td>
-<td>Retain</td>
-<td>No workload-specific parity evidence separates them</td>
+<td>Iterative loop alongside Harness/LoopAgent</td>
+<td>Nothing distinguishes them on the evidence available</td>
 </tr>
 <tr>
-<td>Foundry preservation policy and upstream compaction</td>
-<td>Retain</td>
-<td>Hybrid failed closed on irreducible compaction, arguing against removing the preservation contract</td>
+<td>Foundry preservation policy alongside upstream compaction</td>
+<td>Hybrid compaction demonstrated a fail-closed case that argues for keeping the Foundry contract</td>
 </tr>
 <tr>
-<td>Selected-provider lane and complete bundle</td>
-<td>Retain</td>
-<td>Each retains a distinct supported scenario; lane consolidation was never tested</td>
+<td>Selected-provider lane alongside the complete bundle</td>
+<td>Each retains a distinct supported scenario</td>
 </tr>
 </tbody>
 </table>
-<p><code>retentionEligible: true</code> in the published evidence means only that the
-pre-registered six-case scheduling minimum was met. It is not a recommendation.</p>
-<h2 id="human-review">Human review<a class="headerlink" href="#human-review" title="Permanent link">&para;</a></h2>
-<p>The decision is bound to a human signature. <code>@ncosentino</code> reviewed run
-<code>30513567405</code> on 2026-07-30 and acknowledged the deterministic anchors, paired
-uncertainty, diagnostics parity, judge omission, and cap/truncation treatment.</p>
-<p>The signature is recorded in
-<code>artifacts/eval/reports/harness-001/run-30513567405-human-review.json</code>, bound to
-bundle checksum
-<code>f76e31d9424e15b8d0b56b12b75a1020626284adb361c609a659a07dfa370d29</code>.</p>
+<p>Consumers continue to choose explicitly between plain Foundry MAF agents, the
+optional Harness bundle, and the Foundry iterative loop.</p>
+<h2 id="a-second-more-durable-decision">A second, more durable decision<a class="headerlink" href="#a-second-more-durable-decision" title="Permanent link">&para;</a></h2>
+<p><strong>Agent evaluation was the wrong instrument for this question, and we are not
+repeating it.</strong></p>
+<p>Deciding which internal execution strategy should be the default is an
+architecture and ergonomics judgement. Answering it statistically would have
+required a large case population, a controlled provider, and calibrated
+subjective scoring — a research programme, not a design decision. The apparatus
+was disproportionate to the question and returned nothing.</p>
+<p>Consequently the entire study — case set, run evidence, comparison reporter,
+per-dimension evaluators, LLM-as-judge scoring, the hosted driver, and its
+workflow — was removed from the repository. It remains recoverable from git
+history.</p>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
 <ul>
-<li>No ADR is superseded. ADR-0005, ADR-0006, ADR-0007, and ADR-0008 continue to
-  describe retained, optional, and experimental surfaces rather than a selected
-  default.</li>
-<li>The experimental hybrid profile stays internal and experimental. Its
-  irreducible-compaction failure is a known limitation, not a removal trigger.</li>
-<li>Consumers keep choosing explicitly between plain Foundry MAF agents, the
-  optional Harness bundle, and the Foundry iterative loop.</li>
-<li>Removing any retained surface requires a new case-set version with a larger
-  case population, workload-specific parity evidence, and migration guidance.</li>
+<li>No ADR is superseded. ADR-0005 through ADR-0008 continue to describe retained,
+  optional, and experimental surfaces rather than a selected default.</li>
+<li>The experimental hybrid profile stays internal and experimental.</li>
+<li>Foundry keeps no bespoke Harness comparison machinery. The general-purpose
+  evaluation primitives in <code>NexusLabs.Foundry.Evaluation</code> — experiments,
+  evaluators, capture, and reporting — are unaffected and remain supported.</li>
+<li>If consolidating to one execution path ever becomes a goal, drive it from API
+  design, maintenance cost, and real consumer workloads rather than another
+  statistical comparison of synthetic cases.</li>
 </ul>
-<h2 id="reversal-criteria">Reversal criteria<a class="headerlink" href="#reversal-criteria" title="Permanent link">&para;</a></h2>
-<p>Revisit this decision when any of the following becomes true:</p>
-<ul>
-<li>a paired completion interval excludes zero at a case count that is not
-  underpowered;</li>
-<li>continuous evidence reaches a sufficient paired sample under the frozen
-  protocol; or</li>
-<li>judge agreement is measured and reaches the pre-registered calibration
-  threshold, making judge evidence usable for ranking.</li>
-</ul>
-<p>Tracked as <a href="https://github.com/ncosentino/foundry/issues/142">#142</a> and
-<a href="https://github.com/ncosentino/foundry/issues/143">#143</a>.</p>
-<h2 id="provenance-note">Provenance note<a class="headerlink" href="#provenance-note" title="Permanent link">&para;</a></h2>
-<p>This ADR is the durable home of a decision first recorded during the Harness
-migration program at
-<code>specs/001-maf-harness-first-class/evidence/retention-decisions.md</code>. That
-feature specification folder was removed from the working tree by an approved
-retention decision; its contents remain in git history and in the GitHub issues
-that narrate the program.</p>
-<p>The signed publication
-<code>artifacts/eval/reports/harness-001/run-30513567405-publication.md</code> is immutable
-and checksum-bound, so it still names the original specification path. It was
-deliberately not edited, because editing it would invalidate the human signature
-bound to it. This ADR is the current location of that decision.</p>
 
 
 

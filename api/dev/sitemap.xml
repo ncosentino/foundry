@@ -181,14 +181,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/NexusLabs.Foundry.Evaluation.Harness/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonArmExecutionContext/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentRetryPolicy/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -202,10 +194,6 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentItemPublicationResult/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessArtifactReuseEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -229,10 +217,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCancellationEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/LocalExperimentCaseSource_TCase_/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -245,15 +229,7 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessDiagnosticsParityComparison/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentMetricRating/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessTelemetryCompletenessEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -265,18 +241,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessDiagnosticsSchemaProfile/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessToolTrajectoryEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonArmExecutor_TOutput_(HarnessComparisonArmExecutionContext,CancellationToken)/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/IExperimentRunEvaluator_TCase,TOutput_/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -285,19 +249,7 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessRunEvaluationContext/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessEventLifecycleEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentRetryDelayProvider(ExperimentRetryContext)/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCompactionValidityEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -305,15 +257,7 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonExperiment/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentBinaryStatisticalEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessRunTerminalCategory/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -321,15 +265,7 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessRunEvaluationEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/IterationCoherenceEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonBinaryTrialValue/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -338,14 +274,6 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/EvaluationCaptureChatClient/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCaseSetManifest/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessContextCompactionEvidence/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -362,10 +290,6 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/QualityGateFailedException/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessArtifactRehydrationEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -413,10 +337,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessToolTrajectoryExpectation/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/TerminationAppropriatenessEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -429,31 +349,11 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCancellationEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessBinaryDimensionComparison/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessManifestCaseSource/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/IExperimentConcurrencyLimiter/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentPairedContinuousCaseMeasurement/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessEvaluationDimension/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessManifestCase/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -465,19 +365,11 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessDiagnosticsSchemaProfileEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentItemResult_TCase,TOutput_/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentRunOutcome_TCase,TOutput_/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessSessionContinuityEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -533,14 +425,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessHostedRunState/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonContinuousTrialValue/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentItemScopeFailureMode/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -557,14 +441,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessIdentityAttributionEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCaseSetManifestSerializer/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentBinarySuccessPolicy_TCase,TOutput_/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -578,14 +454,6 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentMetricSnapshot/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonTrialRecord/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessTelemetryEvidence/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -613,10 +481,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonArm/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/PipelineEvaluationExtensions/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -637,10 +501,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCaseSetManifestException/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentSinkResult/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -649,31 +509,7 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCostAttributionEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessCostAttributionEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentPolicyVerdict/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessLifecyclePhase/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonReport/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessDiagnosticsParityCaseResult/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessContextSafetyEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -685,27 +521,11 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessPairwiseContrastReport/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessContinuousDimensionComparison/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentPairedContinuousPessimisticCaseMeasurement/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessArtifactDecisionEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentMetricNonFiniteValue/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonReporter/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -718,14 +538,6 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/AgentRunDiagnosticsContext/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessIdentityAttributionEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonReportRequest/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
@@ -745,10 +557,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessComparisonArmOutcomes_TOutput_/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/PipelineCostEvaluator/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -765,18 +573,6 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessSessionContinuityEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessLifecycleEventEvidence/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessLifecycleEventKind/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/ExperimentRunEvaluationResult/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
@@ -786,10 +582,6 @@
   </url>
   <url>
     <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/PipelineStageEvaluator/</loc>
-    <lastmod>2026-07-31</lastmod>
-  </url>
-  <url>
-    <loc>https://www.devleader.ca/projects/foundry/api/dev/NexusLabs.Foundry.Evaluation/HarnessDeterministicReference/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
