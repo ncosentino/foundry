@@ -263,7 +263,7 @@ Adopting Harness is additive. Existing Foundry MAF agents keep working
 unchanged, and nothing is deprecated by this release. The iterative loop, plain
 Harness, and hybrid execution modes are all retained: the hosted comparison was
 underpowered and supports no default change or removal. See
-[the retention decision](https://github.com/ncosentino/foundry/blob/main/specs/001-maf-harness-first-class/evidence/retention-decisions.md).
+[ADR-0010](adr/adr-0010-harness-execution-mode-retention.md).
 
 Choose exactly one supported path:
 

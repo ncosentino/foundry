@@ -231,7 +231,7 @@ The decision is confirmed by:
   by its corresponding progress event.
 
 Local build and test validation for this leaf is recorded in
-`specs/001-maf-harness-first-class/evidence/gate-g4.md`. An MAF or MEAI
+the Gate G4 record (git history; see issue #20). An MAF or MEAI
 upgrade that changes workspace, tool-result, or progress-reporting behavior
 must rerun these contracts before this decision can claim continued
 compatibility.
@@ -241,10 +241,10 @@ compatibility.
 - ADR-0005 establishes selected-provider MAF Harness integration, the trusted
   execution binding, and the "`IWorkspace` is authoritative, no `AgentFileStore`
   bridge is a second authority" framing this decision refines.
-- `specs/001-maf-harness-first-class/evidence/gate-g4.md` records the
+- the Gate G4 record (git history; see issue #20) records the
   cumulative implementation evidence, status matrix, and public API
   disposition for this decision.
-- `specs/001-maf-harness-first-class/evidence/workspace-identity-feasibility.md`
+- the workspace identity feasibility record (git history)
   demonstrates why the `AgentFileStore` bridge remains partial and why
   workspace authority must be bound per execution.
 - `HarnessArtifactDiagnostics`, `HarnessArtifactOffloadDecisionEvent`, and

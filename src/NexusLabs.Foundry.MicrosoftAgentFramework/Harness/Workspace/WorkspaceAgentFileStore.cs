@@ -7,10 +7,8 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Workspace;
 
 /// <summary>
 /// Internal bridge that adapts one authorized <see cref="IWorkspace"/> to MAF 1.15
-/// <see cref="AgentFileStore"/> for the subset of semantics proven feasible by
-/// <c>specs/001-maf-harness-first-class/evidence/workspace-identity-feasibility.md</c> (T020) and
-/// restated/extended by <c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c>
-/// (T041).
+/// <see cref="AgentFileStore"/> for the subset of semantics proven feasible for Foundry's
+/// workspace authority and identity model.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -351,8 +349,7 @@ internal sealed class WorkspaceAgentFileStore : AgentFileStore
     /// <remarks>
     /// Permanently unsupported. <see cref="IWorkspace"/> cannot inspect file size or bound a read
     /// before allocating full content, so no generic, safe implementation of this method exists.
-    /// Enabling search would require a separately proven bounded-search adapter (see
-    /// <c>specs/001-maf-harness-first-class/evidence/workspace-identity-feasibility.md</c>).
+    /// Enabling search would require a separately proven bounded-search adapter.
     /// </remarks>
     /// <exception cref="NotSupportedException">Always thrown.</exception>
     public override Task<IReadOnlyList<FileSearchResult>> SearchAsync(
@@ -370,8 +367,7 @@ internal sealed class WorkspaceAgentFileStore : AgentFileStore
         throw new NotSupportedException(
             "WorkspaceAgentFileStore does not support generic content search. IWorkspace cannot " +
             "inspect file size or bound a read before allocating full content. Enabling search " +
-            "requires a separately proven bounded-search adapter (see " +
-            "specs/001-maf-harness-first-class/evidence/workspace-identity-feasibility.md).");
+            "requires a separately proven bounded-search adapter.");
     }
 
     /// <inheritdoc />

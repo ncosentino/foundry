@@ -207,19 +207,20 @@ public sealed class HarnessPublishedComparisonArtifactTests
             Path.Combine(reportRoot, "run-30513567405-publication.md"));
         var retention = File.ReadAllText(Path.Combine(
             FindRepositoryRoot(),
-            "specs",
-            "001-maf-harness-first-class",
-            "evidence",
-            "retention-decisions.md"));
+            "docs",
+            "adr",
+            "adr-0010-harness-execution-mode-retention.md"));
 
         Assert.Contains("Human review status: `HumanReviewed`", publication);
         Assert.Contains("Every completion interval includes zero", publication);
         Assert.Contains("Judge evidence is `UNCALIBRATED`", publication);
         Assert.Contains("RetainAllPendingStrongerEvidence", publication);
-        Assert.Contains("DUP-002", retention);
-        Assert.Contains("DUP-006", retention);
-        Assert.Contains("DUP-008", retention);
-        Assert.Contains("No accepted ADR is superseded", retention);
+        Assert.Contains("Retain all three execution modes", retention);
+        Assert.Contains("remove nothing", retention, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("No ADR is superseded", retention);
+        Assert.Contains(
+            "f76e31d9424e15b8d0b56b12b75a1020626284adb361c609a659a07dfa370d29",
+            retention);
     }
 
     private static string FindReportRoot()
