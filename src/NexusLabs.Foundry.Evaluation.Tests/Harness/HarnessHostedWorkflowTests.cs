@@ -85,24 +85,55 @@ public sealed class HarnessHostedWorkflowTests
     }
 
     [Fact]
-    public void EvaluationJobs_AreNotAmongTheRequiredStatusChecks()
+    public void EvaluationJobs_CannotRunOnAnyAutomaticEvent()
     {
         var evaluationWorkflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
         var ci = ReadRepositoryFile(".github/workflows/ci.yml");
-        var requiredCheckNames = new[] { "build-test-pack", "docs", "aot" };
 
         Assert.Contains("name: advisory-harness-evaluation", evaluationWorkflow);
-        Assert.Contains("harness-evaluation-dispatch:", ci);
-        Assert.DoesNotContain(
-            requiredCheckNames,
-            required => string.Equals(required, "advisory-harness-evaluation", StringComparison.Ordinal)
-                || string.Equals(required, "harness-evaluation-dispatch", StringComparison.Ordinal));
-
         Assert.DoesNotContain("pull_request:", evaluationWorkflow);
         Assert.DoesNotContain("push:", evaluationWorkflow);
-        Assert.Contains(
-            "if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation",
-            ci);
+
+        var dispatchGuard = ReadJobGuard(ci, "harness-evaluation-dispatch");
+        Assert.Equal(
+            "github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation",
+            dispatchGuard);
+
+        foreach (var requiredJob in new[] { "build-test-pack", "aot", "aot-harness" })
+        {
+            Assert.Equal(
+                "github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation",
+                ReadJobGuard(ci, requiredJob));
+        }
+    }
+
+    private static string ReadJobGuard(string workflow, string jobName)
+    {
+        var lines = workflow.Split('\n');
+        var jobIndex = Array.FindIndex(
+            lines,
+            line => line.TrimEnd('\r') == $"  {jobName}:");
+        Assert.True(jobIndex >= 0, $"Job '{jobName}' was not found.");
+
+        for (var index = jobIndex + 1; index < lines.Length; index++)
+        {
+            var line = lines[index].TrimEnd('\r');
+            if (line.StartsWith("  ", StringComparison.Ordinal) &&
+                !line.StartsWith("    ", StringComparison.Ordinal) &&
+                line.Trim().Length > 0)
+            {
+                break;
+            }
+
+            var trimmed = line.Trim();
+            if (trimmed.StartsWith("if:", StringComparison.Ordinal))
+            {
+                return trimmed["if:".Length..].Trim();
+            }
+        }
+
+        Assert.Fail($"Job '{jobName}' has no 'if:' guard.");
+        return string.Empty;
     }
 
     [Fact]
