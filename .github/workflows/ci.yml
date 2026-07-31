@@ -6,22 +6,6 @@ on:
       - main
   pull_request:
   workflow_dispatch:
-    inputs:
-      run_harness_evaluation:
-        description: Run the hosted Harness evaluation preflight on the dispatched ref.
-        required: true
-        type: boolean
-        default: false
-      confirm_copilot_enterprise_billing:
-        description: Confirm this PitCrew run is authorized to use GitHub Copilot Enterprise billing.
-        required: true
-        type: boolean
-        default: false
-      harness_model_id:
-        description: GitHub Copilot generator model identifier.
-        required: true
-        type: string
-        default: gpt-5-mini
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -30,7 +14,6 @@ env:
 
 jobs:
   build-test-pack:
-    if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation
     # PitCrew default. Set CI_RUNNER=ubuntu-latest for the manual cloud fallback.
     # Untrusted fork pull requests always use GitHub-hosted infrastructure.
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
@@ -108,7 +91,6 @@ jobs:
           path: artifacts/packages/*
 
   aot:
-    if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
 
     steps:
@@ -149,7 +131,6 @@ jobs:
           path: artifacts/aot/AotAgentFrameworkApp
 
   aot-harness:
-    if: github.event_name != 'workflow_dispatch' || !inputs.run_harness_evaluation
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
 
     steps:
@@ -189,119 +170,3 @@ jobs:
         with:
           name: foundry-aot-harness-linux-x64
           path: artifacts/aot-harness/AotHarnessApp
-
-  harness-evaluation-dispatch:
-    if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation
-    runs-on: foundry-ci
-    timeout-minutes: 60
-    permissions:
-      contents: read
-      copilot-requests: write
-    env:
-      MODEL_ID: ${{ inputs.harness_model_id }}
-      COPILOT_BILLING_CONFIRMED: ${{ inputs.confirm_copilot_enterprise_billing }}
-      HARNESS_EVAL_PLANNED_RUNS: 72
-      HARNESS_EVAL_MAX_ATTEMPTS: 144
-      HARNESS_EVAL_MAX_REQUESTS_PER_ATTEMPT: 8
-      HARNESS_EVAL_MAX_RESERVED_REQUESTS: 1152
-      HARNESS_EVAL_WORKFLOW_TIMEOUT_MINUTES: 60
-      HARNESS_EVAL_SCHEDULING_DEADLINE_MINUTES: 50
-      HARNESS_EVAL_MAX_ATTEMPT_SECONDS: 120
-      HARNESS_EVAL_MAX_OUTPUT_TOKENS: 2000
-      HARNESS_EVAL_MIN_REQUEST_INTERVAL_MS: 4000
-      HARNESS_EVAL_MAX_CONCURRENCY: 3
-      HARNESS_EVAL_COST_CAP_USD: 25
-      HARNESS_EVAL_ESTIMATED_USD_PER_REQUEST: 0.02
-      HARNESS_EVAL_GLOBAL_SEED: 137
-      HARNESS_EVAL_BATCH_ORDERING_SEED: 104729
-      HARNESS_EVAL_ARM_ORDERING_SEED: 130363
-      HARNESS_EVAL_BOOTSTRAP_SEED: 155921
-
-    steps:
-      - name: Checkout dispatched ref
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup exact .NET SDKs
-        uses: ./.github/actions/setup-dotnet
-        with:
-          global-json-files: global.json
-
-      - name: Validate deterministic evaluation contracts
-        run: >-
-          dotnet test
-          src/NexusLabs.Foundry.Evaluation.Tests/NexusLabs.Foundry.Evaluation.Tests.csproj
-          --configuration Release
-          --filter
-          "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessComparison"
-          --verbosity minimal
-
-      - name: Run PitCrew and Copilot preflight
-        id: preflight
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          HARNESS_EVAL_RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          HARNESS_EVAL_RUNNER_LABELS: foundry,foundry-ci
-        run: |
-          $confirmCopilotEnterpriseBilling = $env:COPILOT_BILLING_CONFIRMED -eq 'true'
-          scripts/Invoke-HarnessEvaluationPreflight.ps1 `
-            -OutputDirectory 'artifacts/eval/hosted-run' `
-            -ModelId $env:MODEL_ID `
-            -ConfirmCopilotEnterpriseBilling:$confirmCopilotEnterpriseBilling
-
-      - name: Run Copilot SDK provider probe
-        if: steps.preflight.outputs.preflight-status == 'Ready'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
-        run: >-
-          dotnet run
-          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
-          --configuration Release
-          --
-          --provider-probe
-          --output artifacts/eval/hosted-run
-
-      - name: Execute complete paired comparison
-        if: steps.preflight.outputs.preflight-status == 'Ready'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          HARNESS_EVAL_COPILOT_MODEL_ID: ${{ env.MODEL_ID }}
-        run: >-
-          dotnet run
-          --project src/Examples/AgentFramework/HarnessEvaluationApp/HarnessEvaluationApp.csproj
-          --configuration Release
-          --no-build
-          --
-          --output artifacts/eval/hosted-run
-
-      - name: Upload immutable preflight bundle
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: harness-evaluation-${{ github.run_id }}-${{ github.run_attempt }}
-          path: artifacts/eval/hosted-run/
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Publish non-gating summary
-        if: always()
-        shell: pwsh
-        run: |
-          $runStatusPath = 'artifacts/eval/hosted-run/run-status.json'
-          $preflightStatusPath = 'artifacts/eval/hosted-run/preflight-status.json'
-          $statusPath = if (Test-Path $runStatusPath) { $runStatusPath } else { $preflightStatusPath }
-          "## Harness Evaluation Dispatch Bridge" | Add-Content $env:GITHUB_STEP_SUMMARY
-          "" | Add-Content $env:GITHUB_STEP_SUMMARY
-          if (Test-Path $statusPath) {
-            $status = Get-Content $statusPath -Raw | ConvertFrom-Json
-            "- State: ``$($status.state)``" | Add-Content $env:GITHUB_STEP_SUMMARY
-            "- Reason: $($status.reason)" | Add-Content $env:GITHUB_STEP_SUMMARY
-          }
-          else {
-            "- State: ``Failed``" | Add-Content $env:GITHUB_STEP_SUMMARY
-            "- Reason: preflight did not produce a status artifact" | Add-Content $env:GITHUB_STEP_SUMMARY
-          }
-          "- Advisory only: ``true``" | Add-Content $env:GITHUB_STEP_SUMMARY

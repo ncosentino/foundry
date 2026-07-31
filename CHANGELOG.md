@@ -27,9 +27,6 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   forwarding over-budget context to a provider.
 - NativeAOT Harness profile with source-generated tools, no reflection fallback,
   and a published-and-executed native application in CI.
-- Pre-registered hosted comparison of the iterative loop, plain Harness, and
-  hybrid Harness execution modes, with an immutable checksum-verified evidence
-  bundle, paired uncertainty, diagnostics parity, and a human-signed decision.
 - Repository-owned Foundry CI runner image source and trusted GHCR publication
   workflow with exact .NET SDKs, NativeAOT prerequisites, GitHub-hosted pull
   request validation, provenance, SBOM generation, and retained digest evidence.
@@ -45,8 +42,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### Deprecated
 
 - Nothing. The iterative loop, plain Harness, and hybrid execution modes are all
-  retained. The hosted comparison was underpowered and supports no default
-  change or removal.
+  retained. See
+  [ADR-0010](docs/adr/adr-0010-harness-execution-mode-retention.md).
 
 ### Migration
 

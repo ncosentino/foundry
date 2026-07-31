@@ -1,8 +1,0 @@
-{
-  "SchemaVersion": "1.0",
-  "CalibrationState": "Uncalibrated",
-  "EligibleCalibrationItemCount": 0,
-  "ProvisionalCalibrationItemCount": 7,
-  "UsableForArmRanking": false,
-  "Reason": "Judge execution was omitted because the frozen calibration set has no human-attested eligible labels."
-}
