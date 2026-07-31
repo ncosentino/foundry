@@ -71,7 +71,7 @@ jobs:
           src/NexusLabs.Foundry.Evaluation.Tests/NexusLabs.Foundry.Evaluation.Tests.csproj
           --configuration Release
           --filter
-          "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessJudgeCalibrationTests|FullyQualifiedName~HarnessComparison"
+          "FullyQualifiedName~HarnessCaseSetManifestTests|FullyQualifiedName~HarnessCaseReferenceTests|FullyQualifiedName~HarnessComparison"
           --verbosity minimal
 
       - name: Run PitCrew and Copilot preflight

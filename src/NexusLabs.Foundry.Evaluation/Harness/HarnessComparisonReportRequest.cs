@@ -1,7 +1,5 @@
 using System.Text.RegularExpressions;
 
-using NexusLabs.Foundry.Evaluation.Harness.Judging;
-
 namespace NexusLabs.Foundry.Evaluation.Harness;
 
 /// <summary>
@@ -21,7 +19,6 @@ public sealed partial record HarnessComparisonReportRequest
     /// <param name="bootstrapSeed">The pinned case-level bootstrap seed.</param>
     /// <param name="confidenceLevel">The two-sided confidence level.</param>
     /// <param name="trials">The normalized scheduling ledger rows.</param>
-    /// <param name="judgeObservations">The deterministic-versus-judge comparison observations.</param>
     /// <exception cref="ArgumentException">Identity, digests, or confidence are invalid.</exception>
     /// <exception cref="ArgumentNullException">
     /// <paramref name="manifest"/>, <paramref name="trials"/>, or a row is <see langword="null"/>.
@@ -35,8 +32,7 @@ public sealed partial record HarnessComparisonReportRequest
         string analysisPlanSha256,
         ulong bootstrapSeed,
         double confidenceLevel,
-        IReadOnlyList<HarnessComparisonTrialRecord> trials,
-        IReadOnlyList<HarnessJudgeComparisonObservation> judgeObservations)
+        IReadOnlyList<HarnessComparisonTrialRecord> trials)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reportId);
         if (!Enum.IsDefined(runState))
@@ -63,15 +59,6 @@ public sealed partial record HarnessComparisonReportRequest
             trialSnapshot[index] = trial;
         }
 
-        ArgumentNullException.ThrowIfNull(judgeObservations);
-        var judgeSnapshot = new HarnessJudgeComparisonObservation[judgeObservations.Count];
-        for (var index = 0; index < judgeObservations.Count; index++)
-        {
-            var observation = judgeObservations[index];
-            ArgumentNullException.ThrowIfNull(observation);
-            judgeSnapshot[index] = observation;
-        }
-
         ReportId = reportId;
         RunState = runState;
         Manifest = new HarnessManifestCaseSource(manifest).Manifest;
@@ -80,7 +67,6 @@ public sealed partial record HarnessComparisonReportRequest
         BootstrapSeed = bootstrapSeed;
         ConfidenceLevel = confidenceLevel;
         Trials = Array.AsReadOnly(trialSnapshot);
-        JudgeObservations = Array.AsReadOnly(judgeSnapshot);
     }
 
     /// <summary>Gets the stable report identifier.</summary>
@@ -106,9 +92,6 @@ public sealed partial record HarnessComparisonReportRequest
 
     /// <summary>Gets a defensive snapshot of normalized scheduling-ledger rows.</summary>
     public IReadOnlyList<HarnessComparisonTrialRecord> Trials { get; }
-
-    /// <summary>Gets a defensive snapshot of deterministic-versus-judge observations.</summary>
-    public IReadOnlyList<HarnessJudgeComparisonObservation> JudgeObservations { get; }
 
     private static void ValidateDigest(string digest, string parameterName)
     {

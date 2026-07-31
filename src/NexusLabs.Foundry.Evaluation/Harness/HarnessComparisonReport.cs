@@ -1,5 +1,3 @@
-using NexusLabs.Foundry.Evaluation.Harness.Judging;
-
 namespace NexusLabs.Foundry.Evaluation.Harness;
 
 /// <summary>
@@ -16,8 +14,7 @@ public sealed record HarnessComparisonReport
         string analysisPlanSha256,
         int fullyScheduledCaseCount,
         bool retentionEligible,
-        IReadOnlyList<HarnessPairwiseContrastReport> contrasts,
-        HarnessJudgeDisagreementReport judgeDisagreement)
+        IReadOnlyList<HarnessPairwiseContrastReport> contrasts)
     {
         ReportId = reportId;
         RunState = runState;
@@ -28,7 +25,6 @@ public sealed record HarnessComparisonReport
         FullyScheduledCaseCount = fullyScheduledCaseCount;
         RetentionEligible = retentionEligible;
         Contrasts = Array.AsReadOnly(contrasts.ToArray());
-        JudgeDisagreement = judgeDisagreement;
     }
 
     /// <summary>Gets the stable report identifier.</summary>
@@ -57,7 +53,4 @@ public sealed record HarnessComparisonReport
 
     /// <summary>Gets the three stable pairwise arm contrasts.</summary>
     public IReadOnlyList<HarnessPairwiseContrastReport> Contrasts { get; }
-
-    /// <summary>Gets deterministic-versus-judge disagreement evidence.</summary>
-    public HarnessJudgeDisagreementReport JudgeDisagreement { get; }
 }
