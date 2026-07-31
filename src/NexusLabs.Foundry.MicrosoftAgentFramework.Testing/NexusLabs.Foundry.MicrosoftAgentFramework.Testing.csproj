@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageDescription>Test harness for NexusLabs.Foundry.MicrosoftAgentFramework. Provides IAgentScenario, AgentScenarioRunner, and deterministic testing support for agent orchestrations.</PackageDescription>
+    <PackageDescription>Test harness for NexusLabs.Foundry.MicrosoftAgentFramework. Provides IAgentScenario, AgentScenarioRunner, IHarnessScenario, HarnessScenarioRunner, and deterministic testing support for agent orchestrations.</PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>
