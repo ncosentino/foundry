@@ -84,10 +84,9 @@ Write-JsonFile `
 $caseSetRoot = Join-Path $repoRoot 'artifacts/eval/case-sets/harness-001/v1.0'
 $manifestPath = Join-Path $caseSetRoot 'manifest.json'
 $analysisPlanPath = Join-Path $caseSetRoot 'analysis-plan.md'
-$judgeManifestPath = Join-Path $caseSetRoot 'judges/manifest.json'
 $pricingPath = Join-Path $caseSetRoot 'pricing/github-copilot.v1.json'
 
-foreach ($requiredPath in @($manifestPath, $analysisPlanPath, $judgeManifestPath, $pricingPath)) {
+foreach ($requiredPath in @($manifestPath, $analysisPlanPath, $pricingPath)) {
     if (-not (Test-Path -LiteralPath $requiredPath)) {
         Stop-Preflight -Message "Required hosted evaluation input '$requiredPath' does not exist."
     }
@@ -129,7 +128,6 @@ $immutableInputs = [ordered]@{
     confirmCopilotEnterpriseBilling = $ConfirmCopilotEnterpriseBilling
     manifestSha256 = Get-CanonicalSha256 -Path $manifestPath
     analysisPlanSha256 = Get-CanonicalSha256 -Path $analysisPlanPath
-    judgeManifestSha256 = Get-CanonicalSha256 -Path $judgeManifestPath
     pricingTableSha256 = Get-CanonicalSha256 -Path $pricingPath
     caps = $caps
 }

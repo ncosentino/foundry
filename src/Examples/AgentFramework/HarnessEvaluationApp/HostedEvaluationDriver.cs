@@ -10,7 +10,6 @@ using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.Evaluation.Experiments;
 using NexusLabs.Foundry.Evaluation.Harness;
-using NexusLabs.Foundry.Evaluation.Harness.Judging;
 
 namespace HarnessEvaluationApp;
 
@@ -223,21 +222,6 @@ internal sealed class HostedEvaluationDriver
         var analysisPlanPath = Path.Combine(
             Path.GetDirectoryName(manifestPath)!,
             "analysis-plan.md");
-        var judgeAssets = HarnessJudgeAssetLoader.Load(
-            Path.Combine(Path.GetDirectoryName(manifestPath)!, "judges"));
-        var judgeOmissionReason = judgeAssets.EligibleCalibrationItemCount == 0
-            ? "Judge execution was omitted because the frozen calibration set has no human-attested eligible labels."
-            : "Judge execution was omitted because human-attested labels exist, but observed agreement has not been established.";
-        await WriteJsonAtomicAsync(
-            Path.Combine(_options.OutputDirectory, "judge", "omission.json"),
-            new HostedJudgeOmissionArtifact(
-                "1.0",
-                judgeAssets.CalibrationState,
-                judgeAssets.EligibleCalibrationItemCount,
-                judgeAssets.ProvisionalCalibrationItemCount,
-                judgeAssets.UsableForArmRanking,
-                judgeOmissionReason),
-            finalizationToken).ConfigureAwait(false);
         var request = new HarnessComparisonReportRequest(
             reportId: $"harness-001-{Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? "local"}",
             state,
@@ -246,8 +230,7 @@ internal sealed class HostedEvaluationDriver
             CanonicalSha256(analysisPlanPath),
             _options.BootstrapSeed,
             confidenceLevel: 0.95,
-            ledger,
-            judgeObservations: []);
+            ledger);
         var reporter = new HarnessComparisonReporter();
         var report = reporter.Build(request);
         var caseTypeInfo = (JsonTypeInfo<HarnessManifestCase>)_jsonOptions

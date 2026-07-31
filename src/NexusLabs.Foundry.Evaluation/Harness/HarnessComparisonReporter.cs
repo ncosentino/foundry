@@ -2,7 +2,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 using NexusLabs.Foundry.Evaluation.Experiments;
-using NexusLabs.Foundry.Evaluation.Harness.Judging;
 
 namespace NexusLabs.Foundry.Evaluation.Harness;
 
@@ -47,7 +46,6 @@ public sealed class HarnessComparisonReporter
         var hostedCases = request.Manifest.Cases
             .Where(@case => !@case.Development)
             .ToArray();
-        ValidateJudgeObservations(request.JudgeObservations, hostedCases);
         var ledger = ValidateLedger(request, hostedCases);
         var fullyScheduledCaseCount = hostedCases.Count(@case =>
             IsCaseFullyScheduled(ledger, @case.Id));
@@ -143,8 +141,7 @@ public sealed class HarnessComparisonReporter
             request.AnalysisPlanSha256,
             fullyScheduledCaseCount,
             retentionEligible,
-            contrasts,
-            HarnessJudgeDisagreementReport.Create(request.JudgeObservations));
+            contrasts);
 
     private static void WriteOutcome(
         Utf8JsonWriter writer,
@@ -525,53 +522,6 @@ public sealed class HarnessComparisonReporter
         HarnessEvaluationDimension dimension) =>
         hostedCases.Where(@case =>
             @case.DeterministicReferences.Any(reference => reference.Dimension == dimension));
-
-    private static void ValidateJudgeObservations(
-        IReadOnlyList<HarnessJudgeComparisonObservation> observations,
-        IReadOnlyList<HarnessManifestCase> hostedCases)
-    {
-        var hostedById = hostedCases.ToDictionary(@case => @case.Id, StringComparer.Ordinal);
-        var identities = new HashSet<(
-            string CaseId,
-            HarnessEvaluationDimension Dimension,
-            HarnessComparisonArm XArm,
-            HarnessComparisonArm YArm)>();
-        foreach (var observation in observations)
-        {
-            if (!hostedById.TryGetValue(observation.CaseId, out var manifestCase))
-            {
-                throw new ArgumentException(
-                    $"Judge observation references unknown hosted case '{observation.CaseId}'.",
-                    nameof(observations));
-            }
-
-            if (!manifestCase.DeterministicReferences.Any(reference =>
-                    reference.Dimension == observation.Dimension))
-            {
-                throw new ArgumentException(
-                    $"Judge observation dimension '{observation.Dimension}' is not declared by case '{observation.CaseId}'.",
-                    nameof(observations));
-            }
-
-            if (!Contrasts.Contains((observation.XArm, observation.YArm)))
-            {
-                throw new ArgumentException(
-                    $"Judge observation contrast '{observation.XArm}-{observation.YArm}' is not registered.",
-                    nameof(observations));
-            }
-
-            if (!identities.Add((
-                    observation.CaseId,
-                    observation.Dimension,
-                    observation.XArm,
-                    observation.YArm)))
-            {
-                throw new ArgumentException(
-                    $"Judge observation '{observation.CaseId}/{observation.Dimension}/{observation.XArm}-{observation.YArm}' appears more than once.",
-                    nameof(observations));
-            }
-        }
-    }
 
     private static HarnessComparisonTrialRecord[] GetCaseRows(
         IReadOnlyDictionary<

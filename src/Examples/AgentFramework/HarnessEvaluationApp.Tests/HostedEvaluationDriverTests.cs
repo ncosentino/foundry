@@ -95,14 +95,7 @@ public sealed class HostedEvaluationDriverTests
                 low: 1,
                 high: 150);
             Assert.True(File.Exists(Path.Combine(outputDirectory, "comparison-artifact.json")));
-            using var omission = JsonDocument.Parse(
-                File.ReadAllText(Path.Combine(outputDirectory, "judge", "omission.json")));
-            Assert.Equal(7, omission.RootElement.GetProperty("EligibleCalibrationItemCount").GetInt32());
-            Assert.Equal(0, omission.RootElement.GetProperty("ProvisionalCalibrationItemCount").GetInt32());
-            Assert.False(omission.RootElement.GetProperty("UsableForArmRanking").GetBoolean());
-            Assert.Contains(
-                "observed agreement has not been established",
-                omission.RootElement.GetProperty("Reason").GetString());
+            Assert.False(Directory.Exists(Path.Combine(outputDirectory, "judge")));
             Assert.True(File.Exists(Path.Combine(outputDirectory, "checksums.sha256")));
         }
         finally

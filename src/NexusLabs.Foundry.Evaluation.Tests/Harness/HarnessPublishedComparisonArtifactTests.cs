@@ -62,41 +62,6 @@ public sealed class HarnessPublishedComparisonArtifactTests
     }
 
     [Fact]
-    public void PublicationManifest_HashesPostRunHumanCalibrationEvidence()
-    {
-        var repositoryRoot = FindRepositoryRoot();
-        var reportRoot = FindReportRoot();
-        using var manifest = JsonDocument.Parse(
-            File.ReadAllText(Path.Combine(reportRoot, "run-30273935931-publication-manifest.json")));
-        var evidence = manifest.RootElement.GetProperty("postRunEvidence").EnumerateArray().ToArray();
-        var expectedPaths = new[]
-        {
-            "artifacts/eval/case-sets/harness-001/v1.0/judges/manifest.json",
-            "artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/manifest.json",
-            "artifacts/eval/case-sets/harness-001/v1.0/judges/calibration/heldout.human-attested.jsonl",
-        };
-
-        Assert.Equal(
-            expectedPaths,
-            evidence.Select(item => item.GetProperty("path").GetString()).ToArray());
-
-        var publication = File.ReadAllText(
-            Path.Combine(reportRoot, "run-30273935931-publication.md"));
-        foreach (var item in evidence)
-        {
-            var relativePath = item.GetProperty("path").GetString()!;
-            var path = Path.Combine(
-                repositoryRoot,
-                relativePath.Replace('/', Path.DirectorySeparatorChar));
-            var expectedHash = item.GetProperty("sha256").GetString()!;
-
-            Assert.True(File.Exists(path), $"Post-run evidence '{relativePath}' does not exist.");
-            Assert.Equal(expectedHash, CanonicalSha256(path));
-            Assert.Contains(expectedHash, publication);
-        }
-    }
-
-    [Fact]
     public void HumanReviewBlock_IsCompleteButUnsigned()
     {
         var reportRoot = FindReportRoot();

@@ -3,7 +3,6 @@ using System.Text.Json.Serialization.Metadata;
 
 using NexusLabs.Foundry.Evaluation.Experiments;
 using NexusLabs.Foundry.Evaluation.Harness;
-using NexusLabs.Foundry.Evaluation.Harness.Judging;
 
 namespace NexusLabs.Foundry.Evaluation.Tests.Harness;
 
@@ -214,67 +213,6 @@ public sealed class HarnessComparisonReporterTests
     }
 
     [Fact]
-    public void Build_JudgeConflict_ReportsDisagreementWithDeterministicAuthority()
-    {
-        var source = CreateSource();
-        var observation = new HarnessJudgeComparisonObservation(
-            caseId: "h001-01",
-            dimension: HarnessEvaluationDimension.Completion,
-            xArm: HarnessComparisonArm.PlainHarness,
-            yArm: HarnessComparisonArm.Iterative,
-            deterministicPreference: HarnessPairwisePreference.Left,
-            judgePreference: HarnessPairwisePreference.Right,
-            isOrderConsistent: true,
-            calibrationState: HarnessJudgeCalibrationState.Uncalibrated);
-        var request = CreateRequest(
-            source,
-            HarnessHostedRunState.Completed,
-            BuildRows(
-                source,
-                new HashSet<TrialKey>(),
-                new Dictionary<TrialKey, ExperimentItemStatus>(),
-                new Dictionary<BinaryKey, BinaryOverride>(),
-                new Dictionary<ContinuousKey, ContinuousOverride>()),
-            [observation]);
-
-        var report = new HarnessComparisonReporter().Build(request);
-
-        Assert.Equal(1, report.JudgeDisagreement.TotalObservationCount);
-        Assert.Equal(1, report.JudgeDisagreement.DisagreementCount);
-        Assert.False(report.JudgeDisagreement.UsableForArmRanking);
-        var disagreement = Assert.Single(report.JudgeDisagreement.Observations);
-        Assert.True(disagreement.IsDisagreement);
-        Assert.True(disagreement.DeterministicGoverns);
-    }
-
-    [Fact]
-    public void Build_DuplicateJudgeObservation_Throws()
-    {
-        var source = CreateSource();
-        var observation = new HarnessJudgeComparisonObservation(
-            caseId: "h001-01",
-            dimension: HarnessEvaluationDimension.Completion,
-            xArm: HarnessComparisonArm.PlainHarness,
-            yArm: HarnessComparisonArm.Iterative,
-            deterministicPreference: HarnessPairwisePreference.Left,
-            judgePreference: HarnessPairwisePreference.Right,
-            isOrderConsistent: true,
-            calibrationState: HarnessJudgeCalibrationState.Uncalibrated);
-        var request = CreateRequest(
-            source,
-            HarnessHostedRunState.Completed,
-            BuildRows(
-                source,
-                new HashSet<TrialKey>(),
-                new Dictionary<TrialKey, ExperimentItemStatus>(),
-                new Dictionary<BinaryKey, BinaryOverride>(),
-                new Dictionary<ContinuousKey, ContinuousOverride>()),
-            [observation, observation]);
-
-        Assert.Throws<ArgumentException>(() => new HarnessComparisonReporter().Build(request));
-    }
-
-    [Fact]
     public async Task WriteAsync_EmbedsCanonicalOutcomesFromExperimentArtifactWriter()
     {
         var source = CreateSource();
@@ -288,8 +226,7 @@ public sealed class HarnessComparisonReporterTests
         var report = reporter.Build(CreateRequest(
             source,
             HarnessHostedRunState.Completed,
-            rows,
-            Array.Empty<HarnessJudgeComparisonObservation>()));
+            rows));
         var runner = new ExperimentRunner();
         var iterative = await RunArmAsync(
             runner,
@@ -354,17 +291,6 @@ public sealed class HarnessComparisonReporterTests
         HarnessManifestCaseSource source,
         HarnessHostedRunState runState,
         IReadOnlyList<HarnessComparisonTrialRecord> trials) =>
-        CreateRequest(
-            source,
-            runState,
-            trials,
-            Array.Empty<HarnessJudgeComparisonObservation>());
-
-    private static HarnessComparisonReportRequest CreateRequest(
-        HarnessManifestCaseSource source,
-        HarnessHostedRunState runState,
-        IReadOnlyList<HarnessComparisonTrialRecord> trials,
-        IReadOnlyList<HarnessJudgeComparisonObservation> judgeObservations) =>
         new(
             reportId: "report-1",
             runState,
@@ -373,8 +299,7 @@ public sealed class HarnessComparisonReporterTests
             analysisPlanSha256: new string('b', 64),
             bootstrapSeed: 123,
             confidenceLevel: ConfidenceLevel,
-            trials,
-            judgeObservations);
+            trials);
 
     private static Task<ExperimentRunOutcome<HarnessManifestCase, string>> RunArmAsync(
         ExperimentRunner runner,
