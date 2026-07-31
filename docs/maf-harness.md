@@ -261,8 +261,7 @@ sites rather than expecting a forwarding type.
 
 Adopting Harness is additive. Existing Foundry MAF agents keep working
 unchanged, and nothing is deprecated by this release. The iterative loop, plain
-Harness, and hybrid execution modes are all retained: the hosted comparison was
-underpowered and supports no default change or removal. See
+Harness, and hybrid execution modes are all retained. See
 [ADR-0010](adr/adr-0010-harness-execution-mode-retention.md).
 
 Choose exactly one supported path:

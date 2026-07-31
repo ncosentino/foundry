@@ -1,8 +1,0 @@
-{
-  "SchemaVersion": "1.0",
-  "CalibrationState": "Uncalibrated",
-  "EligibleCalibrationItemCount": 7,
-  "ProvisionalCalibrationItemCount": 0,
-  "UsableForArmRanking": false,
-  "Reason": "Judge execution was omitted because human-attested labels exist, but observed agreement has not been established."
-}

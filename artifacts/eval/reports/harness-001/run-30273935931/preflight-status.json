@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "1.0",
-  "state": "Succeeded",
-  "reason": "GitHub Models access and capture/replay artifact writing succeeded; full paired execution remains T119.",
-  "advisoryOnly": true,
-  "smokeAttempted": true,
-  "smokeSucceeded": true,
-  "fullPairedExecutionTask": "T119"
-}
