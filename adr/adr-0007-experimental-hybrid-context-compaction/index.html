@@ -3245,6 +3245,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr-0010-harness-execution-mode-retention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0010 Harness Execution Mode Retention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3300,7 +3328,7 @@ does not approve a public Harness runtime configuration or composition API —
 every mechanism introduced remains <code>internal</code> — and it does not aggregate this
 leaf's observability into completed-run diagnostics, a sink, or a metrics
 surface; that aggregation is explicitly deferred, as recorded in
-<code>specs/001-maf-harness-first-class/evidence/gate-g5.md</code>.</p>
+the Gate G5 record (git history; see issue #21).</p>
 <h2 id="decision-drivers">Decision drivers<a class="headerlink" href="#decision-drivers" title="Permanent link">&para;</a></h2>
 <ul>
 <li>A long-lived hybrid agent's conversation must eventually exceed any fixed
@@ -3592,7 +3620,7 @@ provider on every subsequent nested call within the same run.</p>
   tool arguments/results, exception text, or classifier output text.</li>
 </ul>
 <p>Local build and test validation for this leaf is recorded in
-<code>specs/001-maf-harness-first-class/evidence/gate-g5.md</code>. An MAF or MEAI
+the Gate G5 record (git history; see issue #21). An MAF or MEAI
 upgrade that changes provider-call middleware ordering, chat-reducer
 behavior, or progress-reporting behavior must rerun these contracts before
 this decision can claim continued compatibility.</p>
@@ -3604,7 +3632,7 @@ this decision can claim continued compatibility.</p>
 <li>ADR-0005 establishes the trusted execution binding and selected-provider
   composition root this decision's per-provider-call seam and capability
   resolution continue to rely on.</li>
-<li><code>specs/001-maf-harness-first-class/evidence/gate-g5.md</code> records the
+<li>the Gate G5 record (git history; see issue #21) records the
   cumulative implementation evidence, policy/trigger/fallback/termination
   matrices, and public API disposition for this decision.</li>
 <li><code>HarnessContextDiagnostics</code>, <code>HarnessContextAttribution</code>, and the

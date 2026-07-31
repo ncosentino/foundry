@@ -3234,6 +3234,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr-0010-harness-execution-mode-retention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0010 Harness Execution Mode Retention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3467,7 +3495,7 @@ deterministic mapping that already knows which case it is handling.</p>
   by its corresponding progress event.</li>
 </ul>
 <p>Local build and test validation for this leaf is recorded in
-<code>specs/001-maf-harness-first-class/evidence/gate-g4.md</code>. An MAF or MEAI
+the Gate G4 record (git history; see issue #20). An MAF or MEAI
 upgrade that changes workspace, tool-result, or progress-reporting behavior
 must rerun these contracts before this decision can claim continued
 compatibility.</p>
@@ -3476,10 +3504,10 @@ compatibility.</p>
 <li>ADR-0005 establishes selected-provider MAF Harness integration, the trusted
   execution binding, and the "<code>IWorkspace</code> is authoritative, no <code>AgentFileStore</code>
   bridge is a second authority" framing this decision refines.</li>
-<li><code>specs/001-maf-harness-first-class/evidence/gate-g4.md</code> records the
+<li>the Gate G4 record (git history; see issue #20) records the
   cumulative implementation evidence, status matrix, and public API
   disposition for this decision.</li>
-<li><code>specs/001-maf-harness-first-class/evidence/workspace-identity-feasibility.md</code>
+<li>the workspace identity feasibility record (git history)
   demonstrates why the <code>AgentFileStore</code> bridge remains partial and why
   workspace authority must be bound per execution.</li>
 <li><code>HarnessArtifactDiagnostics</code>, <code>HarnessArtifactOffloadDecisionEvent</code>, and

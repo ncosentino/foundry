@@ -133,6 +133,10 @@
     <lastmod>2026-07-31</lastmod>
   </url>
   <url>
+    <loc>https://www.devleader.ca/projects/foundry/adr/adr-0010-harness-execution-mode-retention/</loc>
+    <lastmod>2026-07-31</lastmod>
+  </url>
+  <url>
     <loc>https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/</loc>
     <lastmod>2026-07-31</lastmod>
   </url>
