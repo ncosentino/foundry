@@ -7,8 +7,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 
 /// <summary>
 /// Single shared utility for the deterministic digest and content-addressed workspace path used
-/// by every workspace artifact (<c>specs/001-maf-harness-first-class/evidence/harness-lifecycle-feasibility.md</c>'s
-/// Decision 4 and "Content-addressed path format"). Every offloaded artifact's identity is a
+/// by every workspace artifact. Every offloaded artifact's identity is a
 /// pure function of the exact UTF-8 bytes of its serialized content — the same string the
 /// byte-threshold offload decision was measured against — so retrying a write or reconstructing a
 /// reference from recorded metadata always reproduces the identical digest and path.

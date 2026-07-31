@@ -222,9 +222,9 @@ provider-specific and hosted validation.
 
 - ADR-0004 assigns Microsoft Agent Framework and neutral agent infrastructure to
   Foundry while keeping Needlr as an optional integration boundary.
-- `specs/001-maf-harness-first-class/evidence/gate-g2.md` records the cumulative
+- the Gate G2 record (git history; see issue #18) records the cumulative
   implementation evidence and internal API disposition for this decision.
-- `specs/001-maf-harness-first-class/evidence/workspace-identity-feasibility.md`
+- the workspace identity feasibility record (git history)
   demonstrates why workspace authority must be bound per execution and why a
   generic `AgentFileStore` bridge remains partial.
 - `HarnessProviderComposition`, `HarnessCompositionGuard`, and

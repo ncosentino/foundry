@@ -36,7 +36,7 @@ does not approve a public Harness runtime configuration or composition API —
 every mechanism introduced remains `internal` — and it does not aggregate this
 leaf's observability into completed-run diagnostics, a sink, or a metrics
 surface; that aggregation is explicitly deferred, as recorded in
-`specs/001-maf-harness-first-class/evidence/gate-g5.md`.
+the Gate G5 record (git history; see issue #21).
 
 ## Decision drivers
 
@@ -349,7 +349,7 @@ The decision is confirmed by:
   tool arguments/results, exception text, or classifier output text.
 
 Local build and test validation for this leaf is recorded in
-`specs/001-maf-harness-first-class/evidence/gate-g5.md`. An MAF or MEAI
+the Gate G5 record (git history; see issue #21). An MAF or MEAI
 upgrade that changes provider-call middleware ordering, chat-reducer
 behavior, or progress-reporting behavior must rerun these contracts before
 this decision can claim continued compatibility.
@@ -362,7 +362,7 @@ this decision can claim continued compatibility.
 - ADR-0005 establishes the trusted execution binding and selected-provider
   composition root this decision's per-provider-call seam and capability
   resolution continue to rely on.
-- `specs/001-maf-harness-first-class/evidence/gate-g5.md` records the
+- the Gate G5 record (git history; see issue #21) records the
   cumulative implementation evidence, policy/trigger/fallback/termination
   matrices, and public API disposition for this decision.
 - `HarnessContextDiagnostics`, `HarnessContextAttribution`, and the

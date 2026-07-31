@@ -260,5 +260,5 @@ those remain separate gates.
   public construction candidate and explicit option mapping.
 - `FoundryHarnessTelemetryComposition` defines the progress-only composition
   that preserves upstream loop and telemetry ownership.
-- `specs/001-maf-harness-first-class/evidence/gate-g6.md` records the dependency,
+- the Gate G6 record (git history; see issue #22) records the dependency,
   defaults, tests, review dispositions, and delivery evidence for this decision.

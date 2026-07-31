@@ -85,16 +85,24 @@ public sealed class HarnessHostedWorkflowTests
     }
 
     [Fact]
-    public void GateEvidence_RecordsWorkflowAsNonRequired()
+    public void EvaluationJobs_AreNotAmongTheRequiredStatusChecks()
     {
-        var evidence = ReadRepositoryFile(
-            "specs/001-maf-harness-first-class/evidence/hosted-eval-gate.md");
+        var evaluationWorkflow = ReadRepositoryFile(".github/workflows/harness-evaluation.yml");
+        var ci = ReadRepositoryFile(".github/workflows/ci.yml");
+        var requiredCheckNames = new[] { "build-test-pack", "docs", "aot" };
 
-        Assert.Contains("build-test-pack", evidence);
-        Assert.Contains("docs", evidence);
-        Assert.Contains("aot", evidence);
-        Assert.Contains("Harness Evaluation", evidence);
-        Assert.Contains("not a required status", evidence, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("name: advisory-harness-evaluation", evaluationWorkflow);
+        Assert.Contains("harness-evaluation-dispatch:", ci);
+        Assert.DoesNotContain(
+            requiredCheckNames,
+            required => string.Equals(required, "advisory-harness-evaluation", StringComparison.Ordinal)
+                || string.Equals(required, "harness-evaluation-dispatch", StringComparison.Ordinal));
+
+        Assert.DoesNotContain("pull_request:", evaluationWorkflow);
+        Assert.DoesNotContain("push:", evaluationWorkflow);
+        Assert.Contains(
+            "if: github.event_name == 'workflow_dispatch' && inputs.run_harness_evaluation",
+            ci);
     }
 
     [Fact]
