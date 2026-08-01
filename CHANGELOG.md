@@ -23,8 +23,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   offload, selective rehydration, and content-addressed artifact references.
 - Harness diagnostics progress events for approvals, artifact offload and
   rehydration, and context composition and compaction.
-- Experimental internal hybrid context compaction that fails closed rather than
-  forwarding over-budget context to a provider.
+- Public per-provider-call hybrid context compaction on the Harness bundle
+  (`FoundryHarnessFeatureSelections.EnableHybridCompaction` and
+  `FoundryHarnessAgentConfiguration.HybridCompactionOptions`). Unlike upstream
+  compaction, it bounds the exact message set dispatched for every provider
+  request including each intermediate tool round, and fails closed rather than
+  forwarding over-budget context. See ADR-0011.
 - NativeAOT Harness profile with source-generated tools, no reflection fallback,
   and a published-and-executed native application in CI.
 - Repository-owned Foundry CI runner image source and trusted GHCR publication
@@ -38,6 +42,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - The Harness bundle owns the tool-invocation loop and OpenTelemetry for
   complete-bundle agents; Foundry emits no duplicate spans or metrics for that
   profile.
+- `FoundryHarnessFeatureSelections` and `FoundryHarnessAgentConfiguration` each
+  gained a required member for hybrid compaction, which is source-breaking for
+  existing construction sites. Set `EnableHybridCompaction = false` and
+  `HybridCompactionOptions = null` to keep prior behavior.
+- The effective-defaults report now discloses that upstream compaction is
+  evaluated once per agent turn rather than once per provider request, so it
+  does not bound context inside a multi-round tool loop. Measured against
+  `Microsoft.Agents.AI.Harness` 1.15.0 and 1.16.0 and tracked in
+  [#73](https://github.com/ncosentino/foundry/issues/73).
 
 ### Deprecated
 

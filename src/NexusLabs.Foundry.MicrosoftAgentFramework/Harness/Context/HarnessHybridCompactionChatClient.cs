@@ -77,12 +77,22 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 internal sealed class HarnessHybridCompactionChatClient(
     IChatClient innerClient,
     HarnessHybridProfile profile,
-    HarnessExecutionBinding executionBinding,
-    IAgentExecutionContextAccessor executionContextAccessor,
-    string sessionId,
+    HarnessExecutionBinding? executionBinding,
+    IAgentExecutionContextAccessor? executionContextAccessor,
+    string? sessionId,
     HarnessCompactionRunCoordinator? runCoordinator,
     IProgressReporterAccessor? progressAccessor) : DelegatingChatClient(innerClient)
 {
+    /// <summary>
+    /// The trusted-execution identity revalidated around assembly, or <see langword="null"/> when the
+    /// caller has no workspace authority to defend; see <see cref="HarnessCompactionTrustBinding"/>.
+    /// </summary>
+    private readonly HarnessCompactionTrustBinding? _trustBinding =
+        HarnessCompactionTrustBinding.CreateOrNone(
+            executionBinding,
+            executionContextAccessor,
+            sessionId);
+
     /// <summary>
     /// The non-retransmission coordinator for the active outer agent run. When a caller supplies
     /// one (always the case when this node is installed by <see cref="HarnessCompactionComposition"/>
@@ -285,7 +295,7 @@ internal sealed class HarnessHybridCompactionChatClient(
         // First checkpoint: a pre-canceled or already-canceled token must never reach the real
         // provider client, and must never be masked by any catch anywhere in this node.
         cancellationToken.ThrowIfCancellationRequested();
-        executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
+        _trustBinding?.EnsureCurrent();
 
         var leaseId = Guid.NewGuid();
         var leaseOwned = false;
@@ -349,7 +359,7 @@ internal sealed class HarnessHybridCompactionChatClient(
             // the bounded messages this node assembled are ever handed onward. This is deliberately in
             // addition to, not instead of, the entry-point check above and any outer defense-in-depth
             // binding validation.
-            executionBinding.EnsureCurrent(executionContextAccessor, sessionId);
+            _trustBinding?.EnsureCurrent();
 
             // Forwarded digests are only the recoverable segments that actually survived assembly (and
             // are therefore about to be dispatched) — never a segment pressure-evicted before reaching

@@ -67,6 +67,7 @@ internal sealed class HarnessProviderScenario(
                 EnableTodoProvider = true,
                 EnableAgentModeProvider = false,
                 EnableCompaction = false,
+                EnableHybridCompaction = false,
             },
             ProgressAccessor = null,
             MaxContextWindowTokens = null,
@@ -80,6 +81,7 @@ internal sealed class HarnessProviderScenario(
             ToolApprovalAgentOptions = null,
             AgentModeProviderOptions = null,
             CompactionStrategy = null,
+            HybridCompactionOptions = null,
             OpenTelemetrySourceName = null,
             AdditionalContextProviders = [],
         };

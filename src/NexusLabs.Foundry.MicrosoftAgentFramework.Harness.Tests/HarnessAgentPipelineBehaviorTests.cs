@@ -21,7 +21,8 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// </para>
 /// <para>
 /// <b>Known discoverability gap (do not "fix" by adding reflection to production code):</b> the
-/// in-loop compaction provider is <b>not</b> discoverable via <c>GetService&lt;T&gt;()</c> even when
+/// upstream per-turn compaction provider is <b>not</b> discoverable via <c>GetService&lt;T&gt;()</c>
+/// even when
 /// compaction is genuinely active with valid token budgets; live probing showed nothing
 /// "Compaction"-related is reachable anywhere in the constructed agent's object graph via public
 /// reflection, and the internal chat-client decorator that would own it

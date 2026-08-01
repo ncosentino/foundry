@@ -2,6 +2,8 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
+using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
+
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 /// <summary>
@@ -27,6 +29,14 @@ public sealed class FoundryHarnessAgentFactory
     /// caller-supplied tool sharing this name would collide with it.
     /// </summary>
     internal const string WebSearchToolName = "web_search";
+
+    /// <summary>
+    /// Identifies the preservation scheme reported in hybrid compaction diagnostics for agents built
+    /// by this factory, distinguishing them from selected-provider compositions that supply their own.
+    /// </summary>
+    private const string HybridPreservationLabel = "foundry-harness-bundle";
+
+    private const int HybridPreservationVersion = 1;
 
     private readonly FoundryHarnessBundleDefaultsInspector _inspector = new();
 
@@ -166,9 +176,43 @@ public sealed class FoundryHarnessAgentFactory
         };
 
         var agent = telemetryComposition
-            .ComposeChatClient(configuration.ChatClient)
+            .ComposeChatClient(BuildProviderChatClient(configuration))
             .AsHarnessAgent(options, loggerFactory, services);
         return telemetryComposition.ComposeAgent(agent);
+    }
+
+    /// <remarks>
+    /// Hybrid compaction wraps the caller's client innermost — beneath telemetry and beneath everything
+    /// the upstream bundle installs above it — so the node observes the exact message set dispatched for
+    /// each provider request rather than only the outer agent call. No trusted execution binding is
+    /// supplied: the complete-bundle path owns no workspace, so there is no workspace authority for a
+    /// binding to defend here.
+    /// </remarks>
+    private static IChatClient BuildProviderChatClient(
+        FoundryHarnessAgentConfiguration configuration)
+    {
+        if (configuration.HybridCompactionOptions is not { } hybridOptions)
+        {
+            return configuration.ChatClient;
+        }
+
+        var policy = HarnessHybridContextPolicy.Create(
+            hybridOptions.HardLimitBytes,
+            hybridOptions.TriggerMarginBytes,
+            hybridOptions.RecentMessageRetentionCount,
+            hybridOptions.MaximumCompactionAttempts,
+            HybridPreservationLabel,
+            HybridPreservationVersion,
+            new HarnessUtf8ContextSizeEstimator());
+
+        return new HarnessHybridCompactionChatClient(
+            configuration.ChatClient,
+            HarnessHybridProfile.CreateWithDefaultStrategies(policy, hybridOptions.UpstreamReducer),
+            executionBinding: null,
+            executionContextAccessor: null,
+            sessionId: null,
+            runCoordinator: null,
+            progressAccessor: configuration.ProgressAccessor);
     }
 
     private static void Validate(FoundryHarnessAgentConfiguration configuration)
@@ -325,7 +369,7 @@ public sealed class FoundryHarnessAgentFactory
             throw new ArgumentException(
                 "FoundryHarnessAgentConfiguration.Features.EnableCompaction is true, but " +
                 "CompactionStrategy was not supplied and MaxContextWindowTokens/MaxOutputTokens " +
-                "were not both supplied. The upstream bundle cannot honor in-loop compaction " +
+                "were not both supplied. The upstream bundle cannot honor per-turn compaction " +
                 "without either an explicit strategy or both token budgets.",
                 nameof(configuration));
         }
@@ -337,6 +381,40 @@ public sealed class FoundryHarnessAgentFactory
                 "Features.EnableCompaction is false. Set EnableCompaction to true to use a custom " +
                 "compaction strategy, or pass null here to leave compaction disabled.",
                 nameof(configuration));
+        }
+
+        if (configuration.Features.EnableHybridCompaction &&
+            configuration.HybridCompactionOptions is null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.Features.EnableHybridCompaction is true, but " +
+                "HybridCompactionOptions was not supplied. Hybrid compaction has no default budget " +
+                "or reducer to fall back to.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableHybridCompaction &&
+            configuration.HybridCompactionOptions is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.HybridCompactionOptions was supplied while " +
+                "Features.EnableHybridCompaction is false. Set EnableHybridCompaction to true to " +
+                "use hybrid compaction, or pass null here to leave it disabled.",
+                nameof(configuration));
+        }
+
+        if (configuration.HybridCompactionOptions is { } hybridOptions)
+        {
+            ArgumentNullException.ThrowIfNull(hybridOptions.UpstreamReducer);
+
+            if (configuration.ChatClient.GetService<HarnessHybridCompactionChatClient>() is not null)
+            {
+                throw new ArgumentException(
+                    "FoundryHarnessAgentConfiguration.ChatClient already contains a hybrid " +
+                    "compaction component. Exactly one may ever be installed, so remove the " +
+                    "existing one or leave HybridCompactionOptions null.",
+                    nameof(configuration));
+            }
         }
 
         if (!configuration.Features.EnableFileMemory && configuration.FileMemoryStore is not null)

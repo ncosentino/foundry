@@ -61,6 +61,7 @@ internal sealed class AotHarnessScenario : IHarnessScenario
                 EnableTodoProvider = false,
                 EnableAgentModeProvider = false,
                 EnableCompaction = false,
+                EnableHybridCompaction = false,
             },
             ProgressAccessor = null,
             MaxContextWindowTokens = null,
@@ -74,6 +75,7 @@ internal sealed class AotHarnessScenario : IHarnessScenario
             ToolApprovalAgentOptions = null,
             AgentModeProviderOptions = null,
             CompactionStrategy = null,
+            HybridCompactionOptions = null,
             OpenTelemetrySourceName = null,
             AdditionalContextProviders = [],
         };

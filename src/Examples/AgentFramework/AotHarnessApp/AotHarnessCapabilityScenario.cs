@@ -77,6 +77,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
                 EnableTodoProvider = true,
                 EnableAgentModeProvider = true,
                 EnableCompaction = true,
+                EnableHybridCompaction = true,
             },
             ProgressAccessor = null,
             // Compaction requires either an explicit strategy or both token budgets. Supplying
@@ -92,6 +93,14 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
             ToolApprovalAgentOptions = null,
             AgentModeProviderOptions = null,
             CompactionStrategy = null,
+            HybridCompactionOptions = new FoundryHarnessHybridCompactionOptions
+            {
+                HardLimitBytes = 262144,
+                TriggerMarginBytes = 65536,
+                RecentMessageRetentionCount = 4,
+                MaximumCompactionAttempts = 3,
+                UpstreamReducer = new AotHarnessPassthroughChatReducer(),
+            },
             OpenTelemetrySourceName = "aot-harness-capabilities",
             AdditionalContextProviders = [],
         };
@@ -178,6 +187,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
         FoundryHarnessFeature.TodoProvider,
         FoundryHarnessFeature.AgentModeProvider,
         FoundryHarnessFeature.Compaction,
+        FoundryHarnessFeature.HybridCompaction,
     ];
 
     private static IEnumerable<FoundryHarnessFeature> UnreachableFeatures =>

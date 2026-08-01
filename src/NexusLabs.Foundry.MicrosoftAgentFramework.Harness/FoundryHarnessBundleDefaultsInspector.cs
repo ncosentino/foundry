@@ -35,6 +35,20 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
         "Upstream always wraps the provider chat client with a per-service-call chat history " +
         "persisting decorator. The backing ChatHistoryProvider store is the only configurable part.";
 
+    private const string UpstreamCompactionPerTurnLimitation =
+        "Upstream evaluates the compaction strategy once per agent turn, not once per provider " +
+        "request, so it does not bound context within a multi-round tool loop: a run whose tool " +
+        "rounds grow the conversation is compacted only against the state that preceded the first " +
+        "round. Measured against Microsoft.Agents.AI.Harness 1.15.0 and 1.16.0; tracked upstream in " +
+        "ncosentino/foundry#73. Enable HybridCompaction for per-provider-call bounding.";
+
+    private const string HybridCompactionLimitation =
+        "Foundry-owned rather than upstream, so it is not covered by upstream's compatibility " +
+        "guarantees and its position depends on the verified bundle middleware order. Budgets are " +
+        "measured in UTF-8 bytes of rendered content, not provider tokens, so a budget must be " +
+        "chosen with headroom. A context that cannot be reduced below the hard limit fails the " +
+        "request rather than being forwarded over budget.";
+
     internal FoundryHarnessEffectiveDefaults Describe(FoundryHarnessAgentConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
@@ -59,6 +73,7 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
             Toggle(FoundryHarnessFeature.TodoProvider, features.EnableTodoProvider),
             DescribeAgentModeProvider(configuration),
             DescribeCompaction(configuration),
+            DescribeHybridCompaction(configuration),
             DescribeAdditionalContextProviders(configuration),
             NotExposed(FoundryHarnessFeature.BackgroundAgents, BackgroundAgentsLimitation),
             NotExposed(FoundryHarnessFeature.LoopEvaluation, LoopEvaluationLimitation),
@@ -330,7 +345,7 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
             FoundryHarnessFeature.Compaction,
             FoundryHarnessFeatureRequestedState.RequestedEnabled,
             FoundryHarnessFeatureEffectiveState.Enabled,
-            null,
+            UpstreamCompactionPerTurnLimitation,
             callerSupplied
                 ? FoundryHarnessFeatureBackingSelection.CallerSupplied
                 : FoundryHarnessFeatureBackingSelection.UpstreamDefault,
@@ -340,6 +355,31 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
                   "when a strategy is supplied."
                 : "Upstream default: a ContextWindowCompactionStrategy constructed from the supplied " +
                   "MaxContextWindowTokens and MaxOutputTokens token budgets.");
+    }
+
+    private static FoundryHarnessFeatureDisposition DescribeHybridCompaction(
+        FoundryHarnessAgentConfiguration configuration)
+    {
+        if (configuration.HybridCompactionOptions is null)
+        {
+            return FoundryHarnessFeatureDisposition.Create(
+                FoundryHarnessFeature.HybridCompaction,
+                FoundryHarnessFeatureRequestedState.RequestedDisabled,
+                FoundryHarnessFeatureEffectiveState.Disabled,
+                null,
+                FoundryHarnessFeatureBackingSelection.NotApplicable,
+                null);
+        }
+
+        return FoundryHarnessFeatureDisposition.Create(
+            FoundryHarnessFeature.HybridCompaction,
+            FoundryHarnessFeatureRequestedState.RequestedEnabled,
+            FoundryHarnessFeatureEffectiveState.Enabled,
+            HybridCompactionLimitation,
+            FoundryHarnessFeatureBackingSelection.CallerSupplied,
+            "Foundry wraps the supplied ChatClient with a per-provider-call compaction node at the " +
+            "innermost position, using the caller-supplied byte budget and reducer with Foundry's " +
+            "default content-hash entry identity and per-call snapshot strategies.");
     }
 
     private static FoundryHarnessFeatureDisposition DescribeAdditionalContextProviders(
