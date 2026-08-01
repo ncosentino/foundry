@@ -174,12 +174,6 @@ public sealed class ExperimentRunnerCancellationTests
             Task = task,
         };
 
-    private async Task WaitUntilAsync(Func<bool> predicate)
-    {
-        while (!predicate())
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            await Task.Yield();
-        }
-    }
+    private Task WaitUntilAsync(Func<bool> predicate) =>
+        ExperimentTestConditions.WaitUntilAsync(predicate, _cancellationToken);
 }

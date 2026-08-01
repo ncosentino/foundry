@@ -103,14 +103,8 @@ public sealed class ExperimentSharedConcurrencyLimiterTests
         }
     }
 
-    private async Task WaitUntilAsync(Func<bool> predicate)
-    {
-        while (!predicate())
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            await Task.Yield();
-        }
-    }
+    private Task WaitUntilAsync(Func<bool> predicate) =>
+        ExperimentTestConditions.WaitUntilAsync(predicate, _cancellationToken);
 
     private static void UpdateMaximum(ref int maximum, int candidate)
     {
