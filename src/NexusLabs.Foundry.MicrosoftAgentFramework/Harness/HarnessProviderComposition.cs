@@ -355,8 +355,10 @@ internal sealed class HarnessProviderComposition
             context,
             cancellationToken) =>
         {
-            // MEAI may convert invocation exceptions into tool results, so the
-            // chat-client binding checks must also remain in the pipeline.
+            // MEAI converts an exception thrown here into a tool-error FunctionResultContent and
+            // continues its loop, so this rejection alone would not stop the run. The binding
+            // checks in the chat-client pipeline reject the resulting follow-up request before it
+            // reaches the provider, which is why both guards are required.
             request.ExecutionBinding.EnsureCurrent(
                 request.ExecutionContextAccessor,
                 request.SessionId);
