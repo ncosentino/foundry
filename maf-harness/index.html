@@ -1003,6 +1003,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#run-against-a-real-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run against a real provider
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nativeaot" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3453,6 +3464,38 @@ context problems:</p>
   authoritative working state.</li>
 </ul>
 <p>See <a href="../iterative-agent-loop/">Iterative Agent Loop</a> for a detailed comparison.</p>
+<h2 id="run-against-a-real-provider">Run against a real provider<a class="headerlink" href="#run-against-a-real-provider" title="Permanent link">&para;</a></h2>
+<p><code>src/Examples/AgentFramework/HarnessProviderApp</code> runs one Harness agent whose
+only variable is the chat provider. The tools, workspace, session, and bundle
+configuration are identical across providers, so switching isolates provider
+behavior.</p>
+<p>It defaults to a deterministic offline provider, so <code>dotnet run</code> costs nothing
+and needs no credentials:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/HarnessProviderApp
+</code></pre></div>
+<p>To run it against a real model, point it at GitHub Copilot. Create
+<code>appsettings.Development.json</code> next to <code>appsettings.json</code> — that filename is
+already git-ignored:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;Harness&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&quot;Provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;copilot&quot;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">&quot;Copilot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">&quot;Model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;claude-sonnet-4.5&quot;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>Or set an environment variable for a single run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">Harness__Provider</span><span class="o">=</span>copilot<span class="w"> </span>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/HarnessProviderApp
+</code></pre></div>
+<p>The Copilot provider uses <code>CopilotTokenSource.Auto</code>, which resolves the GitHub
+Copilot CLI's local credentials first. If you are already signed in to the CLI,
+no token belongs in configuration and none belongs in an environment variable.</p>
+<p>Because a real model chooses its own wording, the scenario asserts only that the
+agent used its workspace tool. Exact-output assertions belong in the
+deterministic NativeAOT scenarios instead.</p>
+<p><code>EnableWebSearch</code> is opt-in and defaults to <code>false</code>. Web search is a hosted
+tool, so only a provider that supports it can execute the declaration.</p>
 <h2 id="nativeaot">NativeAOT<a class="headerlink" href="#nativeaot" title="Permanent link">&para;</a></h2>
 <p><code>AotHarnessApp</code> is the minimum supported NativeAOT profile:</p>
 <ul>
