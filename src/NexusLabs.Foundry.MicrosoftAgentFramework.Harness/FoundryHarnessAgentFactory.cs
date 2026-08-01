@@ -369,7 +369,7 @@ public sealed class FoundryHarnessAgentFactory
             throw new ArgumentException(
                 "FoundryHarnessAgentConfiguration.Features.EnableCompaction is true, but " +
                 "CompactionStrategy was not supplied and MaxContextWindowTokens/MaxOutputTokens " +
-                "were not both supplied. The upstream bundle cannot honor in-loop compaction " +
+                "were not both supplied. The upstream bundle cannot honor per-turn compaction " +
                 "without either an explicit strategy or both token budgets.",
                 nameof(configuration));
         }

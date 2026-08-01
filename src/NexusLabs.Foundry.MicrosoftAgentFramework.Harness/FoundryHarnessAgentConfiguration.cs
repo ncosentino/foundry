@@ -231,7 +231,7 @@ public sealed record FoundryHarnessAgentConfiguration
     public required AgentModeProviderOptions? AgentModeProviderOptions { get; init; }
 
     /// <summary>
-    /// Gets an explicit in-loop compaction strategy (mapped to
+    /// Gets an explicit compaction strategy for upstream's per-turn compaction (mapped to
     /// <c>HarnessAgentOptions.CompactionStrategy</c>), or <see langword="null"/> to let the upstream
     /// bundle construct a default <c>ContextWindowCompactionStrategy</c> from
     /// <see cref="MaxContextWindowTokens"/> and <see cref="MaxOutputTokens"/>. When a strategy is
@@ -241,6 +241,13 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <see cref="FoundryHarnessFeatureSelections.EnableCompaction"/> is <see langword="true"/>; the
     /// factory fails closed if this is supplied while that feature is disabled.
     /// </summary>
+    /// <remarks>
+    /// This strategy is <em>not</em> evaluated inside the tool loop. Upstream runs it once per agent
+    /// turn, against the persisted history index, so it bounds what the agent remembers between turns
+    /// rather than what any individual provider request carries. Use
+    /// <see cref="HybridCompactionOptions"/> to bound context within a turn; see
+    /// <see cref="FoundryHarnessFeature.Compaction"/> for the measured behavior.
+    /// </remarks>
     public required CompactionStrategy? CompactionStrategy { get; init; }
 
     /// <summary>
@@ -248,12 +255,23 @@ public sealed record FoundryHarnessAgentConfiguration
     /// <see langword="null"/> to leave it disabled.
     /// </summary>
     /// <remarks>
-    /// This is independent of <see cref="CompactionStrategy"/>, which configures upstream's per-turn
-    /// compaction. Hybrid compaction wraps the supplied <see cref="ChatClient"/> at the innermost
-    /// position, so it observes and bounds every provider request the agent makes, including each
-    /// intermediate tool round. The factory fails closed when this is supplied while
+    /// <para>
+    /// This is independent of <see cref="CompactionStrategy"/> rather than an alternative to it. That
+    /// property configures upstream's compaction, which runs once per agent turn and reduces the
+    /// persisted history — it bounds what the agent <em>remembers</em>. This property configures
+    /// Foundry's compaction, which runs once per provider request and reduces the messages of that one
+    /// request — it bounds what is <em>sent</em>. Neither suppresses the other and both may be
+    /// supplied together; see <see cref="FoundryHarnessFeature.Compaction"/> and
+    /// <see cref="FoundryHarnessFeature.HybridCompaction"/>.
+    /// </para>
+    /// <para>
+    /// Hybrid compaction wraps the supplied <see cref="ChatClient"/> at the innermost position, so it
+    /// observes and bounds every provider request the agent makes, including each intermediate tool
+    /// round. The factory fails closed when this is supplied while
     /// <see cref="FoundryHarnessFeatureSelections.EnableHybridCompaction"/> is <see langword="false"/>,
-    /// and when that feature is enabled without this.
+    /// when that feature is enabled without this, and when <see cref="ChatClient"/> already contains a
+    /// hybrid compaction component.
+    /// </para>
     /// </remarks>
     public required FoundryHarnessHybridCompactionOptions? HybridCompactionOptions { get; init; }
 
