@@ -6,8 +6,6 @@ namespace NexusLabs.Foundry.Evaluation.Tests.Experiments;
 
 public sealed class ExperimentRunnerRetryTests
 {
-    private static readonly TimeSpan ConditionTimeout = TimeSpan.FromSeconds(30);
-
     private readonly CancellationToken _cancellationToken = TestContext.Current.CancellationToken;
 
     [Fact]
@@ -410,45 +408,13 @@ public sealed class ExperimentRunnerRetryTests
             Task = task,
         };
 
-    private async Task WaitUntilAsync(Func<bool> predicate)
-    {
-        var deadline = DateTime.UtcNow + ConditionTimeout;
-        while (!predicate())
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            if (DateTime.UtcNow > deadline)
-            {
-                Assert.Fail(
-                    $"The awaited runner condition was not reached within {ConditionTimeout}.");
-            }
+    private Task WaitUntilAsync(Func<bool> predicate) =>
+        ExperimentTestConditions.WaitUntilAsync(predicate, _cancellationToken);
 
-            await Task.Yield();
-        }
-    }
-
-    /// <remarks>
-    /// The retry scheduler registers its delay timer on a task the caller cannot observe, so a
-    /// single advance can land before that registration and leave the timer waiting on a clock
-    /// that never moves again. Advancing repeatedly re-arms whatever registered late.
-    /// </remarks>
-    private async Task AdvanceUntilAsync(
+    private Task AdvanceUntilAsync(
         FakeTimeProvider timeProvider,
         Func<bool> predicate,
-        TimeSpan increment)
-    {
-        var deadline = DateTime.UtcNow + ConditionTimeout;
-        while (!predicate())
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            if (DateTime.UtcNow > deadline)
-            {
-                Assert.Fail(
-                    $"The awaited runner condition was not reached within {ConditionTimeout} " +
-                    $"while advancing the test clock in {increment} steps.");
-            }
-
-            timeProvider.Advance(increment);
-            await Task.Yield();
-        }
-    }
+        TimeSpan increment) =>
+        ExperimentTestConditions.AdvanceUntilAsync(
+            timeProvider, predicate, increment, _cancellationToken);
 }

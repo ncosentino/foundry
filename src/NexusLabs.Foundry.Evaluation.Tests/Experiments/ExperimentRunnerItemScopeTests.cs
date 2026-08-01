@@ -1042,27 +1042,15 @@ public sealed class ExperimentRunnerItemScopeTests
             Policies = policies ?? [],
         };
 
-    private async Task WaitUntilAsync(Func<bool> predicate)
-    {
-        while (!predicate())
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            await Task.Yield();
-        }
-    }
+    private Task WaitUntilAsync(Func<bool> predicate) =>
+        ExperimentTestConditions.WaitUntilAsync(predicate, _cancellationToken);
 
-    private async Task AdvanceUntilAsync(
+    private Task AdvanceUntilAsync(
         FakeTimeProvider timeProvider,
         Func<bool> predicate,
-        TimeSpan increment)
-    {
-        while (!predicate())
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            timeProvider.Advance(increment);
-            await Task.Yield();
-        }
-    }
+        TimeSpan increment) =>
+        ExperimentTestConditions.AdvanceUntilAsync(
+            timeProvider, predicate, increment, _cancellationToken);
 
     private sealed class MutableIdentityItemScopeProvider :
         IExperimentItemScopeProvider<int, int>
