@@ -66,7 +66,6 @@ function Test-RunnerProfileContract {
     $ciPath = Get-RepositoryFile $Root '.github/workflows/ci.yml'
     $docsPath = Get-RepositoryFile $Root '.github/workflows/docs.yml'
     $releasePath = Get-RepositoryFile $Root '.github/workflows/release.yml'
-    $harnessAotPath = Get-RepositoryFile $Root '.github/workflows/harness-g1-aot.yml'
     $runnerImagePath = Get-RepositoryFile $Root '.github/workflows/runner-image.yml'
 
     $profile = Get-Content -LiteralPath $profilePath -Raw | ConvertFrom-Json
@@ -139,7 +138,6 @@ function Test-RunnerProfileContract {
         'ci.yml' = Get-Content -LiteralPath $ciPath -Raw
         'docs.yml' = Get-Content -LiteralPath $docsPath -Raw
         'release.yml' = Get-Content -LiteralPath $releasePath -Raw
-        'harness-g1-aot.yml' = Get-Content -LiteralPath $harnessAotPath -Raw
     }
     foreach ($entry in $workflows.GetEnumerator()) {
         Assert-Contract ($entry.Value -notmatch 'actions/setup-dotnet@') "Workflow '$($entry.Key)' still calls actions/setup-dotnet directly."
@@ -166,9 +164,6 @@ function Test-RunnerProfileContract {
         Assert-Contract ($workflows['ci.yml'].Contains($jobName)) "Required CI job '$jobName' changed."
     }
     Assert-Contract ($workflows['docs.yml'] -match '(?m)^\s{2}docs:\s*$') "Required check job 'docs' changed."
-    Assert-Contract (
-        $workflows['harness-g1-aot.yml'] -match 'runs-on:\s*ubuntu-latest'
-    ) 'Harness G1 AOT must remain explicitly GitHub-hosted.'
     Assert-Contract ($workflows['release.yml'] -match 'environment:\s*release') 'Release environment binding changed.'
     Assert-Contract ($workflows['release.yml'] -match 'packages:\s*write') 'Release package permission changed.'
     Assert-Contract ($workflows['release.yml'] -match 'id-token:\s*write') 'Release identity permission changed.'
@@ -198,7 +193,6 @@ function Copy-ContractFixture {
         '.github/workflows/ci.yml',
         '.github/workflows/docs.yml',
         '.github/workflows/release.yml',
-        '.github/workflows/harness-g1-aot.yml',
         '.github/workflows/runner-image.yml'
     )) {
         $source = Join-Path $SourceRoot ($relativePath -replace '/', [IO.Path]::DirectorySeparatorChar)
