@@ -76,11 +76,26 @@ public sealed record FoundryHarnessFeatureSelections
     public required bool EnableAgentModeProvider { get; init; }
 
     /// <summary>
-    /// Gets whether in-loop context-window compaction is enabled. The upstream disable flag defaults
+    /// Gets whether upstream's context-window compaction is enabled. The upstream disable flag defaults
     /// to <see langword="false"/>, but compaction is effectively inert until either an explicit
     /// <see cref="FoundryHarnessAgentConfiguration.CompactionStrategy"/> or both token budgets are
     /// supplied. Foundry therefore treats this dimension as explicit opt-in and fails closed when an
     /// enabled configuration supplies neither valid backing form.
     /// </summary>
+    /// <remarks>
+    /// Upstream evaluates this strategy once per agent turn, not once per provider request, so it does
+    /// not bound context <em>within</em> a multi-round tool loop. See
+    /// <see cref="EnableHybridCompaction"/> for the per-provider-call alternative and
+    /// <c>docs/maf-harness.md</c> for the measured limitation.
+    /// </remarks>
     public required bool EnableCompaction { get; init; }
+
+    /// <summary>
+    /// Gets whether Foundry's per-provider-call hybrid compaction is enabled. Unlike
+    /// <see cref="EnableCompaction"/>, this bounds the exact message set dispatched for every provider
+    /// request, including each intermediate tool round. Requires
+    /// <see cref="FoundryHarnessAgentConfiguration.HybridCompactionOptions"/>; supplying one while this
+    /// is disabled, or enabling this without one, fails closed before any agent is constructed.
+    /// </summary>
+    public required bool EnableHybridCompaction { get; init; }
 }

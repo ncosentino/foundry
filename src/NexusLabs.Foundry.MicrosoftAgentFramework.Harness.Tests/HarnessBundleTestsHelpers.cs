@@ -23,6 +23,7 @@ internal static class HarnessBundleTestsHelpers
             EnableTodoProvider = false,
             EnableAgentModeProvider = false,
             EnableCompaction = false,
+            EnableHybridCompaction = false,
         };
 
     internal static FoundryHarnessFeatureSelections AllFeaturesEnabled() =>
@@ -38,6 +39,9 @@ internal static class HarnessBundleTestsHelpers
             EnableTodoProvider = true,
             EnableAgentModeProvider = true,
             EnableCompaction = true,
+            // Hybrid compaction cannot be enabled here: it fails closed without an explicit budget
+            // and reducer, which this helper has no basis to choose for every caller.
+            EnableHybridCompaction = false,
         };
 
     internal static FoundryHarnessAgentConfiguration CreateBaseline(
@@ -64,6 +68,7 @@ internal static class HarnessBundleTestsHelpers
             ToolApprovalAgentOptions = null,
             AgentModeProviderOptions = null,
             CompactionStrategy = null,
+            HybridCompactionOptions = null,
             OpenTelemetrySourceName = null,
             AdditionalContextProviders = [],
         };

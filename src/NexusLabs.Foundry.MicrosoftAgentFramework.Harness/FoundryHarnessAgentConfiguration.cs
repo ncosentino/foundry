@@ -244,6 +244,20 @@ public sealed record FoundryHarnessAgentConfiguration
     public required CompactionStrategy? CompactionStrategy { get; init; }
 
     /// <summary>
+    /// Gets the configuration for Foundry's per-provider-call hybrid compaction, or
+    /// <see langword="null"/> to leave it disabled.
+    /// </summary>
+    /// <remarks>
+    /// This is independent of <see cref="CompactionStrategy"/>, which configures upstream's per-turn
+    /// compaction. Hybrid compaction wraps the supplied <see cref="ChatClient"/> at the innermost
+    /// position, so it observes and bounds every provider request the agent makes, including each
+    /// intermediate tool round. The factory fails closed when this is supplied while
+    /// <see cref="FoundryHarnessFeatureSelections.EnableHybridCompaction"/> is <see langword="false"/>,
+    /// and when that feature is enabled without this.
+    /// </remarks>
+    public required FoundryHarnessHybridCompactionOptions? HybridCompactionOptions { get; init; }
+
+    /// <summary>
     /// Gets the <see cref="System.Diagnostics.ActivitySource"/> name used by the OpenTelemetry
     /// instrumentation wrapper (mapped to <c>HarnessAgentOptions.OpenTelemetrySourceName</c>), or
     /// <see langword="null"/> to use the upstream default source name

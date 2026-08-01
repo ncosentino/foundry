@@ -1,12 +1,20 @@
 ---
 title: "ADR-0007: Experimental hybrid context compaction"
-status: "Accepted"
+status: "Superseded"
 date: "2026-07-25"
 authors: ["Nick Cosentino"]
 tags: ["architecture", "decision", "agent-framework", "harness", "context", "compaction", "observability"]
 supersedes: ""
-superseded_by: ""
+superseded_by: "adr-0011-public-hybrid-context-compaction.md"
 ---
+
+> **Superseded by [ADR-0011](adr-0011-public-hybrid-context-compaction.md).**
+> The mechanism this record describes is unchanged and still governs how
+> compaction behaves. What changed is its reachability: ADR-0011 makes the
+> capability publicly configurable on the complete-bundle path and supplies
+> defaults for the two collaborators this record required a host to author.
+> Every constraint below about workspace authority, structural preservation,
+> fail-closed symmetry, and observability continues to apply.
 
 ## Context and scope
 

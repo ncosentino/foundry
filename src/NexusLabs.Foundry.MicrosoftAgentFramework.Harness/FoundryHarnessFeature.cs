@@ -95,10 +95,22 @@ public enum FoundryHarnessFeature
     AgentModeProvider,
 
     /// <summary>
-    /// In-loop context-window compaction. Opt-in: disabled unless both a context-window token
+    /// Upstream's context-window compaction. Opt-in: disabled unless both a context-window token
     /// budget and an output token budget (or a custom strategy) are supplied.
     /// </summary>
+    /// <remarks>
+    /// Upstream evaluates the strategy once per agent turn rather than once per provider request, so
+    /// this dimension does not bound context within a multi-round tool loop. See
+    /// <see cref="HybridCompaction"/>.
+    /// </remarks>
     Compaction,
+
+    /// <summary>
+    /// Foundry's per-provider-call hybrid compaction, which bounds the exact message set dispatched
+    /// for every provider request including each intermediate tool round. Opt-in: disabled unless
+    /// <c>FoundryHarnessAgentConfiguration.HybridCompactionOptions</c> is supplied.
+    /// </summary>
+    HybridCompaction,
 
     /// <summary>
     /// Additional <c>Microsoft.Agents.AI.AIContextProvider</c> instances (mapped to

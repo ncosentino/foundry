@@ -61,6 +61,7 @@ var features = new FoundryHarnessFeatureSelections
     EnableTodoProvider = false,
     EnableAgentModeProvider = false,
     EnableCompaction = false,
+    EnableHybridCompaction = false,
 };
 
 var configuration = new FoundryHarnessAgentConfiguration
@@ -85,6 +86,7 @@ var configuration = new FoundryHarnessAgentConfiguration
     ToolApprovalAgentOptions = null,
     AgentModeProviderOptions = null,
     CompactionStrategy = null,
+    HybridCompactionOptions = null,
     OpenTelemetrySourceName = "MyApp.SupportAgent",
     AdditionalContextProviders = [],
 };
@@ -204,16 +206,98 @@ The complete bundle and Foundry's selected-provider work solve different
 context problems:
 
 - **Upstream bundle compaction** is available when you explicitly enable it
-  with an upstream strategy or valid context/output budgets.
-- **Foundry experimental hybrid compaction** verifies structural preservation,
+  with an upstream strategy or valid context/output budgets. It is evaluated
+  **once per agent turn**, so it does not bound context inside a tool loop —
+  see the limitation below.
+- **Foundry hybrid compaction** verifies structural preservation,
   workspace-backed artifact references, and per-provider-call context bounds.
-  It remains an internal selected-provider profile and is not enabled by the
-  public complete-bundle factory.
+  It is enabled on the complete-bundle factory via
+  `EnableHybridCompaction` and `HybridCompactionOptions`.
 - **Foundry iterative execution** starts each iteration with a fresh
   workspace-derived prompt and is often a better fit when files are the
   authoritative working state.
 
 See [Iterative Agent Loop](iterative-agent-loop.md) for a detailed comparison.
+
+### Upstream compaction does not bound a tool loop
+
+Upstream's `CompactionProvider` is an `AIContextProvider`, and context
+providers are invoked once per agent turn rather than once per provider
+request. A single agent run that makes several model calls — one per tool
+round — therefore compacts only against the state that preceded the **first**
+round.
+
+This was measured with a scripted two-round tool loop, compaction enabled, and
+a strategy whose trigger always fires:
+
+| measurement | value |
+| --- | --- |
+| provider calls (model rounds) | 2 |
+| `CompactCoreAsync` calls | 1 |
+| messages in the index at that call | 2 |
+
+The round carrying the `FunctionCallContent` and its `FunctionResultContent`
+is never offered to the strategy. Identical results on
+`Microsoft.Agents.AI.Harness` 1.15.0 and 1.16.0.
+
+If your agent's context growth comes from tool results inside a single turn,
+upstream compaction will not bound it. Tracked in
+[issue #73](https://github.com/ncosentino/foundry/issues/73).
+
+### Enable hybrid compaction
+
+Hybrid compaction wraps your chat client at the innermost position, so it
+observes and bounds the exact message set dispatched for every provider
+request, including each intermediate tool round.
+
+```csharp
+var configuration = new FoundryHarnessAgentConfiguration
+{
+    // ...
+    Features = new FoundryHarnessFeatureSelections
+    {
+        // ...
+        EnableCompaction = false,
+        EnableHybridCompaction = true,
+    },
+    CompactionStrategy = null,
+    HybridCompactionOptions = new FoundryHarnessHybridCompactionOptions
+    {
+        HardLimitBytes = 262_144,
+        TriggerMarginBytes = 65_536,
+        RecentMessageRetentionCount = 4,
+        MaximumCompactionAttempts = 3,
+        UpstreamReducer = myChatReducer,
+    },
+};
+```
+
+The two paths are independent and may be enabled together: upstream bounds
+across turns, hybrid bounds within a call.
+
+Limitations to weigh before enabling it:
+
+- **Budgets are UTF-8 bytes of rendered content, not provider tokens.** Bytes
+  are computable locally without a tokenizer matched to your provider, so
+  choose a budget with headroom rather than treating it as a token count.
+- **An irreducible context fails the request.** If assembled context cannot be
+  reduced below `HardLimitBytes`, the call throws rather than forwarding an
+  over-budget context.
+- **`UpstreamReducer` output is a proposal, never ground truth.** Foundry
+  verifies it against the hard limit and its own structural-preservation rules
+  before anything is dispatched.
+- **This is Foundry-owned, not upstream.** Its position depends on the verified
+  upstream middleware order, so it is not covered by upstream's compatibility
+  guarantees.
+- **Upstream compaction strategies are not usable here.** They operate on
+  upstream's per-turn index; hybrid compaction takes an
+  `IChatReducer` over a single provider request.
+
+`DescribeEffectiveDefaults` reports both dimensions, and each carries the
+limitation text above in its `Limitation` field.
+
+See [ADR-0011](adr/adr-0011-public-hybrid-context-compaction.md) for the
+decision to make this public and what deliberately stayed internal.
 
 ## Run against a real provider
 
@@ -273,8 +357,9 @@ tool, so only a provider that supports it can execute the declaration.
 - trim and AOT warnings treated as errors; and
 - native binary execution in CI.
 
-Dynamic skills/scripts, background agents, loop evaluators, and experimental
-hybrid compaction are not included in that minimum profile.
+Dynamic skills/scripts, background agents, and loop evaluators are not
+included in that minimum profile. Hybrid compaction is exercised separately by
+the AOT capability scenario, which enables every reachable feature at once.
 
 ## Internal selected-provider conformance example
 
@@ -286,7 +371,8 @@ selected-provider seam with:
 - trusted workspace and session binding;
 - Foundry-owned diagnostics/progress;
 - exactly one function loop and telemetry owner; and
-- an explicit assertion that experimental compaction is disabled.
+- an explicit assertion that Foundry hybrid compaction is disabled for that
+  profile.
 
 !!! warning "Contributor-only internal example"
     `HarnessHybridApp` is a non-packable friend assembly over internal
@@ -295,9 +381,10 @@ selected-provider seam with:
     should choose a public path from the table at the start of this guide.
 
 The task-defined name `HarnessHybridApp` refers to the selected-provider seam
-where experimental hybrid context can attach. The example itself uses the
-stable-only profile and proves that compaction remains disabled; it does not
-claim to execute hybrid compaction.
+where hybrid context can attach. The example itself uses the stable-only
+profile and proves that compaction remains disabled; it does not claim to
+execute hybrid compaction. For hybrid compaction through a supported public
+API, use the complete-bundle path described above.
 
 ## Migration and compatibility
 
@@ -335,6 +422,7 @@ not a security boundary because the assemblies are unsigned.
 
 See [ADR-0005](adr/adr-0005-first-class-maf-harness-integration.md),
 [ADR-0006](adr/adr-0006-hybrid-context-and-workspace-authority.md),
-[ADR-0007](adr/adr-0007-experimental-hybrid-context-compaction.md), and
+[ADR-0007](adr/adr-0007-experimental-hybrid-context-compaction.md) (superseded
+by [ADR-0011](adr/adr-0011-public-hybrid-context-compaction.md)), and
 [ADR-0008](adr/adr-0008-optional-harness-bundle.md) for the architecture
 decisions behind these boundaries.
