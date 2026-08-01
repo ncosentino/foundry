@@ -62,7 +62,6 @@ function Test-RunnerImageContract {
     $workflowPath = Get-RepositoryFile $Root '.github/workflows/runner-image.yml'
     $ciPath = Get-RepositoryFile $Root '.github/workflows/ci.yml'
     $docsPath = Get-RepositoryFile $Root '.github/workflows/docs.yml'
-    $harnessAotPath = Get-RepositoryFile $Root '.github/workflows/harness-g1-aot.yml'
 
     Assert-ExactSdkContract $rootGlobal '10.0.302'
     Assert-ExactSdkContract $docsGlobal '9.0.316'
@@ -151,9 +150,6 @@ function Test-RunnerImageContract {
         Assert-Contract ($ci.Contains($jobName)) "Required CI job '$jobName' was renamed or removed."
     }
     Assert-Contract ($docs -match '(?m)^\s{2}docs:\s*$') "Required check job 'docs' was renamed or removed."
-
-    $harnessAot = Get-Content -LiteralPath $harnessAotPath -Raw
-    Assert-Contract ($harnessAot -match 'runs-on:\s*ubuntu-latest') 'Harness G1 AOT must remain explicitly GitHub-hosted.'
 }
 
 function Copy-ContractFixture {
@@ -171,8 +167,7 @@ function Copy-ContractFixture {
         '.github/runner-images/foundry-ci/Dockerfile',
         '.github/workflows/runner-image.yml',
         '.github/workflows/ci.yml',
-        '.github/workflows/docs.yml',
-        '.github/workflows/harness-g1-aot.yml'
+        '.github/workflows/docs.yml'
     )) {
         $source = Join-Path $SourceRoot ($relativePath -replace '/', [IO.Path]::DirectorySeparatorChar)
         $destination = Join-Path $DestinationRoot ($relativePath -replace '/', [IO.Path]::DirectorySeparatorChar)
