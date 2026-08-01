@@ -215,6 +215,52 @@ context problems:
 
 See [Iterative Agent Loop](iterative-agent-loop.md) for a detailed comparison.
 
+## Run against a real provider
+
+`src/Examples/AgentFramework/HarnessProviderApp` runs one Harness agent whose
+only variable is the chat provider. The tools, workspace, session, and bundle
+configuration are identical across providers, so switching isolates provider
+behavior.
+
+It defaults to a deterministic offline provider, so `dotnet run` costs nothing
+and needs no credentials:
+
+```bash
+dotnet run --project src/Examples/AgentFramework/HarnessProviderApp
+```
+
+To run it against a real model, point it at GitHub Copilot. Create
+`appsettings.Development.json` next to `appsettings.json` — that filename is
+already git-ignored:
+
+```json
+{
+  "Harness": {
+    "Provider": "copilot"
+  },
+  "Copilot": {
+    "Model": "claude-sonnet-4.5"
+  }
+}
+```
+
+Or set an environment variable for a single run:
+
+```bash
+Harness__Provider=copilot dotnet run --project src/Examples/AgentFramework/HarnessProviderApp
+```
+
+The Copilot provider uses `CopilotTokenSource.Auto`, which resolves the GitHub
+Copilot CLI's local credentials first. If you are already signed in to the CLI,
+no token belongs in configuration and none belongs in an environment variable.
+
+Because a real model chooses its own wording, the scenario asserts only that the
+agent used its workspace tool. Exact-output assertions belong in the
+deterministic NativeAOT scenarios instead.
+
+`EnableWebSearch` is opt-in and defaults to `false`. Web search is a hosted
+tool, so only a provider that supports it can execute the declaration.
+
 ## NativeAOT
 
 `AotHarnessApp` is the minimum supported NativeAOT profile:
