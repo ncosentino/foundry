@@ -6,6 +6,8 @@ namespace NexusLabs.Foundry.Evaluation.Tests.Experiments;
 
 public sealed class ExperimentRunnerRetryTests
 {
+    private static readonly TimeSpan ConditionTimeout = TimeSpan.FromSeconds(30);
+
     private readonly CancellationToken _cancellationToken = TestContext.Current.CancellationToken;
 
     [Fact]
@@ -224,11 +226,17 @@ public sealed class ExperimentRunnerRetryTests
             _cancellationToken);
 
         await otherItemEntered.Task.WaitAsync(_cancellationToken);
+        // The signal is raised from inside the second item's task body, so that item still
+        // holds its lease at this point and releases it on the worker rather than here.
+        await WaitUntilAsync(() => limiter.ActiveLeaseCount == 0);
 
         Assert.Equal(1, retryAttempts);
         Assert.Equal(2, limiter.AcquisitionCount);
         Assert.Equal(0, limiter.ActiveLeaseCount);
-        timeProvider.Advance(TimeSpan.FromMinutes(1));
+        await AdvanceUntilAsync(
+            timeProvider,
+            () => Volatile.Read(ref retryAttempts) == 2,
+            TimeSpan.FromMinutes(1));
         var result = await runTask;
 
         Assert.Equal(2, retryAttempts);
@@ -404,21 +412,41 @@ public sealed class ExperimentRunnerRetryTests
 
     private async Task WaitUntilAsync(Func<bool> predicate)
     {
+        var deadline = DateTime.UtcNow + ConditionTimeout;
         while (!predicate())
         {
             _cancellationToken.ThrowIfCancellationRequested();
+            if (DateTime.UtcNow > deadline)
+            {
+                Assert.Fail(
+                    $"The awaited runner condition was not reached within {ConditionTimeout}.");
+            }
+
             await Task.Yield();
         }
     }
 
+    /// <remarks>
+    /// The retry scheduler registers its delay timer on a task the caller cannot observe, so a
+    /// single advance can land before that registration and leave the timer waiting on a clock
+    /// that never moves again. Advancing repeatedly re-arms whatever registered late.
+    /// </remarks>
     private async Task AdvanceUntilAsync(
         FakeTimeProvider timeProvider,
         Func<bool> predicate,
         TimeSpan increment)
     {
+        var deadline = DateTime.UtcNow + ConditionTimeout;
         while (!predicate())
         {
             _cancellationToken.ThrowIfCancellationRequested();
+            if (DateTime.UtcNow > deadline)
+            {
+                Assert.Fail(
+                    $"The awaited runner condition was not reached within {ConditionTimeout} " +
+                    $"while advancing the test clock in {increment} steps.");
+            }
+
             timeProvider.Advance(increment);
             await Task.Yield();
         }
