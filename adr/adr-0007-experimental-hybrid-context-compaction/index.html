@@ -2944,7 +2944,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -2969,7 +2969,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3273,6 +3273,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr-0011-public-hybrid-context-compaction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0011 Public Hybrid Context Compaction
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3302,6 +3337,15 @@
 
   <h1>ADR-0007 Experimental Hybrid Context Compaction</h1>
 
+<blockquote>
+<p><strong>Superseded by <a href="../adr-0011-public-hybrid-context-compaction/">ADR-0011</a>.</strong>
+The mechanism this record describes is unchanged and still governs how
+compaction behaves. What changed is its reachability: ADR-0011 makes the
+capability publicly configurable on the complete-bundle path and supplies
+defaults for the two collaborators this record required a host to author.
+Every constraint below about workspace authority, structural preservation,
+fail-closed symmetry, and observability continues to apply.</p>
+</blockquote>
 <h2 id="context-and-scope">Context and scope<a class="headerlink" href="#context-and-scope" title="Permanent link">&para;</a></h2>
 <p>ADR-0006 established that <code>IWorkspace</code> is Foundry's sole authoritative store
 for bulk artifact bytes and that a conversation carries only a bounded

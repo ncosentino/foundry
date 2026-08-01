@@ -2901,7 +2901,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3002,6 +3002,41 @@
     
   </span>
   
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0011-public-hybrid-context-compaction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0011 Public Hybrid Context Compaction
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
   
 
       </a>
@@ -3125,7 +3160,7 @@ disabled, upstream configures the default provider without chat reduction.</p>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.chathistoryprovider" title="Microsoft.Agents.AI.ChatHistoryProvider">Microsoft.Agents.AI.ChatHistoryProvider</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy'></a></p>
 <h2 id="foundryharnessagentconfigurationcompactionstrategy-property">FoundryHarnessAgentConfiguration.CompactionStrategy Property<a class="headerlink" href="#foundryharnessagentconfigurationcompactionstrategy-property" title="Permanent link">&para;</a></h2>
-<p>Gets an explicit in-loop compaction strategy (mapped to
+<p>Gets an explicit compaction strategy for upstream's per-turn compaction (mapped to
 <code>HarnessAgentOptions.CompactionStrategy</code>), or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to let the upstream
 bundle construct a default <code>ContextWindowCompactionStrategy</code> from
 <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxContextWindowTokens" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxContextWindowTokens">MaxContextWindowTokens</a> and <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxOutputTokens" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxOutputTokens">MaxOutputTokens</a>. When a strategy is
@@ -3138,6 +3173,12 @@ factory fails closed if this is supplied while that feature is disabled.</p>
 </code></pre></div>
 <h4 id="property-value_5">Property Value<a class="headerlink" href="#property-value_5" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.compaction.compactionstrategy" title="Microsoft.Agents.AI.Compaction.CompactionStrategy">Microsoft.Agents.AI.Compaction.CompactionStrategy</a></p>
+<h3 id="remarks_2">Remarks<a class="headerlink" href="#remarks_2" title="Permanent link">&para;</a></h3>
+<p>This strategy is \&lt;em&gt;not\&lt;/em&gt; evaluated inside the tool loop. Upstream runs it once per agent
+turn, against the persisted history index, so it bounds what the agent remembers between turns
+rather than what any individual provider request carries. Use
+<a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.HybridCompactionOptions" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.HybridCompactionOptions">HybridCompactionOptions</a> to bound context within a turn; see
+<a href="../FoundryHarnessFeature/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.Compaction" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.Compaction">Compaction</a> for the measured behavior.</p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.Description'></a></p>
 <h2 id="foundryharnessagentconfigurationdescription-property">FoundryHarnessAgentConfiguration.Description Property<a class="headerlink" href="#foundryharnessagentconfigurationdescription-property" title="Permanent link">&para;</a></h2>
 <p>Gets a human-readable description of the agent's purpose, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for none.</p>
@@ -3194,13 +3235,35 @@ instructions entirely.</p>
 </code></pre></div>
 <h4 id="property-value_11">Property Value<a class="headerlink" href="#property-value_11" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.HybridCompactionOptions'></a></p>
+<h2 id="foundryharnessagentconfigurationhybridcompactionoptions-property">FoundryHarnessAgentConfiguration.HybridCompactionOptions Property<a class="headerlink" href="#foundryharnessagentconfigurationhybridcompactionoptions-property" title="Permanent link">&para;</a></h2>
+<p>Gets the configuration for Foundry's per-provider-call hybrid compaction, or
+<a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to leave it disabled.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Harness</span><span class="p">.</span><span class="n">Bundle</span><span class="p">.</span><span class="n">FoundryHarnessHybridCompactionOptions</span><span class="o">?</span><span class="w"> </span><span class="n">HybridCompactionOptions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h4 id="property-value_12">Property Value<a class="headerlink" href="#property-value_12" title="Permanent link">&para;</a></h4>
+<p><a href="../FoundryHarnessHybridCompactionOptions/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessHybridCompactionOptions">FoundryHarnessHybridCompactionOptions</a></p>
+<h3 id="remarks_3">Remarks<a class="headerlink" href="#remarks_3" title="Permanent link">&para;</a></h3>
+<p>This is independent of <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy">CompactionStrategy</a> rather than an alternative to it. That
+property configures upstream's compaction, which runs once per agent turn and reduces the
+persisted history — it bounds what the agent <em>remembers</em>. This property configures
+Foundry's compaction, which runs once per provider request and reduces the messages of that one
+request — it bounds what is <em>sent</em>. Neither suppresses the other and both may be
+supplied together; see <a href="../FoundryHarnessFeature/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.Compaction" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.Compaction">Compaction</a> and
+<a href="../FoundryHarnessFeature/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.HybridCompaction" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.HybridCompaction">HybridCompaction</a>.</p>
+<p>Hybrid compaction wraps the supplied <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.ChatClient" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.ChatClient">ChatClient</a> at the innermost position, so it
+observes and bounds every provider request the agent makes, including each intermediate tool
+round. The factory fails closed when this is supplied while
+<a href="../FoundryHarnessFeatureSelections/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableHybridCompaction" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableHybridCompaction">EnableHybridCompaction</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool">false</a>,
+when that feature is enabled without this, and when <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.ChatClient" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.ChatClient">ChatClient</a> already contains a
+hybrid compaction component.</p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.Id'></a></p>
 <h2 id="foundryharnessagentconfigurationid-property">FoundryHarnessAgentConfiguration.Id Property<a class="headerlink" href="#foundryharnessagentconfigurationid-property" title="Permanent link">&para;</a></h2>
 <p>Gets the agent identifier, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to let the upstream bundle
 generate one.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Id</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Id</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_12">Property Value<a class="headerlink" href="#property-value_12" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_13">Property Value<a class="headerlink" href="#property-value_13" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.Instructions'></a></p>
 <h2 id="foundryharnessagentconfigurationinstructions-property">FoundryHarnessAgentConfiguration.Instructions Property<a class="headerlink" href="#foundryharnessagentconfigurationinstructions-property" title="Permanent link">&para;</a></h2>
@@ -3208,19 +3271,19 @@ generate one.</p>
 <code>HarnessAgentOptions.ChatOptions.Instructions</code>), or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> for none.
 These are combined with, and follow, <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.HarnessInstructionsOverride" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.HarnessInstructionsOverride">HarnessInstructionsOverride</a> (or the
 upstream default harness instructions when that is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a>).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Instructions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Instructions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_13">Property Value<a class="headerlink" href="#property-value_13" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_14">Property Value<a class="headerlink" href="#property-value_14" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxContextWindowTokens'></a></p>
 <h2 id="foundryharnessagentconfigurationmaxcontextwindowtokens-property">FoundryHarnessAgentConfiguration.MaxContextWindowTokens Property<a class="headerlink" href="#foundryharnessagentconfigurationmaxcontextwindowtokens-property" title="Permanent link">&para;</a></h2>
 <p>Gets the maximum number of tokens the model's context window supports, or
 <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> if not applicable.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MaxContextWindowTokens</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MaxContextWindowTokens</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_14">Property Value<a class="headerlink" href="#property-value_14" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_15">Property Value<a class="headerlink" href="#property-value_15" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">System.Nullable&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">&gt;</a></p>
-<h3 id="remarks_2">Remarks<a class="headerlink" href="#remarks_2" title="Permanent link">&para;</a></h3>
+<h3 id="remarks_4">Remarks<a class="headerlink" href="#remarks_4" title="Permanent link">&para;</a></h3>
 <p>Required (together with <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxOutputTokens" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxOutputTokens">MaxOutputTokens</a>) when
 <a href="../FoundryHarnessFeatureSelections/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableCompaction" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableCompaction">EnableCompaction</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool">true</a> and
 <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy">CompactionStrategy</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a>. Must be positive when provided.</p>
@@ -3237,19 +3300,19 @@ output cap when compaction is disabled; it does not trigger the reducer.</p>
 <h2 id="foundryharnessagentconfigurationmaximumiterationsperrequest-property">FoundryHarnessAgentConfiguration.MaximumIterationsPerRequest Property<a class="headerlink" href="#foundryharnessagentconfigurationmaximumiterationsperrequest-property" title="Permanent link">&para;</a></h2>
 <p>Gets the maximum number of function-invocation loop iterations per request, or
 <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to use the upstream <code>FunctionInvokingChatClient</code> default.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MaximumIterationsPerRequest</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MaximumIterationsPerRequest</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_15">Property Value<a class="headerlink" href="#property-value_15" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_16">Property Value<a class="headerlink" href="#property-value_16" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">System.Nullable&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">&gt;</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxOutputTokens'></a></p>
 <h2 id="foundryharnessagentconfigurationmaxoutputtokens-property">FoundryHarnessAgentConfiguration.MaxOutputTokens Property<a class="headerlink" href="#foundryharnessagentconfigurationmaxoutputtokens-property" title="Permanent link">&para;</a></h2>
 <p>Gets the maximum number of output tokens the model can generate per response, or
 <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> if not applicable.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MaxOutputTokens</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Nullable</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MaxOutputTokens</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_16">Property Value<a class="headerlink" href="#property-value_16" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_17">Property Value<a class="headerlink" href="#property-value_17" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">System.Nullable&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.int32" title="System.Int32">System.Int32</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1" title="System.Nullable`1">&gt;</a></p>
-<h3 id="remarks_3">Remarks<a class="headerlink" href="#remarks_3" title="Permanent link">&para;</a></h3>
+<h3 id="remarks_5">Remarks<a class="headerlink" href="#remarks_5" title="Permanent link">&para;</a></h3>
 <p>Required (together with <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxContextWindowTokens" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.MaxContextWindowTokens">MaxContextWindowTokens</a>) when
 <a href="../FoundryHarnessFeatureSelections/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableCompaction" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableCompaction">EnableCompaction</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool">true</a> and
 <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.CompactionStrategy">CompactionStrategy</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a>. Must be non-negative when
@@ -3260,9 +3323,9 @@ Upstream propagates this value to <code>ChatOptions.MaxOutputTokens</code> while
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.Name'></a></p>
 <h2 id="foundryharnessagentconfigurationname-property">FoundryHarnessAgentConfiguration.Name Property<a class="headerlink" href="#foundryharnessagentconfigurationname-property" title="Permanent link">&para;</a></h2>
 <p>Gets the agent's name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_17">Property Value<a class="headerlink" href="#property-value_17" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_18">Property Value<a class="headerlink" href="#property-value_18" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.OpenTelemetrySourceName'></a></p>
 <h2 id="foundryharnessagentconfigurationopentelemetrysourcename-property">FoundryHarnessAgentConfiguration.OpenTelemetrySourceName Property<a class="headerlink" href="#foundryharnessagentconfigurationopentelemetrysourcename-property" title="Permanent link">&para;</a></h2>
@@ -3273,20 +3336,20 @@ instrumentation wrapper (mapped to <code>HarnessAgentOptions.OpenTelemetrySource
 <a href="../FoundryHarnessFeatureSelections/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableOpenTelemetry" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableOpenTelemetry">EnableOpenTelemetry</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool">true</a>;
 the factory fails closed if this is supplied while that feature is disabled, or if it is a
 whitespace-only string.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">OpenTelemetrySourceName</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">OpenTelemetrySourceName</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_18">Property Value<a class="headerlink" href="#property-value_18" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_19">Property Value<a class="headerlink" href="#property-value_19" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.ProgressAccessor'></a></p>
 <h2 id="foundryharnessagentconfigurationprogressaccessor-property">FoundryHarnessAgentConfiguration.ProgressAccessor Property<a class="headerlink" href="#foundryharnessagentconfigurationprogressaccessor-property" title="Permanent link">&para;</a></h2>
 <p>Gets the Foundry progress accessor used to emit ordered agent, model-call, and tool-call
 events around the upstream bundle pipeline, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to disable Foundry
 progress.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">IProgressReporterAccessor</span><span class="o">?</span><span class="w"> </span><span class="n">ProgressAccessor</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">public</span><span class="w"> </span><span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Progress</span><span class="p">.</span><span class="n">IProgressReporterAccessor</span><span class="o">?</span><span class="w"> </span><span class="n">ProgressAccessor</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_19">Property Value<a class="headerlink" href="#property-value_19" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_20">Property Value<a class="headerlink" href="#property-value_20" title="Permanent link">&para;</a></h4>
 <p><a href="../../NexusLabs.Foundry.MicrosoftAgentFramework/">NexusLabs.Foundry.MicrosoftAgentFramework.Progress.IProgressReporterAccessor</a></p>
-<h3 id="remarks_4">Remarks<a class="headerlink" href="#remarks_4" title="Permanent link">&para;</a></h3>
+<h3 id="remarks_6">Remarks<a class="headerlink" href="#remarks_6" title="Permanent link">&para;</a></h3>
 <p>The caller must establish an active reporter scope before running the agent; without one,
 reporting is a no-op. The accessor is supplied explicitly rather than resolved from the
 factory's service provider so progress composition has one inspectable source of truth.</p>
@@ -3302,19 +3365,19 @@ auto-approval middleware (mapped to <code>HarnessAgentOptions.ToolApprovalAgentO
 <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to use the middleware's own default options. Only meaningful when
 <a href="../FoundryHarnessFeatureSelections/#NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableToolAutoApproval" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeatureSelections.EnableToolAutoApproval">EnableToolAutoApproval</a> is <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/bool">true</a>;
 the factory fails closed if this is supplied while that feature is disabled.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">public</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">ToolApprovalAgentOptions</span><span class="o">?</span><span class="w"> </span><span class="n">ToolApprovalAgentOptions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">public</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">ToolApprovalAgentOptions</span><span class="o">?</span><span class="w"> </span><span class="n">ToolApprovalAgentOptions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_20">Property Value<a class="headerlink" href="#property-value_20" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_21">Property Value<a class="headerlink" href="#property-value_21" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.toolapprovalagentoptions" title="Microsoft.Agents.AI.ToolApprovalAgentOptions">Microsoft.Agents.AI.ToolApprovalAgentOptions</a></p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration.Tools'></a></p>
 <h2 id="foundryharnessagentconfigurationtools-property">FoundryHarnessAgentConfiguration.Tools Property<a class="headerlink" href="#foundryharnessagentconfigurationtools-property" title="Permanent link">&para;</a></h2>
 <p>Gets the complete set of tools available to the agent (mapped to
 <code>HarnessAgentOptions.ChatOptions.Tools</code>).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Collections</span><span class="p">.</span><span class="n">Generic</span><span class="p">.</span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Extensions</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">AITool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Tools</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">public</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Collections</span><span class="p">.</span><span class="n">Generic</span><span class="p">.</span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Extensions</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">AITool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Tools</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<h4 id="property-value_21">Property Value<a class="headerlink" href="#property-value_21" title="Permanent link">&para;</a></h4>
+<h4 id="property-value_22">Property Value<a class="headerlink" href="#property-value_22" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ireadonlylist-1" title="System.Collections.Generic.IReadOnlyList`1">System.Collections.Generic.IReadOnlyList&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.ai.aitool" title="Microsoft.Extensions.AI.AITool">Microsoft.Extensions.AI.AITool</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ireadonlylist-1" title="System.Collections.Generic.IReadOnlyList`1">&gt;</a></p>
-<h3 id="remarks_5">Remarks<a class="headerlink" href="#remarks_5" title="Permanent link">&para;</a></h3>
+<h3 id="remarks_7">Remarks<a class="headerlink" href="#remarks_7" title="Permanent link">&para;</a></h3>
 <p>Supply an empty list for no additional tools. Source-generator callers (for example,
 <code>[AgentFunctionGroup]</code>-declared functions resolved via
 <code>NexusLabs.Foundry.MicrosoftAgentFramework</code>) must resolve their generated

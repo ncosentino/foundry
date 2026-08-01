@@ -98,3 +98,4 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [ADR-0008 Optional Harness Bundle](https://www.devleader.ca/projects/foundry/adr/adr-0008-optional-harness-bundle/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0009 Repository-Owned CI Runner Image](https://www.devleader.ca/projects/foundry/adr/adr-0009-repository-owned-ci-runner-image/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0010 Harness Execution Mode Retention](https://www.devleader.ca/projects/foundry/adr/adr-0010-harness-execution-mode-retention/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0011 Public Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0011-public-hybrid-context-compaction/) -- Build reliable, observable, and testable AI agent systems in .NET
