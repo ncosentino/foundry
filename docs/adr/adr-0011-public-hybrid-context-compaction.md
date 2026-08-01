@@ -104,8 +104,20 @@ Disclosure through the report rather than only through prose matters because the
 report is machine-readable and already asserted by the AOT capability scenario.
 
 **Neither path is enabled by default, and enabling both is permitted.** They
-solve different problems — upstream bounds across turns, hybrid bounds within a
-call — and a caller who wants both should not have to choose.
+solve different problems — upstream bounds what the agent remembers across
+turns, hybrid bounds what is dispatched for one call — and a caller who wants
+both should not have to choose. They are independent rather than layered:
+measurement over all four combinations confirms neither suppresses the other,
+and enabling hybrid does not extend upstream's reach beyond the pre-tool-loop
+state.
+
+**Hybrid compaction is non-destructive to stored history.** It is installed
+inner to the per-service-call history decorator, so history is persisted before
+a reduction is applied and every call re-assembles from the full record. A
+reduction therefore bounds one dispatch rather than permanently discarding
+conversation. The cost is that reduction work is not cumulative and the stored
+record still grows, which is a reason to enable upstream compaction alongside it
+rather than instead of it.
 
 ## Consequences
 

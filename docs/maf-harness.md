@@ -219,6 +219,68 @@ context problems:
 
 See [Iterative Agent Loop](iterative-agent-loop.md) for a detailed comparison.
 
+### Compaction vs. hybrid compaction
+
+The two compaction dimensions are **independent, not layered**. Neither
+overrides or suppresses the other, and either can be enabled alone. They differ
+in what they act on:
+
+| | `EnableCompaction` (upstream) | `EnableHybridCompaction` (Foundry) |
+| --- | --- | --- |
+| Runs | once per **agent turn** | once per **provider request** |
+| Sits | above the tool loop | innermost, below everything |
+| Acts on | the persisted history index | the exact messages being dispatched |
+| Shrinks | what is **remembered** | what is **sent** |
+| Budget | provider tokens | UTF-8 bytes |
+| Configured by | `CompactionStrategy` or token budgets | `HybridCompactionOptions` |
+
+The one-line rule: **upstream compaction shrinks what the agent remembers;
+hybrid compaction shrinks what goes on the wire for one call.**
+
+Measured behavior over a two-round tool loop, all four combinations:
+
+| `EnableCompaction` | `EnableHybridCompaction` | upstream runs | hybrid assemblies |
+| --- | --- | --- | --- |
+| off | off | 0 | 0 |
+| on | off | 1 | 0 |
+| off | on | 0 | 2 |
+| on | on | 1 | 2 |
+
+Enabling hybrid does not extend upstream's reach: in the both-enabled row,
+upstream still runs exactly once against the pre-tool-loop state. Enabling
+upstream does not reduce hybrid's work either.
+
+#### Hybrid compaction does not shrink stored history
+
+Hybrid compaction is installed inner to the per-service-call history decorator,
+so history is persisted **before** a reduction is applied. Every provider call
+re-assembles from the full record and re-reduces it. With a reducer that drops
+the oldest message, over a three-round loop:
+
+| round | reducer input | reducer output | provider received |
+| --- | --- | --- | --- |
+| 1 | 1 | 1 | 1 |
+| 2 | 3 | 2 | 2 |
+| 3 | **5** | 4 | 4 |
+
+Round 3 sees five messages, not four — the message dropped in round 2 is back,
+because the drop was never persisted.
+
+Two consequences worth planning for:
+
+- **Nothing is lost from the conversation record.** A hybrid reduction is not
+  destructive; the stored history is intact.
+- **Reduction work is not cumulative.** The cost is paid on every call and the
+  stored history keeps growing. If you need the *record* bounded over a long
+  conversation, that is upstream compaction's job, which is a reason to enable
+  both.
+
+#### Choosing
+
+- Context grows from **tool results inside one turn** — enable hybrid.
+- Context grows **across many turns** — enable upstream.
+- Both — enable both; they compose without interfering.
+
 ### Upstream compaction does not bound a tool loop
 
 Upstream's `CompactionProvider` is an `AIContextProvider`, and context
