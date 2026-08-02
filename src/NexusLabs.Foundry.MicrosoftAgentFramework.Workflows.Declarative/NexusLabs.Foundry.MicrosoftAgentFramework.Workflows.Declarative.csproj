@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Optional declarative workflow integration for NexusLabs.Foundry.MicrosoftAgentFramework. Runs Microsoft Agent Framework declarative (YAML) workflows against Foundry-registered agents, with no dependency on a remote Azure AI Foundry project. This package is optional: the core NexusLabs.Foundry.MicrosoftAgentFramework package never references it, and no other Foundry package gains it transitively.</PackageDescription>
+    <!-- Upstream's declarative package evaluates Power Fx through an interpreter and maps Power
+         Platform object-model types reflectively. A probe measured 44 trim and 41 AOT warnings, and a
+         native binary that failed in a static initializer, so this package is deliberately excluded
+         from the NativeAOT profile rather than annotated as compatible. -->
+    <IsAotCompatible>false</IsAotCompatible>
+    <NoWarn>$(NoWarn);MAAI001;MAAIW001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI.Workflows.Declarative" />
+    <ProjectReference Include="..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests" />
+  </ItemGroup>
+
+</Project>

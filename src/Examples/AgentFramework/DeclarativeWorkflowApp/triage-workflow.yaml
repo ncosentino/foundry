@@ -1,0 +1,39 @@
+#
+# A two-agent triage workflow. Neither agent is deployed anywhere: both are declared with
+# [FoundryAgent] and resolved by class name through Foundry's agent factory, which is what
+# lets this run offline.
+#
+kind: Workflow
+trigger:
+
+  kind: OnConversationStart
+  id: triage_workflow
+  actions:
+
+    - kind: SetVariable
+      id: capture_report
+      displayName: Capture the incoming report
+      variable: Local.report
+      value: =System.LastMessage.Text
+
+    - kind: InvokeAzureAgent
+      id: classify
+      displayName: Classify the report
+      agent:
+        name: ClassifierAgent
+      input:
+        messages: =Local.report
+      output:
+        autoSend: true
+        responseObject: Local.Classification
+
+    - kind: InvokeAzureAgent
+      id: respond
+      displayName: Draft a response
+      agent:
+        name: ResponderAgent
+      input:
+        messages: =Local.report
+      output:
+        autoSend: true
+        responseObject: Local.Response

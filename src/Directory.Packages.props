@@ -28,6 +28,7 @@
     <PackageVersion Include="Microsoft.Agents.AI.Harness" Version="1.15.0" />
     <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.15.0" />
     <PackageVersion Include="Microsoft.Agents.AI.Workflows.Generators" Version="1.15.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Declarative" Version="1.15.0" />
     <!-- DevUI and Hosting (preview — isolated in NexusLabs.Foundry.MicrosoftAgentFramework.DevUI) -->
     <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.15.0-preview.260722.1" />
     <PackageVersion Include="Microsoft.Agents.AI.Hosting" Version="1.15.0-preview.260722.1" />

@@ -4,6 +4,7 @@
     <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
     <Project Path="Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj" />
     <Project Path="Examples/AgentFramework/CodeReviewPipelineApp/CodeReviewPipelineApp.csproj" />
+    <Project Path="Examples/AgentFramework/DeclarativeWorkflowApp/DeclarativeWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/DagRoutingApp.Agents/DagRoutingApp.Agents.csproj" />
     <Project Path="Examples/AgentFramework/DagRoutingApp/DagRoutingApp.csproj" />
     <Project Path="Examples/AgentFramework/DevUIApp/DevUIApp.csproj" />
@@ -58,6 +59,8 @@
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Testing/NexusLabs.Foundry.MicrosoftAgentFramework.Testing.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows/NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
+    <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative/NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.csproj" />
+    <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests/NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.MicrosoftAgentFramework/NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
   <Project Path="NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.Tests/NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.Tests.csproj" />
   <Project Path="NexusLabs.Foundry.Needlr.MicrosoftAgentFramework/NexusLabs.Foundry.Needlr.MicrosoftAgentFramework.csproj" />

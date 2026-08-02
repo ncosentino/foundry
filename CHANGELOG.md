@@ -29,6 +29,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   compaction, it bounds the exact message set dispatched for every provider
   request including each intermediate tool round, and fails closed rather than
   forwarding over-budget context. See ADR-0011.
+- Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
+  that runs Microsoft Agent Framework declarative (YAML) workflows against
+  Foundry-registered agents, with no dependency on a deployed Azure AI Foundry
+  project. Includes deliberate document validation and a bridge from the upstream
+  workflow event stream onto Foundry progress reporting. The package is excluded from
+  the NativeAOT profile because its Power Fx and Power Platform dependencies are not
+  AOT compatible. See `docs/declarative-workflows.md`.
 - NativeAOT Harness profile with source-generated tools, no reflection fallback,
   and a published-and-executed native application in CI.
 - Repository-owned Foundry CI runner image source and trusted GHCR publication

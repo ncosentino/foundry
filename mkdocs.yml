@@ -56,6 +56,7 @@ nav:
       - MAF Harness: maf-harness.md
       - Agent Functions: agent-functions.md
       - Iterative Agent Loop: iterative-agent-loop.md
+      - Declarative Workflows: declarative-workflows.md
       - Workspace: workspace.md
       - Progress Reporting: progress-reporting.md
       - Pipeline Metrics: pipeline-metrics.md

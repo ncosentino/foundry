@@ -25,6 +25,7 @@ $expectedPackageIds = @(
     'NexusLabs.Foundry.MicrosoftAgentFramework.Harness',
     'NexusLabs.Foundry.MicrosoftAgentFramework.Testing',
     'NexusLabs.Foundry.MicrosoftAgentFramework.Workflows',
+    'NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative',
     'NexusLabs.Foundry.Needlr.MicrosoftAgentFramework',
     'NexusLabs.Foundry.Needlr.SemanticKernel',
     'NexusLabs.Foundry.Needlr.SemanticKernel.Generators'
@@ -248,6 +249,12 @@ Assert-Dependency $packagesById `
     'Microsoft.Agents.AI.Harness'
 Assert-Dependency $packagesById `
     'NexusLabs.Foundry.MicrosoftAgentFramework.Harness' `
+    'NexusLabs.Foundry.MicrosoftAgentFramework'
+Assert-Dependency $packagesById `
+    'NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative' `
+    'Microsoft.Agents.AI.Workflows.Declarative'
+Assert-Dependency $packagesById `
+    'NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative' `
     'NexusLabs.Foundry.MicrosoftAgentFramework'
 
 if ($failures.Count -gt 0) {
