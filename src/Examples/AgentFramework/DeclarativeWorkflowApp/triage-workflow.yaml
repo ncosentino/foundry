@@ -1,10 +1,7 @@
 #
 # A two-agent triage workflow. Neither agent is deployed anywhere: both are declared with
-# [FoundryAgent] and resolved by name through Foundry's agent factory, which is what lets this
-# run offline.
-#
-# Agents are addressed by fully-qualified type name because that is what
-# IAgentFactory.CreateAgent(string) currently matches on.
+# [FoundryAgent] and resolved by class name through Foundry's agent factory, which is what
+# lets this run offline.
 #
 kind: Workflow
 trigger:
@@ -23,7 +20,7 @@ trigger:
       id: classify
       displayName: Classify the report
       agent:
-        name: DeclarativeWorkflowApp.ClassifierAgent
+        name: ClassifierAgent
       input:
         messages: =Local.report
       output:
@@ -34,7 +31,7 @@ trigger:
       id: respond
       displayName: Draft a response
       agent:
-        name: DeclarativeWorkflowApp.ResponderAgent
+        name: ResponderAgent
       input:
         messages: =Local.report
       output:

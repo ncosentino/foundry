@@ -25,7 +25,7 @@ public sealed class DeclarativeWorkflowProgressTests
             - kind: InvokeAzureAgent
               id: classify
               agent:
-                name: NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests.ClassifierAgent
+                name: ClassifierAgent
               input:
                 messages: =Local.topic
               output:

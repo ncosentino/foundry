@@ -25,7 +25,7 @@ public sealed class DeclarativeWorkflowTests
             - kind: InvokeAzureAgent
               id: classify
               agent:
-                name: NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests.ClassifierAgent
+                name: ClassifierAgent
               input:
                 messages: =System.LastMessage
               output:
@@ -49,7 +49,7 @@ public sealed class DeclarativeWorkflowTests
             - kind: InvokeAzureAgent
               id: classify
               agent:
-                name: NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests.ClassifierAgent
+                name: ClassifierAgent
               input:
                 messages: =Local.brief
               output:
@@ -59,7 +59,7 @@ public sealed class DeclarativeWorkflowTests
             - kind: InvokeAzureAgent
               id: respond
               agent:
-                name: NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests.ResponderAgent
+                name: ResponderAgent
               input:
                 messages: =System.LastMessage
               output:

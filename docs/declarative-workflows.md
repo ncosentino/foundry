@@ -72,7 +72,7 @@ trigger:
     - kind: InvokeAzureAgent
       id: classify
       agent:
-        name: DeclarativeWorkflowApp.ClassifierAgent
+        name: ClassifierAgent
       input:
         messages: =Local.report
       output:
@@ -80,10 +80,12 @@ trigger:
         responseObject: Local.Classification
 ```
 
-Agent names are matched exactly as `IAgentFactory.CreateAgent(string)` matches them, which
-today is the fully-qualified type name. That couples a hand-edited document to a namespace
-and type name, so renaming or moving an agent class breaks the workflow with no compile-time
+Agents are addressed by class name, matched exactly as
+`IAgentFactory.CreateAgent(string)` matches them. That couples a hand-edited document
+to a type name, so renaming an agent class breaks the workflow with no compile-time
 error — the document is not compiled, and there is no schema to validate it against.
+The fully-qualified type name also resolves, and is the way to disambiguate if you
+ever need it.
 
 A complete runnable example is in
 `src/Examples/AgentFramework/DeclarativeWorkflowApp`. It runs entirely offline.
