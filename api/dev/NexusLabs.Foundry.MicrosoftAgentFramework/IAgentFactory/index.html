@@ -903,6 +903,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../declarative-workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Declarative Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../workspace/" class="md-nav__link">
         
   
@@ -3091,8 +3119,10 @@ auto-discovered <a href="../AgentFunctionAttribute/" title="NexusLabs.Foundry.Mi
 <h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.IAgentFactory.CreateAgent(string).agentClassName'></a></p>
 <p><code>agentClassName</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
-<p>The simple class name of an agent type registered via <code>AddAgent&lt;T&gt;()</code>,
-<code>AddAgentsFromGenerated()</code>, or the source generator bootstrap.</p>
+<p>The simple class name or the fully-qualified type name of an agent registered via
+<code>AddAgent&lt;T&gt;()</code>, <code>AddAgentsFromGenerated()</code>, or the source generator
+bootstrap. Simple names are addressable because each agent class name must be unique across
+namespaces; the fully-qualified name always resolves.</p>
 <h4 id="returns">Returns<a class="headerlink" href="#returns" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.aiagent" title="Microsoft.Agents.AI.AIAgent">Microsoft.Agents.AI.AIAgent</a></p>
 <h4 id="exceptions">Exceptions<a class="headerlink" href="#exceptions" title="Permanent link">&para;</a></h4>
@@ -3108,7 +3138,7 @@ then applying the <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.IAgentFa
 <h4 id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">&para;</a></h4>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.IAgentFactory.CreateAgent(string,System.Action_NexusLabs.Foundry.MicrosoftAgentFramework.AgentFactoryOptions_).agentClassName'></a></p>
 <p><code>agentClassName</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
-<p>The simple class name of an agent type.</p>
+<p>The simple class name or the fully-qualified type name of an agent type.</p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.IAgentFactory.CreateAgent(string,System.Action_NexusLabs.Foundry.MicrosoftAgentFramework.AgentFactoryOptions_).configure'></a></p>
 <p><code>configure</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.action-1" title="System.Action`1">System.Action&lt;</a><a href="../AgentFactoryOptions/" title="NexusLabs.Foundry.MicrosoftAgentFramework.AgentFactoryOptions">AgentFactoryOptions</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.action-1" title="System.Action`1">&gt;</a></p>
 <p>Callback to override attribute-populated defaults.</p>
