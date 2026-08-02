@@ -54,8 +54,10 @@ public interface IAgentFactory
     /// <paramref name="agentClassName"/> and reading its <see cref="FoundryAgentAttribute"/>.
     /// </summary>
     /// <param name="agentClassName">
-    /// The simple class name of an agent type registered via <c>AddAgent&lt;T&gt;()</c>,
-    /// <c>AddAgentsFromGenerated()</c>, or the source generator bootstrap.
+    /// The simple class name or the fully-qualified type name of an agent registered via
+    /// <c>AddAgent&lt;T&gt;()</c>, <c>AddAgentsFromGenerated()</c>, or the source generator
+    /// bootstrap. Simple names are addressable because each agent class name must be unique across
+    /// namespaces; the fully-qualified name always resolves.
     /// </param>
     /// <exception cref="InvalidOperationException">
     /// Thrown when no agent with the given name is registered.
@@ -68,7 +70,7 @@ public interface IAgentFactory
     /// then applying the <paramref name="configure"/> callback to override per-run values.
     /// </summary>
     /// <param name="agentClassName">
-    /// The simple class name of an agent type.
+    /// The simple class name or the fully-qualified type name of an agent type.
     /// </param>
     /// <param name="configure">
     /// Callback to override attribute-populated defaults.
