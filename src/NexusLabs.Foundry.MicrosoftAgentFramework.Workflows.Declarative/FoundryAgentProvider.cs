@@ -44,6 +44,9 @@ public sealed class FoundryAgentProvider : ResponseAgentProvider
         _registry = registry;
     }
 
+    /// <summary>Gets the identifiers of every conversation this provider has created.</summary>
+    public IReadOnlyCollection<string> ConversationIds => _conversations.Keys.ToList();
+
     /// <inheritdoc />
     public override Task<string> CreateConversationAsync(CancellationToken cancellationToken)
     {
@@ -139,6 +142,15 @@ public sealed class FoundryAgentProvider : ResponseAgentProvider
     /// <exception cref="DeclarativeWorkflowAgentNotFoundException">
     /// The workflow named an agent that is not registered.
     /// </exception>
+    /// <remarks>
+    /// The messages supplied by the runtime are passed to the agent as-is. Conversation history is
+    /// deliberately not merged in, and the resulting turn is deliberately not recorded here: the
+    /// runtime records both the user and assistant turns itself through
+    /// <see cref="CreateMessageAsync"/>, and it supplies exactly the messages the document's
+    /// <c>input</c> expression resolved to. Merging history would show the agent messages the
+    /// document did not ask for, and recording the turn would duplicate what the runtime already
+    /// stored.
+    /// </remarks>
     public override async IAsyncEnumerable<AgentResponseUpdate> InvokeAgentAsync(
         string agentName,
         string? conversationId,
@@ -154,24 +166,23 @@ public sealed class FoundryAgentProvider : ResponseAgentProvider
             throw new DeclarativeWorkflowAgentNotFoundException(agentName);
         }
 
-        var supplied = messages?.ToList() ?? [];
-        var input = BuildAgentInput(conversationId, additionalInstructions, supplied);
+        var input = new List<ChatMessage>();
+        if (!string.IsNullOrWhiteSpace(additionalInstructions))
+        {
+            input.Add(new ChatMessage(ChatRole.System, additionalInstructions));
+        }
 
-        var responseText = new StringBuilder();
+        if (messages is not null)
+        {
+            input.AddRange(messages);
+        }
+
         await foreach (var update in agent
             .RunStreamingAsync(input, cancellationToken: cancellationToken)
             .WithCancellation(cancellationToken)
             .ConfigureAwait(false))
         {
-            responseText.Append(update.Text);
             yield return update;
-        }
-
-        // The assistant turn is recorded only after the stream completes, so a caller that abandons
-        // enumeration part-way never leaves a truncated turn behind for the next expression to read.
-        if (conversationId is not null && responseText.Length > 0)
-        {
-            Append(conversationId, new ChatMessage(ChatRole.Assistant, responseText.ToString()));
         }
     }
 
@@ -197,50 +208,4 @@ public sealed class FoundryAgentProvider : ResponseAgentProvider
 
         return message;
     }
-
-    private List<ChatMessage> BuildAgentInput(
-        string? conversationId,
-        string? additionalInstructions,
-        List<ChatMessage> supplied)
-    {
-        var input = new List<ChatMessage>();
-
-        if (!string.IsNullOrWhiteSpace(additionalInstructions))
-        {
-            input.Add(new ChatMessage(ChatRole.System, additionalInstructions));
-        }
-
-        if (conversationId is null)
-        {
-            input.AddRange(supplied);
-            return input;
-        }
-
-        var messages = GetConversation(conversationId);
-        List<ChatMessage> history;
-        lock (messages)
-        {
-            history = [.. messages];
-        }
-
-        input.AddRange(history);
-
-        // The runtime may already have written this turn's input into the conversation before
-        // invoking, so a supplied message that is already the recorded tail is context rather than a
-        // new turn; appending it again would show the agent the same message twice.
-        foreach (var message in supplied)
-        {
-            if (!ContainsEquivalent(history, message))
-            {
-                input.Add(Append(conversationId, message));
-            }
-        }
-
-        return input;
-    }
-
-    private static bool ContainsEquivalent(List<ChatMessage> history, ChatMessage candidate) =>
-        history.Any(existing =>
-            existing.Role.Equals(candidate.Role) &&
-            string.Equals(existing.Text, candidate.Text, StringComparison.Ordinal));
 }

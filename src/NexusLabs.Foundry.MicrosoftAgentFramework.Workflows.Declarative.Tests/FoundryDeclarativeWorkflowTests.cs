@@ -101,8 +101,15 @@ public sealed class FoundryDeclarativeWorkflowTests
         Assert.Equal(["quantum computing (brief)"], host.Clients["Writer"].ObservedPrompts);
     }
 
+    /// <remarks>
+    /// Pins the runtime contract this provider is built against, because it is not documented and
+    /// the provider's shape depends on it: the runtime records both the user and the assistant turn
+    /// itself, and invokes the agent with a null conversation id and exactly the messages the
+    /// document's input expression resolved to. If any of that changes upstream, this fails rather
+    /// than the provider silently double-recording turns or feeding agents unrequested history.
+    /// </remarks>
     [Fact]
-    public async Task Run_AgentAction_RecordsTheAssistantTurnForLaterActions()
+    public async Task Run_AgentAction_RuntimeOwnsConversationRecording()
     {
         var host = DeclarativeTestFixture.CreateHost(("Writer", "written:"));
         var workflow = new FoundryDeclarativeWorkflowFactory(host.Provider).Create(AgentWorkflow);
@@ -110,11 +117,27 @@ public sealed class FoundryDeclarativeWorkflowTests
         await DeclarativeTestFixture.RunAsync(
             workflow, "quantum computing", TestContext.Current.CancellationToken);
 
-        // The conversation the workflow used must contain the assistant turn, or a subsequent action
-        // reading System.LastMessage would see the user's input again rather than the agent's answer.
-        var conversationId = await host.Provider.CreateConversationAsync(
-            TestContext.Current.CancellationToken);
-        Assert.StartsWith("foundry-declarative-", conversationId, StringComparison.Ordinal);
+        // A conversation the provider created and never wrote to would be empty; the runtime having
+        // recorded both turns is what makes these present.
+        var conversationId = Assert.Single(host.Provider.ConversationIds);
+        var recorded = new List<string>();
+        await foreach (var message in host.Provider.GetMessagesAsync(
+            conversationId,
+            limit: null,
+            after: null,
+            before: null,
+            newestFirst: false,
+            TestContext.Current.CancellationToken))
+        {
+            recorded.Add($"{message.Role}:{message.Text}");
+        }
+
+        Assert.Equal(
+            ["user:quantum computing", "assistant:written:quantum computing"],
+            recorded);
+
+        // Exactly one agent turn: the provider must not have replayed history back into the agent.
+        Assert.Equal(["quantum computing"], host.Clients["Writer"].ObservedPrompts);
     }
 
     [Fact]
