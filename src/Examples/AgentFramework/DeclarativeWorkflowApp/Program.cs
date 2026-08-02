@@ -1,45 +1,37 @@
 using DeclarativeWorkflowApp;
 
-using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
-using Microsoft.Agents.AI.Workflows.Declarative;
+using Microsoft.Extensions.DependencyInjection;
 
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Progress;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative;
 
-// The workflow names two agents. Neither is deployed anywhere: they are ordinary in-process agents
-// resolved by name, which is the whole point of this example. Nothing here reaches a network.
-var agents = new Dictionary<string, AIAgent>(StringComparer.OrdinalIgnoreCase)
-{
-    ["Classifier"] = new ChatClientAgent(
-        new ScriptedChatClient(report =>
-            report.Contains("cannot log in", StringComparison.OrdinalIgnoreCase)
-                ? "category: access"
-                : "category: general"),
-        name: "Classifier",
-        instructions: "Classify the incoming report."),
-    ["Responder"] = new ChatClientAgent(
-        new ScriptedChatClient(report => $"Thanks for reporting: {report}"),
-        name: "Responder",
-        instructions: "Draft a reply to the incoming report."),
-};
+// The workflow names two agents. Neither is deployed anywhere: both are declared with
+// [FoundryAgent] and resolved through the same agent factory the rest of Foundry uses, so this
+// example never reaches a network.
+var services = new ServiceCollection();
+services.AddFoundryAgentFramework(builder => builder
+    .UsingChatClient(new ScriptedChatClient())
+    .AddAgent<ClassifierAgent>()
+    .AddAgent<ResponderAgent>());
 
-var provider = new FoundryAgentProvider(new DeclarativeWorkflowAgentRegistry(agents));
-var factory = new FoundryDeclarativeWorkflowFactory(provider);
+using var serviceProvider = services.BuildServiceProvider();
+var agentFactory = serviceProvider.GetRequiredService<IAgentFactory>();
 
 var workflowPath = Path.Combine(AppContext.BaseDirectory, "triage-workflow.yaml");
 var workflowYaml = File.ReadAllText(workflowPath);
 
 // Validation is deliberate rather than implicit: declarative workflows have no published schema, so
 // parsing is the only check available and it is worth doing before a run rather than during one.
-var validation = factory.Validate(workflowYaml);
+var validation = agentFactory.ValidateDeclarativeWorkflow(workflowYaml);
 if (!validation.IsValid)
 {
     Console.WriteLine($"DeclarativeWorkflowApp:invalid:{validation.ErrorMessage}");
     return 1;
 }
 
-Workflow workflow = factory.Create(workflowYaml);
+Workflow workflow = agentFactory.CreateDeclarativeWorkflow(workflowYaml);
 
 var reporter = new ConsoleProgressReporter("declarative-triage");
 StreamingRun run = await InProcessExecution.RunStreamingAsync(

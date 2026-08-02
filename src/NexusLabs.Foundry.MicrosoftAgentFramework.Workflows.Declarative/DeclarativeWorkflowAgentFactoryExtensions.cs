@@ -6,59 +6,66 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative;
 
 /// <summary>
 /// Builds executable workflows from declarative YAML documents, resolving the agents they name
-/// against Foundry-registered agents.
+/// against Foundry's declared agents.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The result is an ordinary <see cref="Workflow"/>, identical in kind to one built in code, so it
-/// runs through the same execution, checkpointing, and event surfaces. This factory adds agent
-/// resolution and deliberate validation; it does not introduce a second execution model.
+/// The result is an ordinary <see cref="Workflow"/>, identical in kind to one produced by
+/// <c>IWorkflowFactory</c> from attribute-declared topology, and it runs through the same execution,
+/// checkpointing, and event surfaces. Only the declaration source differs: a YAML document instead
+/// of attributes.
+/// </para>
+/// <para>
+/// These are extension methods on <see cref="IAgentFactory"/> rather than members of
+/// <c>IWorkflowFactory</c> because agent resolution is the only thing declarative composition needs
+/// from Foundry, and because <c>IWorkflowFactory</c> lives in the core package, which cannot take a
+/// dependency on this one without pulling an interpreted expression engine into every consumer and
+/// breaking the NativeAOT profile.
 /// </para>
 /// <para>
 /// Workflow input is converted to a user message before the document sees it, matching how a
-/// declarative document reads its input through <c>System.LastMessage</c> rather than through a
-/// typed input namespace.
+/// declarative document reads input through <c>System.LastMessage</c> rather than a typed input
+/// namespace.
 /// </para>
 /// </remarks>
-public sealed class FoundryDeclarativeWorkflowFactory
+public static class DeclarativeWorkflowAgentFactoryExtensions
 {
-    private readonly FoundryAgentProvider _agentProvider;
-
-    /// <exception cref="ArgumentNullException"><paramref name="agentProvider"/> is <see langword="null"/>.</exception>
-    public FoundryDeclarativeWorkflowFactory(FoundryAgentProvider agentProvider)
-    {
-        ArgumentNullException.ThrowIfNull(agentProvider);
-
-        _agentProvider = agentProvider;
-    }
-
     /// <summary>
     /// Builds a workflow from a declarative YAML document.
     /// </summary>
+    /// <param name="agentFactory">Resolves the agents the document names by class name.</param>
     /// <param name="workflowYaml">The complete document text.</param>
     /// <returns>An executable workflow accepting a string input.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="agentFactory"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException"><paramref name="workflowYaml"/> is empty or whitespace-only.</exception>
     /// <exception cref="DeclarativeWorkflowParseException">The document could not be parsed.</exception>
-    public Workflow Create(string workflowYaml)
+    public static Workflow CreateDeclarativeWorkflow(
+        this IAgentFactory agentFactory,
+        string workflowYaml)
     {
+        ArgumentNullException.ThrowIfNull(agentFactory);
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowYaml);
 
         using var reader = new StringReader(workflowYaml);
-        return Create(reader);
+        return agentFactory.CreateDeclarativeWorkflow(reader);
     }
 
     /// <summary>
     /// Builds a workflow from a declarative YAML document.
     /// </summary>
+    /// <param name="agentFactory">Resolves the agents the document names by class name.</param>
     /// <param name="workflowYaml">A reader positioned at the start of the document.</param>
     /// <returns>An executable workflow accepting a string input.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="workflowYaml"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException">Either argument is <see langword="null"/>.</exception>
     /// <exception cref="DeclarativeWorkflowParseException">The document could not be parsed.</exception>
-    public Workflow Create(TextReader workflowYaml)
+    public static Workflow CreateDeclarativeWorkflow(
+        this IAgentFactory agentFactory,
+        TextReader workflowYaml)
     {
+        ArgumentNullException.ThrowIfNull(agentFactory);
         ArgumentNullException.ThrowIfNull(workflowYaml);
 
-        var options = new DeclarativeWorkflowOptions(_agentProvider);
+        var options = new DeclarativeWorkflowOptions(new FoundryAgentProvider(agentFactory));
         try
         {
             return DeclarativeWorkflowBuilder.Build<string>(
@@ -89,19 +96,24 @@ public sealed class FoundryDeclarativeWorkflowFactory
     /// It reports what upstream's builder rejects, which is structural malformation. It does
     /// <em>not</em> catch every authoring mistake: upstream accepts an action <c>kind</c> it does not
     /// recognize, and it cannot detect an expression that will fail to evaluate or an agent name that
-    /// is not registered, because neither is knowable until the action runs.
+    /// is not declared, because neither is knowable until the action runs.
     /// </para>
     /// </remarks>
+    /// <param name="agentFactory">Resolves the agents the document names by class name.</param>
     /// <param name="workflowYaml">The complete document text.</param>
     /// <returns>The validation outcome, including parse failure detail when invalid.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="agentFactory"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException"><paramref name="workflowYaml"/> is empty or whitespace-only.</exception>
-    public DeclarativeWorkflowValidationResult Validate(string workflowYaml)
+    public static DeclarativeWorkflowValidationResult ValidateDeclarativeWorkflow(
+        this IAgentFactory agentFactory,
+        string workflowYaml)
     {
+        ArgumentNullException.ThrowIfNull(agentFactory);
         ArgumentException.ThrowIfNullOrWhiteSpace(workflowYaml);
 
         try
         {
-            _ = Create(workflowYaml);
+            _ = agentFactory.CreateDeclarativeWorkflow(workflowYaml);
             return DeclarativeWorkflowValidationResult.Valid();
         }
         catch (DeclarativeWorkflowParseException ex)

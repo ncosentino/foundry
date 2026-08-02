@@ -23,22 +23,22 @@ public sealed class DeclarativeWorkflowProgressTests
               value: =System.LastMessage.Text
 
             - kind: InvokeAzureAgent
-              id: call_writer
+              id: classify
               agent:
-                name: Writer
+                name: NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests.ClassifierAgent
               input:
                 messages: =Local.topic
               output:
                 autoSend: true
-                responseObject: Local.WriterResult
+                responseObject: Local.Classification
         """;
 
     [Fact]
     public async Task ReportProgressTo_DeclarativeRun_ReportsActionsByTheirAuthoredIds()
     {
+        using var host = DeclarativeTestFixture.CreateHost();
         var reporter = new RecordingProgressReporter("declarative-progress");
-        var host = DeclarativeTestFixture.CreateHost(("Writer", "written:"));
-        var workflow = new FoundryDeclarativeWorkflowFactory(host.Provider).Create(AgentWorkflow);
+        var workflow = host.AgentFactory.CreateDeclarativeWorkflow(AgentWorkflow);
 
         var forwarded = 0;
         StreamingRun run = await InProcessExecution.RunStreamingAsync(
@@ -60,7 +60,7 @@ public sealed class DeclarativeWorkflowProgressTests
             .ToList();
 
         Assert.Contains("capture_topic", startedActionIds);
-        Assert.Contains("call_writer", startedActionIds);
+        Assert.Contains("classify", startedActionIds);
         Assert.Contains(reporter.Events, e => e is DeclarativeActionCompletedProgressEvent);
         Assert.Contains(reporter.Events, e => e is SuperStepStartedProgressEvent);
         Assert.True(forwarded > 0, "The bridge must forward the upstream stream, not consume it.");
@@ -69,9 +69,9 @@ public sealed class DeclarativeWorkflowProgressTests
     [Fact]
     public async Task ReportProgressTo_AgentResponse_ReportsResponseChunks()
     {
+        using var host = DeclarativeTestFixture.CreateHost();
         var reporter = new RecordingProgressReporter("declarative-progress");
-        var host = DeclarativeTestFixture.CreateHost(("Writer", "written:"));
-        var workflow = new FoundryDeclarativeWorkflowFactory(host.Provider).Create(AgentWorkflow);
+        var workflow = host.AgentFactory.CreateDeclarativeWorkflow(AgentWorkflow);
 
         StreamingRun run = await InProcessExecution.RunStreamingAsync(
             workflow,
@@ -91,9 +91,9 @@ public sealed class DeclarativeWorkflowProgressTests
     [Fact]
     public async Task ReportProgressTo_SequenceNumbers_AreStrictlyIncreasing()
     {
+        using var host = DeclarativeTestFixture.CreateHost();
         var reporter = new RecordingProgressReporter("declarative-progress");
-        var host = DeclarativeTestFixture.CreateHost(("Writer", "written:"));
-        var workflow = new FoundryDeclarativeWorkflowFactory(host.Provider).Create(AgentWorkflow);
+        var workflow = host.AgentFactory.CreateDeclarativeWorkflow(AgentWorkflow);
 
         StreamingRun run = await InProcessExecution.RunStreamingAsync(
             workflow,

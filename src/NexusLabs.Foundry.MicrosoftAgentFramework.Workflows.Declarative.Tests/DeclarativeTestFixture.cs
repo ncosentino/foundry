@@ -1,32 +1,37 @@
-using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Declarative;
+using Microsoft.Extensions.DependencyInjection;
+
+using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests;
 
 /// <summary>
-/// Shared construction and execution helpers for declarative workflow tests.
+/// Builds a Foundry runtime containing the declared test agents and runs declarative workflows
+/// against it.
 /// </summary>
 internal static class DeclarativeTestFixture
 {
-    internal static DeclarativeTestHost CreateHost(
-        params (string Name, string ResponsePrefix)[] agents)
+    /// <remarks>
+    /// Agents are registered explicitly rather than through the source generator's module
+    /// initializer, because this test project does not reference the generator. The resolution path
+    /// under test — <see cref="IAgentFactory.CreateAgent(string)"/> by class name — is identical
+    /// either way.
+    /// </remarks>
+    internal static DeclarativeTestHost CreateHost()
     {
-        var clients = new Dictionary<string, ScriptedDeclarativeChatClient>(StringComparer.OrdinalIgnoreCase);
-        var registered = new Dictionary<string, AIAgent>(StringComparer.OrdinalIgnoreCase);
+        var chatClient = new ScriptedDeclarativeChatClient();
+        var services = new ServiceCollection();
+        services.AddFoundryAgentFramework(builder => builder
+            .UsingChatClient(chatClient)
+            .AddAgent<ClassifierAgent>()
+            .AddAgent<ResponderAgent>());
 
-        foreach (var (name, responsePrefix) in agents)
-        {
-            var client = new ScriptedDeclarativeChatClient(responsePrefix);
-            clients[name] = client;
-            registered[name] = new ChatClientAgent(
-                client,
-                name: name,
-                instructions: "Answer using the supplied text.");
-        }
-
-        var provider = new FoundryAgentProvider(new DeclarativeWorkflowAgentRegistry(registered));
-        return new DeclarativeTestHost(provider, clients);
+        var provider = services.BuildServiceProvider();
+        return new DeclarativeTestHost(
+            provider.GetRequiredService<IAgentFactory>(),
+            chatClient,
+            provider);
     }
 
     /// <summary>
@@ -67,8 +72,12 @@ internal static class DeclarativeTestFixture
     }
 
     internal sealed record DeclarativeTestHost(
-        FoundryAgentProvider Provider,
-        IReadOnlyDictionary<string, ScriptedDeclarativeChatClient> Clients);
+        IAgentFactory AgentFactory,
+        ScriptedDeclarativeChatClient ChatClient,
+        ServiceProvider Services) : IDisposable
+    {
+        public void Dispose() => Services.Dispose();
+    }
 
     internal sealed record DeclarativeRunOutcome(
         IReadOnlyList<string> Activities,

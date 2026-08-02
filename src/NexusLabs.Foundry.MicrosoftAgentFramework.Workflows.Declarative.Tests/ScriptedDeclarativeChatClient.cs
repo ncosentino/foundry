@@ -1,55 +1,51 @@
+using System.Runtime.CompilerServices;
+
 using Microsoft.Extensions.AI;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests;
 
 /// <summary>
-/// A chat client that answers with a deterministic transformation of the last user message, so
-/// declarative workflow tests observe agent participation without a live provider.
+/// A deterministic chat client shared by every declared test agent, which answers using the
+/// instructions the invoking agent supplied so a test can tell which agent ran.
 /// </summary>
-internal sealed class ScriptedDeclarativeChatClient(string responsePrefix) : IChatClient
+/// <remarks>
+/// Agents built through <see cref="IAgentFactory"/> share the one chat client configured on the
+/// runtime builder, so per-agent behavior has to be derived from something the agent itself carries.
+/// Each declared test agent's <c>Instructions</c> act as its tag, which is why they are single words
+/// rather than prose.
+/// </remarks>
+internal sealed class ScriptedDeclarativeChatClient : IChatClient
 {
-    private readonly List<string> _observedPrompts = [];
+    private readonly List<(string Tag, string Prompt)> _invocations = [];
 
-    internal IReadOnlyList<string> ObservedPrompts
+    internal IReadOnlyList<(string Tag, string Prompt)> Invocations
     {
         get
         {
-            lock (_observedPrompts)
+            lock (_invocations)
             {
-                return [.. _observedPrompts];
+                return [.. _invocations];
             }
         }
     }
 
+    internal IReadOnlyList<string> PromptsFor(string tag) =>
+        [.. Invocations.Where(i => i.Tag == tag).Select(i => i.Prompt)];
+
     public Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var prompt = LastUserText(messages);
-        lock (_observedPrompts)
-        {
-            _observedPrompts.Add(prompt);
-        }
-
-        return Task.FromResult(
-            new ChatResponse(new ChatMessage(ChatRole.Assistant, $"{responsePrefix}{prompt}")));
-    }
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, Record(messages, options))));
 
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
-        [System.Runtime.CompilerServices.EnumeratorCancellation]
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var prompt = LastUserText(messages);
-        lock (_observedPrompts)
-        {
-            _observedPrompts.Add(prompt);
-        }
-
+        var reply = Record(messages, options);
         await Task.Yield();
-        yield return new ChatResponseUpdate(ChatRole.Assistant, $"{responsePrefix}{prompt}");
+        yield return new ChatResponseUpdate(ChatRole.Assistant, reply);
     }
 
     public object? GetService(Type serviceType, object? key) => null;
@@ -58,6 +54,19 @@ internal sealed class ScriptedDeclarativeChatClient(string responsePrefix) : ICh
     {
     }
 
-    private static string LastUserText(IEnumerable<ChatMessage> messages) =>
-        messages.LastOrDefault(m => m.Role.Equals(ChatRole.User))?.Text ?? string.Empty;
+    private string Record(IEnumerable<ChatMessage> messages, ChatOptions? options)
+    {
+        var materialized = messages.ToList();
+        var tag = options?.Instructions
+            ?? materialized.FirstOrDefault(m => m.Role.Equals(ChatRole.System))?.Text
+            ?? "<untagged>";
+        var prompt = materialized.LastOrDefault(m => m.Role.Equals(ChatRole.User))?.Text ?? string.Empty;
+
+        lock (_invocations)
+        {
+            _invocations.Add((tag, prompt));
+        }
+
+        return $"{tag}:{prompt}";
+    }
 }

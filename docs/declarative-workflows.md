@@ -19,17 +19,23 @@ so a declarative workflow can drive in-process agents with no remote project inv
 
 ## Running a workflow
 
+Agents are declared the same way as anywhere else in Foundry and resolved through
+`IAgentFactory`, so a declarative workflow needs no registration code of its own:
+
 ```csharp
-var agents = new Dictionary<string, AIAgent>(StringComparer.OrdinalIgnoreCase)
-{
-    ["Classifier"] = classifierAgent,
-    ["Responder"] = responderAgent,
-};
+[FoundryAgent(Description = "...", Instructions = "...")]
+public sealed class ClassifierAgent { }
 
-var provider = new FoundryAgentProvider(new DeclarativeWorkflowAgentRegistry(agents));
-var factory = new FoundryDeclarativeWorkflowFactory(provider);
+// composition root
+services.AddFoundryAgentFramework(builder => builder
+    .UsingChatClient(chatClient)
+    .AddAgent<ClassifierAgent>()
+    .AddAgent<ResponderAgent>());
 
-Workflow workflow = factory.Create(File.ReadAllText("triage-workflow.yaml"));
+var agentFactory = serviceProvider.GetRequiredService<IAgentFactory>();
+
+Workflow workflow = agentFactory.CreateDeclarativeWorkflow(
+    File.ReadAllText("triage-workflow.yaml"));
 
 StreamingRun run = await InProcessExecution.RunStreamingAsync(
     workflow,
@@ -42,7 +48,13 @@ await foreach (var workflowEvent in run.WatchStreamAsync().ReportProgressTo(repo
 }
 ```
 
-The document names agents by name only:
+`CreateDeclarativeWorkflow` and `ValidateDeclarativeWorkflow` are extension methods on
+`IAgentFactory` rather than members of `IWorkflowFactory`. Agent resolution is the only
+thing declarative composition needs from Foundry, and `IWorkflowFactory` lives in the
+core package, which cannot depend on this one without pulling an interpreted expression
+engine into every consumer.
+
+The document names agents by type name:
 
 ```yaml
 kind: Workflow
@@ -60,13 +72,18 @@ trigger:
     - kind: InvokeAzureAgent
       id: classify
       agent:
-        name: Classifier
+        name: DeclarativeWorkflowApp.ClassifierAgent
       input:
         messages: =Local.report
       output:
         autoSend: true
         responseObject: Local.Classification
 ```
+
+Agent names are matched exactly as `IAgentFactory.CreateAgent(string)` matches them, which
+today is the fully-qualified type name. That couples a hand-edited document to a namespace
+and type name, so renaming or moving an agent class breaks the workflow with no compile-time
+error — the document is not compiled, and there is no schema to validate it against.
 
 A complete runnable example is in
 `src/Examples/AgentFramework/DeclarativeWorkflowApp`. It runs entirely offline.
@@ -77,7 +94,7 @@ Declarative workflows have **no published JSON Schema**, so parsing is the only
 validation available. `Validate` makes it deliberate:
 
 ```csharp
-var validation = factory.Validate(workflowYaml);
+var validation = agentFactory.ValidateDeclarativeWorkflow(workflowYaml);
 if (!validation.IsValid)
 {
     Console.WriteLine(validation.ErrorMessage);
