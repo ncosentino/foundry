@@ -90,18 +90,7 @@ public sealed record AgentFrameworkBuilder
             .Distinct()
             .ToList();
 
-        var agentTypeMap = new Dictionary<string, Type>(StringComparer.Ordinal);
-        foreach (var t in AgentTypes ?? [])
-        {
-            var key = t.FullName ?? t.Name;
-            if (!agentTypeMap.TryAdd(key, t))
-            {
-                throw new InvalidOperationException(
-                    $"Duplicate agent registration: '{key}' is already registered as " +
-                    $"'{agentTypeMap[key].AssemblyQualifiedName}'. Cannot also register " +
-                    $"'{t.AssemblyQualifiedName}'. Ensure each [FoundryAgent] class has a unique fully-qualified name.");
-            }
-        }
+        var agentTypeMap = BuildAgentTypeMap(AgentTypes ?? []);
 
         AgentFrameworkGeneratedBootstrap.TryGetAIFunctionProvider(out var generatedProvider);
 
@@ -114,5 +103,62 @@ public sealed record AgentFrameworkBuilder
             generatedProvider: generatedProvider,
             plugins: Plugins ?? [],
             perAgentResilienceFactory: PerAgentResilienceFactory);
+    }
+
+    /// <summary>
+    /// Maps every registered agent type by its fully-qualified name, and additionally by its simple
+    /// class name so a caller can address an agent without repeating its namespace.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The fully-qualified name is always registered, because it is the only name guaranteed to be
+    /// unique and it is what a caller must fall back to.
+    /// </para>
+    /// <para>
+    /// A simple name shared by two agents is rejected rather than silently resolving to whichever
+    /// registered first, or being quietly dropped in favour of fully-qualified lookup. Both of those
+    /// would let a workflow document or a configuration string keep working while addressing an
+    /// agent nobody intended. Failing here surfaces the collision at composition, where the fix is
+    /// to rename one of the classes.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Two agent types share a fully-qualified name, or two share a simple class name.
+    /// </exception>
+    private static Dictionary<string, Type> BuildAgentTypeMap(IReadOnlyList<Type> agentTypes)
+    {
+        var agentTypeMap = new Dictionary<string, Type>(StringComparer.Ordinal);
+        foreach (var agentType in agentTypes)
+        {
+            var fullName = agentType.FullName ?? agentType.Name;
+            if (!agentTypeMap.TryAdd(fullName, agentType))
+            {
+                throw new InvalidOperationException(
+                    $"Duplicate agent registration: '{fullName}' is already registered as " +
+                    $"'{agentTypeMap[fullName].AssemblyQualifiedName}'. Cannot also register " +
+                    $"'{agentType.AssemblyQualifiedName}'. Ensure each [FoundryAgent] class has a unique fully-qualified name.");
+            }
+        }
+
+        var simpleNameGroups = agentTypes.GroupBy(agentType => agentType.Name, StringComparer.Ordinal);
+
+        foreach (var group in simpleNameGroups)
+        {
+            var candidates = group.ToList();
+            if (candidates.Count > 1)
+            {
+                throw new InvalidOperationException(
+                    $"Ambiguous agent name '{group.Key}': it is declared by " +
+                    $"{string.Join(" and ", candidates.Select(c => $"'{c.FullName}'"))}. " +
+                    "Agents are addressable by simple class name, so each [FoundryAgent] class " +
+                    "must have a unique class name even across namespaces. Rename one of them.");
+            }
+
+            // A simple name identical to some other agent's full name would otherwise overwrite it,
+            // so the unambiguous full-name mapping wins and the alias is skipped.
+            agentTypeMap.TryAdd(group.Key, candidates[0]);
+        }
+
+        return agentTypeMap;
     }
 }
