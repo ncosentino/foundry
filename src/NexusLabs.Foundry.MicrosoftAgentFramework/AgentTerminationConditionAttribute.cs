@@ -1,15 +1,33 @@
 namespace NexusLabs.Foundry.MicrosoftAgentFramework;
 
 /// <summary>
-/// Declares a termination condition that is wired into the group chat manager for this agent
-/// (Layer 1). The condition is evaluated inside MAF's group chat loop, before the next agent
-/// turn starts, giving a clean early exit.
+/// Declares a termination condition that is wired into the group chat manager for a group this
+/// agent belongs to (Layer 1). The condition is evaluated inside MAF's group chat loop, before the
+/// next agent turn starts, giving a clean early exit.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Apply to a class also decorated with <see cref="AgentGroupChatMemberAttribute"/>. Multiple
 /// conditions may be stacked; OR semantics apply (first match stops the workflow).
 /// </para>
+/// <para>
+/// <b>The condition is evaluated after every participant's turn, not only after turns produced by
+/// the agent it is declared on.</b> Every condition declared by any member of the group is
+/// collected into one set and each is offered every turn, so the class this attribute sits on
+/// determines only which group the condition joins — it does not scope when the condition runs.
+/// A condition that should apply to one agent has to say so itself, by comparing
+/// <see cref="TerminationContext.AgentId"/>:
+/// </para>
+/// <example>
+/// <code>
+/// public sealed class ApprovedByReviewer : IWorkflowTerminationCondition
+/// {
+///     public bool ShouldTerminate(TerminationContext context) =&gt;
+///         context.AgentId == "ReviewerAgent"
+///         &amp;&amp; context.LastMessage?.Text?.Contains("APPROVED") == true;
+/// }
+/// </code>
+/// </example>
 /// <para>
 /// The <c>conditionType</c> must implement <see cref="IWorkflowTerminationCondition"/>.
 /// Constructor arguments for the condition are passed via <c>ctorArgs</c>.

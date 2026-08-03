@@ -17,6 +17,12 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework;
 /// turn) or <see cref="WorkflowRunTerminationConditionAttribute"/> (Layer 2: any workflow type,
 /// fires via <c>RunAsync</c>).
 /// </para>
+/// <para>
+/// In both layers an implementation is evaluated after <em>every</em> agent's turn, not only after
+/// turns produced by the class that declared it. An implementation meant for one agent must scope
+/// itself by comparing <see cref="TerminationContext.AgentId"/>; the built-in conditions do not,
+/// and so stop the workflow on whichever agent first produces a match.
+/// </para>
 /// </remarks>
 public interface IWorkflowTerminationCondition
 {

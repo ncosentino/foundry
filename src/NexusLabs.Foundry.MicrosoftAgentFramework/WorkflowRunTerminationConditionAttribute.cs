@@ -9,8 +9,15 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework;
 /// <remarks>
 /// <para>
 /// Apply to any agent class. Multiple conditions may be stacked; OR semantics apply (first
-/// match stops the workflow). Conditions from all agents in the workflow are merged; a condition
-/// fires only when the agent it is declared on produces the matching response.
+/// match stops the workflow).
+/// </para>
+/// <para>
+/// <b>The condition is evaluated after every agent's turn, not only after turns produced by the
+/// agent it is declared on.</b> Conditions declared anywhere in the workflow's topology are
+/// collected into one flat set and each is offered every turn, so the class this attribute sits on
+/// determines only which workflows the condition is wired into — it does not scope when the
+/// condition runs. A condition that should apply to one agent has to say so itself, by comparing
+/// <see cref="TerminationContext.AgentId"/>.
 /// </para>
 /// <para>
 /// The <c>conditionType</c> must implement <see cref="IWorkflowTerminationCondition"/>.
