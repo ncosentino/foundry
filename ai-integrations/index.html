@@ -1223,6 +1223,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Termination conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conditions-are-evaluated-for-every-agents-turn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conditions are evaluated for every agent's turn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4036,7 +4053,7 @@ the complete Harness factory.</p>
 <p><code>RunAsync</code> is an extension method from <code>NexusLabs.Foundry.MicrosoftAgentFramework.Workflows</code> that wraps the underlying MAF streaming execution.</p>
 <h3 id="termination-conditions">Termination conditions<a class="headerlink" href="#termination-conditions" title="Permanent link">&para;</a></h3>
 <p>Termination conditions let you stop a workflow early when a content-based criterion is met. Two layers are available:</p>
-<p><strong>Layer 1 — group chat (per-agent, fires before the next turn):</strong>
+<p><strong>Layer 1 — group chat (fires before the next turn):</strong>
 <code>[AgentTerminationCondition]</code> on a group chat member. The condition is evaluated inside MAF's group chat loop after each agent response. When it triggers, the current turn is the last one — the next agent is never called.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="na">[AgentTerminationCondition(typeof(KeywordTerminationCondition), &quot;APPROVED&quot;)]</span>
@@ -4048,16 +4065,39 @@ the complete Harness factory.</p>
 <a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="na">[WorkflowRunTerminationCondition(typeof(KeywordTerminationCondition), &quot;EXTRACTION_FAILED&quot;)]</span>
 <a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentExtractorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
-<p>When an agent carries <code>[WorkflowRunTerminationCondition]</code>, the generator emits a paired <code>Run*Async</code> method that packages creation and execution together with the declared conditions already wired in:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1">// Generated Run*Async bundles conditions automatically</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">responses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunContentPipelineSequentialWorkflowAsync</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+<h4 id="conditions-are-evaluated-for-every-agents-turn">Conditions are evaluated for every agent's turn<a class="headerlink" href="#conditions-are-evaluated-for-every-agents-turn" title="Permanent link">&para;</a></h4>
+<p>In both layers, the class an attribute is applied to determines only which workflow the condition is
+wired into — <strong>not</strong> whose turns it runs against. Every declared condition is collected into one set
+and offered every turn, so in the example above <code>KeywordTerminationCondition("APPROVED")</code> stops the
+workflow whenever <em>any</em> member of <code>code-review</code> says <code>APPROVED</code>, not only <code>ReviewerAgent</code>.</p>
+<p>That is usually what you want for an approval gate. When it isn't, the condition has to scope itself
+using <code>TerminationContext.AgentId</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ApprovedByReviewer</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IWorkflowTerminationCondition</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="p">{</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">ShouldTerminate</span><span class="p">(</span><span class="n">TerminationContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">AgentId</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;ReviewerAgent&quot;</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="n">LastMessage</span><span class="o">?.</span><span class="n">Text</span><span class="o">?.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;APPROVED&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">true</span><span class="p">;</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="p">}</span>
 </code></pre></div>
-<p>Built-in conditions: <code>KeywordTerminationCondition</code>, <code>RegexTerminationCondition</code>. Custom conditions implement <code>IWorkflowTerminationCondition</code>.</p>
+<p>Two things to know about <code>AgentId</code> before comparing against it:</p>
+<ul>
+<li><strong>It differs by layer.</strong> Under Layer 1 it is the agent's <em>published</em> name — the class name, or
+  <code>[FoundryAgent(Name = "...")]</code> when one is declared. Under Layer 2 it is the workflow executor id.
+  A condition written for one layer will not necessarily match under the other.</li>
+<li><strong>It can be empty.</strong> The initial input message carries no author, so the first evaluation sees an
+  empty string. Compare defensively rather than assuming an agent name is always present.</li>
+</ul>
+<p>The built-in conditions do not scope themselves, by design — they match on content alone.</p>
+<p>When an agent carries <code>[WorkflowRunTerminationCondition]</code>, the generator emits a paired <code>Run*Async</code> method that packages creation and execution together with the declared conditions already wired in:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1">// Generated Run*Async bundles conditions automatically</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">responses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunContentPipelineSequentialWorkflowAsync</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</code></pre></div>
+<p>Built-in conditions: <code>KeywordTerminationCondition</code>, <code>RegexTerminationCondition</code>, <code>ToolCallTerminationCondition</code>. Custom conditions implement <code>IWorkflowTerminationCondition</code>.</p>
 <h3 id="topology-graph-diagnostic">Topology graph diagnostic<a class="headerlink" href="#topology-graph-diagnostic" title="Permanent link">&para;</a></h3>
 <p>Set <code>FoundryDiagnostics=true</code> in the agent class library's project properties to emit a Mermaid diagram of the agent topology at build time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nt">&lt;PropertyGroup&gt;</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&lt;FoundryDiagnostics&gt;</span>true<span class="nt">&lt;/FoundryDiagnostics&gt;</span>
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="nt">&lt;/PropertyGroup&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nt">&lt;PropertyGroup&gt;</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">&lt;FoundryDiagnostics&gt;</span>true<span class="nt">&lt;/FoundryDiagnostics&gt;</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="nt">&lt;/PropertyGroup&gt;</span>
 </code></pre></div>
 <p>The diagram is written to <code>bin/{Configuration}/{TFM}/FoundryDiagnostics/AgentTopologyGraph.md</code> and visualises all declared handoff, group chat, and sequential topologies in the compilation.</p>
 <hr />

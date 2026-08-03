@@ -3118,6 +3118,10 @@ available in the <code>NexusLabs.Foundry.MicrosoftAgentFramework.Workflows</code
 <a href="../AgentTerminationConditionAttribute/" title="NexusLabs.Foundry.MicrosoftAgentFramework.AgentTerminationConditionAttribute">AgentTerminationConditionAttribute</a> (Layer 1: group chat, fires before the next
 turn) or <a href="../WorkflowRunTerminationConditionAttribute/" title="NexusLabs.Foundry.MicrosoftAgentFramework.WorkflowRunTerminationConditionAttribute">WorkflowRunTerminationConditionAttribute</a> (Layer 2: any workflow type,
 fires via <code>RunAsync</code>).</p>
+<p>In both layers an implementation is evaluated after <em>every</em> agent's turn, not only after
+turns produced by the class that declared it. An implementation meant for one agent must scope
+itself by comparing <a href="../TerminationContext/#NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId">AgentId</a>; the built-in conditions do not,
+and so stop the workflow on whichever agent first produces a match.</p>
 <h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.IWorkflowTerminationCondition.ShouldTerminate(NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext)'></a></p>
 <h2 id="iworkflowterminationconditionshouldterminateterminationcontext-method">IWorkflowTerminationCondition.ShouldTerminate(TerminationContext) Method<a class="headerlink" href="#iworkflowterminationconditionshouldterminateterminationcontext-method" title="Permanent link">&para;</a></h2>

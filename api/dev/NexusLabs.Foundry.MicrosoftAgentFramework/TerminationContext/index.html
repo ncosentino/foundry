@@ -3113,11 +3113,24 @@ workflow should stop after an agent's response.</p>
 <h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId'></a></p>
 <h2 id="terminationcontextagentid-property">TerminationContext.AgentId Property<a class="headerlink" href="#terminationcontextagentid-property" title="Permanent link">&para;</a></h2>
-<p>Gets the executor ID of the agent that produced this response.</p>
+<p>Gets the identity of the agent that produced this response, which a condition compares
+against to scope itself to one agent.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">AgentId</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">init</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h4 id="property-value">Property Value<a class="headerlink" href="#property-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<h3 id="remarks">Remarks<a class="headerlink" href="#remarks" title="Permanent link">&para;</a></h3>
+<p>Scoping is the condition's own job: a condition is offered every agent's turn regardless of
+which class declared it, so this is the only thing distinguishing them.</p>
+<p>The value differs by layer, because the two evaluate at different points and have different
+information to hand. Under <a href="../AgentTerminationConditionAttribute/" title="NexusLabs.Foundry.MicrosoftAgentFramework.AgentTerminationConditionAttribute">AgentTerminationConditionAttribute</a> it is the author
+of the turn's last message, which is the agent's published name — the class name, or
+<a href="../FoundryAgentAttribute/#NexusLabs.Foundry.MicrosoftAgentFramework.FoundryAgentAttribute.Name" title="NexusLabs.Foundry.MicrosoftAgentFramework.FoundryAgentAttribute.Name">Name</a> when one is declared. Under
+<a href="../WorkflowRunTerminationConditionAttribute/" title="NexusLabs.Foundry.MicrosoftAgentFramework.WorkflowRunTerminationConditionAttribute">WorkflowRunTerminationConditionAttribute</a> it is the workflow executor id.
+A condition written against one layer will not necessarily match under the other.</p>
+<p>It is empty when the turn's message carries no author, which happens for the initial input
+message. A condition that compares this value must therefore tolerate an empty string rather
+than assuming an agent name is always present.</p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.ConversationHistory'></a></p>
 <h2 id="terminationcontextconversationhistory-property">TerminationContext.ConversationHistory Property<a class="headerlink" href="#terminationcontextconversationhistory-property" title="Permanent link">&para;</a></h2>
 <p>Gets the accumulated conversation history up to and including this turn.

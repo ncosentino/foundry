@@ -3114,8 +3114,13 @@ helpers after each completed agent turn (Layer 2). Unlike
 <p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; <a href="https://learn.microsoft.com/en-us/dotnet/api/system.attribute" title="System.Attribute">System.Attribute</a> &#129106; WorkflowRunTerminationConditionAttribute</p>
 <h3 id="remarks">Remarks<a class="headerlink" href="#remarks" title="Permanent link">&para;</a></h3>
 <p>Apply to any agent class. Multiple conditions may be stacked; OR semantics apply (first
-match stops the workflow). Conditions from all agents in the workflow are merged; a condition
-fires only when the agent it is declared on produces the matching response.</p>
+match stops the workflow).</p>
+<p><b>The condition is evaluated after every agent's turn, not only after turns produced by the
+            agent it is declared on.</b> Conditions declared anywhere in the workflow's topology are
+            collected into one flat set and each is offered every turn, so the class this attribute sits on
+            determines only which workflows the condition is wired into — it does not scope when the
+            condition runs. A condition that should apply to one agent has to say so itself, by comparing
+            <a href="../TerminationContext/#NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId">AgentId</a>.</p>
 <p>The <code>conditionType</code> must implement <a href="../IWorkflowTerminationCondition/" title="NexusLabs.Foundry.MicrosoftAgentFramework.IWorkflowTerminationCondition">IWorkflowTerminationCondition</a>.
 Constructor arguments are passed via <code>ctorArgs</code>.</p>
 <p>For group chat workflows, prefer <a href="../AgentTerminationConditionAttribute/" title="NexusLabs.Foundry.MicrosoftAgentFramework.AgentTerminationConditionAttribute">AgentTerminationConditionAttribute</a> — it fires

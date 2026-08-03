@@ -3105,15 +3105,30 @@
 <h4 id="nexuslabsfoundrymicrosoftagentframework"><a href="../" title="index">NexusLabs.Foundry.MicrosoftAgentFramework</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframework" title="Permanent link">&para;</a></h4>
 <h3 id="nexuslabsfoundrymicrosoftagentframework_1"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework/" title="NexusLabs.Foundry.MicrosoftAgentFramework">NexusLabs.Foundry.MicrosoftAgentFramework</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframework_1" title="Permanent link">&para;</a></h3>
 <h2 id="agentterminationconditionattribute-class">AgentTerminationConditionAttribute Class<a class="headerlink" href="#agentterminationconditionattribute-class" title="Permanent link">&para;</a></h2>
-<p>Declares a termination condition that is wired into the group chat manager for this agent
-(Layer 1). The condition is evaluated inside MAF's group chat loop, before the next agent
-turn starts, giving a clean early exit.</p>
+<p>Declares a termination condition that is wired into the group chat manager for a group this
+agent belongs to (Layer 1). The condition is evaluated inside MAF's group chat loop, before the
+next agent turn starts, giving a clean early exit.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AgentTerminationConditionAttribute</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Attribute</span>
 </code></pre></div>
 <p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; <a href="https://learn.microsoft.com/en-us/dotnet/api/system.attribute" title="System.Attribute">System.Attribute</a> &#129106; AgentTerminationConditionAttribute</p>
 <h3 id="remarks">Remarks<a class="headerlink" href="#remarks" title="Permanent link">&para;</a></h3>
 <p>Apply to a class also decorated with <a href="../AgentGroupChatMemberAttribute/" title="NexusLabs.Foundry.MicrosoftAgentFramework.AgentGroupChatMemberAttribute">AgentGroupChatMemberAttribute</a>. Multiple
 conditions may be stacked; OR semantics apply (first match stops the workflow).</p>
+<p><b>The condition is evaluated after every participant's turn, not only after turns produced by
+            the agent it is declared on.</b> Every condition declared by any member of the group is
+            collected into one set and each is offered every turn, so the class this attribute sits on
+            determines only which group the condition joins — it does not scope when the condition runs.
+            A condition that should apply to one agent has to say so itself, by comparing
+            <a href="../TerminationContext/#NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId" title="NexusLabs.Foundry.MicrosoftAgentFramework.TerminationContext.AgentId">AgentId</a>:\&lt;example&gt;
+  \&lt;code&gt;
+            public sealed class ApprovedByReviewer : IWorkflowTerminationCondition
+            {
+                public bool ShouldTerminate(TerminationContext context) =&gt;
+                    context.AgentId == "ReviewerAgent"
+                    &amp;&amp; context.LastMessage?.Text?.Contains("APPROVED") == true;
+            }
+            \&lt;/code&gt;
+\&lt;/example&gt;</p>
 <p>The <code>conditionType</code> must implement <a href="../IWorkflowTerminationCondition/" title="NexusLabs.Foundry.MicrosoftAgentFramework.IWorkflowTerminationCondition">IWorkflowTerminationCondition</a>.
 Constructor arguments for the condition are passed via <code>ctorArgs</code>.\&lt;example&gt;
   \&lt;code&gt;
