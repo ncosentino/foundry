@@ -8,7 +8,29 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework;
 /// </summary>
 public sealed class TerminationContext
 {
-    /// <summary>Gets the executor ID of the agent that produced this response.</summary>
+    /// <summary>
+    /// Gets the identity of the agent that produced this response, which a condition compares
+    /// against to scope itself to one agent.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Scoping is the condition's own job: a condition is offered every agent's turn regardless of
+    /// which class declared it, so this is the only thing distinguishing them.
+    /// </para>
+    /// <para>
+    /// The value differs by layer, because the two evaluate at different points and have different
+    /// information to hand. Under <see cref="AgentTerminationConditionAttribute"/> it is the author
+    /// of the turn's last message, which is the agent's published name — the class name, or
+    /// <see cref="FoundryAgentAttribute.Name"/> when one is declared. Under
+    /// <see cref="WorkflowRunTerminationConditionAttribute"/> it is the workflow executor id.
+    /// A condition written against one layer will not necessarily match under the other.
+    /// </para>
+    /// <para>
+    /// It is empty when the turn's message carries no author, which happens for the initial input
+    /// message. A condition that compares this value must therefore tolerate an empty string rather
+    /// than assuming an agent name is always present.
+    /// </para>
+    /// </remarks>
     public required string AgentId { get; init; }
 
     /// <summary>

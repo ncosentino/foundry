@@ -496,7 +496,7 @@ var responses = await workflow.RunAsync("Which countries has Nick visited?");
 
 Termination conditions let you stop a workflow early when a content-based criterion is met. Two layers are available:
 
-**Layer 1 — group chat (per-agent, fires before the next turn):**
+**Layer 1 — group chat (fires before the next turn):**
 `[AgentTerminationCondition]` on a group chat member. The condition is evaluated inside MAF's group chat loop after each agent response. When it triggers, the current turn is the last one — the next agent is never called.
 
 ```csharp
@@ -514,6 +514,35 @@ public class ReviewerAgent { }
 public class ContentExtractorAgent { }
 ```
 
+#### Conditions are evaluated for every agent's turn
+
+In both layers, the class an attribute is applied to determines only which workflow the condition is
+wired into — **not** whose turns it runs against. Every declared condition is collected into one set
+and offered every turn, so in the example above `KeywordTerminationCondition("APPROVED")` stops the
+workflow whenever *any* member of `code-review` says `APPROVED`, not only `ReviewerAgent`.
+
+That is usually what you want for an approval gate. When it isn't, the condition has to scope itself
+using `TerminationContext.AgentId`:
+
+```csharp
+public sealed class ApprovedByReviewer : IWorkflowTerminationCondition
+{
+    public bool ShouldTerminate(TerminationContext context) =>
+        context.AgentId == "ReviewerAgent"
+        && context.LastMessage?.Text?.Contains("APPROVED") == true;
+}
+```
+
+Two things to know about `AgentId` before comparing against it:
+
+- **It differs by layer.** Under Layer 1 it is the agent's *published* name — the class name, or
+  `[FoundryAgent(Name = "...")]` when one is declared. Under Layer 2 it is the workflow executor id.
+  A condition written for one layer will not necessarily match under the other.
+- **It can be empty.** The initial input message carries no author, so the first evaluation sees an
+  empty string. Compare defensively rather than assuming an agent name is always present.
+
+The built-in conditions do not scope themselves, by design — they match on content alone.
+
 When an agent carries `[WorkflowRunTerminationCondition]`, the generator emits a paired `Run*Async` method that packages creation and execution together with the declared conditions already wired in:
 
 ```csharp
@@ -521,7 +550,7 @@ When an agent carries `[WorkflowRunTerminationCondition]`, the generator emits a
 var responses = await factory.RunContentPipelineSequentialWorkflowAsync(message);
 ```
 
-Built-in conditions: `KeywordTerminationCondition`, `RegexTerminationCondition`. Custom conditions implement `IWorkflowTerminationCondition`.
+Built-in conditions: `KeywordTerminationCondition`, `RegexTerminationCondition`, `ToolCallTerminationCondition`. Custom conditions implement `IWorkflowTerminationCondition`.
 
 ### Topology graph diagnostic
 

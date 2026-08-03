@@ -10,8 +10,14 @@ namespace GroupChatAgentFrameworkApp.Agents;
 /// <remarks>
 /// The <see cref="AgentTerminationConditionAttribute"/> wires a
 /// <see cref="KeywordTerminationCondition"/> into the <c>RoundRobinGroupChatManager</c>
-/// at workflow-creation time. When this agent's response contains "CONSENSUS: APPROVED",
-/// the group chat stops before the next iteration begins — no extra code in Program.cs required.
+/// at workflow-creation time. When a response contains "CONSENSUS: APPROVED", the group chat
+/// stops before the next iteration begins — no extra code in Program.cs required.
+/// <para>
+/// The condition is evaluated after every participant's turn, not only this agent's. It works here
+/// because only this agent is instructed to emit those verdict phrases; a reviewer that happened to
+/// quote one would stop the chat too. A condition that must be restricted to one agent has to
+/// compare <c>TerminationContext.AgentId</c> itself.
+/// </para>
 /// </remarks>
 [FoundryAgent(
     Description = "Synthesises reviewer feedback and delivers a final consensus verdict.",
