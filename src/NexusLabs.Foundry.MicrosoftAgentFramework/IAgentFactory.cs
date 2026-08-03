@@ -25,7 +25,8 @@ public interface IAgentFactory
     /// </summary>
     /// <typeparam name="TAgent">
     /// A class decorated with <see cref="FoundryAgentAttribute"/>.
-    /// The class name becomes the agent's <c>Name</c>.
+    /// The agent's <c>Name</c> is <see cref="FoundryAgentAttribute.Name"/> when declared and the
+    /// class name otherwise.
     /// </typeparam>
     /// <exception cref="InvalidOperationException">
     /// Thrown when <typeparamref name="TAgent"/> is not decorated with <see cref="FoundryAgentAttribute"/>.
@@ -51,31 +52,32 @@ public interface IAgentFactory
 
     /// <summary>
     /// Creates a new <see cref="AIAgent"/> by looking up the registered type for
-    /// <paramref name="agentClassName"/> and reading its <see cref="FoundryAgentAttribute"/>.
+    /// <paramref name="agentName"/> and reading its <see cref="FoundryAgentAttribute"/>.
     /// </summary>
-    /// <param name="agentClassName">
-    /// The simple class name or the fully-qualified type name of an agent registered via
+    /// <param name="agentName">
+    /// The published name or the fully-qualified type name of an agent registered via
     /// <c>AddAgent&lt;T&gt;()</c>, <c>AddAgentsFromGenerated()</c>, or the source generator
-    /// bootstrap. Simple names are addressable because each agent class name must be unique across
-    /// namespaces; the fully-qualified name always resolves.
+    /// bootstrap. The published name is <see cref="FoundryAgentAttribute.Name"/> when declared and
+    /// the simple class name otherwise; it is addressable because each agent must publish a unique
+    /// name across namespaces. The fully-qualified name always resolves.
     /// </param>
     /// <exception cref="InvalidOperationException">
     /// Thrown when no agent with the given name is registered.
     /// </exception>
-    AIAgent CreateAgent(string agentClassName);
+    AIAgent CreateAgent(string agentName);
 
     /// <summary>
     /// Creates a new <see cref="AIAgent"/> by looking up the registered type for
-    /// <paramref name="agentClassName"/>, reading its <see cref="FoundryAgentAttribute"/>,
+    /// <paramref name="agentName"/>, reading its <see cref="FoundryAgentAttribute"/>,
     /// then applying the <paramref name="configure"/> callback to override per-run values.
     /// </summary>
-    /// <param name="agentClassName">
-    /// The simple class name or the fully-qualified type name of an agent type.
+    /// <param name="agentName">
+    /// The published name or the fully-qualified type name of an agent type.
     /// </param>
     /// <param name="configure">
     /// Callback to override attribute-populated defaults.
     /// </param>
-    AIAgent CreateAgent(string agentClassName, Action<AgentFactoryOptions> configure);
+    AIAgent CreateAgent(string agentName, Action<AgentFactoryOptions> configure);
 
     /// <summary>
     /// Resolves the set of <see cref="AITool"/> instances that would be wired

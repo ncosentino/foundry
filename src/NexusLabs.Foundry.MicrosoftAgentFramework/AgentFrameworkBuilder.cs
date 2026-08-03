@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -106,8 +108,8 @@ public sealed record AgentFrameworkBuilder
     }
 
     /// <summary>
-    /// Maps every registered agent type by its fully-qualified name, and additionally by its simple
-    /// class name so a caller can address an agent without repeating its namespace.
+    /// Maps every registered agent type by its fully-qualified name, and additionally by the name it
+    /// is published under so a caller can address an agent without repeating its namespace.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -115,15 +117,22 @@ public sealed record AgentFrameworkBuilder
     /// unique and it is what a caller must fall back to.
     /// </para>
     /// <para>
-    /// A simple name shared by two agents is rejected rather than silently resolving to whichever
+    /// The published name comes from <see cref="FoundryAgentName"/>, so declaring
+    /// <c>[FoundryAgent(Name = "…")]</c> changes what this map is keyed on. The class name is not
+    /// also kept as an alias in that case: the point of declaring a name is that exactly one name is
+    /// published, and keeping the class name addressable alongside it would leave the class rename
+    /// the declaration was meant to survive still able to break a caller.
+    /// </para>
+    /// <para>
+    /// A published name shared by two agents is rejected rather than silently resolving to whichever
     /// registered first, or being quietly dropped in favour of fully-qualified lookup. Both of those
     /// would let a workflow document or a configuration string keep working while addressing an
     /// agent nobody intended. Failing here surfaces the collision at composition, where the fix is
-    /// to rename one of the classes.
+    /// to rename one of them.
     /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">
-    /// Two agent types share a fully-qualified name, or two share a simple class name.
+    /// Two agent types share a fully-qualified name, or two share a published name.
     /// </exception>
     private static Dictionary<string, Type> BuildAgentTypeMap(IReadOnlyList<Type> agentTypes)
     {
@@ -140,25 +149,38 @@ public sealed record AgentFrameworkBuilder
             }
         }
 
-        var simpleNameGroups = agentTypes.GroupBy(agentType => agentType.Name, StringComparer.Ordinal);
+        var publishedNameGroups = agentTypes.GroupBy(FoundryAgentName.Resolve, StringComparer.Ordinal);
 
-        foreach (var group in simpleNameGroups)
+        foreach (var group in publishedNameGroups)
         {
             var candidates = group.ToList();
             if (candidates.Count > 1)
             {
                 throw new InvalidOperationException(
-                    $"Ambiguous agent name '{group.Key}': it is declared by " +
-                    $"{string.Join(" and ", candidates.Select(c => $"'{c.FullName}'"))}. " +
-                    "Agents are addressable by simple class name, so each [FoundryAgent] class " +
-                    "must have a unique class name even across namespaces. Rename one of them.");
+                    $"Ambiguous agent name '{group.Key}': it is published by " +
+                    $"{string.Join(" and ", candidates.Select(DescribeNameSource))}. " +
+                    "Agents are addressable by their published name, so each [FoundryAgent] class " +
+                    "must publish a unique name even across namespaces. Rename one of them, or give " +
+                    "one a distinct [FoundryAgent(Name = \"…\")].");
             }
 
-            // A simple name identical to some other agent's full name would otherwise overwrite it,
-            // so the unambiguous full-name mapping wins and the alias is skipped.
+            // A published name identical to some other agent's full name would otherwise overwrite
+            // it, so the unambiguous full-name mapping wins and the alias is skipped.
             agentTypeMap.TryAdd(group.Key, candidates[0]);
         }
 
         return agentTypeMap;
+    }
+
+    /// <summary>
+    /// Describes where an agent's published name came from, so a collision message distinguishes a
+    /// declared name from one derived from the class name and names the file to edit either way.
+    /// </summary>
+    private static string DescribeNameSource(Type agentType)
+    {
+        var declared = agentType.GetCustomAttribute<FoundryAgentAttribute>()?.Name;
+        return string.IsNullOrWhiteSpace(declared)
+            ? $"'{agentType.FullName}' (from its class name)"
+            : $"'{agentType.FullName}' (declared as [FoundryAgent(Name = \"{declared}\")])";
     }
 }

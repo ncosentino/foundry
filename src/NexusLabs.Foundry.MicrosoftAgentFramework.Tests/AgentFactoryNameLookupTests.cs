@@ -1,12 +1,14 @@
+using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Tests;
 
 /// <summary>
-/// Covers name-based agent lookup, which had no coverage and whose implementation contradicted its
-/// documented contract: the map was keyed only on <see cref="Type.FullName"/> while the interface
-/// promised simple class names.
+/// Covers the name an agent is published under: the key <see cref="IAgentFactory.CreateAgent(string)"/>
+/// resolves and the value of <see cref="AIAgent.Name"/>. The lookup once had no coverage and
+/// contradicted its documented contract, keying only on <see cref="Type.FullName"/> while the
+/// interface promised simple class names.
 /// </summary>
 public sealed class AgentFactoryNameLookupTests
 {
@@ -78,6 +80,122 @@ public sealed class AgentFactoryNameLookupTests
             typeof(Collisions.LookupWriterAgent).FullName!,
             exception.Message,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CreateAgent_DeclaredName_Resolves()
+    {
+        using var provider = BuildProvider(builder => builder.AddAgent<NamedEditorAgent>());
+        var factory = provider.GetRequiredService<IAgentFactory>();
+
+        var agent = factory.CreateAgent("PublishedEditor");
+
+        Assert.Equal("PublishedEditor", agent.Name);
+    }
+
+    /// <remarks>
+    /// The published name is the agent's identity, not an additional alias beside the class name.
+    /// Keeping the class name addressable would leave the rename that declaring a name exists to
+    /// survive still able to break a caller, so it stops resolving.
+    /// </remarks>
+    [Fact]
+    public void CreateAgent_ClassNameOfAnAgentThatDeclaresAName_DoesNotResolve()
+    {
+        using var provider = BuildProvider(builder => builder.AddAgent<NamedEditorAgent>());
+        var factory = provider.GetRequiredService<IAgentFactory>();
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => factory.CreateAgent(nameof(NamedEditorAgent)));
+
+        Assert.Contains(nameof(NamedEditorAgent), exception.Message, StringComparison.Ordinal);
+        Assert.Contains("PublishedEditor", exception.Message, StringComparison.Ordinal);
+    }
+
+    /// <remarks>
+    /// The fully-qualified name is the caller's fallback, so declaring a name must not take it away.
+    /// </remarks>
+    [Fact]
+    public void CreateAgent_FullyQualifiedNameOfAnAgentThatDeclaresAName_StillResolves()
+    {
+        using var provider = BuildProvider(builder => builder.AddAgent<NamedEditorAgent>());
+        var factory = provider.GetRequiredService<IAgentFactory>();
+
+        var agent = factory.CreateAgent(typeof(NamedEditorAgent).FullName!);
+
+        Assert.Equal("PublishedEditor", agent.Name);
+    }
+
+    /// <remarks>
+    /// <see cref="AIAgent.Name"/> becomes the author of every message the agent produces and the
+    /// <c>gen_ai.agent.name</c> telemetry dimension, so it has to follow the declared name rather
+    /// than staying on the class name.
+    /// </remarks>
+    [Fact]
+    public void CreateAgent_DeclaredName_BecomesTheAgentName()
+    {
+        using var provider = BuildProvider(builder => builder.AddAgent<NamedEditorAgent>());
+        var factory = provider.GetRequiredService<IAgentFactory>();
+
+        var agent = factory.CreateAgent<NamedEditorAgent>();
+
+        Assert.Equal("PublishedEditor", agent.Name);
+    }
+
+    [Fact]
+    public void BuildAgentFactory_TwoAgentsDeclareTheSameName_FailsClosed()
+    {
+        using var provider = BuildProvider(builder => builder
+            .AddAgent<NamedEditorAgent>()
+            .AddAgent<RivalEditorAgent>());
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            provider.GetRequiredService<IAgentFactory>);
+
+        Assert.Contains("PublishedEditor", exception.Message, StringComparison.Ordinal);
+        Assert.Contains(
+            typeof(RivalEditorAgent).FullName!, exception.Message, StringComparison.Ordinal);
+        Assert.Contains(
+            typeof(NamedEditorAgent).FullName!, exception.Message, StringComparison.Ordinal);
+    }
+
+    /// <remarks>
+    /// Only one of the two declarations mentions the shared name here, so this is the collision a
+    /// reader is least likely to spot. The message has to say which side declared it.
+    /// </remarks>
+    [Fact]
+    public void BuildAgentFactory_DeclaredNameCollidesWithAnotherClassName_FailsClosed()
+    {
+        using var provider = BuildProvider(builder => builder
+            .AddAgent<LookupWriterAgent>()
+            .AddAgent<ImpersonatingWriterAgent>());
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            provider.GetRequiredService<IAgentFactory>);
+
+        Assert.Contains(nameof(LookupWriterAgent), exception.Message, StringComparison.Ordinal);
+        Assert.Contains("declared as", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("from its class name", exception.Message, StringComparison.Ordinal);
+    }
+
+    /// <remarks>
+    /// A failed lookup is most often a spelling or a registration problem, and both are answered by
+    /// showing what is actually registered.
+    /// </remarks>
+    [Fact]
+    public void CreateAgent_UnregisteredName_ListsTheRegisteredNames()
+    {
+        using var provider = BuildProvider(builder => builder
+            .AddAgent<LookupWriterAgent>()
+            .AddAgent<NamedEditorAgent>());
+        var factory = provider.GetRequiredService<IAgentFactory>();
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => factory.CreateAgent("NotRegisteredAgent"));
+
+        Assert.Contains(nameof(LookupWriterAgent), exception.Message, StringComparison.Ordinal);
+        Assert.Contains("PublishedEditor", exception.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            typeof(LookupWriterAgent).FullName!, exception.Message, StringComparison.Ordinal);
     }
 
     private static ServiceProvider BuildProvider(

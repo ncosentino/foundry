@@ -392,4 +392,18 @@ public static class MafDiagnosticDescriptors
         isEnabledByDefault: true,
         description: "When an [AgentFunction] string parameter is named like JSON (Json/_json suffix) or described as containing JSON (\"JSON array\", \"JSON object\"), the underlying IChatClient may deliver it as a non-string JsonElement kind. The kind-tolerant generator coercion makes this work, but typing the parameter as System.Text.Json.JsonElement avoids the canonical-text round-trip and lets the tool body work with the parsed shape directly.",
         helpLinkUri: HelpLinkBase + "FDRYMAF030.md");
+
+    /// <summary>
+    /// FDRYMAF031: Two or more <c>[FoundryAgent]</c> classes publish the same name.
+    /// </summary>
+    public static readonly DiagnosticDescriptor DuplicateAgentName = new(
+        id: MafDiagnosticIds.DuplicateAgentName,
+        title: "Two declared agents publish the same name",
+        messageFormat: "Agent name '{0}' is published by {1}. Each [FoundryAgent] class must publish a unique name, so building the agent factory will throw. Rename one of the classes, or give one a distinct [FoundryAgent(Name = \"...\")].",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "An agent's published name is [FoundryAgent(Name = \"...\")] when declared and the simple class name otherwise. It is the key IAgentFactory.CreateAgent(string) resolves, the value of AIAgent.Name, and the gen_ai.agent.name telemetry dimension. Two agents sharing one makes the name ambiguous, so BuildAgentFactory() rejects it rather than resolving to whichever registered first.",
+        helpLinkUri: HelpLinkBase + "FDRYMAF031.md",
+        customTags: WellKnownDiagnosticTags.CompilationEnd);
 }

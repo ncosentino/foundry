@@ -16,6 +16,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class FoundryAgentAttribute : System.Attribute
     {
+        public string? Name { get; set; }
         public string? Instructions { get; set; }
         public string? Description { get; set; }
         public System.Type[]? FunctionTypes { get; set; }

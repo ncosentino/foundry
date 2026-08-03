@@ -189,4 +189,12 @@ public static class MafDiagnosticIds
     /// the string-typed shape work via <c>JsonElement.GetRawText()</c>.
     /// </summary>
     public const string AgentFunctionJsonStringParameter = "FDRYMAF030";
+
+    /// <summary>
+    /// FDRYMAF031: Two or more classes decorated with <c>[FoundryAgent]</c> publish the same
+    /// name. The published name is <c>[FoundryAgent(Name = "…")]</c> when declared and the class
+    /// name otherwise, and it is what <c>IAgentFactory.CreateAgent(string)</c> resolves, so a
+    /// duplicate makes the name unusable and is rejected when the agent factory is built.
+    /// </summary>
+    public const string DuplicateAgentName = "FDRYMAF031";
 }

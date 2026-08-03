@@ -53,31 +53,57 @@ internal sealed class AgentFactory : IAgentFactory
         return CreateAgentFromType(typeof(TAgent), configure);
     }
 
-    public AIAgent CreateAgent(string agentClassName)
+    public AIAgent CreateAgent(string agentName)
     {
-        ArgumentNullException.ThrowIfNull(agentClassName);
+        ArgumentNullException.ThrowIfNull(agentName);
 
-        if (!_agentTypeMap.TryGetValue(agentClassName, out var type))
+        if (!_agentTypeMap.TryGetValue(agentName, out var type))
             throw new InvalidOperationException(
-                $"No agent named '{agentClassName}' is registered. " +
+                $"No agent named '{agentName}' is registered. " +
                 $"Ensure the class is decorated with [FoundryAgent] and registered via " +
-                $"AddAgent<T>(), AddAgentsFromGenerated(), or the source generator [ModuleInitializer].");
+                $"AddAgent<T>(), AddAgentsFromGenerated(), or the source generator [ModuleInitializer]. " +
+                $"Agents are addressed by their published name — [FoundryAgent(Name = \"…\")] when " +
+                $"declared, otherwise the class name. Registered names: {DescribeRegisteredNames()}.");
 
         return CreateAgentFromType(type);
     }
 
-    public AIAgent CreateAgent(string agentClassName, Action<AgentFactoryOptions> configure)
+    public AIAgent CreateAgent(string agentName, Action<AgentFactoryOptions> configure)
     {
-        ArgumentNullException.ThrowIfNull(agentClassName);
+        ArgumentNullException.ThrowIfNull(agentName);
         ArgumentNullException.ThrowIfNull(configure);
 
-        if (!_agentTypeMap.TryGetValue(agentClassName, out var type))
+        if (!_agentTypeMap.TryGetValue(agentName, out var type))
             throw new InvalidOperationException(
-                $"No agent named '{agentClassName}' is registered. " +
+                $"No agent named '{agentName}' is registered. " +
                 $"Ensure the class is decorated with [FoundryAgent] and registered via " +
-                $"AddAgent<T>(), AddAgentsFromGenerated(), or the source generator [ModuleInitializer].");
+                $"AddAgent<T>(), AddAgentsFromGenerated(), or the source generator [ModuleInitializer]. " +
+                $"Agents are addressed by their published name — [FoundryAgent(Name = \"…\")] when " +
+                $"declared, otherwise the class name. Registered names: {DescribeRegisteredNames()}.");
 
         return CreateAgentFromType(type, configure);
+    }
+
+    /// <summary>
+    /// Lists the published names an agent can be addressed by, so a failed lookup shows the
+    /// available choices instead of leaving the caller to guess whether the name, the registration,
+    /// or the spelling is at fault.
+    /// </summary>
+    /// <remarks>
+    /// Fully-qualified entries are omitted: every agent contributes one, they are derivable from the
+    /// published names, and including them would double the length of a message whose value is being
+    /// short enough to read.
+    /// </remarks>
+    private string DescribeRegisteredNames()
+    {
+        var names = _agentTypeMap
+            .Where(entry => !string.Equals(
+                entry.Key, entry.Value.FullName, StringComparison.Ordinal))
+            .Select(entry => $"'{entry.Key}'")
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+
+        return names.Count == 0 ? "(none)" : string.Join(", ", names);
     }
 
     public IReadOnlyList<AITool> ResolveTools(Action<AgentFactoryOptions>? configure = null)
@@ -150,7 +176,7 @@ internal sealed class AgentFactory : IAgentFactory
             configure: opts =>
             {
                 // Populate from [FoundryAgent] attribute as defaults
-                opts.Name = agentType.Name;
+                opts.Name = FoundryAgentName.Resolve(attr, agentType);
                 opts.Description = attr.Description;
                 opts.Instructions = attr.Instructions;
                 opts.FunctionTypes = attr.FunctionTypes;
