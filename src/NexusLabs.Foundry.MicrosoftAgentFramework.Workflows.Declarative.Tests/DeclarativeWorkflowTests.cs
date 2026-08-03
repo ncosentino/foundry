@@ -67,6 +67,44 @@ public sealed class DeclarativeWorkflowTests
                 responseObject: Local.Response
         """;
 
+    private const string DeclaredNameWorkflow = """
+        kind: Workflow
+        trigger:
+
+          kind: OnConversationStart
+          id: declared_name_workflow
+          actions:
+
+            - kind: InvokeAzureAgent
+              id: summarize
+              agent:
+                name: Summarizer
+              input:
+                messages: =System.LastMessage
+              output:
+                autoSend: true
+                responseObject: Local.Summary
+        """;
+
+    private const string ClassNameWorkflow = """
+        kind: Workflow
+        trigger:
+
+          kind: OnConversationStart
+          id: class_name_workflow
+          actions:
+
+            - kind: InvokeAzureAgent
+              id: summarize
+              agent:
+                name: ReportDigestWriter
+              input:
+                messages: =System.LastMessage
+              output:
+                autoSend: true
+                responseObject: Local.Summary
+        """;
+
     /// <remarks>
     /// Structural malformation is used rather than an unrecognized action kind, because upstream's
     /// builder accepts unknown kinds without complaint; see the remarks on
@@ -97,6 +135,45 @@ public sealed class DeclarativeWorkflowTests
 
         Assert.Empty(outcome.Errors);
         Assert.Equal(["quantum computing"], host.ChatClient.PromptsFor("classified"));
+    }
+
+    /// <remarks>
+    /// The reason a document should be able to name an agent independently of its class: a workflow
+    /// document is hand-edited and never compiled, so binding it to a class name makes a rename a
+    /// runtime break with no compile-time signal.
+    /// </remarks>
+    [Fact]
+    public async Task Run_AgentAction_InvokesTheAgentByItsDeclaredNameNotItsClassName()
+    {
+        using var host = DeclarativeTestFixture.CreateHost();
+        var workflow = host.AgentFactory.CreateDeclarativeWorkflow(DeclaredNameWorkflow);
+
+        var outcome = await DeclarativeTestFixture.RunAsync(
+            workflow, "quantum computing", TestContext.Current.CancellationToken);
+
+        Assert.Empty(outcome.Errors);
+        Assert.Equal(["quantum computing"], host.ChatClient.PromptsFor("summarized"));
+    }
+
+    /// <remarks>
+    /// Declaring a name replaces the class name rather than adding a second way to say the same
+    /// thing, so a document still naming the class must fail. Were the class name kept addressable,
+    /// the rename the declaration exists to survive could still break the document.
+    /// </remarks>
+    [Fact]
+    public async Task Run_AgentAction_ClassNameOfAnAgentThatDeclaresAName_FailsNamingTheAction()
+    {
+        using var host = DeclarativeTestFixture.CreateHost();
+        var workflow = host.AgentFactory.CreateDeclarativeWorkflow(ClassNameWorkflow);
+
+        var outcome = await DeclarativeTestFixture.RunAsync(
+            workflow, "quantum computing", TestContext.Current.CancellationToken);
+
+        var error = Assert.Single(outcome.Errors);
+        Assert.Contains(nameof(ReportDigestWriter), error, StringComparison.Ordinal);
+        Assert.Contains("summarize", error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Summarizer", error, StringComparison.Ordinal);
+        Assert.Empty(host.ChatClient.PromptsFor("summarized"));
     }
 
     [Fact]

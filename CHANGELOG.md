@@ -9,6 +9,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- `FoundryAgentAttribute.Name`, declaring the name an agent is published under
+  independently of its class name. The published name is the key
+  `IAgentFactory.CreateAgent(string)` resolves — including from a declarative
+  workflow document — the value of `AIAgent.Name` and therefore the author of the
+  messages the agent produces, the `gen_ai.agent.name` telemetry dimension, and the
+  key a hosted agent is registered under for DevUI. All of those resolve it through
+  one place, `FoundryAgentName`, rather than each deriving it from `Type` separately.
+- `FDRYMAF031`, reporting two `[FoundryAgent]` classes that publish the same name at
+  compile time rather than leaving it to `BuildAgentFactory()` at startup.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Harness` package that
   builds the official upstream `Microsoft.Agents.AI.Harness` complete-bundle
   pipeline from fully explicit configuration and reports requested-versus-
@@ -46,6 +55,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Agents are addressed by their published name rather than always by their class
+  name. Behaviour is unchanged for agents that do not declare
+  `[FoundryAgent(Name = "...")]`, since the published name defaults to the class name.
+  Declaring one *replaces* the class-name alias rather than adding a second alias, so
+  `CreateAgent("<ClassName>")` stops resolving for that agent; the fully-qualified type
+  name always resolves. Adding `Name` to an existing agent is therefore a breaking
+  change for its own callers, by design — there is one published name, not two.
+- A failed `IAgentFactory.CreateAgent(string)` lookup now lists the registered
+  published names.
 - The Harness bundle owns the tool-invocation loop and OpenTelemetry for
   complete-bundle agents; Foundry emits no duplicate spans or metrics for that
   profile.

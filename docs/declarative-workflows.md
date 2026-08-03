@@ -80,12 +80,47 @@ trigger:
         responseObject: Local.Classification
 ```
 
-Agents are addressed by class name, matched exactly as
-`IAgentFactory.CreateAgent(string)` matches them. That couples a hand-edited document
-to a type name, so renaming an agent class breaks the workflow with no compile-time
-error — the document is not compiled, and there is no schema to validate it against.
-The fully-qualified type name also resolves, and is the way to disambiguate if you
-ever need it.
+Agents are addressed by their **published name**, matched exactly as
+`IAgentFactory.CreateAgent(string)` matches them. That is the simple class name by
+default, or `[FoundryAgent(Name = "...")]` when one is declared:
+
+```csharp
+[FoundryAgent(
+    Name = "Classifier",
+    Instructions = "Classify the report.")]
+public sealed class ClassifierAgent { }
+```
+
+```yaml
+      agent:
+        name: Classifier
+```
+
+Declaring a name matters here because a workflow document is hand-edited and is not
+compiled. Left as the class name, the document is coupled to a type name, and renaming
+the class breaks the workflow with no compile-time error — there is no schema to
+validate the document against either. Declaring the name instead lets the class be
+renamed freely, and moves the thing that must not change into a place an author can
+see. Renaming the *published* name still breaks the document, so pick it deliberately.
+
+Either way the failure is loud rather than silent. An unresolved name surfaces at the
+action that named it:
+
+```text
+DeclarativeActionException: Unhandled workflow failure - #classify (InvokeAzureAgent)
+ ---> InvalidOperationException: No agent named 'Clasifier' is registered. ...
+      Registered names: 'Classifier', 'ResponderAgent'.
+```
+
+Names must be unique across all declared agents; a collision is reported by
+[FDRYMAF031](analyzers/FDRYMAF031.md) at compile time and rejected when the agent
+factory is built. Because the name also reaches the model as part of a handoff tool
+name, prefer characters a provider accepts in a function name — letters, digits,
+hyphens, and underscores. Nothing in Foundry or the Agent Framework enforces that, so
+a name containing other characters may be rejected by the provider instead.
+
+The fully-qualified type name always resolves as well, and is the way to disambiguate
+if you ever need it.
 
 A complete runnable example is in
 `src/Examples/AgentFramework/DeclarativeWorkflowApp`. It runs entirely offline.

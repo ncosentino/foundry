@@ -7,8 +7,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests;
 /// </summary>
 /// <remarks>
 /// Declared with <see cref="FoundryAgentAttribute"/> rather than constructed inline, because a
-/// declarative document resolves agents through <see cref="IAgentFactory"/> by class name. Using the
-/// real declaration model is what makes these tests exercise the same path a consumer would.
+/// declarative document resolves agents through <see cref="IAgentFactory"/> by their published
+/// name. Using the real declaration model is what makes these tests exercise the same path a
+/// consumer would.
 /// </remarks>
 [FoundryAgent(
     Description = "Classifies an incoming report.",

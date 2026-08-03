@@ -81,8 +81,8 @@ public static class FoundryDevUIServiceCollectionExtensions
                 continue;
             }
 
-            var agentName = agentType.Name;
-            var agentFullName = agentType.FullName ?? agentName;
+            var agentName = FoundryAgentName.Resolve(attribute, agentType);
+            var agentFullName = agentType.FullName ?? agentType.Name;
 
             services.AddAIAgent(agentName, (sp, key) =>
             {

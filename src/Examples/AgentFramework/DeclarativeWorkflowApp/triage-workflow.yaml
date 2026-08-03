@@ -1,7 +1,11 @@
 #
 # A two-agent triage workflow. Neither agent is deployed anywhere: both are declared with
-# [FoundryAgent] and resolved by class name through Foundry's agent factory, which is what
-# lets this run offline.
+# [FoundryAgent] and resolved through Foundry's agent factory, which is what lets this run
+# offline.
+#
+# Agents are addressed by their published name. ClassifierAgent does not declare one, so its
+# class name is used. ResponderAgent declares [FoundryAgent(Name = "Responder")], so it is
+# addressed as "Responder" and its class can be renamed without editing this file.
 #
 kind: Workflow
 trigger:
@@ -31,7 +35,7 @@ trigger:
       id: respond
       displayName: Draft a response
       agent:
-        name: ResponderAgent
+        name: Responder
       input:
         messages: =Local.report
       output:

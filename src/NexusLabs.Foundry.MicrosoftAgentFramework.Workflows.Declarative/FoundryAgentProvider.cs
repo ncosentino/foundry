@@ -18,7 +18,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative;
 /// through <see cref="ResponseAgentProvider.InvokeAgentAsync"/> regardless of where the agent lives,
 /// so this provider resolves names through <see cref="IAgentFactory"/> instead — the same
 /// <c>[FoundryAgent]</c> declarations and source-generated registration the rest of Foundry uses.
-/// A workflow document therefore names an agent by its class name, exactly as
+/// A workflow document therefore names an agent by its published name, exactly as
 /// <see cref="IAgentFactory.CreateAgent(string)"/> already expects.
 /// </para>
 /// <para>

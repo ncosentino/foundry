@@ -15,7 +15,7 @@ internal static class DeclarativeTestFixture
     /// <remarks>
     /// Agents are registered explicitly rather than through the source generator's module
     /// initializer, because this test project does not reference the generator. The resolution path
-    /// under test — <see cref="IAgentFactory.CreateAgent(string)"/> by class name — is identical
+    /// under test — <see cref="IAgentFactory.CreateAgent(string)"/> by published name — is identical
     /// either way.
     /// </remarks>
     internal static DeclarativeTestHost CreateHost()
@@ -25,7 +25,8 @@ internal static class DeclarativeTestFixture
         services.AddFoundryAgentFramework(builder => builder
             .UsingChatClient(chatClient)
             .AddAgent<ClassifierAgent>()
-            .AddAgent<ResponderAgent>());
+            .AddAgent<ResponderAgent>()
+            .AddAgent<ReportDigestWriter>());
 
         var provider = services.BuildServiceProvider();
         return new DeclarativeTestHost(

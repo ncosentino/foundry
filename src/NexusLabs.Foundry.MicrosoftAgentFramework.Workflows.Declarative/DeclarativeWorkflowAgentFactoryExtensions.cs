@@ -33,7 +33,7 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
     /// <summary>
     /// Builds a workflow from a declarative YAML document.
     /// </summary>
-    /// <param name="agentFactory">Resolves the agents the document names by class name.</param>
+    /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
     /// <param name="workflowYaml">The complete document text.</param>
     /// <returns>An executable workflow accepting a string input.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="agentFactory"/> is <see langword="null"/>.</exception>
@@ -53,7 +53,7 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
     /// <summary>
     /// Builds a workflow from a declarative YAML document.
     /// </summary>
-    /// <param name="agentFactory">Resolves the agents the document names by class name.</param>
+    /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
     /// <param name="workflowYaml">A reader positioned at the start of the document.</param>
     /// <returns>An executable workflow accepting a string input.</returns>
     /// <exception cref="ArgumentNullException">Either argument is <see langword="null"/>.</exception>
@@ -99,7 +99,7 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
     /// is not declared, because neither is knowable until the action runs.
     /// </para>
     /// </remarks>
-    /// <param name="agentFactory">Resolves the agents the document names by class name.</param>
+    /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
     /// <param name="workflowYaml">The complete document text.</param>
     /// <returns>The validation outcome, including parse failure detail when invalid.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="agentFactory"/> is <see langword="null"/>.</exception>
