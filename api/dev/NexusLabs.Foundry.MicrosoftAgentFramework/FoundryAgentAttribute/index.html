@@ -3161,6 +3161,34 @@ all registered function types are used.</p>
 </code></pre></div>
 <h4 id="property-value_3">Property Value<a class="headerlink" href="#property-value_3" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.FoundryAgentAttribute.Name'></a></p>
+<h2 id="foundryagentattributename-property">FoundryAgentAttribute.Name Property<a class="headerlink" href="#foundryagentattributename-property" title="Permanent link">&para;</a></h2>
+<p>Gets or sets the name this agent is published under, overriding the class name.
+When <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a>, the simple class name is used.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">set</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h4 id="property-value_4">Property Value<a class="headerlink" href="#property-value_4" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<h3 id="remarks_1">Remarks<a class="headerlink" href="#remarks_1" title="Permanent link">&para;</a></h3>
+<p>This is the agent's identity everywhere a name rather than a type identifies it: the key for
+<a href="../IAgentFactory/#NexusLabs.Foundry.MicrosoftAgentFramework.IAgentFactory.CreateAgent(string)" title="NexusLabs.Foundry.MicrosoftAgentFramework.IAgentFactory.CreateAgent(string)">CreateAgent(string)</a>, the value of <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.aiagent.name" title="Microsoft.Agents.AI.AIAgent.Name">Microsoft.Agents.AI.AIAgent.Name</a> and
+therefore the author of the messages it produces, the <code>gen_ai.agent.name</code> telemetry
+dimension, and the key a hosted agent is registered under. Setting it here sets all of them,
+because they are all resolved from this one value.</p>
+<p>Set it when the published identity should outlive the class name — a workflow document that
+names agents in text, or a metrics dashboard that groups by agent, both keep working across a
+class rename only if the name is declared rather than derived.</p>
+<p>Setting a name <em>replaces</em> the class name as the addressable alias: once
+<code>[FoundryAgent(Name = "Triage")]</code> is applied to <code>TriageAgent</code>,
+<code>CreateAgent("TriageAgent")</code> no longer resolves and <code>CreateAgent("Triage")</code> does.
+There is one published name, not two. The fully-qualified type name always resolves as well,
+regardless of this property.</p>
+<p>Names must be unique across all declared agents, exactly as class names must be; a collision
+is reported by <code>FDRYMAF031</code> at compile time and rejected when the factory is built.
+Because the name reaches the model as part of a handoff tool name, prefer characters a
+provider accepts in a function name — letters, digits, hyphens, and underscores. Nothing
+enforces that here, so a name containing other characters may be rejected by the provider
+rather than by Foundry.</p>
 
 
 
