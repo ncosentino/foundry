@@ -18,8 +18,8 @@ public sealed class HarnessCapabilityProfileTests
                 []));
 
         Assert.Equal(1, profile.SchemaVersion);
-        Assert.Equal("1.15.0", profile.MafVersion);
-        Assert.Equal("maf-1.15.0", profile.MiddlewareOrderVersion);
+        Assert.Equal("1.16.0", profile.MafVersion);
+        Assert.Equal("maf-1.16.0", profile.MiddlewareOrderVersion);
         Assert.Equal(HarnessDeliveryPhase.G2, profile.EvidenceThroughPhase);
         Assert.True(profile.IsExecutable);
         Assert.Equal(HarnessConstructionLane.SelectedProviders, profile.Lane);

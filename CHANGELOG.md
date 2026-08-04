@@ -55,6 +55,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Upgraded Microsoft Agent Framework to 1.16.0 (from 1.15.0),
+  Microsoft.Extensions.AI to 10.8.3 and its Evaluation packages to 10.8.0 (from
+  10.6.0), and the OpenAI SDK to 2.12.0 (from 2.10.0). No Foundry source change
+  was required; upstream shipped no breaking changes across this range. The
+  Harness middleware-order pin moved to `maf-1.16.0` after re-proving the
+  ordering ADR-0008 requires: the hybrid compaction node is still observed on
+  every intermediate tool round and every message-injection-driven extra call.
+  Foundry's existing workarounds all remain necessary — upstream compaction is
+  still evaluated once per agent turn, `FunctionInvokingChatClient` still turns
+  `FunctionInvoker` exceptions into tool-error results, and the declarative
+  workflow package is still not NativeAOT compatible.
 - Agents are addressed by their published name rather than always by their class
   name. Behaviour is unchanged for agents that do not declare
   `[FoundryAgent(Name = "...")]`, since the published name defaults to the class name.

@@ -23,7 +23,7 @@ public sealed class FoundryHarnessAgentFactory
     /// <summary>
     /// The exact upstream marker name for the hosted web search tool
     /// (<c>Microsoft.Extensions.AI.HostedWebSearchTool().Name</c>), confirmed by live
-    /// instantiation against <c>Microsoft.Agents.AI.Harness</c> 1.15.0. When
+    /// instantiation against <c>Microsoft.Agents.AI.Harness</c> 1.16.0. When
     /// <see cref="FoundryHarnessFeatureSelections.EnableWebSearch"/> is <see langword="true"/>, the
     /// upstream bundle adds a tool with exactly this name to <c>ChatOptions.Tools</c>; a
     /// caller-supplied tool sharing this name would collide with it.
