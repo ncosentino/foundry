@@ -160,6 +160,17 @@ applies — none of which is knowable here. Upstream provides:
   sends whatever the document asks, wherever the document names. That suits a trusted
   document and is a poor default for one that is not.
 
+A runnable example against a real MCP server is in
+`src/Examples/AgentFramework/DeclarativeMcpWorkflowApp`. Start a server first:
+
+```bash
+PORT=3111 npx -y @modelcontextprotocol/server-everything streamableHttp
+```
+
+The tool's result surfaces both in the `responseObject` variable and as an
+`AgentResponseEvent` on the workflow stream, so a caller watching the stream sees it
+without reading workflow state.
+
 ### The `InvokeMcpTool` action
 
 There is no published schema for this action. The shape below was established by running

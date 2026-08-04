@@ -1,0 +1,42 @@
+#
+# A declarative workflow that calls a real MCP server tool, then hands control to a
+# Foundry-declared agent.
+#
+# The MCP action reaches the server named in serverUrl. Argument values are Power Fx
+# expressions evaluated against workflow state before the handler is called, so the tool
+# receives a resolved value rather than expression text.
+#
+kind: Workflow
+trigger:
+
+  kind: OnConversationStart
+  id: mcp_workflow
+  actions:
+
+    - kind: SetVariable
+      id: capture_request
+      displayName: Capture the incoming request
+      variable: Local.request
+      value: =System.LastMessage.Text
+
+    - kind: InvokeMcpTool
+      id: call_echo
+      displayName: Call the MCP server's echo tool
+      serverUrl: http://localhost:3111/mcp
+      serverLabel: everything
+      toolName: echo
+      arguments:
+        message: =Local.request
+      output:
+        responseObject: Local.EchoResult
+
+    - kind: InvokeAzureAgent
+      id: summarize
+      displayName: Report on what the tool returned
+      agent:
+        name: EchoSummarizer
+      input:
+        messages: =Local.request
+      output:
+        autoSend: true
+        responseObject: Local.Summary

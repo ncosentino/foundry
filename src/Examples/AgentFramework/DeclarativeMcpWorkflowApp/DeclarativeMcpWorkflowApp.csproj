@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);MAAI001;MAAIW001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Upstream's default MCP tool handler. Deliberately referenced here rather than by
+         NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative: taking it there would put
+         ModelContextProtocol in front of every declarative consumer, including those whose
+         documents invoke no MCP servers at all. -->
+    <PackageReference Include="Microsoft.Agents.AI.Workflows.Declarative.Mcp" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework\NexusLabs.Foundry.MicrosoftAgentFramework.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="mcp-workflow.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
