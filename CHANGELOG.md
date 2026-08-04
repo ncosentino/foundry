@@ -62,6 +62,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Digest-pinned `foundry-ci` PitCrew profile and portable exact-SDK setup action
   that skips downloads only when every required SDK is already installed.
 
+### Fixed
+
+- `NexusLabs.Foundry.MicrosoftAgentFramework` now references
+  `Microsoft.Extensions.AI` and `Microsoft.Extensions.AI.Abstractions` directly
+  instead of receiving them through `Microsoft.Agents.AI`. That dependency floors
+  MEAI rather than pinning it, and central package management only applies to
+  packages a project actually references, so the centrally managed version was
+  silently ignored for the core package and everything downstream of it: the
+  props file said 10.8.3 while the resolved assemblies were 10.7.0. Consumers of
+  the published package were likewise resolving whatever the Agent Framework's
+  floor happened to be rather than the version Foundry tests against.
+
 ### Changed
 
 - Upgraded Microsoft Agent Framework to 1.16.0 (from 1.15.0),

@@ -11,6 +11,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Agents.AI" />
     <PackageReference Include="Microsoft.Agents.AI.Workflows" />
+    <!-- Referenced directly, not left to arrive transitively through Microsoft.Agents.AI. That
+         dependency floors Microsoft.Extensions.AI rather than pinning it, so without this the
+         centrally managed version is silently ignored and the resolved version is whatever the
+         Agent Framework's floor happens to be. -->
+    <PackageReference Include="Microsoft.Extensions.AI" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 
