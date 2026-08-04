@@ -9,6 +9,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- `DeclarativeWorkflowHandlers`, wiring the MCP tool and HTTP request handlers a
+  declarative document may call out through. Both members are required, so a host
+  states whether documents may reach those endpoints rather than defaulting into
+  it. Foundry supplies no implementation of either: upstream's
+  `DefaultMcpToolHandler` lives in `Microsoft.Agents.AI.Workflows.Declarative.Mcp`,
+  and taking that dependency would put `ModelContextProtocol` in front of every
+  declarative consumer. An `InvokeMcpTool` action without a wired handler is
+  rejected while the workflow is built, so `ValidateDeclarativeWorkflow` reports
+  it.
 - `FoundryAgentAttribute.Name`, declaring the name an agent is published under
   independently of its class name. The published name is the key
   `IAgentFactory.CreateAgent(string)` resolves — including from a declarative

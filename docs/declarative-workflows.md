@@ -125,6 +125,62 @@ if you ever need it.
 A complete runnable example is in
 `src/Examples/AgentFramework/DeclarativeWorkflowApp`. It runs entirely offline.
 
+## Calling out to MCP tools and HTTP endpoints
+
+A document can reach outside the workflow three ways: an agent, an MCP server tool, or
+an HTTP endpoint. Agents are always wired — that is what this package is for. The other
+two are not, because each reaches a network endpoint the **host** has to decide to
+trust, not the document and not Foundry.
+
+Supply them explicitly:
+
+```csharp
+var workflow = agentFactory.CreateDeclarativeWorkflow(
+    workflowYaml,
+    new DeclarativeWorkflowHandlers
+    {
+        McpToolHandler = new DefaultMcpToolHandler(/* … */),
+        HttpRequestHandler = null,
+    });
+```
+
+Both members are `required`, so "documents may not do this" is stated as `null` rather
+than left unanswered. If your documents call out to neither, use the overloads that take
+no handlers at all.
+
+**Foundry ships no implementation of either interface.** An implementation decides which
+servers may be reached, what credentials are attached, and what timeout and retry policy
+applies — none of which is knowable here. Upstream provides:
+
+- `DefaultMcpToolHandler` in `Microsoft.Agents.AI.Workflows.Declarative.Mcp` (stable at
+  1.16.0, tracks the same version as the base package). Adding it pulls in
+  `ModelContextProtocol`, which is why Foundry does not take the dependency on your
+  behalf.
+- `DefaultHttpRequestHandler`, already in the base package. Note it is unrestricted — it
+  sends whatever the document asks, wherever the document names. That suits a trusted
+  document and is a poor default for one that is not.
+
+### The `InvokeMcpTool` action
+
+There is no published schema for this action. The shape below was established by running
+candidate documents and observing which reached the handler, and is pinned by tests:
+
+```yaml
+    - kind: InvokeMcpTool
+      id: call_tool
+      serverUrl: https://example.test/mcp   # required
+      serverLabel: example                  # optional
+      toolName: search                      # required
+      arguments:                            # optional
+        query: =System.LastMessage.Text     # values are Power Fx expressions
+      output:
+        responseObject: Local.ToolResult
+```
+
+Argument values are **expressions, not literals** — they are evaluated against workflow
+state before the handler is called, so a handler receives resolved values. Nesting the
+server under a `server:` key or the tool under a `tool:` key does not work.
+
 ## Validation
 
 Declarative workflows have **no published JSON Schema**, so parsing is the only
@@ -138,8 +194,13 @@ if (!validation.IsValid)
 }
 ```
 
-It reports what upstream's builder rejects, which is structural malformation. It does
-**not** catch every authoring mistake:
+It reports what upstream's builder rejects, which is structural malformation. That
+includes two MCP faults, both caught at build rather than at invocation:
+
+- an `InvokeMcpTool` action missing `serverUrl` or `toolName`;
+- an `InvokeMcpTool` action in a document built without an `McpToolHandler`.
+
+It does **not** catch every authoring mistake:
 
 - an unrecognized action `kind` is accepted without complaint;
 - an expression that will fail to evaluate cannot be detected until it runs;
