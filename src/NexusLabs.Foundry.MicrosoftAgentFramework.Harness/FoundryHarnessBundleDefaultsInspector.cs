@@ -7,7 +7,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// <remarks>
 /// This mapping is pure and evidence-derived from the upstream
 /// <c>Microsoft.Agents.AI.HarnessAgentOptions</c> XML documentation shipped with
-/// <c>Microsoft.Agents.AI.Harness</c> 1.15.0: it performs no reflection or probing of a live
+/// <c>Microsoft.Agents.AI.Harness</c> 1.16.0: it performs no reflection or probing of a live
 /// agent instance. Categorical dimensions this type does not yet expose (background agents,
 /// loop evaluation) are reported as unrequested limitations rather than silently omitted.
 /// </remarks>

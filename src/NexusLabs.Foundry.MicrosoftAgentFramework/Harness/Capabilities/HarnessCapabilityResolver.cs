@@ -7,7 +7,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Capabilities;
 internal sealed class HarnessCapabilityResolver
 {
     internal const int SchemaVersion = 1;
-    internal const string MiddlewareOrderVersion = "maf-1.15.0";
+    internal const string MiddlewareOrderVersion = "maf-1.16.0";
     internal static string MafVersion { get; } =
         typeof(AIAgent).Assembly.GetName().Version?.ToString(3) ??
         "unknown";

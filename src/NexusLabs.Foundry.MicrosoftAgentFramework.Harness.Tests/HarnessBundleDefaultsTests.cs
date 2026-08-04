@@ -6,7 +6,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// Proves that <see cref="FoundryHarnessAgentFactory.DescribeEffectiveDefaults(FoundryHarnessAgentConfiguration)"/>
 /// reports the exact requested-versus-effective disposition matrix (including the
 /// requested/effective axis and the separate backing-selection axis) for the installed
-/// <c>Microsoft.Agents.AI.Harness</c> 1.15.0 bundle: always-on-unavoidable dimensions, toggle
+/// <c>Microsoft.Agents.AI.Harness</c> 1.16.0 bundle: always-on-unavoidable dimensions, toggle
 /// dimensions tracking <see cref="FoundryHarnessFeatureSelections"/>, opt-in dimensions driven by
 /// backing-object presence, and dimensions not yet exposed by this API candidate reported as
 /// limitations rather than silently omitted. Also validates that

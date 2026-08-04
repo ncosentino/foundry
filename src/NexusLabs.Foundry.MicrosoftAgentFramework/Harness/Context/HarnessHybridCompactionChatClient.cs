@@ -18,7 +18,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <strong>Verified middleware order (MAF 1.15 / MEAI 10.6).</strong> The Foundry-composed pipeline this
+/// <strong>Verified middleware order (MAF 1.16 / MEAI 10.8).</strong> The Foundry-composed pipeline this
 /// node is installed beneath is, outermost to innermost:
 /// <c>ApprovalResponseBinding → ApprovalNotRequiredFunctionBypassing → FunctionInvokingChatClient →
 /// MessageInjectingChatClient → HarnessExecutionBindingChatClient → PerServiceCallChatHistoryPersistingChatClient
@@ -28,10 +28,11 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// fully down to this node; <c>PerServiceCallChatHistoryPersistingChatClient</c> prepends its loaded
 /// history before calling its inner client, so this node — being inner to it — always observes the
 /// complete, already-prepended message set for that exact call. This is why a per-call
-/// <see cref="IChatClient"/> decorator at this exact position is required, and why MAF 1.15's built-in
+/// <see cref="IChatClient"/> decorator at this exact position is required, and why MAF's built-in
 /// <c>AIContextProvider</c>/<c>CompactionProvider</c> seam — evaluated once per agent turn rather than
 /// once per provider request, and evaluated against a history index that has not yet observed the
 /// current tool round's result — is structurally insufficient for observing every intermediate request.
+/// Measured as identical on 1.15.0 and 1.16.0.
 /// </para>
 /// <para>
 /// <strong>No composition-root duplication.</strong> This node is constructed and installed entirely by
