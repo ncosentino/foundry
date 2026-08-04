@@ -1021,6 +1021,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#calling-out-to-mcp-tools-and-http-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calling out to MCP tools and HTTP endpoints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Calling out to MCP tools and HTTP endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invokemcptool-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The InvokeMcpTool action
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#validation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3400,17 +3428,74 @@ a name containing other characters may be rejected by the provider instead.</p>
 if you ever need it.</p>
 <p>A complete runnable example is in
 <code>src/Examples/AgentFramework/DeclarativeWorkflowApp</code>. It runs entirely offline.</p>
+<h2 id="calling-out-to-mcp-tools-and-http-endpoints">Calling out to MCP tools and HTTP endpoints<a class="headerlink" href="#calling-out-to-mcp-tools-and-http-endpoints" title="Permanent link">&para;</a></h2>
+<p>A document can reach outside the workflow three ways: an agent, an MCP server tool, or
+an HTTP endpoint. Agents are always wired — that is what this package is for. The other
+two are not, because each reaches a network endpoint the <strong>host</strong> has to decide to
+trust, not the document and not Foundry.</p>
+<p>Supply them explicitly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateDeclarativeWorkflow</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="n">workflowYaml</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">DeclarativeWorkflowHandlers</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">        </span><span class="n">McpToolHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultMcpToolHandler</span><span class="p">(</span><span class="cm">/* … */</span><span class="p">),</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="n">HttpRequestHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="p">});</span>
+</code></pre></div>
+<p>Both members are <code>required</code>, so "documents may not do this" is stated as <code>null</code> rather
+than left unanswered. If your documents call out to neither, use the overloads that take
+no handlers at all.</p>
+<p><strong>Foundry ships no implementation of either interface.</strong> An implementation decides which
+servers may be reached, what credentials are attached, and what timeout and retry policy
+applies — none of which is knowable here. Upstream provides:</p>
+<ul>
+<li><code>DefaultMcpToolHandler</code> in <code>Microsoft.Agents.AI.Workflows.Declarative.Mcp</code> (stable at
+  1.16.0, tracks the same version as the base package). Adding it pulls in
+  <code>ModelContextProtocol</code>, which is why Foundry does not take the dependency on your
+  behalf.</li>
+<li><code>DefaultHttpRequestHandler</code>, already in the base package. Note it is unrestricted — it
+  sends whatever the document asks, wherever the document names. That suits a trusted
+  document and is a poor default for one that is not.</li>
+</ul>
+<p>A runnable example against a real MCP server is in
+<code>src/Examples/AgentFramework/DeclarativeMcpWorkflowApp</code>. Start a server first:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">PORT</span><span class="o">=</span><span class="m">3111</span><span class="w"> </span>npx<span class="w"> </span>-y<span class="w"> </span>@modelcontextprotocol/server-everything<span class="w"> </span>streamableHttp
+</code></pre></div>
+<p>The tool's result surfaces both in the <code>responseObject</code> variable and as an
+<code>AgentResponseEvent</code> on the workflow stream, so a caller watching the stream sees it
+without reading workflow state.</p>
+<h3 id="the-invokemcptool-action">The <code>InvokeMcpTool</code> action<a class="headerlink" href="#the-invokemcptool-action" title="Permanent link">&para;</a></h3>
+<p>There is no published schema for this action. The shape below was established by running
+candidate documents and observing which reached the handler, and is pinned by tests:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">InvokeMcpTool</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">      </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">call_tool</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">      </span><span class="nt">serverUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://example.test/mcp</span><span class="w">   </span><span class="c1"># required</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">      </span><span class="nt">serverLabel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span><span class="w">                  </span><span class="c1"># optional</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">      </span><span class="nt">toolName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">search</span><span class="w">                      </span><span class="c1"># required</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">      </span><span class="nt">arguments</span><span class="p">:</span><span class="w">                            </span><span class="c1"># optional</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">        </span><span class="nt">query</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">=System.LastMessage.Text</span><span class="w">     </span><span class="c1"># values are Power Fx expressions</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="nt">output</span><span class="p">:</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">        </span><span class="nt">responseObject</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Local.ToolResult</span>
+</code></pre></div>
+<p>Argument values are <strong>expressions, not literals</strong> — they are evaluated against workflow
+state before the handler is called, so a handler receives resolved values. Nesting the
+server under a <code>server:</code> key or the tool under a <code>tool:</code> key does not work.</p>
 <h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
 <p>Declarative workflows have <strong>no published JSON Schema</strong>, so parsing is the only
 validation available. <code>Validate</code> makes it deliberate:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">validation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">ValidateDeclarativeWorkflow</span><span class="p">(</span><span class="n">workflowYaml</span><span class="p">);</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">validation</span><span class="p">.</span><span class="n">IsValid</span><span class="p">)</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">{</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">validation</span><span class="p">.</span><span class="n">ErrorMessage</span><span class="p">);</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">validation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">ValidateDeclarativeWorkflow</span><span class="p">(</span><span class="n">workflowYaml</span><span class="p">);</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">validation</span><span class="p">.</span><span class="n">IsValid</span><span class="p">)</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">{</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">validation</span><span class="p">.</span><span class="n">ErrorMessage</span><span class="p">);</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">}</span>
 </code></pre></div>
-<p>It reports what upstream's builder rejects, which is structural malformation. It does
-<strong>not</strong> catch every authoring mistake:</p>
+<p>It reports what upstream's builder rejects, which is structural malformation. That
+includes two MCP faults, both caught at build rather than at invocation:</p>
+<ul>
+<li>an <code>InvokeMcpTool</code> action missing <code>serverUrl</code> or <code>toolName</code>;</li>
+<li>an <code>InvokeMcpTool</code> action in a document built without an <code>McpToolHandler</code>.</li>
+</ul>
+<p>It does <strong>not</strong> catch every authoring mistake:</p>
 <ul>
 <li>an unrecognized action <code>kind</code> is accepted without complaint;</li>
 <li>an expression that will fail to evaluate cannot be detected until it runs;</li>
@@ -3420,8 +3505,8 @@ validation available. <code>Validate</code> makes it deliberate:</p>
 <p><code>ReportProgressTo</code> bridges the upstream event stream onto Foundry progress. Action
 lifecycle is taken from upstream's declarative events rather than the generic executor
 events, because only those carry the <strong>action id written in the document</strong>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>action-started:capture_report:SetVariable
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>action-started:classify:InvokeAzureAgent
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>action-started:capture_report:SetVariable
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>action-started:classify:InvokeAzureAgent
 </code></pre></div>
 <p>It is a pass-through: the original stream is yielded unchanged, so a caller can report
 progress and still do its own handling.</p>
@@ -3431,8 +3516,8 @@ progress and still do its own handling.</p>
 <p>The package is deliberately excluded from Foundry's NativeAOT profile. A probe that
 parsed a declarative document and published with <code>PublishAot=true</code> produced <strong>44 trim
 warnings and 41 AOT warnings</strong>, and the resulting native binary failed at startup:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>NotSupportedException: &#39;Microsoft.Agents.ObjectModel.RecurrenceFrequency[]&#39;
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>is missing native code or metadata.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>NotSupportedException: &#39;Microsoft.Agents.ObjectModel.RecurrenceFrequency[]&#39;
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>is missing native code or metadata.
 </code></pre></div>
 <p>That is a static type initializer, so nothing declarative runs at all under AOT. The
 cause is upstream-owned — Power Fx is an interpreter doing reflective function binding,
