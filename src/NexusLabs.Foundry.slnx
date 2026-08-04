@@ -4,6 +4,7 @@
     <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
     <Project Path="Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj" />
     <Project Path="Examples/AgentFramework/CodeReviewPipelineApp/CodeReviewPipelineApp.csproj" />
+    <Project Path="Examples/AgentFramework/DeclarativeMcpWorkflowApp/DeclarativeMcpWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/DeclarativeWorkflowApp/DeclarativeWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/DagRoutingApp.Agents/DagRoutingApp.Agents.csproj" />
     <Project Path="Examples/AgentFramework/DagRoutingApp/DagRoutingApp.csproj" />

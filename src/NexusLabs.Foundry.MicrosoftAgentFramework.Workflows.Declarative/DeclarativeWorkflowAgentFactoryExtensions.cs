@@ -33,6 +33,11 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
     /// <summary>
     /// Builds a workflow from a declarative YAML document.
     /// </summary>
+    /// <remarks>
+    /// A document that invokes an MCP tool or an HTTP endpoint fails at that action, because no
+    /// handler is wired. Use the overload taking <see cref="DeclarativeWorkflowHandlers"/> to wire
+    /// them.
+    /// </remarks>
     /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
     /// <param name="workflowYaml">The complete document text.</param>
     /// <returns>An executable workflow accepting a string input.</returns>
@@ -51,8 +56,39 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
     }
 
     /// <summary>
+    /// Builds a workflow from a declarative YAML document, wiring the handlers it may call out
+    /// through.
+    /// </summary>
+    /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
+    /// <param name="workflowYaml">The complete document text.</param>
+    /// <param name="handlers">The MCP and HTTP handlers the document may invoke.</param>
+    /// <returns>An executable workflow accepting a string input.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="agentFactory"/> or <paramref name="handlers"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentException"><paramref name="workflowYaml"/> is empty or whitespace-only.</exception>
+    /// <exception cref="DeclarativeWorkflowParseException">The document could not be parsed.</exception>
+    public static Workflow CreateDeclarativeWorkflow(
+        this IAgentFactory agentFactory,
+        string workflowYaml,
+        DeclarativeWorkflowHandlers handlers)
+    {
+        ArgumentNullException.ThrowIfNull(agentFactory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(workflowYaml);
+        ArgumentNullException.ThrowIfNull(handlers);
+
+        using var reader = new StringReader(workflowYaml);
+        return agentFactory.CreateDeclarativeWorkflow(reader, handlers);
+    }
+
+    /// <summary>
     /// Builds a workflow from a declarative YAML document.
     /// </summary>
+    /// <remarks>
+    /// A document that invokes an MCP tool or an HTTP endpoint fails at that action, because no
+    /// handler is wired. Use the overload taking <see cref="DeclarativeWorkflowHandlers"/> to wire
+    /// them.
+    /// </remarks>
     /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
     /// <param name="workflowYaml">A reader positioned at the start of the document.</param>
     /// <returns>An executable workflow accepting a string input.</returns>
@@ -65,7 +101,42 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
         ArgumentNullException.ThrowIfNull(agentFactory);
         ArgumentNullException.ThrowIfNull(workflowYaml);
 
-        var options = new DeclarativeWorkflowOptions(new FoundryAgentProvider(agentFactory));
+        return BuildWorkflow(agentFactory, workflowYaml, handlers: null);
+    }
+
+    /// <summary>
+    /// Builds a workflow from a declarative YAML document, wiring the handlers it may call out
+    /// through.
+    /// </summary>
+    /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
+    /// <param name="workflowYaml">A reader positioned at the start of the document.</param>
+    /// <param name="handlers">The MCP and HTTP handlers the document may invoke.</param>
+    /// <returns>An executable workflow accepting a string input.</returns>
+    /// <exception cref="ArgumentNullException">Any argument is <see langword="null"/>.</exception>
+    /// <exception cref="DeclarativeWorkflowParseException">The document could not be parsed.</exception>
+    public static Workflow CreateDeclarativeWorkflow(
+        this IAgentFactory agentFactory,
+        TextReader workflowYaml,
+        DeclarativeWorkflowHandlers handlers)
+    {
+        ArgumentNullException.ThrowIfNull(agentFactory);
+        ArgumentNullException.ThrowIfNull(workflowYaml);
+        ArgumentNullException.ThrowIfNull(handlers);
+
+        return BuildWorkflow(agentFactory, workflowYaml, handlers);
+    }
+
+    private static Workflow BuildWorkflow(
+        IAgentFactory agentFactory,
+        TextReader workflowYaml,
+        DeclarativeWorkflowHandlers? handlers)
+    {
+        var options = new DeclarativeWorkflowOptions(new FoundryAgentProvider(agentFactory))
+        {
+            McpToolHandler = handlers?.McpToolHandler,
+            HttpRequestHandler = handlers?.HttpRequestHandler,
+        };
+
         try
         {
             return DeclarativeWorkflowBuilder.Build<string>(
@@ -93,10 +164,13 @@ public static class DeclarativeWorkflowAgentFactoryExtensions
     /// or in a lint step — rather than discovering an authoring error partway through a run.
     /// </para>
     /// <para>
-    /// It reports what upstream's builder rejects, which is structural malformation. It does
-    /// <em>not</em> catch every authoring mistake: upstream accepts an action <c>kind</c> it does not
-    /// recognize, and it cannot detect an expression that will fail to evaluate or an agent name that
-    /// is not declared, because neither is knowable until the action runs.
+    /// It reports what upstream's builder rejects, which is structural malformation — including an
+    /// <c>InvokeMcpTool</c> action missing a required property, and one present in a document built
+    /// without an <see cref="DeclarativeWorkflowHandlers.McpToolHandler"/>. Both are rejected at
+    /// build rather than at invocation. It does <em>not</em> catch every authoring mistake: upstream
+    /// accepts an action <c>kind</c> it does not recognize, and it cannot detect an expression that
+    /// will fail to evaluate or an agent name that is not declared, because neither is knowable
+    /// until the action runs.
     /// </para>
     /// </remarks>
     /// <param name="agentFactory">Resolves the agents the document names by their published name.</param>
