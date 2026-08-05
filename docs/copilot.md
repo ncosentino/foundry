@@ -1,5 +1,5 @@
 ---
-description: Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support.
+description: Use GitHub Copilot as a direct IChatClient provider and choose between Foundry's HTTP client and Microsoft's CLI-backed AIAgent.
 ---
 
 # GitHub Copilot Integration
@@ -207,41 +207,80 @@ catch (CopilotRateLimitException ex)
 
 ---
 
-## Foundry Copilot vs GitHub Copilot SDK
+## Choosing a Copilot integration
 
-The official [GitHub Copilot SDK](https://github.com/github/copilot-sdk) (`GitHub.Copilot.SDK` on NuGet) provides a superset of what `NexusLabs.Foundry.Copilot` offers. Before choosing Foundry Copilot, understand the overlap:
+The official
+[`Microsoft.Agents.AI.GitHub.Copilot`](https://www.nuget.org/packages/Microsoft.Agents.AI.GitHub.Copilot)
+package is complementary to `NexusLabs.Foundry.Copilot`, not a replacement.
+They expose different abstractions and different runtime semantics:
 
-| Capability | Foundry Copilot | GitHub Copilot SDK |
+| Capability | `NexusLabs.Foundry.Copilot` | `Microsoft.Agents.AI.GitHub.Copilot` |
 |---|---|---|
-| `IChatClient` for Copilot models | ✅ `CopilotChatClient` (direct HTTP) | ✅ `CopilotClient` → `AsAIAgent()` (via CLI process) |
-| Token discovery (apps.json, env vars) | ✅ Manual implementation | ✅ Built-in, plus OAuth App and BYOK |
-| Streaming responses | ✅ SSE parsing | ✅ Full event stream with deltas |
-| Web search | ✅ `CopilotWebSearchFunction` (MCP endpoint) | ✅ Built-in CLI tool (same backend) |
-| Structured search results (citations, URLs) | ✅ `WebSearchResult` with `Citations` and `SearchQueries` | ❌ Consumed inside the agent loop, not exposed to your code |
-| Full agent loop (file edits, code search, bash) | ❌ | ✅ Full CLI tool set |
-| Multi-agent orchestration (MAF) | ❌ | ✅ `AsAIAgent()` with sequential/concurrent orchestrators |
-| Session persistence & resume | ❌ | ✅ Built-in |
-| Custom agents & skills | Via Foundry Agent Framework | ✅ Built-in |
-| Binary size | ~0 (HTTP-only, no CLI bundled) | ~100MB+ (bundles the Copilot CLI) |
-| Rate limits | Same (20 MCP req/min, premium request quota) | Same |
+| Primary contract | `IChatClient` | `AIAgent` |
+| Runtime | Direct HTTP | Copilot CLI process/runtime |
+| Conversation state | Caller supplies message history | Persistent/resumable SDK session |
+| Per-request options | `ChatOptions` model, sampling, stops, tools | Session-level `SessionConfig`; `AgentRunOptions` are not mapped |
+| Input message semantics | Roles and tool messages preserved | Message text is joined into one prompt; session holds history |
+| Function tools | Caller-supplied only | Caller tools plus permission-gated CLI capabilities |
+| Shell/file/URL capabilities | None | Built into the CLI runtime |
+| MCP servers | Copilot read-only web-search endpoint only | Local stdio and remote HTTP servers |
+| Structured web citations | `WebSearchResult.Citations` and `SearchQueries` | Not exposed by the MAF adapter |
+| Sessions, memory, skills, compaction | Caller/Foundry owned | SDK-native |
+| Child process | None | Default; remote/in-process connections are also available |
+| Model selection | Direct API IDs, per request | CLI catalog, per session; supports `auto` |
+| NativeAOT | Does not currently publish cleanly ([#171](https://github.com/ncosentino/foundry/issues/171)) | Live chat and custom tool call verified under NativeAOT |
+| Deployment footprint | Managed client only | Native host plus downloaded Copilot runtime (~162 MB in a measured win-x64 AOT publish) |
 
-### When to use Foundry Copilot
+### Use Foundry Copilot when
 
-- **You need structured web search results.** `WebSearchResult.Citations` gives your application code programmatic access to source URLs, titles, and character offsets — the SDK's agent loop consumes this data internally and only returns the agent's final text.
-- **You need a tiered provider fallback.** `CopilotRateLimitException` and `CopilotAuthException` integrate with `ITieredProviderSelector` so rate-limited or auth-rejected queries fall through to alternative search providers (DuckDuckGo, Bing API) without parsing English error prose. The SDK doesn't expose typed exceptions for provider-level routing.
-- **You want a lightweight `IChatClient`.** `CopilotChatClient` is a pure HTTP client (~0 binary overhead). The SDK bundles the entire Copilot CLI binary.
-- **You're already using Foundry's agent framework.** `CopilotToolSet` produces `AIFunction` instances that plug directly into `IterativeLoopOptions.AdditionalTools`.
+- **You need `IChatClient`.** It plugs into MEAI and Foundry middleware without
+  replacing the agent construction or tool loop.
+- **You need normal chat-history semantics.** System, user, assistant, and tool
+  messages are sent with their roles intact.
+- **You need per-request control.** `ChatOptions.ModelId`, sampling options,
+  stop sequences, and tools apply to each call.
+- **You need structured search results.** `WebSearchResult` exposes citations,
+  character offsets, and the search queries to application code.
+- **You cannot spawn a CLI process** or accept its deployment footprint.
 
-### When to use the GitHub Copilot SDK instead
+### Use the first-party MAF Copilot agent when
 
-- **You want the full agent experience.** The SDK runs the same agent loop as the Copilot CLI — file editing, code search, `web_fetch` (actual HTTP GET), bash/PowerShell, and more.
-- **You need multi-agent orchestration.** The SDK integrates with Microsoft Agent Framework for sequential, concurrent, and handoff workflows.
-- **You want session persistence.** The SDK persists conversation state to disk and supports resuming sessions.
-- **You want officially supported auth.** The SDK handles token management, OAuth app flows, and BYOK (bring your own API keys from OpenAI, Anthropic, etc.).
-- **You don't need programmatic access to search citations.** If the agent just needs to produce grounded research text, the SDK's built-in `web_search` tool gives the model the same citation data — you just can't inspect it from your code.
+- **You want the full Copilot CLI agent runtime.** It provides permission-gated
+  shell, file, URL, skill, memory, and MCP behavior.
+- **You need persistent SDK sessions.** Sessions can be serialized and resumed by
+  ID, with infinite-session compaction and workspace state.
+- **You need native Copilot hooks and approvals.** `ApprovalRequiredAIFunction`
+  is bridged to the SDK's pre-tool permission hook.
+- **You want the CLI's current model catalog.** Query `ListModelsAsync()` or use
+  `Model = "auto"` rather than assuming a direct-API model ID is available.
 
-!!! info "Both use the same backend"
-    Whether you call `web_search` via Foundry Copilot or the SDK, you're hitting the same GitHub Copilot MCP endpoint. The LLM decides whether to perform a Bing search — see the next section.
+### Model IDs are not portable
+
+The two paths use different model catalogs. In a measured run:
+
+- the direct API accepted `gpt-4.1`;
+- the SDK runtime rejected `gpt-4.1` as unavailable;
+- the SDK accepted `auto` and exposed its current GPT-5.x, Claude, Gemini, Grok,
+  and MAI catalog through `ListModelsAsync()`.
+
+Do not configure both paths with one shared model string without checking both
+catalogs.
+
+### Runtime and security
+
+The first-party package's transitive build targets download a platform-specific
+Copilot runtime from npm and copy it to `runtimes/<rid>/native`. Shell, file, URL,
+and MCP capabilities must be governed by a permission handler. Microsoft recommends
+running agents with shell or file permissions inside a container or similarly
+restricted environment.
+
+`CopilotChatClient` has no child process, but its token exchange uses GitHub's
+`/copilot_internal/v2/token` endpoint. That direct integration is lighter and more
+provider-neutral, but Foundry owns its compatibility risk.
+
+The runnable `CopilotComparisonExample` demonstrates the direct client and the
+underlying SDK runtime used by Microsoft's `AIAgent` adapter. It intentionally
+uses `gpt-4.1` for the direct client and `auto` for the SDK runtime.
 
 ---
 

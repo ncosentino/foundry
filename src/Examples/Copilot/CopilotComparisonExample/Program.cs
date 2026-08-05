@@ -12,8 +12,9 @@
 //               built-in tools. The agent decides which tools to use. Your code
 //               gets the final text response and tool execution events.
 //
-// Both approaches use the same Copilot subscription and hit the same backend.
-// The difference is what your APPLICATION CODE can observe.
+// Both approaches use the same Copilot subscription, but they use different
+// runtime contracts and model catalogs. The difference is not merely what
+// application code can observe.
 //
 // Requirements:
 //   - GitHub Copilot CLI authenticated (run `gh auth login`)
@@ -134,10 +135,13 @@ Console.WriteLine();
 try
 {
     await using var sdkClient = new CopilotClient();
+    await sdkClient.StartAsync();
     await using var session = await sdkClient.CreateSessionAsync(
         new SessionConfig
         {
-            Model = "gpt-4.1",
+            // The SDK runtime has its own model catalog. gpt-4.1 is accepted by
+            // the direct API above but is not available in the CLI catalog.
+            Model = "auto",
             OnPermissionRequest = PermissionHandler.ApproveAll,
         });
 
@@ -200,8 +204,8 @@ Console.WriteLine(new string('═', 70));
 Console.WriteLine("COMPARISON SUMMARY");
 Console.WriteLine(new string('═', 70));
 Console.WriteLine();
-Console.WriteLine("Both approaches used the same Copilot subscription, same query,");
-Console.WriteLine("same model. The key differences:");
+Console.WriteLine("Both approaches used the same Copilot subscription and query,");
+Console.WriteLine("but different runtime/model contracts. The key differences:");
 Console.WriteLine();
 Console.WriteLine("Foundry Copilot (Approach 1):");
 Console.WriteLine("  ✅ Syringe DI → IIterativeAgentLoop → CopilotChatClient");
@@ -217,4 +221,4 @@ Console.WriteLine("  ✅ Agent can chain tools (web_search → web_fetch → syn
 Console.WriteLine("  ✅ Tool events visible via session.On()");
 Console.WriteLine("  ❌ No structured citation access from your code");
 Console.WriteLine("  ❌ Not wired through Syringe — standalone SDK client");
-Console.WriteLine("  ❌ ~100MB CLI binary bundled in NuGet package");
+Console.WriteLine("  ❌ Build targets download/copy a ~125MB native CLI runtime");

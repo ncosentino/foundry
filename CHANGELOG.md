@@ -64,6 +64,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Corrected the Copilot comparison guidance after first-party integration
+  research. `NexusLabs.Foundry.Copilot` is an `IChatClient`; Microsoft's package
+  exposes a CLI-backed `AIAgent`, not another chat client. The two paths also
+  have different model catalogs: the direct API accepts `gpt-4.1`, while the
+  SDK runtime should use `auto` or a value returned by `ListModelsAsync()`.
 - The Copilot client and runnable examples now default to `gpt-4.1` instead of
   the retired `claude-sonnet-4.5`, which the Copilot API rejects with
   `model_not_supported`. Callers that set `ChatOptions.ModelId` or
