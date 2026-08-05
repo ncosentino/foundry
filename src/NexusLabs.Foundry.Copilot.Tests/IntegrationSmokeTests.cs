@@ -103,7 +103,7 @@ public class IntegrationSmokeTests
     {
         return new CopilotChatClient(new CopilotChatClientOptions
         {
-            DefaultModel = "claude-sonnet-4.5",
+            DefaultModel = "gpt-4.1",
         });
     }
 }
