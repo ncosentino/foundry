@@ -1617,6 +1617,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#nativeaot-tool-result-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NativeAOT tool-result contract
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3801,7 +3812,7 @@ They expose different abstractions and different runtime semantics:</p>
 </tr>
 <tr>
 <td>NativeAOT</td>
-<td>Does not currently publish cleanly (<a href="https://github.com/ncosentino/foundry/issues/171">#171</a>)</td>
+<td>Live text and dictionary-result tool loop verified</td>
 <td>Live chat and custom tool call verified under NativeAOT</td>
 </tr>
 <tr>
@@ -3856,6 +3867,22 @@ provider-neutral, but Foundry owns its compatibility risk.</p>
 <p>The runnable <code>CopilotComparisonExample</code> demonstrates the direct client and the
 underlying SDK runtime used by Microsoft's <code>AIAgent</code> adapter. It intentionally
 uses <code>gpt-4.1</code> for the direct client and <code>auto</code> for the SDK runtime.</p>
+<h3 id="nativeaot-tool-result-contract">NativeAOT tool-result contract<a class="headerlink" href="#nativeaot-tool-result-contract" title="Permanent link">&para;</a></h3>
+<p><code>NexusLabs.Foundry.Copilot</code> is marked NativeAOT-compatible and is published and
+executed by CI through <code>AotCopilotApp</code>. The fixture covers:</p>
+<ul>
+<li>tool schema serialization;</li>
+<li>model-supplied argument deserialization;</li>
+<li>a dictionary-valued tool result;</li>
+<li>the second provider request and final response.</li>
+</ul>
+<p>Structured tool arguments and results must use shapes registered in
+<code>CopilotJsonContext</code>, such as <code>JsonElement</code>, dictionaries with string keys, common
+numeric/temporal primitives, or the registered array/list shapes. An arbitrary CLR
+object whose runtime type has no generated JSON metadata falls back to <code>ToString()</code>
+instead of reflection serialization. The default record/class <code>ToString()</code> is usually
+not useful to a model; return a <code>JsonElement</code> or dictionary when it needs structured
+fields from a custom result type.</p>
 <hr />
 <h2 id="web-search-limitations">Web Search Limitations<a class="headerlink" href="#web-search-limitations" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
