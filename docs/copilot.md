@@ -228,7 +228,7 @@ They expose different abstractions and different runtime semantics:
 | Sessions, memory, skills, compaction | Caller/Foundry owned | SDK-native |
 | Child process | None | Default; remote/in-process connections are also available |
 | Model selection | Direct API IDs, per request | CLI catalog, per session; supports `auto` |
-| NativeAOT | Does not currently publish cleanly ([#171](https://github.com/ncosentino/foundry/issues/171)) | Live chat and custom tool call verified under NativeAOT |
+| NativeAOT | Live text and dictionary-result tool loop verified | Live chat and custom tool call verified under NativeAOT |
 | Deployment footprint | Managed client only | Native host plus downloaded Copilot runtime (~162 MB in a measured win-x64 AOT publish) |
 
 ### Use Foundry Copilot when
@@ -281,6 +281,24 @@ provider-neutral, but Foundry owns its compatibility risk.
 The runnable `CopilotComparisonExample` demonstrates the direct client and the
 underlying SDK runtime used by Microsoft's `AIAgent` adapter. It intentionally
 uses `gpt-4.1` for the direct client and `auto` for the SDK runtime.
+
+### NativeAOT tool-result contract
+
+`NexusLabs.Foundry.Copilot` is marked NativeAOT-compatible and is published and
+executed by CI through `AotCopilotApp`. The fixture covers:
+
+- tool schema serialization;
+- model-supplied argument deserialization;
+- a dictionary-valued tool result;
+- the second provider request and final response.
+
+Structured tool arguments and results must use shapes registered in
+`CopilotJsonContext`, such as `JsonElement`, dictionaries with string keys, common
+numeric/temporal primitives, or the registered array/list shapes. An arbitrary CLR
+object whose runtime type has no generated JSON metadata falls back to `ToString()`
+instead of reflection serialization. The default record/class `ToString()` is usually
+not useful to a model; return a `JsonElement` or dictionary when it needs structured
+fields from a custom result type.
 
 ---
 

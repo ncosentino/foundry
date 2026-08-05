@@ -118,17 +118,27 @@ jobs:
             --runtime linux-x64 \
             --self-contained \
             --output artifacts/aot
+          dotnet publish src/Examples/Copilot/AotCopilotApp/AotCopilotApp.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained \
+            --output artifacts/aot-copilot
 
       - name: Verify NativeAOT executable
         run: |
           test -f artifacts/aot/AotAgentFrameworkApp
           file artifacts/aot/AotAgentFrameworkApp
+          test -f artifacts/aot-copilot/AotCopilotApp
+          file artifacts/aot-copilot/AotCopilotApp | grep -q 'ELF.*executable'
+          artifacts/aot-copilot/AotCopilotApp
 
       - name: Upload NativeAOT artifact
         uses: actions/upload-artifact@v4
         with:
           name: foundry-aot-linux-x64
-          path: artifacts/aot/AotAgentFrameworkApp
+          path: |
+            artifacts/aot/AotAgentFrameworkApp
+            artifacts/aot-copilot/AotCopilotApp
 
   aot-harness:
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}

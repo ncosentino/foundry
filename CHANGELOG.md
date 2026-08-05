@@ -64,6 +64,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- `NexusLabs.Foundry.Copilot` now publishes cleanly with NativeAOT. Tool schemas
+  stay as `JsonElement`, function arguments and known result shapes use
+  source-generated `JsonTypeInfo`, and unknown CLR result types fall back to
+  `ToString()` rather than reflection serialization. The new `AotCopilotApp`
+  is published and executed in CI and covers a complete two-request tool loop
+  with a dictionary-valued result.
 - Corrected the Copilot comparison guidance after first-party integration
   research. `NexusLabs.Foundry.Copilot` is an `IChatClient`; Microsoft's package
   exposes a CLI-backed `AIAgent`, not another chat client. The two paths also

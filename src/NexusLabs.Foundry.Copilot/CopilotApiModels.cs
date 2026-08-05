@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace NexusLabs.Foundry.Copilot;
@@ -94,7 +95,7 @@ internal sealed class RequestToolFunction
     public string? Description { get; set; }
 
     [JsonPropertyName("parameters")]
-    public object? Parameters { get; set; }
+    public JsonElement? Parameters { get; set; }
 
     [JsonPropertyName("strict")]
     public bool? Strict { get; set; }
