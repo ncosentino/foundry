@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support.">
+        <meta name="description" content="Use GitHub Copilot as a direct IChatClient provider and choose between Foundry's HTTP client and Microsoft's CLI-backed AIAgent.">
       
       
         <meta name="author" content="Nick Cosentino">
@@ -65,12 +65,12 @@
   
   <meta property="og:type" content="website" />
   <meta property="og:title" content="GitHub Copilot – Foundry" />
-  <meta property="og:description" content="Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support." />
+  <meta property="og:description" content="Use GitHub Copilot as a direct IChatClient provider and choose between Foundry's HTTP client and Microsoft's CLI-backed AIAgent." />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   <meta property="og:url" content="https://www.devleader.ca/projects/foundry/copilot/" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="GitHub Copilot – Foundry" />
-  <meta name="twitter:description" content="Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support." />
+  <meta name="twitter:description" content="Use GitHub Copilot as a direct IChatClient provider and choose between Foundry's HTTP client and Microsoft's CLI-backed AIAgent." />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
   
@@ -1562,22 +1562,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#foundry-copilot-vs-github-copilot-sdk" class="md-nav__link">
+  <a href="#choosing-a-copilot-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Foundry Copilot vs GitHub Copilot SDK
+        Choosing a Copilot integration
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Foundry Copilot vs GitHub Copilot SDK">
+    <nav class="md-nav" aria-label="Choosing a Copilot integration">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#when-to-use-foundry-copilot" class="md-nav__link">
+  <a href="#use-foundry-copilot-when" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use Foundry Copilot
+        Use Foundry Copilot when
       
     </span>
   </a>
@@ -1585,10 +1585,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#when-to-use-the-github-copilot-sdk-instead" class="md-nav__link">
+  <a href="#use-the-first-party-maf-copilot-agent-when" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use the GitHub Copilot SDK instead
+        Use the first-party MAF Copilot agent when
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-ids-are-not-portable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model IDs are not portable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-and-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime and security
       
     </span>
   </a>
@@ -3703,93 +3725,137 @@
 <a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="p">}</span>
 </code></pre></div>
 <hr />
-<h2 id="foundry-copilot-vs-github-copilot-sdk">Foundry Copilot vs GitHub Copilot SDK<a class="headerlink" href="#foundry-copilot-vs-github-copilot-sdk" title="Permanent link">&para;</a></h2>
-<p>The official <a href="https://github.com/github/copilot-sdk">GitHub Copilot SDK</a> (<code>GitHub.Copilot.SDK</code> on NuGet) provides a superset of what <code>NexusLabs.Foundry.Copilot</code> offers. Before choosing Foundry Copilot, understand the overlap:</p>
+<h2 id="choosing-a-copilot-integration">Choosing a Copilot integration<a class="headerlink" href="#choosing-a-copilot-integration" title="Permanent link">&para;</a></h2>
+<p>The official
+<a href="https://www.nuget.org/packages/Microsoft.Agents.AI.GitHub.Copilot"><code>Microsoft.Agents.AI.GitHub.Copilot</code></a>
+package is complementary to <code>NexusLabs.Foundry.Copilot</code>, not a replacement.
+They expose different abstractions and different runtime semantics:</p>
 <table>
 <thead>
 <tr>
 <th>Capability</th>
-<th>Foundry Copilot</th>
-<th>GitHub Copilot SDK</th>
+<th><code>NexusLabs.Foundry.Copilot</code></th>
+<th><code>Microsoft.Agents.AI.GitHub.Copilot</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>IChatClient</code> for Copilot models</td>
-<td>✅ <code>CopilotChatClient</code> (direct HTTP)</td>
-<td>✅ <code>CopilotClient</code> → <code>AsAIAgent()</code> (via CLI process)</td>
+<td>Primary contract</td>
+<td><code>IChatClient</code></td>
+<td><code>AIAgent</code></td>
 </tr>
 <tr>
-<td>Token discovery (apps.json, env vars)</td>
-<td>✅ Manual implementation</td>
-<td>✅ Built-in, plus OAuth App and BYOK</td>
+<td>Runtime</td>
+<td>Direct HTTP</td>
+<td>Copilot CLI process/runtime</td>
 </tr>
 <tr>
-<td>Streaming responses</td>
-<td>✅ SSE parsing</td>
-<td>✅ Full event stream with deltas</td>
+<td>Conversation state</td>
+<td>Caller supplies message history</td>
+<td>Persistent/resumable SDK session</td>
 </tr>
 <tr>
-<td>Web search</td>
-<td>✅ <code>CopilotWebSearchFunction</code> (MCP endpoint)</td>
-<td>✅ Built-in CLI tool (same backend)</td>
+<td>Per-request options</td>
+<td><code>ChatOptions</code> model, sampling, stops, tools</td>
+<td>Session-level <code>SessionConfig</code>; <code>AgentRunOptions</code> are not mapped</td>
 </tr>
 <tr>
-<td>Structured search results (citations, URLs)</td>
-<td>✅ <code>WebSearchResult</code> with <code>Citations</code> and <code>SearchQueries</code></td>
-<td>❌ Consumed inside the agent loop, not exposed to your code</td>
+<td>Input message semantics</td>
+<td>Roles and tool messages preserved</td>
+<td>Message text is joined into one prompt; session holds history</td>
 </tr>
 <tr>
-<td>Full agent loop (file edits, code search, bash)</td>
-<td>❌</td>
-<td>✅ Full CLI tool set</td>
+<td>Function tools</td>
+<td>Caller-supplied only</td>
+<td>Caller tools plus permission-gated CLI capabilities</td>
 </tr>
 <tr>
-<td>Multi-agent orchestration (MAF)</td>
-<td>❌</td>
-<td>✅ <code>AsAIAgent()</code> with sequential/concurrent orchestrators</td>
+<td>Shell/file/URL capabilities</td>
+<td>None</td>
+<td>Built into the CLI runtime</td>
 </tr>
 <tr>
-<td>Session persistence &amp; resume</td>
-<td>❌</td>
-<td>✅ Built-in</td>
+<td>MCP servers</td>
+<td>Copilot read-only web-search endpoint only</td>
+<td>Local stdio and remote HTTP servers</td>
 </tr>
 <tr>
-<td>Custom agents &amp; skills</td>
-<td>Via Foundry Agent Framework</td>
-<td>✅ Built-in</td>
+<td>Structured web citations</td>
+<td><code>WebSearchResult.Citations</code> and <code>SearchQueries</code></td>
+<td>Not exposed by the MAF adapter</td>
 </tr>
 <tr>
-<td>Binary size</td>
-<td>~0 (HTTP-only, no CLI bundled)</td>
-<td>~100MB+ (bundles the Copilot CLI)</td>
+<td>Sessions, memory, skills, compaction</td>
+<td>Caller/Foundry owned</td>
+<td>SDK-native</td>
 </tr>
 <tr>
-<td>Rate limits</td>
-<td>Same (20 MCP req/min, premium request quota)</td>
-<td>Same</td>
+<td>Child process</td>
+<td>None</td>
+<td>Default; remote/in-process connections are also available</td>
+</tr>
+<tr>
+<td>Model selection</td>
+<td>Direct API IDs, per request</td>
+<td>CLI catalog, per session; supports <code>auto</code></td>
+</tr>
+<tr>
+<td>NativeAOT</td>
+<td>Does not currently publish cleanly (<a href="https://github.com/ncosentino/foundry/issues/171">#171</a>)</td>
+<td>Live chat and custom tool call verified under NativeAOT</td>
+</tr>
+<tr>
+<td>Deployment footprint</td>
+<td>Managed client only</td>
+<td>Native host plus downloaded Copilot runtime (~162 MB in a measured win-x64 AOT publish)</td>
 </tr>
 </tbody>
 </table>
-<h3 id="when-to-use-foundry-copilot">When to use Foundry Copilot<a class="headerlink" href="#when-to-use-foundry-copilot" title="Permanent link">&para;</a></h3>
+<h3 id="use-foundry-copilot-when">Use Foundry Copilot when<a class="headerlink" href="#use-foundry-copilot-when" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>You need structured web search results.</strong> <code>WebSearchResult.Citations</code> gives your application code programmatic access to source URLs, titles, and character offsets — the SDK's agent loop consumes this data internally and only returns the agent's final text.</li>
-<li><strong>You need a tiered provider fallback.</strong> <code>CopilotRateLimitException</code> and <code>CopilotAuthException</code> integrate with <code>ITieredProviderSelector</code> so rate-limited or auth-rejected queries fall through to alternative search providers (DuckDuckGo, Bing API) without parsing English error prose. The SDK doesn't expose typed exceptions for provider-level routing.</li>
-<li><strong>You want a lightweight <code>IChatClient</code>.</strong> <code>CopilotChatClient</code> is a pure HTTP client (~0 binary overhead). The SDK bundles the entire Copilot CLI binary.</li>
-<li><strong>You're already using Foundry's agent framework.</strong> <code>CopilotToolSet</code> produces <code>AIFunction</code> instances that plug directly into <code>IterativeLoopOptions.AdditionalTools</code>.</li>
+<li><strong>You need <code>IChatClient</code>.</strong> It plugs into MEAI and Foundry middleware without
+  replacing the agent construction or tool loop.</li>
+<li><strong>You need normal chat-history semantics.</strong> System, user, assistant, and tool
+  messages are sent with their roles intact.</li>
+<li><strong>You need per-request control.</strong> <code>ChatOptions.ModelId</code>, sampling options,
+  stop sequences, and tools apply to each call.</li>
+<li><strong>You need structured search results.</strong> <code>WebSearchResult</code> exposes citations,
+  character offsets, and the search queries to application code.</li>
+<li><strong>You cannot spawn a CLI process</strong> or accept its deployment footprint.</li>
 </ul>
-<h3 id="when-to-use-the-github-copilot-sdk-instead">When to use the GitHub Copilot SDK instead<a class="headerlink" href="#when-to-use-the-github-copilot-sdk-instead" title="Permanent link">&para;</a></h3>
+<h3 id="use-the-first-party-maf-copilot-agent-when">Use the first-party MAF Copilot agent when<a class="headerlink" href="#use-the-first-party-maf-copilot-agent-when" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>You want the full agent experience.</strong> The SDK runs the same agent loop as the Copilot CLI — file editing, code search, <code>web_fetch</code> (actual HTTP GET), bash/PowerShell, and more.</li>
-<li><strong>You need multi-agent orchestration.</strong> The SDK integrates with Microsoft Agent Framework for sequential, concurrent, and handoff workflows.</li>
-<li><strong>You want session persistence.</strong> The SDK persists conversation state to disk and supports resuming sessions.</li>
-<li><strong>You want officially supported auth.</strong> The SDK handles token management, OAuth app flows, and BYOK (bring your own API keys from OpenAI, Anthropic, etc.).</li>
-<li><strong>You don't need programmatic access to search citations.</strong> If the agent just needs to produce grounded research text, the SDK's built-in <code>web_search</code> tool gives the model the same citation data — you just can't inspect it from your code.</li>
+<li><strong>You want the full Copilot CLI agent runtime.</strong> It provides permission-gated
+  shell, file, URL, skill, memory, and MCP behavior.</li>
+<li><strong>You need persistent SDK sessions.</strong> Sessions can be serialized and resumed by
+  ID, with infinite-session compaction and workspace state.</li>
+<li><strong>You need native Copilot hooks and approvals.</strong> <code>ApprovalRequiredAIFunction</code>
+  is bridged to the SDK's pre-tool permission hook.</li>
+<li><strong>You want the CLI's current model catalog.</strong> Query <code>ListModelsAsync()</code> or use
+  <code>Model = "auto"</code> rather than assuming a direct-API model ID is available.</li>
 </ul>
-<div class="admonition info">
-<p class="admonition-title">Both use the same backend</p>
-<p>Whether you call <code>web_search</code> via Foundry Copilot or the SDK, you're hitting the same GitHub Copilot MCP endpoint. The LLM decides whether to perform a Bing search — see the next section.</p>
-</div>
+<h3 id="model-ids-are-not-portable">Model IDs are not portable<a class="headerlink" href="#model-ids-are-not-portable" title="Permanent link">&para;</a></h3>
+<p>The two paths use different model catalogs. In a measured run:</p>
+<ul>
+<li>the direct API accepted <code>gpt-4.1</code>;</li>
+<li>the SDK runtime rejected <code>gpt-4.1</code> as unavailable;</li>
+<li>the SDK accepted <code>auto</code> and exposed its current GPT-5.x, Claude, Gemini, Grok,
+  and MAI catalog through <code>ListModelsAsync()</code>.</li>
+</ul>
+<p>Do not configure both paths with one shared model string without checking both
+catalogs.</p>
+<h3 id="runtime-and-security">Runtime and security<a class="headerlink" href="#runtime-and-security" title="Permanent link">&para;</a></h3>
+<p>The first-party package's transitive build targets download a platform-specific
+Copilot runtime from npm and copy it to <code>runtimes/&lt;rid&gt;/native</code>. Shell, file, URL,
+and MCP capabilities must be governed by a permission handler. Microsoft recommends
+running agents with shell or file permissions inside a container or similarly
+restricted environment.</p>
+<p><code>CopilotChatClient</code> has no child process, but its token exchange uses GitHub's
+<code>/copilot_internal/v2/token</code> endpoint. That direct integration is lighter and more
+provider-neutral, but Foundry owns its compatibility risk.</p>
+<p>The runnable <code>CopilotComparisonExample</code> demonstrates the direct client and the
+underlying SDK runtime used by Microsoft's <code>AIAgent</code> adapter. It intentionally
+uses <code>gpt-4.1</code> for the direct client and <code>auto</code> for the SDK runtime.</p>
 <hr />
 <h2 id="web-search-limitations">Web Search Limitations<a class="headerlink" href="#web-search-limitations" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">

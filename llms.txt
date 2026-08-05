@@ -36,7 +36,7 @@ Author: Nick Cosentino (https://www.devleader.ca).
 
 ## Providers
 
-- [GitHub Copilot](https://www.devleader.ca/projects/foundry/copilot/) -- Use GitHub Copilot as an IChatClient provider in Foundry with web search tool support.
+- [GitHub Copilot](https://www.devleader.ca/projects/foundry/copilot/) -- Use GitHub Copilot as a direct IChatClient provider and choose between Foundry's HTTP client and Microsoft's CLI-backed AIAgent.
 
 ## Testing
 
