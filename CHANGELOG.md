@@ -103,6 +103,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Upgraded all Microsoft Agent Framework packages to 1.17.0, including the
+  optional declarative MCP package and the corresponding DevUI/Hosting preview
+  line. The Harness middleware-order pin moved to `maf-1.17.0` after the
+  per-provider-call compaction, service-discovery, defaults, telemetry, and
+  stream-lifecycle suites passed unchanged. MAF 1.17 also changes declarative
+  invocation so an agent response carrying top-level `ErrorContent` fails the
+  workflow before downstream actions run; Foundry now pins that behavior with
+  a provider-neutral test.
 - Upgraded Microsoft Agent Framework to 1.16.0 (from 1.15.0),
   Microsoft.Extensions.AI to 10.8.3 and its Evaluation packages to 10.8.0 (from
   10.6.0), and the OpenAI SDK to 2.12.0 (from 2.10.0). No Foundry source change
@@ -133,7 +141,7 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - The effective-defaults report now discloses that upstream compaction is
   evaluated once per agent turn rather than once per provider request, so it
   does not bound context inside a multi-round tool loop. Measured against
-  `Microsoft.Agents.AI.Harness` 1.15.0 and 1.16.0 and tracked in
+  `Microsoft.Agents.AI.Harness` 1.15.0, 1.16.0, and 1.17.0 and tracked in
   [#73](https://github.com/ncosentino/foundry/issues/73).
 
 ### Deprecated

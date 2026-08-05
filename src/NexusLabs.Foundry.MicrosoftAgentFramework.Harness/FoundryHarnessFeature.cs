@@ -112,7 +112,7 @@ public enum FoundryHarnessFeature
     /// — is compacted only against the state that preceded the <em>first</em> round. Measured over a
     /// deterministic two-round tool loop with a strategy whose trigger always fires, the strategy is
     /// consulted once, against a two-message index; the round carrying the tool call and its result is
-    /// never offered to it. Identical on <c>Microsoft.Agents.AI.Harness</c> 1.15.0 and 1.16.0, because
+    /// never offered to it. Identical on <c>Microsoft.Agents.AI.Harness</c> 1.15.0, 1.16.0, and 1.17.0, because
     /// this follows from the <c>AIContextProvider</c> contract rather than from a defect. Tracked in
     /// ncosentino/foundry#73.
     /// </para>

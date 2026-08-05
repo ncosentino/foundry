@@ -35,17 +35,21 @@ internal sealed class ScriptedDeclarativeChatClient : IChatClient
     public Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, Record(messages, options))));
+        CancellationToken cancellationToken = default)
+    {
+        var invocation = Record(messages, options);
+        return Task.FromResult(new ChatResponse(
+            new ChatMessage(ChatRole.Assistant, CreateContent(invocation))));
+    }
 
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var reply = Record(messages, options);
+        var invocation = Record(messages, options);
         await Task.Yield();
-        yield return new ChatResponseUpdate(ChatRole.Assistant, reply);
+        yield return new ChatResponseUpdate(ChatRole.Assistant, CreateContent(invocation));
     }
 
     public object? GetService(Type serviceType, object? key) => null;
@@ -54,7 +58,9 @@ internal sealed class ScriptedDeclarativeChatClient : IChatClient
     {
     }
 
-    private string Record(IEnumerable<ChatMessage> messages, ChatOptions? options)
+    private (string Tag, string Prompt) Record(
+        IEnumerable<ChatMessage> messages,
+        ChatOptions? options)
     {
         var materialized = messages.ToList();
         var tag = options?.Instructions
@@ -67,6 +73,17 @@ internal sealed class ScriptedDeclarativeChatClient : IChatClient
             _invocations.Add((tag, prompt));
         }
 
-        return $"{tag}:{prompt}";
+        return (tag, prompt);
     }
+
+    private static IList<AIContent> CreateContent((string Tag, string Prompt) invocation) =>
+        invocation.Tag == "failed"
+            ?
+            [
+                new ErrorContent("The scripted agent failed.")
+                {
+                    ErrorCode = "server_error",
+                },
+            ]
+            : [new TextContent($"{invocation.Tag}:{invocation.Prompt}")];
 }

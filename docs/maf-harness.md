@@ -300,7 +300,7 @@ a strategy whose trigger always fires:
 
 The round carrying the `FunctionCallContent` and its `FunctionResultContent`
 is never offered to the strategy. Identical results on
-`Microsoft.Agents.AI.Harness` 1.15.0 and 1.16.0.
+`Microsoft.Agents.AI.Harness` 1.15.0, 1.16.0, and 1.17.0.
 
 If your agent's context growth comes from tool results inside a single turn,
 upstream compaction will not bound it. Tracked in

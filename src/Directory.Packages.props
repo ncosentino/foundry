@@ -24,16 +24,16 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.1.0" />
     <!-- Microsoft Agent Framework (stable) -->
-    <PackageVersion Include="Microsoft.Agents.AI" Version="1.16.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Harness" Version="1.16.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.16.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Generators" Version="1.16.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Declarative" Version="1.16.0" />
-    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Declarative.Mcp" Version="1.16.0" />
+    <PackageVersion Include="Microsoft.Agents.AI" Version="1.17.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Harness" Version="1.17.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.17.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Generators" Version="1.17.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Declarative" Version="1.17.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows.Declarative.Mcp" Version="1.17.0" />
     <!-- DevUI and Hosting (preview — isolated in NexusLabs.Foundry.MicrosoftAgentFramework.DevUI) -->
-    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.16.0-preview.260730.1" />
-    <PackageVersion Include="Microsoft.Agents.AI.Hosting" Version="1.16.0-preview.260730.1" />
-    <PackageVersion Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.16.0-alpha.260730.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.17.0-preview.260804.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting" Version="1.17.0-preview.260804.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.17.0-alpha.260804.1" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.8.3" />
     <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.8.3" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.8.3" />

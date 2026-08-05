@@ -7,7 +7,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// <remarks>
 /// This mapping is pure and evidence-derived from the upstream
 /// <c>Microsoft.Agents.AI.HarnessAgentOptions</c> XML documentation shipped with
-/// <c>Microsoft.Agents.AI.Harness</c> 1.16.0: it performs no reflection or probing of a live
+/// <c>Microsoft.Agents.AI.Harness</c> 1.17.0: it performs no reflection or probing of a live
 /// agent instance. Categorical dimensions this type does not yet expose (background agents,
 /// loop evaluation) are reported as unrequested limitations rather than silently omitted.
 /// </remarks>
@@ -39,7 +39,7 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
         "Upstream evaluates the compaction strategy once per agent turn, not once per provider " +
         "request, so it does not bound context within a multi-round tool loop: a run whose tool " +
         "rounds grow the conversation is compacted only against the state that preceded the first " +
-        "round. Measured against Microsoft.Agents.AI.Harness 1.15.0 and 1.16.0; tracked upstream in " +
+        "round. Measured against Microsoft.Agents.AI.Harness 1.15.0, 1.16.0, and 1.17.0; tracked upstream in " +
         "ncosentino/foundry#73. Enable HybridCompaction for per-provider-call bounding.";
 
     private const string HybridCompactionLimitation =

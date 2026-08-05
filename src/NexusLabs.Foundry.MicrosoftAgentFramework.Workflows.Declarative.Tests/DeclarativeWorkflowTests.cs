@@ -1,3 +1,5 @@
+using Microsoft.Extensions.AI;
+
 using NexusLabs.Foundry.MicrosoftAgentFramework;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative.Tests;
@@ -174,6 +176,56 @@ public sealed class DeclarativeWorkflowTests
         Assert.Contains("summarize", error, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Summarizer", error, StringComparison.Ordinal);
         Assert.Empty(host.ChatClient.PromptsFor("summarized"));
+    }
+
+    /// <remarks>
+    /// MAF 1.17 changed declarative invocation so a top-level <see cref="ErrorContent"/> aborts the
+    /// action. This differs from a provider exception: the agent returned a valid response object,
+    /// but explicitly reported that the run failed. The downstream activity proves the workflow
+    /// does not silently continue after that response.
+    /// </remarks>
+    [Fact]
+    public async Task Run_AgentErrorContent_FailsWorkflowBeforeDownstreamAction()
+    {
+        using var host = DeclarativeTestFixture.CreateHost();
+        var workflow = host.AgentFactory.CreateDeclarativeWorkflow("""
+            kind: Workflow
+            trigger:
+
+              kind: OnConversationStart
+              id: failed_agent_workflow
+              actions:
+
+                - kind: InvokeAzureAgent
+                  id: invoke_failing_agent
+                  agent:
+                    name: FailingAgent
+                  input:
+                    messages: =System.LastMessage
+                  output:
+                    autoSend: true
+                    responseObject: Local.Failure
+
+                - kind: SendActivity
+                  id: should_not_run
+                  activity:
+                    text:
+                      - Workflow continued after an agent failure.
+            """);
+
+        var outcome = await DeclarativeTestFixture.RunAsync(
+            workflow,
+            "fail now",
+            TestContext.Current.CancellationToken);
+
+        var error = Assert.Single(outcome.Errors);
+        Assert.Contains("FailingAgent", error, StringComparison.Ordinal);
+        Assert.Contains("server_error", error, StringComparison.Ordinal);
+        Assert.Contains("The scripted agent failed.", error, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "Workflow continued after an agent failure.",
+            outcome.Activities);
+        Assert.DoesNotContain("AgentResponseEvent", outcome.ObservedEvents);
     }
 
     [Fact]

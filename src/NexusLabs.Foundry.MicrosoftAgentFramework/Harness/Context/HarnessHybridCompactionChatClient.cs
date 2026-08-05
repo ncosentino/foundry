@@ -32,7 +32,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Context;
 /// <c>AIContextProvider</c>/<c>CompactionProvider</c> seam — evaluated once per agent turn rather than
 /// once per provider request, and evaluated against a history index that has not yet observed the
 /// current tool round's result — is structurally insufficient for observing every intermediate request.
-/// Measured as identical on 1.15.0 and 1.16.0.
+/// Measured as identical on 1.15.0, 1.16.0, and 1.17.0.
 /// </para>
 /// <para>
 /// <strong>No composition-root duplication.</strong> This node is constructed and installed entirely by
