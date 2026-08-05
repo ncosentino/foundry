@@ -37,7 +37,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
         "Proves every optional Harness bundle capability initializes under NativeAOT.";
 
     public string SystemPrompt =>
-        "Use the generated WriteWorkspace tool exactly once.";
+        "Use the generated write_workspace tool exactly once.";
 
     public string UserPrompt =>
         "Write the deterministic AOT capability proof value.";

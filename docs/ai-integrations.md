@@ -152,6 +152,52 @@ var chatOptions = new ChatOptions
 
 The generated provider path carries no reflection fallback and is used by the executed `AotHarnessApp` NativeAOT fixture.
 
+### Published function and parameter names
+
+A tool name is part of the model contract, not an implementation detail. It appears in
+the tool schema sent to the model, comes back in `FunctionCallContent`, and is used by
+tool-name metrics, termination conditions, transcripts, and evaluation datasets.
+Renaming a C# method therefore renames all of those by default.
+
+MEAI's naming attributes let the public contract stay stable across a refactor:
+
+```csharp
+#pragma warning disable MEAI001
+
+[AgentFunction]
+[AIFunctionName("get_temperature")]
+[Description("Gets the current temperature for a city.")]
+public string GetTemperature(
+    [AIParameterName("city_name")]
+    [Description("The city to look up.")] string city) =>
+    $"22°C in {city}";
+
+#pragma warning restore MEAI001
+```
+
+`AIFunctionNameAttribute` and `AIParameterNameAttribute` are experimental MEAI APIs,
+which is why using them produces `MEAI001`. Foundry does not duplicate them with its
+own naming properties. The reflection path already delegates to `AIFunctionFactory`;
+the generated path reads the same attributes and emits the same function name, JSON
+schema keys, required-property list, and argument lookup.
+
+Declaring a name **replaces** the C# identifier in the model contract. A function
+published as `get_temperature` is no longer resolved as `GetTemperature`, and the
+model must supply `city_name`, not `city`. Changing the published name is therefore
+still a breaking contract change; declaring it only moves the stable name into a
+place the author controls.
+
+Blank names are rejected by [FDRYMAF032](analyzers/FDRYMAF032.md). Duplicate names
+within one function type or one parameter list are rejected by
+[FDRYMAF033](analyzers/FDRYMAF033.md). Same-named functions in separate types remain
+valid when agents use them independently; `IAgentFactory` fails closed only if an
+agent actually resolves both into one ambiguous tool set.
+
+`src/Examples/AgentFramework/HarnessProviderApp` uses published names for both
+workspace tools and their parameters. Its scripted provider pins the generated
+contract offline, and its `Harness__Provider=copilot` mode exercises a real model
+calling `write_note` and `read_note`.
+
 ### Per-agent tool scoping
 
 Multiple agents can be created from the same `IAgentFactory`, each with a tailored subset of the registered tools:

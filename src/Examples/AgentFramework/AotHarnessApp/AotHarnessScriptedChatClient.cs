@@ -42,7 +42,7 @@ internal sealed class AotHarnessScriptedChatClient(
                                 functionName,
                                 new Dictionary<string, object?>
                                 {
-                                    ["value"] = toolArgumentValue,
+                                    ["proof_value"] = toolArgumentValue,
                                 }),
                         ])));
         }

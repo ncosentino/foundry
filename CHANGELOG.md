@@ -64,6 +64,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Source-generated `[AgentFunction]` wrappers now honor MEAI's experimental
+  `AIFunctionNameAttribute` and `AIParameterNameAttribute`, matching the
+  reflection path's existing behavior. The published function name, JSON schema
+  keys, required-property list, and invocation argument lookup now come from the
+  declared contract rather than always from C# identifiers. `FDRYMAF032` rejects
+  blank published names, `FDRYMAF033` rejects unconditional collisions, and
+  `IAgentFactory` rejects cross-type collisions against the actual tool set an
+  agent resolves. This is a behavioral break for an existing unscoped agent that
+  receives two same-named tools: creating the agent or resolving its tools now
+  throws instead of forwarding an ambiguous tool list to the model. Scope the
+  agent's `FunctionTypes`/`FunctionGroups`, or publish a distinct name for one
+  method.
 - `NexusLabs.Foundry.MicrosoftAgentFramework` now references
   `Microsoft.Extensions.AI` and `Microsoft.Extensions.AI.Abstractions` directly
   instead of receiving them through `Microsoft.Agents.AI`. That dependency floors

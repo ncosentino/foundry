@@ -8,7 +8,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Generators;
 internal readonly struct AgentFunctionParameterInfo
 {
     public AgentFunctionParameterInfo(
-        string name, string typeFullName,
+        string name, string? publishedName, string typeFullName,
         string jsonSchemaType, string? jsonSchemaFormat,
         string? itemJsonSchemaType,
         string? itemObjectSchemaJson,
@@ -18,7 +18,7 @@ internal readonly struct AgentFunctionParameterInfo
         bool isCancellationToken, bool isNullable, bool hasDefault,
         string? defaultLiteral, bool isEnum, string? description)
     {
-        Name = name; TypeFullName = typeFullName;
+        Name = name; PublishedName = publishedName; TypeFullName = typeFullName;
         JsonSchemaType = jsonSchemaType; JsonSchemaFormat = jsonSchemaFormat;
         ItemJsonSchemaType = itemJsonSchemaType;
         ItemObjectSchemaJson = itemObjectSchemaJson;
@@ -31,6 +31,7 @@ internal readonly struct AgentFunctionParameterInfo
     }
 
     public string Name { get; }
+    public string? PublishedName { get; }
     public string TypeFullName { get; }
     public string JsonSchemaType { get; }
     /// <summary>

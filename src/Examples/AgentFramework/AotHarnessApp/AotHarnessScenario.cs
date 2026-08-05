@@ -24,7 +24,7 @@ internal sealed class AotHarnessScenario : IHarnessScenario
         "Proves generated-tool, workspace, session, and optional Harness execution under NativeAOT.";
 
     public string SystemPrompt =>
-        "Use the generated WriteWorkspace tool exactly once.";
+        "Use the generated write_workspace tool exactly once.";
 
     public string UserPrompt =>
         "Write the deterministic AOT proof value.";
@@ -122,7 +122,7 @@ internal sealed class AotHarnessScenario : IHarnessScenario
         }
 
         if (!context.ResolvedGeneratedToolNames.SequenceEqual(
-            ["WriteWorkspace"],
+            ["write_workspace"],
             StringComparer.Ordinal))
         {
             throw new ScenarioVerificationException(
@@ -131,7 +131,7 @@ internal sealed class AotHarnessScenario : IHarnessScenario
         }
 
         if (!context.ExecutedGeneratedToolNames.SequenceEqual(
-            ["WriteWorkspace"],
+            ["write_workspace"],
             StringComparer.Ordinal))
         {
             throw new ScenarioVerificationException(

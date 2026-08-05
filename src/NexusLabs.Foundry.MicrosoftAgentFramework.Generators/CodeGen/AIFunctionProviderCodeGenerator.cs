@@ -110,14 +110,26 @@ internal static class AIFunctionProviderCodeGenerator
 
         sb.AppendLine();
 
+        var contractValidation = BuildContractValidation(method);
         if (!type.IsStatic)
-            sb.AppendLine($"        public {nestedClassName}({type.TypeName} instance) {{ _instance = instance; }}");
+        {
+            sb.AppendLine($"        public {nestedClassName}({type.TypeName} instance)");
+            sb.AppendLine("        {");
+            sb.AppendLine("            _instance = instance;");
+            AppendContractValidation(sb, contractValidation);
+            sb.AppendLine("        }");
+        }
         else
-            sb.AppendLine($"        public {nestedClassName}() {{ }}");
+        {
+            sb.AppendLine($"        public {nestedClassName}()");
+            sb.AppendLine("        {");
+            AppendContractValidation(sb, contractValidation);
+            sb.AppendLine("        }");
+        }
 
         sb.AppendLine();
 
-        var escapedName = method.MethodName.Replace("\"", "\\\"");
+        var escapedName = EscapeCSharpString(method.PublishedName ?? string.Empty);
         var escapedDesc = method.Description.Replace("\\", "\\\\").Replace("\"", "\\\"");
         sb.AppendLine($"        public override string Name => \"{escapedName}\";");
         sb.AppendLine($"        public override string Description => \"{escapedDesc}\";");
@@ -196,11 +208,11 @@ internal static class AIFunctionProviderCodeGenerator
         {
             if (!firstProp) props.Append(",");
             firstProp = false;
-            var escapedParamName = param.Name.Replace("\"", "\\\"");
+            var escapedParamName = EscapeJsonString(param.PublishedName ?? string.Empty);
             props.Append($"\"{escapedParamName}\":");
             props.Append(BuildJsonSchemaTypeEntry(param));
             if (param.IsRequired)
-                required.Add(param.Name);
+                required.Add(param.PublishedName ?? string.Empty);
         }
         props.Append("}");
 
@@ -210,7 +222,8 @@ internal static class AIFunctionProviderCodeGenerator
         if (required.Count > 0)
         {
             sb.Append(",\"required\":[");
-            sb.Append(string.Join(",", required.Select(r => "\"" + r.Replace("\"", "\\\"") + "\"")));
+            sb.Append(string.Join(",", required.Select(
+                requiredName => "\"" + EscapeJsonString(requiredName) + "\"")));
             sb.Append("]");
         }
         sb.Append("}");
@@ -284,7 +297,9 @@ internal static class AIFunctionProviderCodeGenerator
     {
         var rawVar = $"_raw_{param.Name}";
         var jVar = $"_j_{param.Name}";
-        sb.AppendLine($"            arguments.TryGetValue(\"{param.Name}\", out var {rawVar});");
+        var escapedPublishedName = EscapeCSharpString(param.PublishedName ?? string.Empty);
+        sb.AppendLine(
+            $"            arguments.TryGetValue(\"{escapedPublishedName}\", out var {rawVar});");
 
         switch (param.JsonSchemaType)
         {
@@ -412,11 +427,13 @@ internal static class AIFunctionProviderCodeGenerator
 
         if (param.IsRequired)
         {
-            var toolMethodName = $"{AgentDiscoveryHelper.GetShortName(type.TypeName)}.{method.MethodName}";
+            var toolMethodName = EscapeCSharpString(method.PublishedName ?? string.Empty);
+            var publishedParameterName = EscapeCSharpString(
+                param.PublishedName ?? string.Empty);
             sb.AppendLine($"            if (!{ExtractorFqn}.IsArgumentSupplied({rawVar}))");
             sb.AppendLine("            {");
             sb.AppendLine("                throw new global::System.ArgumentException(");
-            sb.AppendLine($"                    \"Required argument '{param.Name}' was not supplied to AIFunction '{toolMethodName}'.\",");
+            sb.AppendLine($"                    \"Required argument '{publishedParameterName}' was not supplied to AIFunction '{toolMethodName}'.\",");
             sb.AppendLine("                    nameof(arguments));");
             sb.AppendLine("            }");
             sb.AppendLine($"            {varType} {param.Name} = {extractorCall};");
@@ -471,11 +488,13 @@ internal static class AIFunctionProviderCodeGenerator
 
         if (param.IsRequired)
         {
-            var toolMethodName = $"{AgentDiscoveryHelper.GetShortName(type.TypeName)}.{method.MethodName}";
+            var toolMethodName = EscapeCSharpString(method.PublishedName ?? string.Empty);
+            var publishedParameterName = EscapeCSharpString(
+                param.PublishedName ?? string.Empty);
             sb.AppendLine($"            if (!{ExtractorFqn}.IsArgumentSupplied({rawVar}))");
             sb.AppendLine("            {");
             sb.AppendLine("                throw new global::System.ArgumentException(");
-            sb.AppendLine($"                    \"Required argument '{param.Name}' was not supplied to AIFunction '{toolMethodName}'.\",");
+            sb.AppendLine($"                    \"Required argument '{publishedParameterName}' was not supplied to AIFunction '{toolMethodName}'.\",");
             sb.AppendLine("                    nameof(arguments));");
             sb.AppendLine("            }");
             sb.AppendLine($"            {varType} {param.Name} = {enumParse};");
@@ -489,6 +508,72 @@ internal static class AIFunctionProviderCodeGenerator
         sb.AppendLine("            else");
         sb.AppendLine($"                {param.Name} = {enumParse};");
     }
+
+    private static string? BuildContractValidation(AgentFunctionMethodInfo method)
+    {
+        if (string.IsNullOrWhiteSpace(method.PublishedName))
+        {
+            return "global::System.ArgumentException.ThrowIfNullOrWhiteSpace(" +
+                (method.PublishedName is null ? "null" : "\"\"") +
+                ", \"name\");";
+        }
+
+        foreach (var parameter in method.Parameters.Where(parameter => !parameter.IsCancellationToken))
+        {
+            if (string.IsNullOrWhiteSpace(parameter.PublishedName))
+            {
+                return "global::System.ArgumentException.ThrowIfNullOrWhiteSpace(" +
+                    (parameter.PublishedName is null ? "null" : "\"\"") +
+                    ", \"name\");";
+            }
+        }
+
+        var duplicateParameterName = method.Parameters
+            .Where(parameter => !parameter.IsCancellationToken)
+            .GroupBy(parameter => parameter.PublishedName, StringComparer.Ordinal)
+            .FirstOrDefault(group => group.Count() > 1)
+            ?.Key;
+
+        var escapedDuplicateParameterName = EscapeCSharpString(
+            duplicateParameterName ?? string.Empty);
+        return duplicateParameterName is null
+            ? null
+            : "throw new global::System.ArgumentException(" +
+              $"\"Multiple parameters are mapped to the same name '{escapedDuplicateParameterName}'. " +
+              "Ensure that any AIParameterNameAttribute values do not collide with each other " +
+              "or with other parameter names.\", \"method\");";
+    }
+
+    private static void AppendContractValidation(StringBuilder sb, string? validation)
+    {
+        if (validation is not null)
+        {
+            sb.AppendLine($"            {validation}");
+        }
+    }
+
+    private static string EscapeCSharpString(string value) =>
+        value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\0", "\\0")
+            .Replace("\a", "\\a")
+            .Replace("\b", "\\b")
+            .Replace("\f", "\\f")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t")
+            .Replace("\v", "\\v");
+
+    private static string EscapeJsonString(string value) =>
+        value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\b", "\\b")
+            .Replace("\f", "\\f")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t");
 
     /// <summary>
     /// Resolves the right helper for a "string" schema type, using the

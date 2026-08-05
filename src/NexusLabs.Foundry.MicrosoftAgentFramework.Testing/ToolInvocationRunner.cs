@@ -235,13 +235,13 @@ public sealed class ToolInvocationRunner
     }
 
     /// <summary>
-    /// Resolves an <see cref="AIFunction"/> for <typeparamref name="TTool"/> by method name via
+    /// Resolves an <see cref="AIFunction"/> for <typeparamref name="TTool"/> by published name via
     /// the source-generated <see cref="IAIFunctionProvider"/>.
     /// </summary>
     /// <typeparam name="TTool">The tool class declaring the <c>[AgentFunction]</c> method.</typeparam>
     /// <param name="methodName">
-    /// The function name as exposed to the LLM (defaults to the C# method name when the
-    /// source generator emits the wrapper).
+    /// The function name as exposed to the LLM. This is the value of
+    /// <c>[AIFunctionName("...")]</c> when declared, and the C# method name otherwise.
     /// </param>
     /// <exception cref="InvalidOperationException">
     /// Thrown when no generated provider is registered, or when no function with that name is
@@ -251,7 +251,7 @@ public sealed class ToolInvocationRunner
         => GetFunction(typeof(TTool), methodName);
 
     /// <summary>
-    /// Resolves an <see cref="AIFunction"/> for <paramref name="toolType"/> by method name via
+    /// Resolves an <see cref="AIFunction"/> for <paramref name="toolType"/> by published name via
     /// the source-generated <see cref="IAIFunctionProvider"/>.
     /// </summary>
     public AIFunction GetFunction(Type toolType, string methodName)
@@ -296,7 +296,7 @@ public sealed class ToolInvocationRunner
     }
 
     /// <summary>
-    /// Resolves an <see cref="AIFunction"/> for <typeparamref name="TTool"/> by method name,
+    /// Resolves an <see cref="AIFunction"/> for <typeparamref name="TTool"/> by published name,
     /// preferring the source-generated provider but falling back to reflection-based discovery
     /// via <see cref="AIFunctionFactory.Create(MethodInfo, object?, AIFunctionFactoryOptions?)"/>
     /// when the generator output is not available.
@@ -312,7 +312,7 @@ public sealed class ToolInvocationRunner
         => GetFunctionAllowingReflection(typeof(TTool), methodName);
 
     /// <summary>
-    /// Resolves an <see cref="AIFunction"/> for <paramref name="toolType"/> by method name,
+    /// Resolves an <see cref="AIFunction"/> for <paramref name="toolType"/> by published name,
     /// preferring the source-generated provider but falling back to reflection-based discovery
     /// via <see cref="AIFunctionFactory.Create(MethodInfo, object?, AIFunctionFactoryOptions?)"/>
     /// when the generator output is not available.

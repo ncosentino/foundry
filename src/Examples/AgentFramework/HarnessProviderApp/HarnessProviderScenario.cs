@@ -28,7 +28,7 @@ internal sealed class HarnessProviderScenario(
 
     public string SystemPrompt =>
         "You are a concise assistant with workspace tools. " +
-        "Use WriteNote to persist your answer, then briefly confirm what you wrote.";
+        "Use write_note to persist your answer, then use read_note to confirm what you wrote.";
 
     public string UserPrompt =>
         $"Write a one-sentence summary of what the Foundry Harness bundle does to " +

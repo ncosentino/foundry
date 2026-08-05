@@ -93,6 +93,23 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework
         bool ShouldTerminate(object context);
     }
 }
+
+namespace Microsoft.Extensions.AI
+{
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class AIFunctionNameAttribute : System.Attribute
+    {
+        public AIFunctionNameAttribute(string name) { Name = name; }
+        public string Name { get; }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    public sealed class AIParameterNameAttribute : System.Attribute
+    {
+        public AIParameterNameAttribute(string name) { Name = name; }
+        public string Name { get; }
+    }
+}
 ";
 
     /// <summary>
@@ -154,5 +171,6 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework
         WaitAny = 1,
     }
 }
+
 ";
 }

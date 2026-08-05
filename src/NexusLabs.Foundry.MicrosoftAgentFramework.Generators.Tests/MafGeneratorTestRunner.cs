@@ -256,6 +256,23 @@ internal sealed class MafGeneratorTestRunner
             public sealed class Workflow { }
         }
 
+        namespace Microsoft.Extensions.AI
+        {
+            [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+            public sealed class AIFunctionNameAttribute : System.Attribute
+            {
+                public AIFunctionNameAttribute(string name) { Name = name; }
+                public string Name { get; }
+            }
+
+            [System.AttributeUsage(System.AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
+            public sealed class AIParameterNameAttribute : System.Attribute
+            {
+                public AIParameterNameAttribute(string name) { Name = name; }
+                public string Name { get; }
+            }
+        }
+
         namespace NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics
         {
             public interface IPipelineRunResult { }

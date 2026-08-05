@@ -145,17 +145,47 @@ internal sealed class AgentFactory : IAgentFactory
     {
         var allFunctions = _lazyFunctionsCache.Value;
         var applicableTypes = GetApplicableTypes(agentOptions);
-        var tools = new List<AITool>();
+        var resolvedFunctions = new List<(Type FunctionType, AIFunction Function)>();
 
         foreach (var type in applicableTypes)
         {
             if (allFunctions.TryGetValue(type, out var fns))
             {
-                tools.AddRange(fns);
+                resolvedFunctions.AddRange(fns.Select(function => (type, function)));
             }
         }
 
-        return tools;
+        var blankName = resolvedFunctions.FirstOrDefault(
+            entry => string.IsNullOrWhiteSpace(entry.Function.Name));
+        if (blankName.Function is not null)
+        {
+            throw new InvalidOperationException(
+                $"Function type '{blankName.FunctionType.FullName}' produced a tool with no " +
+                "published name. AIFunctionNameAttribute values must not be empty or whitespace.");
+        }
+
+        var duplicate = resolvedFunctions
+            .GroupBy(entry => entry.Function.Name, StringComparer.Ordinal)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicate is not null)
+        {
+            var sources = duplicate
+                .GroupBy(entry => entry.FunctionType)
+                .OrderBy(group => group.Key.FullName, StringComparer.Ordinal)
+                .Select(group => group.Count() == 1
+                    ? $"'{group.Key.FullName}'"
+                    : $"{group.Count()} functions from '{group.Key.FullName}'");
+
+            throw new InvalidOperationException(
+                $"Ambiguous tool name '{duplicate.Key}': it is published by " +
+                $"{string.Join(" and ", sources)}. Each agent must resolve a unique set of tool " +
+                "names. Give one method a distinct [AIFunctionName(\"...\")] or scope the agent " +
+                "to function types and groups that do not collide.");
+        }
+
+        return resolvedFunctions
+            .Select(entry => (AITool)entry.Function)
+            .ToList();
     }
 
     private AIAgent CreateAgentFromType(Type agentType, Action<AgentFactoryOptions>? additionalConfigure = null)

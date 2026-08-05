@@ -406,4 +406,30 @@ public static class MafDiagnosticDescriptors
         description: "An agent's published name is [FoundryAgent(Name = \"...\")] when declared and the simple class name otherwise. It is the key IAgentFactory.CreateAgent(string) resolves, the value of AIAgent.Name, and the gen_ai.agent.name telemetry dimension. Two agents sharing one makes the name ambiguous, so BuildAgentFactory() rejects it rather than resolving to whichever registered first.",
         helpLinkUri: HelpLinkBase + "FDRYMAF031.md",
         customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+    /// <summary>
+    /// FDRYMAF032: An MEAI published function or parameter name is blank.
+    /// </summary>
+    public static readonly DiagnosticDescriptor InvalidAgentFunctionPublishedName = new(
+        id: MafDiagnosticIds.InvalidAgentFunctionPublishedName,
+        title: "Published tool contract name is blank",
+        messageFormat: "The published {0} name on '{1}' cannot be null, empty, or whitespace",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "AIFunctionNameAttribute and AIParameterNameAttribute values become the names exposed to the model. Microsoft.Extensions.AI rejects blank values when reflection creates the function, and Foundry's source-generated path enforces the same contract.",
+        helpLinkUri: HelpLinkBase + "FDRYMAF032.md");
+
+    /// <summary>
+    /// FDRYMAF033: Published function or parameter names collide within their unconditional scope.
+    /// </summary>
+    public static readonly DiagnosticDescriptor DuplicateAgentFunctionPublishedName = new(
+        id: MafDiagnosticIds.DuplicateAgentFunctionPublishedName,
+        title: "Published tool contract names collide",
+        messageFormat: "Published {0} name '{1}' is used by {2} in '{3}': {4}",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Two methods in one function type cannot publish the same function name, and two parameters in one function cannot publish the same parameter name. Microsoft.Extensions.AI rejects duplicate parameter names; duplicate function names make model tool calls ambiguous. Cross-type function collisions are checked at runtime against the actual tool set an agent resolves, because separate agents may legitimately use same-named tools without ever seeing both.",
+        helpLinkUri: HelpLinkBase + "FDRYMAF033.md");
 }

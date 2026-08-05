@@ -138,6 +138,6 @@ public class BuildHandoffWorkflowExtensionsTests
     {
         [AgentFunction]
         [Description("Returns test data for handoff workflow tests.")]
-        public string GetTestData() => "test";
+        public string GetHandoffTestData() => "test";
     }
 }

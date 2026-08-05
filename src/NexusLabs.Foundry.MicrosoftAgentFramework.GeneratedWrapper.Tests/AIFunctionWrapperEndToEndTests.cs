@@ -49,6 +49,125 @@ public class AIFunctionWrapperEndToEndTests
     private static JsonElement Parse(string json) => JsonDocument.Parse(json).RootElement.Clone();
 
     [Fact]
+    public async Task Wrapper_PublishedFunctionAndParameterNames_MatchReflection()
+    {
+        var generatedCapture = new E2EPublishedNameTool.Capture();
+        var generated = ResolveFunction<E2EPublishedNameTool>(
+            "record_published_value",
+            generatedCapture);
+
+        var reflectedCapture = new E2EPublishedNameTool.Capture();
+        var reflected = AIFunctionFactory.Create(
+            typeof(E2EPublishedNameTool).GetMethod(nameof(E2EPublishedNameTool.Record))!,
+            new E2EPublishedNameTool(reflectedCapture));
+
+        Assert.Equal(reflected.Name, generated.Name);
+        Assert.Equal("record_published_value", generated.Name);
+        Assert.True(generated.JsonSchema.GetProperty("properties").TryGetProperty(
+            "published_value",
+            out _));
+        Assert.False(generated.JsonSchema.GetProperty("properties").TryGetProperty(
+            "value",
+            out _));
+
+        await generated.InvokeAsync(
+            Args("published_value", Parse("\"generated-value\"")),
+            TestContext.Current.CancellationToken);
+        await reflected.InvokeAsync(
+            Args("published_value", Parse("\"reflected-value\"")),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("generated-value", generatedCapture.Value);
+        Assert.Equal("reflected-value", reflectedCapture.Value);
+    }
+
+    [Fact]
+    public void Wrapper_PublishedFunctionName_ReplacesTheMethodName()
+    {
+        var capture = new E2EPublishedNameTool.Capture();
+        var runner = ToolInvocationRunner.CreateFor<E2EPublishedNameTool>(
+            services => services.AddSingleton(capture));
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => runner.GetFunction<E2EPublishedNameTool>(
+                nameof(E2EPublishedNameTool.Record)));
+
+        Assert.Contains("record_published_value", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Wrapper_BlankPublishedFunctionName_MatchesReflectionFailure()
+    {
+        var runner = ToolInvocationRunner.CreateFor<E2EBlankPublishedNameTool>();
+
+        var generatedException = Assert.Throws<ArgumentException>(
+            () => runner.GetFunction<E2EBlankPublishedNameTool>("unused"));
+        var reflectedException = Assert.Throws<ArgumentException>(
+            () => AIFunctionFactory.Create(
+                typeof(E2EBlankPublishedNameTool).GetMethod(
+                    nameof(E2EBlankPublishedNameTool.Run))!,
+                new E2EBlankPublishedNameTool()));
+
+        Assert.Equal(reflectedException.GetType(), generatedException.GetType());
+        Assert.Equal(reflectedException.ParamName, generatedException.ParamName);
+    }
+
+    [Fact]
+    public void Wrapper_DuplicatePublishedParameterNames_MatchesReflectionFailure()
+    {
+        var runner = ToolInvocationRunner.CreateFor<E2EDuplicatePublishedParameterTool>();
+
+        var generatedException = Assert.Throws<ArgumentException>(
+            () => runner.GetFunction<E2EDuplicatePublishedParameterTool>("Run"));
+        var reflectedException = Assert.Throws<ArgumentException>(
+            () => AIFunctionFactory.Create(
+                typeof(E2EDuplicatePublishedParameterTool).GetMethod(
+                    nameof(E2EDuplicatePublishedParameterTool.Run))!,
+                new E2EDuplicatePublishedParameterTool()));
+
+        Assert.Equal(reflectedException.GetType(), generatedException.GetType());
+        Assert.Equal(reflectedException.ParamName, generatedException.ParamName);
+        Assert.Contains(
+            "Multiple parameters are mapped to the same name 'same'",
+            generatedException.Message,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Wrapper_BlankPublishedParameterName_MatchesReflectionFailure()
+    {
+        var runner = ToolInvocationRunner.CreateFor<E2EBlankPublishedParameterTool>();
+
+        var generatedException = Assert.Throws<ArgumentException>(
+            () => runner.GetFunction<E2EBlankPublishedParameterTool>("Run"));
+        var reflectedException = Assert.Throws<ArgumentException>(
+            () => AIFunctionFactory.Create(
+                typeof(E2EBlankPublishedParameterTool).GetMethod(
+                    nameof(E2EBlankPublishedParameterTool.Run))!,
+                new E2EBlankPublishedParameterTool()));
+
+        Assert.Equal(reflectedException.GetType(), generatedException.GetType());
+        Assert.Equal(reflectedException.ParamName, generatedException.ParamName);
+    }
+
+    [Fact]
+    public void Wrapper_NullPublishedFunctionName_MatchesReflectionFailure()
+    {
+        var runner = ToolInvocationRunner.CreateFor<E2ENullPublishedNameTool>();
+
+        var generatedException = Assert.ThrowsAny<ArgumentException>(
+            () => runner.GetFunction<E2ENullPublishedNameTool>("unused"));
+        var reflectedException = Assert.ThrowsAny<ArgumentException>(
+            () => AIFunctionFactory.Create(
+                typeof(E2ENullPublishedNameTool).GetMethod(
+                    nameof(E2ENullPublishedNameTool.Run))!,
+                new E2ENullPublishedNameTool()));
+
+        Assert.Equal(reflectedException.GetType(), generatedException.GetType());
+        Assert.Equal(reflectedException.ParamName, generatedException.ParamName);
+    }
+
+    [Fact]
     public async Task Wrapper_StringParam_AcceptsArrayLiteral()
     {
         var capture = new E2EStringTool.Capture();
