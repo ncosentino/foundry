@@ -84,6 +84,88 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
         Assert.DoesNotContain("PlainClass", output);
     }
 
+    [Fact]
+    public void PipelineA_AIFunctionNameAttribute_UsesPublishedName()
+    {
+        var source = MafGeneratorTestRunner.MafAttributeDefinitions + """
+            namespace MyApp
+            {
+                public class CalculatorFunctions
+                {
+                    [NexusLabs.Foundry.MicrosoftAgentFramework.AgentFunction]
+                    [Microsoft.Extensions.AI.AIFunctionName("sum_values")]
+                    public string Add(int a, int b) => (a + b).ToString();
+                }
+            }
+            """;
+
+        var output = new MafGeneratorTestRunner()
+            .WithSource(source)
+            .GetFile("GeneratedAIFunctionProvider.g.cs");
+
+        Assert.Contains("public override string Name => \"sum_values\";", output);
+        Assert.Contains("_instance.Add(a, b)", output);
+    }
+
+    [Fact]
+    public void PipelineA_AIParameterNameAttribute_UsesPublishedSchemaAndArgumentKey()
+    {
+        var source = MafGeneratorTestRunner.MafAttributeDefinitions + """
+            namespace MyApp
+            {
+                public class GreetingFunctions
+                {
+                    [NexusLabs.Foundry.MicrosoftAgentFramework.AgentFunction]
+                    public string Greet(
+                        [Microsoft.Extensions.AI.AIParameterName("person_name")] string name) =>
+                        "Hello " + name;
+                }
+            }
+            """;
+
+        var output = new MafGeneratorTestRunner()
+            .WithSource(source)
+            .GetFile("GeneratedAIFunctionProvider.g.cs");
+
+        Assert.Contains("\"person_name\"", output);
+        Assert.Contains("arguments.TryGetValue(\"person_name\", out var _raw_name);", output);
+        Assert.Contains("_instance.Greet(name)", output);
+        Assert.DoesNotContain("arguments.TryGetValue(\"name\"", output);
+    }
+
+    [Fact]
+    public void PipelineA_InvalidPublishedContract_EmitsReflectionEquivalentGuard()
+    {
+        var source = MafGeneratorTestRunner.MafAttributeDefinitions + """
+            namespace MyApp
+            {
+                public class InvalidFunctions
+                {
+                    [NexusLabs.Foundry.MicrosoftAgentFramework.AgentFunction]
+                    [Microsoft.Extensions.AI.AIFunctionName("")]
+                    public string BlankName(string value) => value;
+
+                    [NexusLabs.Foundry.MicrosoftAgentFramework.AgentFunction]
+                    public string DuplicateParameters(
+                        [Microsoft.Extensions.AI.AIParameterName("same")] string first,
+                        [Microsoft.Extensions.AI.AIParameterName("same")] string second) =>
+                        first + second;
+                }
+            }
+            """;
+
+        var output = new MafGeneratorTestRunner()
+            .WithSource(source)
+            .GetFile("GeneratedAIFunctionProvider.g.cs");
+
+        Assert.Contains(
+            "global::System.ArgumentException.ThrowIfNullOrWhiteSpace(\"\", \"name\");",
+            output);
+        Assert.Contains(
+            "Multiple parameters are mapped to the same name 'same'.",
+            output);
+    }
+
     // -------------------------------------------------------------------------
     // Pipeline B — AgentFunctionGroup
     // -------------------------------------------------------------------------
@@ -2813,7 +2895,7 @@ public sealed class AgentFrameworkFunctionRegistryGeneratorTests
         Assert.Contains("AgentFrameworkArgumentExtractor.IsArgumentSupplied(_raw_flag)", output);
         Assert.Contains("global::System.ArgumentException", output);
         Assert.Contains("Required argument 'flag'", output);
-        Assert.Contains("AIFunction 'RequiredBoolTool.DoIt'", output);
+        Assert.Contains("AIFunction 'DoIt'", output);
     }
 
     [Fact]

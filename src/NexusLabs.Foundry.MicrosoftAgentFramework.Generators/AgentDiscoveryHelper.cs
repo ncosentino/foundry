@@ -17,6 +17,8 @@ internal static class AgentDiscoveryHelper
 {
     private const string AgentFunctionAttributeName = "NexusLabs.Foundry.MicrosoftAgentFramework.AgentFunctionAttribute";
     private const string AgentFunctionGroupAttributeName = "NexusLabs.Foundry.MicrosoftAgentFramework.AgentFunctionGroupAttribute";
+    private const string AIFunctionNameAttributeName = "Microsoft.Extensions.AI.AIFunctionNameAttribute";
+    private const string AIParameterNameAttributeName = "Microsoft.Extensions.AI.AIParameterNameAttribute";
 
     public static AgentFunctionTypeInfo? GetAgentFunctionTypeInfo(
         GeneratorSyntaxContext context,
@@ -126,6 +128,10 @@ internal static class AgentDiscoveryHelper
             }
 
             string? methodDesc = GetDescriptionFromAttributes(method.GetAttributes());
+            string? publishedMethodName = GetPublishedName(
+                method.GetAttributes(),
+                AIFunctionNameAttributeName,
+                method.Name);
 
             var parameters = ImmutableArray.CreateBuilder<AgentFunctionParameterInfo>();
             foreach (var param in method.Parameters)
@@ -143,6 +149,10 @@ internal static class AgentDiscoveryHelper
                      enumNullable.TypeArguments.Length == 1 &&
                      enumNullable.TypeArguments[0].TypeKind == TypeKind.Enum);
                 string? paramDesc = GetDescriptionFromAttributes(param.GetAttributes());
+                string? publishedParameterName = GetPublishedName(
+                    param.GetAttributes(),
+                    AIParameterNameAttributeName,
+                    param.Name);
                 string jsonSchemaType = GetJsonSchemaType(param.Type, out string? itemJsonSchemaType);
                 string? jsonSchemaFormat = GetJsonSchemaFormat(param.Type);
                 string typeFullName = GetFullyQualifiedName(param.Type);
@@ -182,14 +192,15 @@ internal static class AgentDiscoveryHelper
                 }
 
                 parameters.Add(new AgentFunctionParameterInfo(
-                    param.Name, typeFullName, jsonSchemaType, jsonSchemaFormat, itemJsonSchemaType,
+                    param.Name, publishedParameterName, typeFullName,
+                    jsonSchemaType, jsonSchemaFormat, itemJsonSchemaType,
                     itemObjectSchemaJson, itemObjectProperties,
                     objectSchemaJson, objectProperties,
                     isCancellationToken, isNullable, hasDefault, defaultLiteral, isEnum, paramDesc));
             }
 
             methodInfos.Add(new AgentFunctionMethodInfo(
-                method.Name, isAsync, isVoidLike, returnValueTypeFQN,
+                method.Name, publishedMethodName, isAsync, isVoidLike, returnValueTypeFQN,
                 returnJsonSchemaType, returnObjectSchemaJson,
                 parameters.ToImmutable(), methodDesc ?? ""));
         }
@@ -199,6 +210,26 @@ internal static class AgentDiscoveryHelper
             typeSymbol.ContainingAssembly?.Name ?? "Unknown",
             typeSymbol.IsStatic,
             methodInfos.ToImmutable());
+    }
+
+    private static string? GetPublishedName(
+        ImmutableArray<AttributeData> attributes,
+        string attributeName,
+        string fallback)
+    {
+        foreach (var attribute in attributes)
+        {
+            if (attribute.AttributeClass?.ToDisplayString() != attributeName)
+            {
+                continue;
+            }
+
+            return attribute.ConstructorArguments.Length > 0
+                ? attribute.ConstructorArguments[0].Value as string
+                : null;
+        }
+
+        return fallback;
     }
 
     public static ImmutableArray<AgentFunctionGroupEntry> GetAgentFunctionGroupEntries(

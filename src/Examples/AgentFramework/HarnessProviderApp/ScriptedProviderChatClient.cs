@@ -28,11 +28,11 @@ internal sealed class ScriptedProviderChatClient : IChatClient
                     [
                         new FunctionCallContent(
                             CallId,
-                            "WriteNote",
+                            "write_note",
                             new Dictionary<string, object?>
                             {
-                                ["path"] = HarnessProviderRun.NotePath,
-                                ["content"] = HarnessProviderRun.ScriptedNote,
+                                ["relative_path"] = HarnessProviderRun.NotePath,
+                                ["text_content"] = HarnessProviderRun.ScriptedNote,
                             }),
                     ])));
         }

@@ -8,19 +8,21 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Generators;
 internal readonly struct AgentFunctionMethodInfo
 {
     public AgentFunctionMethodInfo(
-        string methodName, bool isAsync, bool isVoidLike,
+        string methodName, string? publishedName, bool isAsync, bool isVoidLike,
         string? returnValueTypeFQN, string? returnJsonSchemaType,
         string? returnObjectSchemaJson,
         ImmutableArray<AgentFunctionParameterInfo> parameters,
         string description)
     {
-        MethodName = methodName; IsAsync = isAsync; IsVoidLike = isVoidLike;
+        MethodName = methodName; PublishedName = publishedName;
+        IsAsync = isAsync; IsVoidLike = isVoidLike;
         ReturnValueTypeFQN = returnValueTypeFQN; ReturnJsonSchemaType = returnJsonSchemaType;
         ReturnObjectSchemaJson = returnObjectSchemaJson;
         Parameters = parameters; Description = description;
     }
 
     public string MethodName { get; }
+    public string? PublishedName { get; }
     public bool IsAsync { get; }
     public bool IsVoidLike { get; }
     public string? ReturnValueTypeFQN { get; }

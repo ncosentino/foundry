@@ -197,4 +197,16 @@ public static class MafDiagnosticIds
     /// duplicate makes the name unusable and is rejected when the agent factory is built.
     /// </summary>
     public const string DuplicateAgentName = "FDRYMAF031";
+
+    /// <summary>
+    /// FDRYMAF032: <c>[AIFunctionName]</c> or <c>[AIParameterName]</c> declares a
+    /// <see langword="null"/>, empty, or whitespace-only published name.
+    /// </summary>
+    public const string InvalidAgentFunctionPublishedName = "FDRYMAF032";
+
+    /// <summary>
+    /// FDRYMAF033: Two <c>[AgentFunction]</c> methods in one function type publish the same
+    /// function name, or two parameters in one function publish the same parameter name.
+    /// </summary>
+    public const string DuplicateAgentFunctionPublishedName = "FDRYMAF033";
 }

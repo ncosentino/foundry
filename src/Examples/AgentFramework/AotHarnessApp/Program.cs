@@ -32,7 +32,7 @@ if (result.Session is null)
     return 2;
 }
 
-if (!result.ExecutedGeneratedToolNames.SequenceEqual(["WriteWorkspace"], StringComparer.Ordinal))
+if (!result.ExecutedGeneratedToolNames.SequenceEqual(["write_workspace"], StringComparer.Ordinal))
 {
     Console.Error.WriteLine("The generated workspace tool did not execute exactly once.");
     return 3;

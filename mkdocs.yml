@@ -102,6 +102,9 @@ nav:
       - FDRYMAF028: analyzers/FDRYMAF028.md
       - FDRYMAF029: analyzers/FDRYMAF029.md
       - FDRYMAF030: analyzers/FDRYMAF030.md
+      - FDRYMAF031: analyzers/FDRYMAF031.md
+      - FDRYMAF032: analyzers/FDRYMAF032.md
+      - FDRYMAF033: analyzers/FDRYMAF033.md
   - API Reference:
       - Overview: api/index.md
       - Development: api/dev/index.md
