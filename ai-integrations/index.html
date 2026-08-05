@@ -993,6 +993,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#published-function-and-parameter-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Published function and parameter names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#per-agent-tool-scoping" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2782,6 +2793,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF031/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF031
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF032/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF032
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analyzers/FDRYMAF033/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FDRYMAF033
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3720,140 +3815,177 @@ the complete Harness factory.</p>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">};</span>
 </code></pre></div>
 <p>The generated provider path carries no reflection fallback and is used by the executed <code>AotHarnessApp</code> NativeAOT fixture.</p>
+<h3 id="published-function-and-parameter-names">Published function and parameter names<a class="headerlink" href="#published-function-and-parameter-names" title="Permanent link">&para;</a></h3>
+<p>A tool name is part of the model contract, not an implementation detail. It appears in
+the tool schema sent to the model, comes back in <code>FunctionCallContent</code>, and is used by
+tool-name metrics, termination conditions, transcripts, and evaluation datasets.
+Renaming a C# method therefore renames all of those by default.</p>
+<p>MEAI's naming attributes let the public contract stay stable across a refactor:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#pragma warning disable MEAI001</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="na">[AgentFunction]</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="na">[AIFunctionName(&quot;get_temperature&quot;)]</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="na">[Description(&quot;Gets the current temperature for a city.&quot;)]</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">GetTemperature</span><span class="p">(</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="na">[AIParameterName(&quot;city_name&quot;)]</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="na">[Description(&quot;The city to look up.&quot;)]</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">city</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="s">$&quot;22°C in {city}&quot;</span><span class="p">;</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="cp">#pragma warning restore MEAI001</span>
+</code></pre></div>
+<p><code>AIFunctionNameAttribute</code> and <code>AIParameterNameAttribute</code> are experimental MEAI APIs,
+which is why using them produces <code>MEAI001</code>. Foundry does not duplicate them with its
+own naming properties. The reflection path already delegates to <code>AIFunctionFactory</code>;
+the generated path reads the same attributes and emits the same function name, JSON
+schema keys, required-property list, and argument lookup.</p>
+<p>Declaring a name <strong>replaces</strong> the C# identifier in the model contract. A function
+published as <code>get_temperature</code> is no longer resolved as <code>GetTemperature</code>, and the
+model must supply <code>city_name</code>, not <code>city</code>. Changing the published name is therefore
+still a breaking contract change; declaring it only moves the stable name into a
+place the author controls.</p>
+<p>Blank names are rejected by <a href="../analyzers/FDRYMAF032/">FDRYMAF032</a>. Duplicate names
+within one function type or one parameter list are rejected by
+<a href="../analyzers/FDRYMAF033/">FDRYMAF033</a>. Same-named functions in separate types remain
+valid when agents use them independently; <code>IAgentFactory</code> fails closed only if an
+agent actually resolves both into one ambiguous tool set.</p>
+<p><code>src/Examples/AgentFramework/HarnessProviderApp</code> uses published names for both
+workspace tools and their parameters. Its scripted provider pins the generated
+contract offline, and its <code>Harness__Provider=copilot</code> mode exercises a real model
+calling <code>write_note</code> and <code>read_note</code>.</p>
 <h3 id="per-agent-tool-scoping">Per-agent tool scoping<a class="headerlink" href="#per-agent-tool-scoping" title="Permanent link">&para;</a></h3>
 <p>Multiple agents can be created from the same <code>IAgentFactory</code>, each with a tailored subset of the registered tools:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Agent 1: geography tools only</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">geographyAgent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateAgent</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">{</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">Instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;You are a geography expert.&quot;</span><span class="p">;</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">FunctionTypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">GeographyFunctions</span><span class="p">)];</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">});</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="c1">// Agent 2: no tools (pure reasoning)</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">writerAgent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateAgent</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">{</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">Instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;You are a technical writer.&quot;</span><span class="p">;</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">FunctionTypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">});</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="c1">// Agent 3: all registered tools (default when FunctionTypes is null)</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="kt">var</span><span class="w"> </span><span class="n">generalAgent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateAgent</span><span class="p">();</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// Agent 1: geography tools only</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">geographyAgent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateAgent</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">{</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">Instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;You are a geography expert.&quot;</span><span class="p">;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">FunctionTypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="k">typeof</span><span class="p">(</span><span class="n">GeographyFunctions</span><span class="p">)];</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">});</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1">// Agent 2: no tools (pure reasoning)</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">writerAgent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateAgent</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">{</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">Instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;You are a technical writer.&quot;</span><span class="p">;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="n">opts</span><span class="p">.</span><span class="n">FunctionTypes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="p">});</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="c1">// Agent 3: all registered tools (default when FunctionTypes is null)</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="kt">var</span><span class="w"> </span><span class="n">generalAgent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateAgent</span><span class="p">();</span>
 </code></pre></div>
 <p><code>FunctionTypes = null</code> means all registered types are available. <code>FunctionTypes = []</code> means no tools.</p>
 <h3 id="recommended-surviving-tool-call-failures">Recommended: surviving tool-call failures<a class="headerlink" href="#recommended-surviving-tool-call-failures" title="Permanent link">&para;</a></h3>
 <p>Tool bodies throw — sometimes from the user's logic (NRE, validation), sometimes from infrastructure (DB timeout, transient HTTP). By default the exception bubbles all the way to <code>FunctionInvokingChatClient</code> and fails the entire agent turn. Call <code>.UsingToolResultMiddleware()</code> on the <code>AgentFrameworkBuilder</code> to catch these exceptions and translate them into structured <code>{ error: … }</code> results the LLM can recover from:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">serviceProvider</span><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">()</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="p">.</span><span class="n">AddAgentFunctionsFromGenerated</span><span class="p">(...)</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingResilience</span><span class="p">()</span><span class="w">             </span><span class="c1">// Innermost — retries first</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingToolResultMiddleware</span><span class="p">()</span><span class="w">   </span><span class="c1">// Outermost — catches what resilience couldn&#39;t recover</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="p">.</span><span class="n">BuildAgentFactory</span><span class="p">();</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">serviceProvider</span><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">()</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="p">.</span><span class="n">AddAgentFunctionsFromGenerated</span><span class="p">(...)</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingResilience</span><span class="p">()</span><span class="w">             </span><span class="c1">// Innermost — retries first</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingToolResultMiddleware</span><span class="p">()</span><span class="w">   </span><span class="c1">// Outermost — catches what resilience couldn&#39;t recover</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="p">.</span><span class="n">BuildAgentFactory</span><span class="p">();</span>
 </code></pre></div>
 <p>See <a href="../tool-result-middleware/">Tool Result Middleware</a> for the full behavior breakdown, ordering rules, and trade-offs.</p>
 <hr />
 <h2 id="semantic-kernel">Semantic Kernel<a class="headerlink" href="#semantic-kernel" title="Permanent link">&para;</a></h2>
 <h3 id="packages_1">Packages<a class="headerlink" href="#packages_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="cm">&lt;!-- Runtime --&gt;</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.Needlr.SemanticKernel&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="cm">&lt;!-- Source generator (add as analyzer — no runtime dep) --&gt;</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.Needlr.SemanticKernel.Generators&quot;</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cm">&lt;!-- Runtime --&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.Needlr.SemanticKernel&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="cm">&lt;!-- Source generator (add as analyzer — no runtime dep) --&gt;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.Needlr.SemanticKernel.Generators&quot;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 </code></pre></div>
 <h3 id="quick-start_1">Quick start<a class="headerlink" href="#quick-start_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Needlr.Injection</span><span class="p">;</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Needlr.Injection.Reflection</span><span class="p">;</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Needlr.SemanticKernel</span><span class="p">;</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WeatherPlugin</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">{</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="na">[KernelFunction]</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="na">[Description(&quot;Gets the current temperature for a city.&quot;)]</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">GetTemperature</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">city</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">$&quot;22°C in {city}&quot;</span><span class="p">;</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="p">}</span>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="kt">var</span><span class="w"> </span><span class="n">kernelFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Syringe</span><span class="p">()</span>
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingReflection</span><span class="p">()</span>
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingSemanticKernel</span><span class="p">(</span><span class="n">sk</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sk</span>
-<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">        </span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">opts</span><span class="p">.</span><span class="n">KernelBuilderFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sp</span><span class="w"> </span><span class="o">=&gt;</span>
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">            </span><span class="n">Kernel</span><span class="p">.</span><span class="n">CreateBuilder</span><span class="p">()</span>
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">                </span><span class="p">.</span><span class="n">AddAzureOpenAIChatCompletion</span><span class="p">(</span><span class="n">deploymentName</span><span class="p">,</span><span class="w"> </span><span class="n">endpoint</span><span class="p">,</span><span class="w"> </span><span class="n">apiKey</span><span class="p">))</span>
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">        </span><span class="p">.</span><span class="n">AddSemanticKernelPluginsFromAssemblies</span><span class="p">())</span><span class="w">   </span><span class="c1">// reflection path</span>
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">    </span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">    </span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IKernelFactory</span><span class="o">&gt;</span><span class="p">();</span>
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>
-<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="kt">var</span><span class="w"> </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kernelFactory</span><span class="p">.</span><span class="n">CreateKernel</span><span class="p">();</span>
-<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="kt">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">kernel</span><span class="p">.</span><span class="n">InvokePromptAsync</span><span class="p">(</span><span class="s">&quot;What is the weather today?&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Needlr.Injection</span><span class="p">;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Needlr.Injection.Reflection</span><span class="p">;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Needlr.SemanticKernel</span><span class="p">;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WeatherPlugin</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">{</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="na">[KernelFunction]</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="na">[Description(&quot;Gets the current temperature for a city.&quot;)]</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">GetTemperature</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">city</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">$&quot;22°C in {city}&quot;</span><span class="p">;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">}</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="kt">var</span><span class="w"> </span><span class="n">kernelFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Syringe</span><span class="p">()</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingReflection</span><span class="p">()</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingSemanticKernel</span><span class="p">(</span><span class="n">sk</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sk</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">        </span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">opts</span><span class="p">.</span><span class="n">KernelBuilderFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sp</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">            </span><span class="n">Kernel</span><span class="p">.</span><span class="n">CreateBuilder</span><span class="p">()</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">                </span><span class="p">.</span><span class="n">AddAzureOpenAIChatCompletion</span><span class="p">(</span><span class="n">deploymentName</span><span class="p">,</span><span class="w"> </span><span class="n">endpoint</span><span class="p">,</span><span class="w"> </span><span class="n">apiKey</span><span class="p">))</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">        </span><span class="p">.</span><span class="n">AddSemanticKernelPluginsFromAssemblies</span><span class="p">())</span><span class="w">   </span><span class="c1">// reflection path</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">    </span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">    </span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IKernelFactory</span><span class="o">&gt;</span><span class="p">();</span>
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="kt">var</span><span class="w"> </span><span class="n">kernel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kernelFactory</span><span class="p">.</span><span class="n">CreateKernel</span><span class="p">();</span>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="kt">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">kernel</span><span class="p">.</span><span class="n">InvokePromptAsync</span><span class="p">(</span><span class="s">&quot;What is the weather today?&quot;</span><span class="p">);</span>
 </code></pre></div>
 <h3 id="source-gen-path-recommended_1">Source gen path (recommended)<a class="headerlink" href="#source-gen-path-recommended_1" title="Permanent link">&para;</a></h3>
 <p>When <code>NexusLabs.Foundry.Needlr.SemanticKernel.Generators</code> is referenced as an analyzer, it emits a compile-time registry:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1">// Generated: SemanticKernelPlugins.g.cs</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">namespace</span><span class="w"> </span><span class="nn">YourAssemblyName.Generated</span><span class="p">;</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">KernelPluginRegistry</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">{</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="p">(</span><span class="n">Type</span><span class="w"> </span><span class="n">PluginType</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">IsStatic</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Entries</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="p">(</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)[]</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">        </span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">WeatherPlugin</span><span class="p">),</span><span class="w"> </span><span class="k">false</span><span class="p">),</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">        </span><span class="c1">// ...</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="p">};</span>
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// Generated: SemanticKernelPlugins.g.cs</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">namespace</span><span class="w"> </span><span class="nn">YourAssemblyName.Generated</span><span class="p">;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">KernelPluginRegistry</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="p">{</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="p">(</span><span class="n">Type</span><span class="w"> </span><span class="n">PluginType</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">IsStatic</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Entries</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="p">(</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)[]</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">WeatherPlugin</span><span class="p">),</span><span class="w"> </span><span class="k">false</span><span class="p">),</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="c1">// ...</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="p">};</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="p">}</span>
 </code></pre></div>
 <p>Pass this to <code>AddSemanticKernelPluginsFromGenerated</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">.</span><span class="n">UsingSemanticKernel</span><span class="p">(</span><span class="n">sk</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sk</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">opts</span><span class="p">.</span><span class="n">KernelBuilderFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sp</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">...)</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="p">.</span><span class="n">AddSemanticKernelPluginsFromGenerated</span><span class="p">(</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">        </span><span class="n">YourAssemblyName</span><span class="p">.</span><span class="n">Generated</span><span class="p">.</span><span class="n">KernelPluginRegistry</span><span class="p">.</span><span class="n">Entries</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">.</span><span class="n">UsingSemanticKernel</span><span class="p">(</span><span class="n">sk</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sk</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">opts</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">opts</span><span class="p">.</span><span class="n">KernelBuilderFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sp</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">...)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="p">.</span><span class="n">AddSemanticKernelPluginsFromGenerated</span><span class="p">(</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">        </span><span class="n">YourAssemblyName</span><span class="p">.</span><span class="n">Generated</span><span class="p">.</span><span class="n">KernelPluginRegistry</span><span class="p">.</span><span class="n">Entries</span><span class="p">))</span>
 </code></pre></div>
 <hr />
 <h2 id="multi-agent-orchestration">Multi-Agent Orchestration<a class="headerlink" href="#multi-agent-orchestration" title="Permanent link">&para;</a></h2>
 <p>Foundry extends the IoC principle from the tool layer upward to the agent and topology layers. Agents are declared as plain C# classes with attributes; Foundry discovers them, builds the workflow graph, and emits source-generated factory methods. Adding a new agent role means adding a class, not editing orchestration wiring.</p>
 <h3 id="packages_2">Packages<a class="headerlink" href="#packages_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="cm">&lt;!-- Runtime: agents, workflows, termination conditions --&gt;</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Workflows&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="cm">&lt;!-- Source generator (analyzer — no runtime dep) --&gt;</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Generators&quot;</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="cm">&lt;!-- Roslyn analyzers (optional but recommended) --&gt;</span>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers&quot;</span>
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="cm">&lt;!-- Runtime: agents, workflows, termination conditions --&gt;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Workflows&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="cm">&lt;!-- Source generator (analyzer — no runtime dep) --&gt;</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Generators&quot;</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="cm">&lt;!-- Roslyn analyzers (optional but recommended) --&gt;</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">&quot;NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers&quot;</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">                  </span><span class="na">OutputItemType=</span><span class="s">&quot;Analyzer&quot;</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">                  </span><span class="na">ReferenceOutputAssembly=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
 </code></pre></div>
 <h3 id="declaring-agents">Declaring agents<a class="headerlink" href="#declaring-agents" title="Permanent link">&para;</a></h3>
 <p>The <code>[FoundryAgent]</code> attribute marks a class as a registered agent. It accepts <code>Instructions</code>, <code>Description</code>, <code>FunctionTypes</code>, and <code>FunctionGroups</code> to configure the agent's identity and tool access.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="na">[FoundryAgent(</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="na">    Instructions = &quot;You are a geography expert. Answer questions about countries and cities.&quot;,</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="na">    Description  = &quot;Handles geographic queries&quot;)]</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">GeographyAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="na">[FoundryAgent(</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="na">    Instructions = &quot;You are a travel writer. Produce engaging summaries.&quot;,</span>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="na">    FunctionGroups = [&quot;travel&quot;]</span><span class="p">)]</span><span class="w">           </span><span class="c1">// scoped to the &quot;travel&quot; function group</span>
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TravelWriterAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
-<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="na">[FoundryAgent(</span>
-<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="na">    Instructions = &quot;You triage requests and route them.&quot;,</span>
-<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="na">    FunctionTypes = []</span><span class="p">)]</span><span class="w">                    </span><span class="c1">// empty array → no tools (pure routing)</span>
-<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TriageAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="na">[FoundryAgent(</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="na">    Instructions = &quot;You are a geography expert. Answer questions about countries and cities.&quot;,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="na">    Description  = &quot;Handles geographic queries&quot;)]</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">GeographyAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="na">[FoundryAgent(</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="na">    Instructions = &quot;You are a travel writer. Produce engaging summaries.&quot;,</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="na">    FunctionGroups = [&quot;travel&quot;]</span><span class="p">)]</span><span class="w">           </span><span class="c1">// scoped to the &quot;travel&quot; function group</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TravelWriterAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="na">[FoundryAgent(</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="na">    Instructions = &quot;You triage requests and route them.&quot;,</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="na">    FunctionTypes = []</span><span class="p">)]</span><span class="w">                    </span><span class="c1">// empty array → no tools (pure routing)</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TriageAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>Foundry discovers all <code>[FoundryAgent]</code> classes in the compilation and emits a static agent registry at build time.</p>
 <h3 id="function-groups">Function groups<a class="headerlink" href="#function-groups" title="Permanent link">&para;</a></h3>
 <p><code>[AgentFunctionGroup]</code> buckets related tool methods under a named group. Agents reference groups by name via <code>FunctionGroups</code>, keeping tool scoping declarative and typo-detectable (<a href="../analyzers/FDRYMAF005/">FDRYMAF005</a>).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="na">[AgentFunctionGroup(&quot;geography&quot;)]</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">GeographyFunctions</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">{</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="na">[AgentFunction]</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="na">[Description(&quot;Returns countries the user has lived in.&quot;)]</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GetCountriesLived</span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Canada&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;USA&quot;</span><span class="p">];</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="na">[AgentFunction]</span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="na">[Description(&quot;Returns the user&#39;s favourite cities.&quot;)]</span>
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GetFavoriteCities</span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Toronto&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;New York&quot;</span><span class="p">];</span>
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="na">[AgentFunctionGroup(&quot;geography&quot;)]</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">GeographyFunctions</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="p">{</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="na">[AgentFunction]</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="na">[Description(&quot;Returns countries the user has lived in.&quot;)]</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GetCountriesLived</span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Canada&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;USA&quot;</span><span class="p">];</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="na">[AgentFunction]</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="na">[Description(&quot;Returns the user&#39;s favourite cities.&quot;)]</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">IReadOnlyList</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GetFavoriteCities</span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Toronto&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;New York&quot;</span><span class="p">];</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="p">}</span>
 </code></pre></div>
 <p>Scoping rules:</p>
 <table>
@@ -3891,65 +4023,65 @@ the complete Harness factory.</p>
 <p>Foundry supports four topology patterns. Each is declared with attributes; the source generator emits a corresponding typed factory method on <code>IWorkflowFactory</code>.</p>
 <h4 id="handoff">Handoff<a class="headerlink" href="#handoff" title="Permanent link">&para;</a></h4>
 <p>One agent handles a request and optionally routes it to another agent when a condition is met. The routing decision is made by the LLM at runtime; the <code>When</code> parameter describes the condition as a natural language hint for the model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Triage the request and hand off.&quot;)]</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="na">[AgentHandoffsTo(typeof(GeographyAgent), When = &quot;The question is about geography&quot;)]</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="na">[AgentHandoffsTo(typeof(TravelWriterAgent), When = &quot;The question is about travel writing&quot;)]</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TriageAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Triage the request and hand off.&quot;)]</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="na">[AgentHandoffsTo(typeof(GeographyAgent), When = &quot;The question is about geography&quot;)]</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="na">[AgentHandoffsTo(typeof(TravelWriterAgent), When = &quot;The question is about travel writing&quot;)]</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TriageAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>Generator emits: <code>factory.CreateTriageAgentHandoffWorkflow()</code></p>
 <h4 id="group-chat">Group chat<a class="headerlink" href="#group-chat" title="Permanent link">&para;</a></h4>
 <p>Multiple agents collaborate in a shared round-robin conversation. All participants are peers; the workflow runs for up to <code>maxIterations</code> turns unless a termination condition triggers earlier.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Review code for correctness.&quot;)]</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ReviewerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="na">[FoundryAgent(Instructions = &quot;Author code changes based on review feedback.&quot;)]</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AuthorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Review code for correctness.&quot;)]</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ReviewerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="na">[FoundryAgent(Instructions = &quot;Author code changes based on review feedback.&quot;)]</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AuthorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>Generator emits: <code>factory.CreateCodeReviewGroupChatWorkflow()</code></p>
 <p>A group chat requires at least two members (<a href="../analyzers/FDRYMAF002/">FDRYMAF002</a>).</p>
 <h4 id="sequential-pipeline">Sequential pipeline<a class="headerlink" href="#sequential-pipeline" title="Permanent link">&para;</a></h4>
 <p>Agents run in a fixed order, each receiving the prior agent's output. Use <code>Order</code> to control the sequence.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Extract key facts from the source material.&quot;)]</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 1)]</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentExtractorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="na">[FoundryAgent(Instructions = &quot;Enrich the extracted facts with examples.&quot;)]</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 2)]</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentEnricherAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="na">[FoundryAgent(Instructions = &quot;Publish the enriched content.&quot;)]</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 3)]</span>
-<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentPublisherAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Extract key facts from the source material.&quot;)]</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 1)]</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentExtractorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="na">[FoundryAgent(Instructions = &quot;Enrich the extracted facts with examples.&quot;)]</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 2)]</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentEnricherAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="na">[FoundryAgent(Instructions = &quot;Publish the enriched content.&quot;)]</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 3)]</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentPublisherAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>Generator emits: <code>factory.CreateContentPipelineSequentialWorkflow()</code></p>
 <h4 id="graph-dag-phase-1">Graph / DAG (Phase 1)<a class="headerlink" href="#graph-dag-phase-1" title="Permanent link">&para;</a></h4>
 <p>Agents form a directed acyclic graph with conditional routing, fan-out, and fan-in convergence. Edges are declared on source agents; the graph name groups them.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Analyze the request and route to research paths.&quot;)]</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="na">[AgentGraphEntry(&quot;research&quot;, RoutingMode = GraphRoutingMode.AllMatching)]</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(WebResearchAgent), Condition = &quot;NeedsWebData&quot;)]</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(DatabaseAgent), Condition = &quot;NeedsDbLookup&quot;)]</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(SummarizerAgent))]</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AnalyzerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="na">[FoundryAgent(Instructions = &quot;Search the web for data.&quot;)]</span>
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(SummarizerAgent))]</span>
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WebResearchAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="na">[FoundryAgent(Instructions = &quot;Query internal databases.&quot;)]</span>
-<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(SummarizerAgent))]</span>
-<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">DatabaseAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>
-<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="na">[FoundryAgent(Instructions = &quot;Synthesize findings into a report.&quot;)]</span>
-<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="na">[AgentGraphNode(&quot;research&quot;, JoinMode = GraphJoinMode.WaitAll)]</span>
-<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">SummarizerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Analyze the request and route to research paths.&quot;)]</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="na">[AgentGraphEntry(&quot;research&quot;, RoutingMode = GraphRoutingMode.AllMatching)]</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(WebResearchAgent), Condition = &quot;NeedsWebData&quot;)]</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(DatabaseAgent), Condition = &quot;NeedsDbLookup&quot;)]</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(SummarizerAgent))]</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AnalyzerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="na">[FoundryAgent(Instructions = &quot;Search the web for data.&quot;)]</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(SummarizerAgent))]</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WebResearchAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="na">[FoundryAgent(Instructions = &quot;Query internal databases.&quot;)]</span>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="na">[AgentGraphEdge(&quot;research&quot;, typeof(SummarizerAgent))]</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">DatabaseAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="na">[FoundryAgent(Instructions = &quot;Synthesize findings into a report.&quot;)]</span>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="na">[AgentGraphNode(&quot;research&quot;, JoinMode = GraphJoinMode.WaitAll)]</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">SummarizerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>Runtime: Use <code>RunGraphAsync</code> for execution — it auto-selects the optimal executor:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1">// RunGraphAsync handles both WaitAll and WaitAny graphs automatically:</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="c1">// - WaitAll-only graphs → MAF&#39;s native BSP executor</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1">// - Graphs with WaitAny nodes → Foundry&#39;s executor using Task.WhenAny</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="kt">var</span><span class="w"> </span><span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunGraphAsync</span><span class="p">(</span><span class="s">&quot;research&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">question</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// RunGraphAsync handles both WaitAll and WaitAny graphs automatically:</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="c1">// - WaitAll-only graphs → MAF&#39;s native BSP executor</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="c1">// - Graphs with WaitAny nodes → Foundry&#39;s executor using Task.WhenAny</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="kt">var</span><span class="w"> </span><span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunGraphAsync</span><span class="p">(</span><span class="s">&quot;research&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">question</span><span class="p">);</span>
 </code></pre></div>
 <p>Alternatively, <code>factory.CreateGraphWorkflow("research")</code> returns the raw MAF <code>Workflow</code> object for direct integration with MAF tooling — but this only supports <code>WaitAll</code>. If you use <code>CreateGraphWorkflow</code> on a graph with <code>WaitAny</code> nodes, analyzer <a href="../analyzers/FDRYMAF025/">FDRYMAF025</a> reports a compile-time error directing you to <code>RunGraphAsync</code>.</p>
 <p>A runnable end-to-end example lives in <code>src/Examples/AgentFramework/GraphWorkflowApp/</code>. It uses <code>CopilotChatClient</code> (no Azure credentials required) to run a four-agent research pipeline DAG with fan-out from an analyzer to parallel web/database research branches that converge at a summarizer.</p>
@@ -3978,22 +4110,22 @@ the complete Harness factory.</p>
 </table>
 <h5 id="dag-diagnostics">DAG Diagnostics<a class="headerlink" href="#dag-diagnostics" title="Permanent link">&para;</a></h5>
 <p>After running a DAG workflow, cast the result to <code>IDagRunResult</code> for per-node diagnostics:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">IDagRunResult</span><span class="p">)</span><span class="k">await</span><span class="w"> </span><span class="n">InProcessExecution</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;DAG {(result.Succeeded ? &quot;</span><span class="n">succeeded</span><span class="s">&quot; : &quot;</span><span class="n">failed</span><span class="s">&quot;)} &quot;</span><span class="w"> </span><span class="o">+</span>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">    </span><span class="s">$&quot;in {result.TotalDuration.TotalSeconds:F1}s, &quot;</span><span class="w"> </span><span class="o">+</span>
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">    </span><span class="s">$&quot;nodes: {result.NodeResults.Count}&quot;</span><span class="p">);</span>
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="p">(</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">nodeResult</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">NodeResults</span><span class="p">)</span>
-<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="p">{</span>
-<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;  {nodeId}: {nodeResult.Kind}, &quot;</span><span class="w"> </span><span class="o">+</span>
-<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">        </span><span class="s">$&quot;{nodeResult.Duration.TotalMilliseconds}ms&quot;</span><span class="p">);</span>
-<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="p">}</span>
-<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>
-<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="p">(</span><span class="n">branchId</span><span class="p">,</span><span class="w"> </span><span class="n">stages</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">BranchResults</span><span class="p">)</span>
-<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="p">{</span>
-<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;  Branch {branchId}: {stages.Count} stages&quot;</span><span class="p">);</span>
-<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">IDagRunResult</span><span class="p">)</span><span class="k">await</span><span class="w"> </span><span class="n">InProcessExecution</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;DAG {(result.Succeeded ? &quot;</span><span class="n">succeeded</span><span class="s">&quot; : &quot;</span><span class="n">failed</span><span class="s">&quot;)} &quot;</span><span class="w"> </span><span class="o">+</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span><span class="s">$&quot;in {result.TotalDuration.TotalSeconds:F1}s, &quot;</span><span class="w"> </span><span class="o">+</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span><span class="s">$&quot;nodes: {result.NodeResults.Count}&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="p">(</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">nodeResult</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">NodeResults</span><span class="p">)</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="p">{</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;  {nodeId}: {nodeResult.Kind}, &quot;</span><span class="w"> </span><span class="o">+</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">        </span><span class="s">$&quot;{nodeResult.Duration.TotalMilliseconds}ms&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="p">}</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="p">(</span><span class="n">branchId</span><span class="p">,</span><span class="w"> </span><span class="n">stages</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">BranchResults</span><span class="p">)</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="p">{</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;  Branch {branchId}: {stages.Count} stages&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="p">}</span>
 </code></pre></div>
 <p><code>IDagRunResult</code> extends <code>IPipelineRunResult</code>, so existing code that consumes the flat <code>Stages</code> list continues to work unchanged. The <code>NodeResults</code> dictionary provides the richer graph-aware view with edge connectivity, timing offsets, and the <code>NodeKind</code> discriminator (<code>Agent</code> vs <code>Reducer</code>).</p>
 <h5 id="dag-progress-events">DAG Progress Events<a class="headerlink" href="#dag-progress-events" title="Permanent link">&para;</a></h5>
@@ -4044,26 +4176,26 @@ the complete Harness factory.</p>
 <p>See <a href="../adr/adr-0001-dag-graph-workflow-support/">ADR-0001</a> for the full design rationale.</p>
 <h3 id="running-workflows">Running workflows<a class="headerlink" href="#running-workflows" title="Permanent link">&para;</a></h3>
 <p>Obtain an <code>IWorkflowFactory</code> from DI and use the generated extension methods. The factory resolves and wires agents automatically.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">serviceProvider</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IWorkflowFactory</span><span class="o">&gt;</span><span class="p">();</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">CreateTriageAgentHandoffWorkflow</span><span class="p">();</span>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="kt">var</span><span class="w"> </span><span class="n">responses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">workflow</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="s">&quot;Which countries has Nick visited?&quot;</span><span class="p">);</span>
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1">// responses: IReadOnlyDictionary&lt;string, string&gt; (agentId → text)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">serviceProvider</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IWorkflowFactory</span><span class="o">&gt;</span><span class="p">();</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">CreateTriageAgentHandoffWorkflow</span><span class="p">();</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="kt">var</span><span class="w"> </span><span class="n">responses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">workflow</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="s">&quot;Which countries has Nick visited?&quot;</span><span class="p">);</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="c1">// responses: IReadOnlyDictionary&lt;string, string&gt; (agentId → text)</span>
 </code></pre></div>
 <p><code>RunAsync</code> is an extension method from <code>NexusLabs.Foundry.MicrosoftAgentFramework.Workflows</code> that wraps the underlying MAF streaming execution.</p>
 <h3 id="termination-conditions">Termination conditions<a class="headerlink" href="#termination-conditions" title="Permanent link">&para;</a></h3>
 <p>Termination conditions let you stop a workflow early when a content-based criterion is met. Two layers are available:</p>
 <p><strong>Layer 1 — group chat (fires before the next turn):</strong>
 <code>[AgentTerminationCondition]</code> on a group chat member. The condition is evaluated inside MAF's group chat loop after each agent response. When it triggers, the current turn is the last one — the next agent is never called.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="na">[AgentTerminationCondition(typeof(KeywordTerminationCondition), &quot;APPROVED&quot;)]</span>
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ReviewerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="na">[AgentGroupChatMember(&quot;code-review&quot;)]</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="na">[AgentTerminationCondition(typeof(KeywordTerminationCondition), &quot;APPROVED&quot;)]</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ReviewerAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p><strong>Layer 2 — workflow-level (fires after a response is fully emitted):</strong>
 <code>[WorkflowRunTerminationCondition]</code> on any agent. The condition is evaluated in Foundry's <code>RunAsync</code> event loop after the agent's complete response is received. Works for all topology types; for group chat, prefer Layer 1 (<a href="../analyzers/FDRYMAF011/">FDRYMAF011</a>).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 1)]</span>
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="na">[WorkflowRunTerminationCondition(typeof(KeywordTerminationCondition), &quot;EXTRACTION_FAILED&quot;)]</span>
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentExtractorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="na">[AgentSequenceMember(&quot;content-pipeline&quot;, Order = 1)]</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="na">[WorkflowRunTerminationCondition(typeof(KeywordTerminationCondition), &quot;EXTRACTION_FAILED&quot;)]</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ContentExtractorAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h4 id="conditions-are-evaluated-for-every-agents-turn">Conditions are evaluated for every agent's turn<a class="headerlink" href="#conditions-are-evaluated-for-every-agents-turn" title="Permanent link">&para;</a></h4>
 <p>In both layers, the class an attribute is applied to determines only which workflow the condition is
@@ -4072,12 +4204,12 @@ and offered every turn, so in the example above <code>KeywordTerminationConditio
 workflow whenever <em>any</em> member of <code>code-review</code> says <code>APPROVED</code>, not only <code>ReviewerAgent</code>.</p>
 <p>That is usually what you want for an approval gate. When it isn't, the condition has to scope itself
 using <code>TerminationContext.AgentId</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ApprovedByReviewer</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IWorkflowTerminationCondition</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="p">{</span>
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">ShouldTerminate</span><span class="p">(</span><span class="n">TerminationContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">AgentId</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;ReviewerAgent&quot;</span>
-<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="n">LastMessage</span><span class="o">?.</span><span class="n">Text</span><span class="o">?.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;APPROVED&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">true</span><span class="p">;</span>
-<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ApprovedByReviewer</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IWorkflowTerminationCondition</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="p">{</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">ShouldTerminate</span><span class="p">(</span><span class="n">TerminationContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="n">AgentId</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;ReviewerAgent&quot;</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="n">LastMessage</span><span class="o">?.</span><span class="n">Text</span><span class="o">?.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;APPROVED&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">true</span><span class="p">;</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="p">}</span>
 </code></pre></div>
 <p>Two things to know about <code>AgentId</code> before comparing against it:</p>
 <ul>
@@ -4089,15 +4221,15 @@ using <code>TerminationContext.AgentId</code>:</p>
 </ul>
 <p>The built-in conditions do not scope themselves, by design — they match on content alone.</p>
 <p>When an agent carries <code>[WorkflowRunTerminationCondition]</code>, the generator emits a paired <code>Run*Async</code> method that packages creation and execution together with the declared conditions already wired in:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1">// Generated Run*Async bundles conditions automatically</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">responses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunContentPipelineSequentialWorkflowAsync</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1">// Generated Run*Async bundles conditions automatically</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">responses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunContentPipelineSequentialWorkflowAsync</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
 </code></pre></div>
 <p>Built-in conditions: <code>KeywordTerminationCondition</code>, <code>RegexTerminationCondition</code>, <code>ToolCallTerminationCondition</code>. Custom conditions implement <code>IWorkflowTerminationCondition</code>.</p>
 <h3 id="topology-graph-diagnostic">Topology graph diagnostic<a class="headerlink" href="#topology-graph-diagnostic" title="Permanent link">&para;</a></h3>
 <p>Set <code>FoundryDiagnostics=true</code> in the agent class library's project properties to emit a Mermaid diagram of the agent topology at build time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nt">&lt;PropertyGroup&gt;</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">&lt;FoundryDiagnostics&gt;</span>true<span class="nt">&lt;/FoundryDiagnostics&gt;</span>
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="nt">&lt;/PropertyGroup&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nt">&lt;PropertyGroup&gt;</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="w">  </span><span class="nt">&lt;FoundryDiagnostics&gt;</span>true<span class="nt">&lt;/FoundryDiagnostics&gt;</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="nt">&lt;/PropertyGroup&gt;</span>
 </code></pre></div>
 <p>The diagram is written to <code>bin/{Configuration}/{TFM}/FoundryDiagnostics/AgentTopologyGraph.md</code> and visualises all declared handoff, group chat, and sequential topologies in the compilation.</p>
 <hr />

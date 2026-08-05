@@ -73,6 +73,9 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [FDRYMAF028](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF028/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [FDRYMAF029](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF029/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [FDRYMAF030](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF030/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF031](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF031/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF032](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF032/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [FDRYMAF033](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF033/) -- Build reliable, observable, and testable AI agent systems in .NET
 
 ## API Reference
 
