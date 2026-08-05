@@ -231,8 +231,9 @@ public sealed class CopilotChatClient : IChatClient
                     {
                         try
                         {
-                            args = JsonSerializer.Deserialize<Dictionary<string, object?>>(
-                                argsJson, CopilotJsonContext.Default.Options);
+                            args = JsonSerializer.Deserialize(
+                                argsJson,
+                                CopilotJsonContext.Default.DictionaryStringObject);
                         }
                         catch (JsonException)
                         {
@@ -373,7 +374,9 @@ public sealed class CopilotChatClient : IChatClient
                         {
                             Name = fc.Name,
                             Arguments = fc.Arguments is not null
-                                ? JsonSerializer.Serialize(fc.Arguments, CopilotJsonContext.Default.Options)
+                                ? SerializeWithContext(
+                                    fc.Arguments,
+                                    typeof(IDictionary<string, object?>))
                                 : "{}",
                         },
                     }).ToList(),
@@ -407,10 +410,6 @@ public sealed class CopilotChatClient : IChatClient
                 continue;
             }
 
-            var parameters = func.JsonSchema is { } schema
-                ? JsonSerializer.Deserialize<object>(schema.GetRawText())
-                : null;
-
             result.Add(new RequestTool
             {
                 Type = "function",
@@ -418,7 +417,9 @@ public sealed class CopilotChatClient : IChatClient
                 {
                     Name = func.Name,
                     Description = func.Description,
-                    Parameters = parameters,
+                    Parameters = func.JsonSchema.ValueKind is JsonValueKind.Undefined
+                        ? null
+                        : func.JsonSchema.Clone(),
                 },
             });
         }
@@ -532,9 +533,9 @@ public sealed class CopilotChatClient : IChatClient
                     {
                         try
                         {
-                            args = JsonSerializer.Deserialize<Dictionary<string, object?>>(
+                            args = JsonSerializer.Deserialize(
                                 tc.Function.Arguments,
-                                CopilotJsonContext.Default.Options);
+                                CopilotJsonContext.Default.DictionaryStringObject);
                         }
                         catch (JsonException)
                         {
@@ -618,9 +619,9 @@ public sealed class CopilotChatClient : IChatClient
                 {
                     try
                     {
-                        args = JsonSerializer.Deserialize<Dictionary<string, object?>>(
+                        args = JsonSerializer.Deserialize(
                             tc.Function.Arguments,
-                            CopilotJsonContext.Default.Options);
+                            CopilotJsonContext.Default.DictionaryStringObject);
                     }
                     catch (JsonException)
                     {
@@ -682,11 +683,20 @@ public sealed class CopilotChatClient : IChatClient
 
         try
         {
-            return JsonSerializer.Serialize(result, result.GetType());
+            return SerializeWithContext(result, result.GetType());
         }
-        catch (JsonException)
+        catch (Exception ex) when (ex is JsonException or NotSupportedException)
         {
             return result.ToString() ?? "";
         }
+    }
+
+    private static string SerializeWithContext(object value, Type runtimeType)
+    {
+        var typeInfo = CopilotJsonContext.Default.GetTypeInfo(runtimeType)
+            ?? throw new NotSupportedException(
+                $"No source-generated JSON metadata is available for '{runtimeType}'.");
+
+        return JsonSerializer.Serialize(value, typeInfo);
     }
 }

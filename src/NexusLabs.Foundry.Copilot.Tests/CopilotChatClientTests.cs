@@ -180,6 +180,60 @@ public class CopilotChatClientTests
     }
 
     [Fact]
+    public async Task GetResponseAsync_PreservesProvidedToolSchema()
+    {
+        string? capturedBody = null;
+
+        using var client = CreateClient(async request =>
+        {
+            if (request.RequestUri!.PathAndQuery.Contains("copilot_internal"))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        TokenExchangeResponse,
+                        Encoding.UTF8,
+                        "application/json"),
+                };
+            }
+
+            capturedBody = await request.Content!.ReadAsStringAsync();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """{"id":"tool-schema","created":0,"model":"m","choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}]}""",
+                    Encoding.UTF8,
+                    "application/json"),
+            };
+        });
+        var tool = AIFunctionFactory.Create(
+            (int value) => value * 2,
+            name: "double_value",
+            description: "Doubles an integer.");
+
+        await client.GetResponseAsync(
+            [new ChatMessage(ChatRole.User, "double 7")],
+            new ChatOptions { Tools = [tool] },
+            TestContext.Current.CancellationToken);
+
+        Assert.NotNull(capturedBody);
+        using var requestJson = JsonDocument.Parse(capturedBody);
+        var function = requestJson.RootElement
+            .GetProperty("tools")[0]
+            .GetProperty("function");
+
+        Assert.Equal("double_value", function.GetProperty("name").GetString());
+        Assert.Equal(
+            "integer",
+            function
+                .GetProperty("parameters")
+                .GetProperty("properties")
+                .GetProperty("value")
+                .GetProperty("type")
+                .GetString());
+    }
+
+    [Fact]
     public async Task GetResponseAsync_SendsRequiredHeaders()
     {
         HttpRequestMessage? capturedRequest = null;
@@ -408,6 +462,200 @@ public class CopilotChatClientTests
         Assert.Equal("result 1", toolMessages[0].GetProperty("content").GetString());
         Assert.Equal("result 2", toolMessages[1].GetProperty("content").GetString());
         Assert.Equal("result 3", toolMessages[2].GetProperty("content").GetString());
+    }
+
+    [Fact]
+    public async Task GetResponseAsync_DictionaryToolResult_SerializesAsJson()
+    {
+        string? capturedBody = null;
+
+        using var client = CreateClient(async request =>
+        {
+            if (request.RequestUri!.PathAndQuery.Contains("copilot_internal"))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        TokenExchangeResponse,
+                        Encoding.UTF8,
+                        "application/json"),
+                };
+            }
+
+            capturedBody = await request.Content!.ReadAsStringAsync();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """{"id":"tool-result","created":0,"model":"m","choices":[{"index":0,"message":{"role":"assistant","content":"done"},"finish_reason":"stop"}]}""",
+                    Encoding.UTF8,
+                    "application/json"),
+            };
+        });
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.User, "double 7"),
+            new(ChatRole.Assistant,
+            [
+                new FunctionCallContent(
+                    "call_1",
+                    "double_value",
+                    new Dictionary<string, object?> { ["value"] = 7 }),
+            ]),
+            new(ChatRole.Tool,
+            [
+                new FunctionResultContent(
+                    "call_1",
+                    new Dictionary<string, object?> { ["doubled"] = 14 }),
+            ]),
+        };
+
+        await client.GetResponseAsync(
+            messages,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(capturedBody);
+        using var requestJson = JsonDocument.Parse(capturedBody);
+        var toolMessage = requestJson.RootElement
+            .GetProperty("messages")
+            .EnumerateArray()
+            .Single(message => message.GetProperty("role").GetString() == "tool");
+        using var resultJson = JsonDocument.Parse(
+            toolMessage.GetProperty("content").GetString()!);
+
+        Assert.Equal(14, resultJson.RootElement.GetProperty("doubled").GetInt32());
+    }
+
+    [Fact]
+    public async Task GetResponseAsync_UnknownToolResultType_FallsBackToString()
+    {
+        string? capturedBody = null;
+
+        using var client = CreateClient(async request =>
+        {
+            if (request.RequestUri!.PathAndQuery.Contains("copilot_internal"))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        TokenExchangeResponse,
+                        Encoding.UTF8,
+                        "application/json"),
+                };
+            }
+
+            capturedBody = await request.Content!.ReadAsStringAsync();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """{"id":"unknown-result","created":0,"model":"m","choices":[{"index":0,"message":{"role":"assistant","content":"done"},"finish_reason":"stop"}]}""",
+                    Encoding.UTF8,
+                    "application/json"),
+            };
+        });
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.User, "run the tool"),
+            new(ChatRole.Assistant,
+            [
+                new FunctionCallContent("call_1", "custom_tool"),
+            ]),
+            new(ChatRole.Tool,
+            [
+                new FunctionResultContent("call_1", new UnknownResult("value")),
+            ]),
+        };
+
+        await client.GetResponseAsync(
+            messages,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(capturedBody);
+        using var requestJson = JsonDocument.Parse(capturedBody);
+        var toolMessage = requestJson.RootElement
+            .GetProperty("messages")
+            .EnumerateArray()
+            .Single(message => message.GetProperty("role").GetString() == "tool");
+
+        Assert.Equal(
+            "unknown:value",
+            toolMessage.GetProperty("content").GetString());
+    }
+
+    [Fact]
+    public async Task GetResponseAsync_DictionaryToolResult_SerializesCommonScalarValues()
+    {
+        string? capturedBody = null;
+        var timestamp = DateTimeOffset.Parse(
+            "2026-08-04T12:34:56Z",
+            System.Globalization.CultureInfo.InvariantCulture);
+        var identifier = Guid.Parse("11111111-2222-3333-4444-555555555555");
+
+        using var client = CreateClient(async request =>
+        {
+            if (request.RequestUri!.PathAndQuery.Contains("copilot_internal"))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        TokenExchangeResponse,
+                        Encoding.UTF8,
+                        "application/json"),
+                };
+            }
+
+            capturedBody = await request.Content!.ReadAsStringAsync();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """{"id":"scalar-result","created":0,"model":"m","choices":[{"index":0,"message":{"role":"assistant","content":"done"},"finish_reason":"stop"}]}""",
+                    Encoding.UTF8,
+                    "application/json"),
+            };
+        });
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.User, "run the tool"),
+            new(ChatRole.Assistant,
+            [
+                new FunctionCallContent("call_1", "scalar_tool"),
+            ]),
+            new(ChatRole.Tool,
+            [
+                new FunctionResultContent(
+                    "call_1",
+                    new Dictionary<string, object?>
+                    {
+                        ["amount"] = 12.5m,
+                        ["timestamp"] = timestamp,
+                        ["identifier"] = identifier,
+                        ["duration"] = TimeSpan.FromMinutes(5),
+                    }),
+            ]),
+        };
+
+        await client.GetResponseAsync(
+            messages,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(capturedBody);
+        using var requestJson = JsonDocument.Parse(capturedBody);
+        var toolMessage = requestJson.RootElement
+            .GetProperty("messages")
+            .EnumerateArray()
+            .Single(message => message.GetProperty("role").GetString() == "tool");
+        using var resultJson = JsonDocument.Parse(
+            toolMessage.GetProperty("content").GetString()!);
+
+        Assert.Equal(12.5m, resultJson.RootElement.GetProperty("amount").GetDecimal());
+        Assert.Equal(
+            timestamp,
+            resultJson.RootElement.GetProperty("timestamp").GetDateTimeOffset());
+        Assert.Equal(
+            identifier,
+            resultJson.RootElement.GetProperty("identifier").GetGuid());
+        Assert.Equal(
+            "00:05:00",
+            resultJson.RootElement.GetProperty("duration").GetString());
     }
 
     [Fact]
@@ -642,5 +890,10 @@ public class CopilotChatClientTests
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
             => handler(request);
+    }
+
+    private sealed record UnknownResult(string Value)
+    {
+        public override string ToString() => $"unknown:{Value}";
     }
 }

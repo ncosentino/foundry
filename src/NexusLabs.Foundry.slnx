@@ -36,6 +36,7 @@
     <Project Path="Examples/AgentFramework/SupportTriagePipelineApp/SupportTriagePipelineApp.csproj" />
   </Folder>
   <Folder Name="/Examples/Copilot/">
+    <Project Path="Examples/Copilot/AotCopilotApp/AotCopilotApp.csproj" />
     <Project Path="Examples/Copilot/CopilotComparisonExample/CopilotComparisonExample.csproj" />
   </Folder>
   <Folder Name="/Examples/SemanticKernel/">
