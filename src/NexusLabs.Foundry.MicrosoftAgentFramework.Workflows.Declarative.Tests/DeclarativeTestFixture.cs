@@ -26,6 +26,7 @@ internal static class DeclarativeTestFixture
             .UsingChatClient(chatClient)
             .AddAgent<ClassifierAgent>()
             .AddAgent<ResponderAgent>()
+            .AddAgent<FailingAgent>()
             .AddAgent<ReportDigestWriter>());
 
         var provider = services.BuildServiceProvider();

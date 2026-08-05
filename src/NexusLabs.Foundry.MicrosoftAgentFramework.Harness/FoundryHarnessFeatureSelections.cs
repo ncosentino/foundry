@@ -94,7 +94,7 @@ public sealed record FoundryHarnessFeatureSelections
     /// <strong>It does not bound a tool loop.</strong> A single turn making several model calls is
     /// compacted only against the state preceding the first round. Measured over a two-round tool loop
     /// with an always-firing strategy: consulted once, against a two-message index, never seeing the
-    /// round that carried the tool call and its result. Identical on 1.15.0 and 1.16.0. Tracked in
+    /// round that carried the tool call and its result. Identical on 1.15.0, 1.16.0, and 1.17.0. Tracked in
     /// ncosentino/foundry#73.
     /// </para>
     /// <para>

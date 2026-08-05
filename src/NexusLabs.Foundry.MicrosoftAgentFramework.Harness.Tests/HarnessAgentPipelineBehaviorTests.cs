@@ -15,7 +15,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// <remarks>
 /// <para>
 /// These tests were designed from live reflection probes against
-/// <c>Microsoft.Agents.AI.Harness</c> 1.15.0 and re-verified on 1.16.0 (see the package-level research notes), which
+/// <c>Microsoft.Agents.AI.Harness</c> 1.15.0 and re-verified on 1.16.0 and 1.17.0 (see the package-level research notes), which
 /// confirmed exactly which pipeline components are discoverable via <c>GetService&lt;T&gt;()</c> on
 /// the constructed agent.
 /// </para>
@@ -27,7 +27,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// "Compaction"-related is reachable anywhere in the constructed agent's object graph via public
 /// reflection, and the internal chat-client decorator that would own it
 /// (<c>AIContextProviderChatClient</c>) is a non-public type in
-/// <c>Microsoft.Agents.AI</c> (through 1.16.0) that does not forward <c>GetService</c> queries down to it.
+/// <c>Microsoft.Agents.AI</c> (through 1.17.0) that does not forward <c>GetService</c> queries down to it.
 /// <c>PerServiceCallChatHistoryPersistingChatClient</c> is likewise non-public, so it can never be
 /// used as a <c>GetService&lt;T&gt;()</c> type argument from test code either. These are reported as
 /// permanent limitations of this API candidate rather than worked around with test-only reflection

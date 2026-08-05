@@ -153,7 +153,7 @@ servers may be reached, what credentials are attached, and what timeout and retr
 applies — none of which is knowable here. Upstream provides:
 
 - `DefaultMcpToolHandler` in `Microsoft.Agents.AI.Workflows.Declarative.Mcp` (stable at
-  1.16.0, tracks the same version as the base package). Adding it pulls in
+  1.17.0, tracks the same version as the base package). Adding it pulls in
   `ModelContextProtocol`, which is why Foundry does not take the dependency on your
   behalf.
 - `DefaultHttpRequestHandler`, already in the base package. Note it is unrestricted — it
