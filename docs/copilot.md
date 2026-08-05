@@ -50,7 +50,7 @@ var services = new Syringe()
     .UsingAgentFramework(af => af
         .UsingChatClient(new CopilotChatClient(new CopilotChatClientOptions
         {
-            DefaultModel = "claude-sonnet-4.5",
+            DefaultModel = "gpt-4.1",
         }))
         .AddAgentFunctionsFromAssemblies())
     .BuildServiceProvider(configuration);
@@ -152,7 +152,7 @@ All settings are on `CopilotChatClientOptions`:
 
 | Property | Default | Description |
 |---|---|---|
-| `DefaultModel` | `"claude-sonnet-4.5"` | Model to use when `ChatOptions.ModelId` is not set |
+| `DefaultModel` | `"gpt-4.1"` | Model to use when `ChatOptions.ModelId` is not set |
 | `CopilotApiBaseUrl` | `"https://api.githubcopilot.com"` | Base URL for the Copilot chat API |
 | `GitHubApiBaseUrl` | `"https://api.github.com"` | Base URL for the GitHub API (token exchange) |
 | `IntegrationId` | `"copilot-developer-cli"` | Sent as `Copilot-Integration-Id` header |

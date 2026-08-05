@@ -385,7 +385,7 @@ already git-ignored:
     "Provider": "copilot"
   },
   "Copilot": {
-    "Model": "claude-sonnet-4.5"
+    "Model": "gpt-4.1"
   }
 }
 ```

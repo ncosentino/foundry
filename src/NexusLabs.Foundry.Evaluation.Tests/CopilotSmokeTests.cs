@@ -21,7 +21,7 @@ public sealed class CopilotSmokeTests
         LiveCopilotTestGuard.RequirePitCrewOptIn();
         using var judge = new CopilotChatClient(new CopilotChatClientOptions
         {
-            DefaultModel = "claude-sonnet-4.5",
+            DefaultModel = "gpt-4.1",
         });
 
         var evaluator = new RelevanceEvaluator();

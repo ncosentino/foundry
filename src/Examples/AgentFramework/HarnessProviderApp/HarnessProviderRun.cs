@@ -87,7 +87,7 @@ internal static class HarnessProviderRun
         var copilotSection = configuration.GetSection("Copilot");
         return new CopilotChatClient(new CopilotChatClientOptions
         {
-            DefaultModel = copilotSection["Model"] ?? "claude-sonnet-4.5",
+            DefaultModel = copilotSection["Model"] ?? "gpt-4.1",
             // Auto resolves the GitHub Copilot CLI's local credentials first, so a developer who
             // is already signed in needs no token in configuration and no environment variable.
             TokenSource = CopilotTokenSource.Auto,

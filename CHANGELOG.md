@@ -64,6 +64,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- The Copilot client and runnable examples now default to `gpt-4.1` instead of
+  the retired `claude-sonnet-4.5`, which the Copilot API rejects with
+  `model_not_supported`. Callers that set `ChatOptions.ModelId` or
+  `CopilotChatClientOptions.DefaultModel` explicitly are unchanged.
 - Source-generated `[AgentFunction]` wrappers now honor MEAI's experimental
   `AIFunctionNameAttribute` and `AIParameterNameAttribute`, matching the
   reflection path's existing behavior. The published function name, JSON schema
