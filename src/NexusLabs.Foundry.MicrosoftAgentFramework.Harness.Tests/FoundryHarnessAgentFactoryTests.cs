@@ -191,6 +191,12 @@ public sealed class FoundryHarnessAgentFactoryTests
     [InlineData(FoundryHarnessFeature.AgentSkills, "load_skill")]
     [InlineData(FoundryHarnessFeature.AgentSkills, "read_skill_resource")]
     [InlineData(FoundryHarnessFeature.AgentSkills, "run_skill_script")]
+    [InlineData(FoundryHarnessFeature.BackgroundAgents, "background_agents_start_task")]
+    [InlineData(FoundryHarnessFeature.BackgroundAgents, "background_agents_wait_for_first_completion")]
+    [InlineData(FoundryHarnessFeature.BackgroundAgents, "background_agents_get_task_results")]
+    [InlineData(FoundryHarnessFeature.BackgroundAgents, "background_agents_get_all_tasks")]
+    [InlineData(FoundryHarnessFeature.BackgroundAgents, "background_agents_continue_task")]
+    [InlineData(FoundryHarnessFeature.BackgroundAgents, "background_agents_clear_completed_task")]
     public void Create_EnabledBuiltInProviderWithCollidingToolName_ThrowsArgumentException(
         FoundryHarnessFeature feature,
         string toolName)

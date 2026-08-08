@@ -129,6 +129,7 @@ nav:
       - ADR-0011 Public Hybrid Context Compaction: adr/adr-0011-public-hybrid-context-compaction.md
       - ADR-0012 Docs-First Agent Guidance: adr/adr-0012-docs-first-agent-guidance.md
       - ADR-0013 Phase-Local Harness Loop Evaluation: adr/adr-0013-phase-local-harness-loop-evaluation.md
+      - ADR-0014 Phase-Local Harness Background Delegation: adr/adr-0014-phase-local-harness-background-delegation.md
 
 plugins:
   - search

@@ -60,6 +60,7 @@ var features = new FoundryHarnessFeatureSelections
     EnableOpenTelemetry = true,
     EnableTodoProvider = false,
     EnableAgentModeProvider = false,
+    EnableBackgroundAgents = false,
     EnableLoopEvaluation = false,
     EnableCompaction = false,
     EnableHybridCompaction = false,
@@ -81,6 +82,8 @@ var configuration = new FoundryHarnessAgentConfiguration
     MaximumIterationsPerRequest = 8,
     LoopEvaluators = [],
     LoopAgentOptions = null,
+    BackgroundAgents = [],
+    BackgroundAgentsProviderOptions = null,
     FileAccessStore = null,
     FileAccessProviderOptions = null,
     ChatHistoryProvider = null,
@@ -173,8 +176,75 @@ foreach (var disposition in defaults.Dispositions)
 ```
 
 Function invocation, message injection, and per-service-call history
-persistence are unavoidable in the complete bundle. Background agents remain
-an upstream opt-in that this public candidate does not yet expose.
+persistence are unavoidable in the complete bundle.
+
+## Delegate bounded work inside one phase
+
+Background agents are an opt-in child catalog for internal phase work:
+
+```csharp
+configuration = configuration with
+{
+    Features = configuration.Features with
+    {
+        EnableBackgroundAgents = true,
+        EnableLoopEvaluation = true,
+    },
+    BackgroundAgents =
+    [
+        researchAgent,
+        analysisAgent,
+    ],
+    BackgroundAgentsProviderOptions = null,
+    LoopEvaluators =
+    [
+        new BackgroundTaskCompletionLoopEvaluator(),
+        artifactEvaluator,
+    ],
+};
+```
+
+The upstream provider adds six tools:
+
+- `background_agents_start_task`
+- `background_agents_wait_for_first_completion`
+- `background_agents_get_task_results`
+- `background_agents_get_all_tasks`
+- `background_agents_continue_task`
+- `background_agents_clear_completed_task`
+
+Each task has its own child session and tasks run concurrently. The background
+task completion evaluator can keep the parent running until no task remains
+active. The macro workflow should still validate the phase artifact rather
+than enforce one exact child-call topology.
+
+Upstream starts child work without the parent run's cancellation token.
+Canceling the parent therefore does not cancel already-running tasks. In-flight
+runtime task and child-session references are also not serialized; after a
+parent session is restored, tasks that were still running are reported as
+`Lost`. Bound child work independently, keep side effects idempotent, clear
+terminal tasks to release their sessions, and treat retrieved child text as
+untrusted model input. The provider stores and returns `AgentResponse.Text`
+only: an approval-only or other non-text child response becomes empty text in
+the result tool. Parent-visible task metadata includes task ID, agent
+name, description, and status, but not the child session ID. Use background
+agents only for work that can complete without surfacing an interactive child
+approval.
+
+The provider has no built-in task-count, concurrency, timeout, retry, or
+cancellation bound, and its wait tool waits for the first completion rather
+than all completions. Child model and tool events are not emitted through the
+parent's Foundry progress wrapper; instrument child agents independently when
+their internal activity must be observed. Custom provider instructions inject
+the rendered child list only where the text includes the
+`{background_agents}` placeholder. Foundry pins this measured MAF 1.17
+implementation behavior; the upstream XML documentation currently describes
+the list as always appended.
+
+Do not combine active background work with
+`LoopAgentOptions.FreshContextPerIteration`: resetting the parent session
+discards the runtime task/session references and turns running tasks into
+`Lost`. Foundry rejects that configuration before construction.
 
 ## Repeat a phase until its artifact is acceptable
 
@@ -481,9 +551,10 @@ tool, so only a provider that supports it can execute the declaration.
 - trim and AOT warnings treated as errors; and
 - native binary execution in CI.
 
-Dynamic skills/scripts, background agents, and loop evaluators are not
-included in that minimum profile. Hybrid compaction is exercised separately by
-the AOT capability scenario, which enables every reachable feature at once.
+Dynamic skills/scripts, background agents, and loop evaluators are not included
+in the minimum scenario. The AOT capability scenario separately enables every
+reachable feature at once, including a fixed background-agent catalog, loop
+evaluation, and hybrid compaction.
 
 ## Internal selected-provider conformance example
 

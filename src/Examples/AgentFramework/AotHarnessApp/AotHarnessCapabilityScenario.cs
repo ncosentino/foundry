@@ -61,7 +61,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
             Description = Description,
             Instructions = SystemPrompt,
             HarnessInstructionsOverride = string.Empty,
-            ChatClient = new AotHarnessScriptedChatClient(
+            ChatClient = new AotHarnessCapabilityChatClient(
                 function.Name,
                 ExpectedWorkspaceContent),
             Tools = [.. context.GeneratedTools],
@@ -76,6 +76,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
                 EnableOpenTelemetry = true,
                 EnableTodoProvider = true,
                 EnableAgentModeProvider = true,
+                EnableBackgroundAgents = true,
                 EnableLoopEvaluation = true,
                 EnableCompaction = true,
                 EnableHybridCompaction = true,
@@ -85,7 +86,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
             // the budgets exercises the upstream default strategy rather than a Foundry one.
             MaxContextWindowTokens = 16000,
             MaxOutputTokens = 1024,
-            MaximumIterationsPerRequest = 4,
+            MaximumIterationsPerRequest = 10,
             LoopEvaluators =
             [
                 new CompletionMarkerLoopEvaluator("harness-result:"),
@@ -95,6 +96,13 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
                 MaxIterations = 2,
                 NonStreamingReturnsLastResponseOnly = true,
             },
+            BackgroundAgents =
+            [
+                new AotHarnessBackgroundChatClient().AsAIAgent(
+                    name: "aot-background-agent",
+                    description: "NativeAOT background-agent capability proof."),
+            ],
+            BackgroundAgentsProviderOptions = null,
             FileAccessStore = new FileSystemAgentFileStore(_fileRoot),
             FileAccessProviderOptions = null,
             ChatHistoryProvider = null,
@@ -196,13 +204,11 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
         FoundryHarnessFeature.OpenTelemetry,
         FoundryHarnessFeature.TodoProvider,
         FoundryHarnessFeature.AgentModeProvider,
+        FoundryHarnessFeature.BackgroundAgents,
         FoundryHarnessFeature.LoopEvaluation,
         FoundryHarnessFeature.Compaction,
         FoundryHarnessFeature.HybridCompaction,
     ];
 
-    private static IEnumerable<FoundryHarnessFeature> UnreachableFeatures =>
-    [
-        FoundryHarnessFeature.BackgroundAgents,
-    ];
+    private static IEnumerable<FoundryHarnessFeature> UnreachableFeatures => [];
 }
