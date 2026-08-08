@@ -30,12 +30,12 @@ Before answering ANY question about MEAI:
    - `Microsoft.Extensions.AI NuGet changelog`
 2. **GitHub code search.** Search for real-world usage across GitHub:
    - `"IChatClient" language:csharp` on github.com
-   - Usage in Microsoft's official samples repo:
-     **https://github.com/dotnet/ai-samples**
-   - Usage in the dotnet/extensions repo where MEAI is developed
-3. **Check Microsoft's samples repo.** The canonical source for MEAI usage
-   examples is **https://github.com/dotnet/ai-samples**. Always check this
-   repo for up-to-date patterns before recommending approaches.
+   - Source and tests in the
+     **https://github.com/dotnet/extensions** repository
+   - Current Microsoft Learn examples and API documentation
+3. **Check authoritative current sources.** Prefer Microsoft Learn, NuGet
+   metadata, and `dotnet/extensions`. Do not treat an archived samples
+   repository as the canonical current API source.
 4. **Verify package versions.** Check NuGet for the latest
    `Microsoft.Extensions.AI` and `Microsoft.Extensions.AI.Abstractions`
    package versions. MEAI is actively evolving — APIs may differ across
@@ -91,46 +91,21 @@ Before answering ANY question about MEAI:
 - Tool calling flow: request → tool calls → tool results → response
 - Parallel and sequential tool call handling
 
-## Codebase Context
+## Repository Context
 
-This repository (Needlr) uses MEAI extensively as the foundation for its agent
-framework. Key integration points:
+Foundry uses MEAI across neutral agent abstractions, provider integrations,
+source generation, evaluation, and reporting. Before making
+repository-specific claims:
 
-| Project | MEAI Usage |
-|---------|------------|
-| `NexusLabs.Foundry.MicrosoftAgentFramework` | `IChatClient` is the core LLM abstraction — `AgentFactory` builds `IChatClient` pipelines with middleware for diagnostics, resilience, and function invocation |
-| `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` | `ToolResultFunctionMiddleware` customizes how tool results are serialized back to the model; `AgentResiliencePlugin` adds Polly-based retry middleware |
-| `NexusLabs.Foundry.Evaluation` | Built on `Microsoft.Extensions.AI.Evaluation` — implements `IEvaluator` for agent-specific metrics |
-| `NexusLabs.Foundry.Copilot` | `CopilotChatClient` — an `IChatClient` implementation that targets the GitHub Copilot API |
-| `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` | Source-generates `[AgentFunctionGroup]`-decorated static classes into `AIFunction` registrations |
+1. Read `AGENTS.md` and the instructions matching the files in scope.
+2. Read `src/Directory.Packages.props` and relevant project references.
+3. Verify the resolved dependency graph when package-version accuracy matters.
+4. Inspect current Foundry source, tests, docs, and accepted ADRs for the
+   behavior under discussion.
 
-### Key Patterns in This Codebase
-
-- **`IChatClient` pipeline composition.** The `AgentFactory` wraps a base
-  `IChatClient` with diagnostics middleware
-  (`DiagnosticsChatClientMiddleware`), function invocation middleware
-  (`DiagnosticsFunctionInvokingChatClient`), and resilience middleware
-  (`AgentResiliencePlugin`).
-- **`ChatClientAccessor` / `IChatClientAccessor`.** Scoped accessor that holds
-  the resolved `IChatClient` for the current agent run, enabling middleware and
-  other components to access it without constructor injection.
-- **Tool result serialization.** `ToolResultFunctionMiddleware` controls how
-  `AIFunction` results are serialized back into chat messages, with
-  configurable `ToolResultMode`.
-- **`EvaluationCaptureChatClient`.** An `IChatClient` wrapper that captures
-  request/response payloads for offline evaluation.
-
-### Package Versions (from `Directory.Packages.props`)
-
-- `Microsoft.Extensions.AI` — `10.3.0`
-- `Microsoft.Extensions.AI.Abstractions` — `10.3.0`
-- `Microsoft.Extensions.AI.OpenAI` — `10.3.0`
-- `Microsoft.Extensions.AI.Evaluation` — `10.5.0`
-- `Microsoft.Extensions.AI.Evaluation.Quality` — `10.5.0`
-- `Microsoft.Extensions.AI.Evaluation.Reporting` — `10.5.0`
-
-These versions change frequently. Always verify against the latest NuGet
-releases when advising on API usage.
+Do not treat this definition as a package, project, middleware, or public-API
+inventory. Foundry may intentionally expose less than upstream, add
+provider-neutral behavior, or isolate an integration in an optional package.
 
 ## Guidelines
 
@@ -139,15 +114,13 @@ releases when advising on API usage.
   uncertainty explicitly.
 - **Cite your sources.** When referencing documentation, samples, or GitHub
   code, include the URL so the user can verify.
-- **Prefer dotnet/ai-samples.** When recommending usage patterns, check
-  https://github.com/dotnet/ai-samples first for canonical examples.
 - **Distinguish MEAI abstractions from provider implementations.** Be clear
   about which layer a type belongs to — the abstraction
   (`Microsoft.Extensions.AI.Abstractions`) vs a concrete provider
   (`Microsoft.Extensions.AI.OpenAI`) vs this repo's wrappers.
-- **Respect the codebase patterns.** This repo uses MEAI through Needlr's
-  DI and source generation conventions. New code should follow the established
-  `IChatClient` pipeline composition patterns.
+- **Respect Foundry's boundaries.** Follow current package references, scoped
+  instructions, tests, and ADRs rather than assuming an older Needlr-owned
+  composition model.
 
 ## Boundaries
 

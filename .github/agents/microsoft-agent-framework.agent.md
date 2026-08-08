@@ -30,8 +30,8 @@ Before answering ANY question about the Microsoft Agent Framework:
    - `Microsoft.Agents.AI.Workflows NuGet`
    - `site:github.com/microsoft "Microsoft.Agents.AI"`
 2. **Verify package versions.** Check NuGet for the latest
-   `Microsoft.Agents.AI` package versions. The framework is pre-release and
-   evolving rapidly — APIs change between versions.
+   `Microsoft.Agents.AI` package versions. The framework evolves rapidly, and
+   APIs and behavior can change between versions.
 3. **Cross-reference samples.** Look for official Microsoft samples and
    community examples demonstrating the pattern in question.
 4. **Never assume an API exists.** If you cannot find evidence of a specific
@@ -95,41 +95,21 @@ Before answering ANY question about the Microsoft Agent Framework:
 - Diagnostics sinks and middleware
 - Progress reporting infrastructure
 
-## Codebase Context
+## Repository Context
 
-This repository (Needlr) builds an opinionated agent framework layer on top
-of the Microsoft Agent Framework. Key projects and patterns:
+Foundry selectively integrates Microsoft Agent Framework rather than mirroring
+its complete API. Before making repository-specific claims:
 
-| Project | Role |
-|---------|------|
-| `NexusLabs.Foundry.MicrosoftAgentFramework` | Core agent abstractions — `AgentFactory`, `IterativeAgentLoop`, execution context, budget tracking, diagnostics, tools, workspace, progress reporting |
-| `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` | Workflow extensions — middleware (`ToolResultFunctionMiddleware`, `AgentResiliencePlugin`), termination conditions (`KeywordTerminationCondition`, `RegexTerminationCondition`, `ToolCallTerminationCondition`), streaming |
-| `NexusLabs.Foundry.MicrosoftAgentFramework.Generators` | Source generator for `[AgentFunctionGroup]`, `[FoundryAgent]`, and related attributes |
-| `NexusLabs.Foundry.MicrosoftAgentFramework.Testing` | `AgentScenarioRunner` and `IAgentScenario` for integration testing agents |
-| `NexusLabs.Foundry.Evaluation` | Evaluators (`ToolCallTrajectoryEvaluator`, `IterationCoherenceEvaluator`, `TerminationAppropriatenessEvaluator`) built on `Microsoft.Extensions.AI.Evaluation` |
-| `src/Examples/AgentFramework/` | Example apps demonstrating iterative loops, group chat, diagnostics, AOT, progress reporting |
+1. Read `AGENTS.md` and the instructions matching the files in scope.
+2. Read `src/Directory.Packages.props` and the relevant project references.
+3. Verify the resolved dependency graph when package-version accuracy matters.
+4. Inspect current Foundry source, tests, docs, and accepted ADRs for the
+   behavior under discussion.
 
-### Key Abstractions in This Codebase
-
-- **`IAgentFactory`** / **`AgentFactory`** — creates and configures agent
-  instances with `IChatClient` pipelines, tools, and middleware.
-- **`IIterativeAgentLoop`** / **`IterativeAgentLoop`** — core multi-turn loop
-  with stall detection, tool completion checks, and iteration records.
-- **`IAgentExecutionContext`** — scoped shared state bag for an agent run.
-- **`ITokenBudgetTracker`** — tracks token consumption against a budget.
-- **`IWorkflowFactory`** — creates workflow pipelines (sequential, group chat).
-- **`IDiagnosticsSink`** — receives diagnostics events during agent runs.
-- **`IProgressReporter`** — reports progress events for long-running agent work.
-
-### Package Versions (from `Directory.Packages.props`)
-
-- `Microsoft.Agents.AI` — `1.0.0-rc1`
-- `Microsoft.Agents.AI.Abstractions` — `1.0.0-rc1`
-- `Microsoft.Agents.AI.Workflows` — `1.0.0-rc1`
-- `Microsoft.Extensions.AI` — `10.3.0`
-
-These versions change frequently. Always verify against the latest NuGet
-releases when advising on API usage.
+Preserve Foundry's durable boundaries: neutral packages remain independent of
+optional Needlr integration, provider integrations depend on neutral
+abstractions, and optional MAF packages remain independently replaceable. Do
+not treat this agent definition as a package, project, or public-API inventory.
 
 ## Guidelines
 
@@ -137,16 +117,14 @@ releases when advising on API usage.
   in the current version, search for it first. State uncertainty explicitly.
 - **Cite your sources.** When referencing documentation or samples, include the
   URL so the user can verify.
-- **Respect the codebase patterns.** This repo wraps the Microsoft Agent
-  Framework with Needlr's DI conventions (composition over inheritance,
-  interfaces over static classes, source generation for discovery). New code
-  should follow these conventions.
-- **Distinguish Microsoft APIs from Needlr APIs.** Be clear about which layer
-  a type belongs to — upstream `Microsoft.Agents.AI` vs this repo's
-  `NexusLabs.Foundry.MicrosoftAgentFramework`.
-- **Keep middleware ordering in mind.** The order in which middleware is
-  registered affects behavior. Diagnostics middleware should wrap resilience
-  middleware, which wraps the inner client.
+- **Respect Foundry's boundaries.** Follow the current scoped instructions,
+  package references, tests, and ADRs rather than assuming an older integration
+  shape.
+- **Distinguish layers.** Be clear whether a type belongs to upstream
+  `Microsoft.Agents.AI`, neutral Foundry, or an optional integration package.
+- **Measure middleware ordering.** Ordering changes behavior; inspect the
+  current composition and its interaction tests rather than relying on a
+  remembered wrapper sequence.
 
 ## Boundaries
 

@@ -146,51 +146,22 @@ Before answering ANY question about agent evaluation:
 - Automated evaluation report generation
 - Evaluation SLA and quality gate definitions
 
-## Codebase Context
+## Repository Context
 
-This repository (Needlr) includes an evaluation project built on
-`Microsoft.Extensions.AI.Evaluation`. While your expertise is tech-stack
-agnostic, you should be aware of the existing evaluation infrastructure:
+Foundry owns provider-neutral evaluation, experiment execution, reporting
+integration, and publication adapters. Before making repository-specific
+claims:
 
-| Project | Role |
-|---------|------|
-| `NexusLabs.Foundry.Evaluation` | Deterministic evaluators for agent runs — implements `IEvaluator` from MEAI Evaluation |
-| `NexusLabs.Foundry.Evaluation.Tests` | Test suite for the evaluators |
-| `NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics` | Diagnostics capture infrastructure — `IAgentRunDiagnostics`, `AgentRunDiagnosticsBuilder`, chat completion and tool call diagnostics |
-| `src/Examples/AgentFramework/IterativeTripPlannerApp.Evaluation/` | Example evaluation harness for the trip planner agent |
+1. Read `AGENTS.md` and the instructions matching the files in scope.
+2. Read `src/Directory.Packages.props` and relevant project references.
+3. Verify the resolved dependency graph when package-version accuracy matters.
+4. Inspect current evaluation source, tests, examples, documentation, and
+   accepted ADRs.
 
-### Existing Evaluators
-
-- **`ToolCallTrajectoryEvaluator`** — deterministic; scores tool-call
-  trajectory from diagnostics (total calls, failed calls, sequence gaps,
-  all-succeeded rollup).
-- **`IterationCoherenceEvaluator`** — deterministic; scores iteration
-  coherence for iterative-loop agents (iteration count, empty outputs,
-  coherent termination).
-- **`TerminationAppropriatenessEvaluator`** — deterministic; checks whether
-  termination was appropriate (success flag, error consistency, execution
-  mode).
-- **`EvaluationCaptureChatClient`** — `IChatClient` middleware that captures
-  request/response payloads to an `IEvaluationCaptureStore` for offline
-  evaluation.
-
-### Evaluation Data Flow
-
-```
-Agent Run → Diagnostics Middleware → IAgentRunDiagnostics snapshot
-                                         ↓
-                              AgentRunDiagnosticsContext
-                                         ↓
-                              IEvaluator.EvaluateAsync()
-                                         ↓
-                              EvaluationResult (metrics)
-```
-
-### Package Versions (from `Directory.Packages.props`)
-
-- `Microsoft.Extensions.AI.Evaluation` — `10.5.0`
-- `Microsoft.Extensions.AI.Evaluation.Quality` — `10.5.0`
-- `Microsoft.Extensions.AI.Evaluation.Reporting` — `10.5.0`
+Do not treat this definition as an evaluator, project, dataset, metric, or
+package inventory. Discover the current implementation from immutable
+repository evidence and distinguish Foundry-owned evaluation behavior from
+upstream MEAI Evaluation contracts.
 
 ## Guidelines
 

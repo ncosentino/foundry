@@ -1,0 +1,66 @@
+{
+  "$schema": "./foundry-guidance.schema.json",
+  "schemaVersion": 1,
+  "agents": {
+    "path": "AGENTS.md",
+    "maxLines": 60,
+    "maxBytes": 3072,
+    "redirects": {
+      "claude": "CLAUDE.md",
+      "copilot": ".github/copilot-instructions.md"
+    }
+  },
+  "docs": {
+    "root": "docs",
+    "mapPath": "mkdocs.yml"
+  },
+  "adrs": {
+    "root": "docs/adr",
+    "filePattern": "adr-NNNN-title-slug.md"
+  },
+  "instructions": {
+    "root": ".github/instructions",
+    "individualReviewThreshold": {
+      "lines": 100,
+      "bytes": 8192
+    },
+    "matchedContext": {
+      "targetLines": 300,
+      "targetBytes": 16384,
+      "maxLines": 600,
+      "maxBytes": 32768
+    },
+    "representativePaths": [
+      ".github/agents/meai.agent.md",
+      ".github/instructions/guidance.instructions.md",
+      ".github/skills/review-changes/SKILL.md",
+      ".github/workflows/ci.yml",
+      ".pitcrew/runner-profile.json",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "README.md",
+      "docs/adr/adr-0008-optional-harness-bundle.md",
+      "docs/agent-guidance.md",
+      "docs/index.md",
+      "mkdocs.yml",
+      "scripts/guidance/Test-Guidance.ps1",
+      "scripts/validate-packages.ps1",
+      "src/Directory.Build.props",
+      "src/Directory.Packages.props",
+      "src/Examples/AgentFramework/DeclarativeMcpWorkflowApp/mcp-workflow.yaml",
+      "src/NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers/AgentFunctionPublishedNameAnalyzer.cs",
+      "src/NexusLabs.Foundry.MicrosoftAgentFramework.Generators/CodeGen/AIFunctionProviderCodeGenerator.cs",
+      "src/NexusLabs.Foundry.MicrosoftAgentFramework.Tests/Harness/HarnessCapabilityProfileTests.cs",
+      "src/NexusLabs.Foundry.MicrosoftAgentFramework/AgentFactory.cs",
+      "src/NexusLabs.Foundry.MicrosoftAgentFramework/NexusLabs.Foundry.MicrosoftAgentFramework.csproj"
+    ]
+  },
+  "review": {
+    "skillPath": ".github/skills/review-changes/SKILL.md",
+    "instructionResolver": "scripts/guidance/Get-ApplicableInstructions.ps1",
+    "validationInventory": "scripts/guidance/Get-ValidationInventory.ps1",
+    "structuralValidator": "scripts/guidance/Test-Guidance.ps1",
+    "maxLines": 200,
+    "maxBytes": 8192
+  }
+}

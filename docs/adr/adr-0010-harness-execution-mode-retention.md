@@ -1,3 +1,13 @@
+---
+title: "ADR-0010: Retain all Harness execution modes"
+status: "Accepted"
+date: "2026-07-30"
+authors: ["Nick Cosentino"]
+tags: ["architecture", "decision", "agent-framework", "harness", "evaluation"]
+supersedes: ""
+superseded_by: ""
+---
+
 # ADR-0010: Retain all Harness execution modes
 
 ## Status

@@ -13,7 +13,21 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
+  guidance:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate agent guidance
+        shell: pwsh
+        run: scripts/guidance/Test-Guidance.ps1 -SelfTest
+
   build-test-pack:
+    needs: guidance
     # PitCrew default. Set CI_RUNNER=ubuntu-latest for the manual cloud fallback.
     # Untrusted fork pull requests always use GitHub-hosted infrastructure.
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
@@ -91,6 +105,7 @@ jobs:
           path: artifacts/packages/*
 
   aot:
+    needs: guidance
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
 
     steps:
@@ -141,6 +156,7 @@ jobs:
             artifacts/aot-copilot/AotCopilotApp
 
   aot-harness:
+    needs: guidance
     runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
 
     steps:
