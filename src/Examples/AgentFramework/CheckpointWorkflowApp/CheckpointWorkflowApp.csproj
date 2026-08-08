@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <NoWarn>$(NoWarn);MAAIW001</NoWarn>
+
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <IlcDisableReflection>true</IlcDisableReflection>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2060;IL2072;IL2075;IL2091;IL3050</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows\NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.csproj" />
+  </ItemGroup>
+
+</Project>
