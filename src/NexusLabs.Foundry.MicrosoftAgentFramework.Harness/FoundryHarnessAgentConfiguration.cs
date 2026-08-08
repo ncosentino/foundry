@@ -198,6 +198,40 @@ public sealed record FoundryHarnessAgentConfiguration
     public required LoopAgentOptions? LoopAgentOptions { get; init; }
 
     /// <summary>
+    /// Gets the upstream <see cref="AIAgent"/> instances available for background delegation.
+    /// Supply an empty list when
+    /// <see cref="FoundryHarnessFeatureSelections.EnableBackgroundAgents"/> is
+    /// <see langword="false"/>. At least one uniquely named agent is required when it is
+    /// <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// Each task receives its own child session and runs concurrently. Upstream does not propagate
+    /// the parent run's cancellation token into started child tasks. In-flight task and child-session
+    /// references are runtime-only; after parent-session serialization and restore, a task that was
+    /// still running is reported as lost. Callers must bound child work independently and treat
+    /// returned child text as untrusted input to the parent. The provider stores only
+    /// <c>AgentResponse.Text</c>; a response containing only approval requests or other non-text
+    /// content is surfaced as empty text, and child session identifiers are not part of the
+    /// parent-visible task metadata. The provider has no task-count, concurrency, timeout, retry,
+    /// or cancellation bound; callers must impose those constraints through their child agents and
+    /// phase design.
+    /// </remarks>
+    public required IReadOnlyList<AIAgent> BackgroundAgents { get; init; }
+
+    /// <summary>
+    /// Gets optional upstream <see cref="Microsoft.Agents.AI.BackgroundAgentsProviderOptions"/>
+    /// controlling the provider instructions and rendered agent list, or <see langword="null"/> to
+    /// use upstream defaults. Only meaningful when
+    /// <see cref="FoundryHarnessFeatureSelections.EnableBackgroundAgents"/> is
+    /// <see langword="true"/>.
+    /// In the MAF 1.17 implementation, a custom instructions value injects the rendered child list
+    /// only where it contains the <c>{background_agents}</c> placeholder. This source-verified
+    /// behavior is stricter than the corresponding upstream XML documentation, which says the list
+    /// is always appended.
+    /// </summary>
+    public required BackgroundAgentsProviderOptions? BackgroundAgentsProviderOptions { get; init; }
+
+    /// <summary>
     /// Gets the <see cref="AgentFileStore"/> that enables the shared file-access provider, or
     /// <see langword="null"/> to leave file access disabled (the upstream default: this dimension
     /// is opt-in, not default-on).

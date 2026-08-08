@@ -169,8 +169,8 @@ public enum FoundryHarnessFeature
 
     /// <summary>
     /// The <c>Microsoft.Agents.AI.BackgroundAgentsProvider</c> context provider for delegating
-    /// to background agents. Not exposed by <see cref="FoundryHarnessAgentConfiguration"/> in
-    /// this candidate; tracked as a limitation until a follow-up API-candidate review.
+    /// to caller-supplied, uniquely named agents through independent child sessions and concurrent
+    /// background tasks.
     /// </summary>
     BackgroundAgents,
 
