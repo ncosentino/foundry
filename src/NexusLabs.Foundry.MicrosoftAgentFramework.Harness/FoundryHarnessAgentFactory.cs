@@ -137,6 +137,9 @@ public sealed class FoundryHarnessAgentFactory
         var additionalContextProviders = configuration.AdditionalContextProviders.Count > 0
             ? new List<AIContextProvider>(configuration.AdditionalContextProviders)
             : null;
+        var loopEvaluators = configuration.LoopEvaluators.Count > 0
+            ? new List<LoopEvaluator>(configuration.LoopEvaluators)
+            : null;
 
         var options = new HarnessAgentOptions
         {
@@ -154,6 +157,8 @@ public sealed class FoundryHarnessAgentFactory
             CompactionStrategy = configuration.CompactionStrategy,
             DisableCompaction = !configuration.Features.EnableCompaction,
             MaximumIterationsPerRequest = configuration.MaximumIterationsPerRequest,
+            LoopEvaluators = loopEvaluators,
+            LoopAgentOptions = configuration.LoopAgentOptions,
             ChatHistoryProvider = configuration.ChatHistoryProvider,
             AIContextProviders = additionalContextProviders,
             DisableToolAutoApproval = !configuration.Features.EnableToolAutoApproval,
@@ -221,6 +226,7 @@ public sealed class FoundryHarnessAgentFactory
         ArgumentNullException.ThrowIfNull(configuration.ChatClient);
         ArgumentNullException.ThrowIfNull(configuration.Tools);
         ArgumentNullException.ThrowIfNull(configuration.Features);
+        ArgumentNullException.ThrowIfNull(configuration.LoopEvaluators);
         ArgumentNullException.ThrowIfNull(configuration.AdditionalContextProviders);
 
         if (string.IsNullOrWhiteSpace(configuration.Name))
@@ -296,6 +302,57 @@ public sealed class FoundryHarnessAgentFactory
                 nameof(configuration),
                 configuration.MaximumIterationsPerRequest,
                 "FoundryHarnessAgentConfiguration.MaximumIterationsPerRequest must be positive when provided.");
+        }
+
+        for (int i = 0; i < configuration.LoopEvaluators.Count; i++)
+        {
+            if (configuration.LoopEvaluators[i] is null)
+            {
+                throw new ArgumentException(
+                    "FoundryHarnessAgentConfiguration.LoopEvaluators contains a null " +
+                    $"element at index {i}.",
+                    nameof(configuration));
+            }
+        }
+
+        if (configuration.Features.EnableLoopEvaluation &&
+            configuration.LoopEvaluators.Count == 0)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.Features.EnableLoopEvaluation is true, but " +
+                "LoopEvaluators is empty. Upstream cannot construct LoopAgent without at least " +
+                "one evaluator.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableLoopEvaluation &&
+            configuration.LoopEvaluators.Count > 0)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.LoopEvaluators contains evaluators while " +
+                "Features.EnableLoopEvaluation is false. Set EnableLoopEvaluation to true to use " +
+                "them, or supply an empty list to leave the outer loop disabled.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableLoopEvaluation &&
+            configuration.LoopAgentOptions is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.LoopAgentOptions was supplied while " +
+                "Features.EnableLoopEvaluation is false. Set EnableLoopEvaluation to true to use " +
+                "custom loop options, or pass null here to leave the outer loop disabled.",
+                nameof(configuration));
+        }
+
+        if (configuration.LoopAgentOptions?.MaxIterations is { } maxLoopIterations &&
+            maxLoopIterations <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(configuration),
+                maxLoopIterations,
+                "FoundryHarnessAgentConfiguration.LoopAgentOptions.MaxIterations must be positive " +
+                "when provided.");
         }
 
         for (int i = 0; i < configuration.Tools.Count; i++)

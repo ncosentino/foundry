@@ -76,6 +76,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
                 EnableOpenTelemetry = true,
                 EnableTodoProvider = true,
                 EnableAgentModeProvider = true,
+                EnableLoopEvaluation = true,
                 EnableCompaction = true,
                 EnableHybridCompaction = true,
             },
@@ -85,6 +86,15 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
             MaxContextWindowTokens = 16000,
             MaxOutputTokens = 1024,
             MaximumIterationsPerRequest = 4,
+            LoopEvaluators =
+            [
+                new CompletionMarkerLoopEvaluator("harness-result:"),
+            ],
+            LoopAgentOptions = new LoopAgentOptions
+            {
+                MaxIterations = 2,
+                NonStreamingReturnsLastResponseOnly = true,
+            },
             FileAccessStore = new FileSystemAgentFileStore(_fileRoot),
             FileAccessProviderOptions = null,
             ChatHistoryProvider = null,
@@ -186,6 +196,7 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
         FoundryHarnessFeature.OpenTelemetry,
         FoundryHarnessFeature.TodoProvider,
         FoundryHarnessFeature.AgentModeProvider,
+        FoundryHarnessFeature.LoopEvaluation,
         FoundryHarnessFeature.Compaction,
         FoundryHarnessFeature.HybridCompaction,
     ];
@@ -193,6 +204,5 @@ internal sealed class AotHarnessCapabilityScenario : IHarnessScenario
     private static IEnumerable<FoundryHarnessFeature> UnreachableFeatures =>
     [
         FoundryHarnessFeature.BackgroundAgents,
-        FoundryHarnessFeature.LoopEvaluation,
     ];
 }

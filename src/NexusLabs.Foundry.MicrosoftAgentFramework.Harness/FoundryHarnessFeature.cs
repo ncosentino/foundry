@@ -2,7 +2,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 /// <summary>
 /// Identifies a distinct default-controlling dimension of the upstream
-/// <c>Microsoft.Agents.AI.Harness</c> complete-bundle pipeline (MAF 1.15).
+/// <c>Microsoft.Agents.AI.Harness</c> complete-bundle pipeline (MAF 1.17).
 /// </summary>
 /// <remarks>
 /// Every value here corresponds to a specific pipeline decorator, context provider,
@@ -175,9 +175,9 @@ public enum FoundryHarnessFeature
     BackgroundAgents,
 
     /// <summary>
-    /// The outermost <c>Microsoft.Agents.AI.LoopAgent</c> decorator that re-invokes the agent
-    /// until loop evaluators are satisfied. Not exposed by <see cref="FoundryHarnessAgentConfiguration"/>
-    /// in this candidate; tracked as a limitation until a follow-up API-candidate review.
+    /// The outermost <c>Microsoft.Agents.AI.LoopAgent</c> decorator that re-invokes the complete
+    /// Harness agent until caller-supplied evaluators are satisfied or the iteration limit is
+    /// reached.
     /// </summary>
     LoopEvaluation,
 }

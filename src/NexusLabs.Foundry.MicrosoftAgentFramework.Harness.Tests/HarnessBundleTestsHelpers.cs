@@ -22,6 +22,7 @@ internal static class HarnessBundleTestsHelpers
             EnableOpenTelemetry = false,
             EnableTodoProvider = false,
             EnableAgentModeProvider = false,
+            EnableLoopEvaluation = false,
             EnableCompaction = false,
             EnableHybridCompaction = false,
         };
@@ -38,6 +39,9 @@ internal static class HarnessBundleTestsHelpers
             EnableOpenTelemetry = true,
             EnableTodoProvider = true,
             EnableAgentModeProvider = true,
+            // Loop evaluation cannot be enabled here: it fails closed without at least one
+            // caller-supplied evaluator, which this helper has no basis to choose.
+            EnableLoopEvaluation = false,
             EnableCompaction = true,
             // Hybrid compaction cannot be enabled here: it fails closed without an explicit budget
             // and reducer, which this helper has no basis to choose for every caller.
@@ -60,6 +64,8 @@ internal static class HarnessBundleTestsHelpers
             MaxContextWindowTokens = null,
             MaxOutputTokens = null,
             MaximumIterationsPerRequest = null,
+            LoopEvaluators = [],
+            LoopAgentOptions = null,
             FileAccessStore = null,
             FileAccessProviderOptions = null,
             ChatHistoryProvider = null,
@@ -88,18 +94,18 @@ internal static class HarnessBundleTestsHelpers
                 disabledFeatures with { EnableAgentModeProvider = true }),
             FoundryHarnessFeature.FileMemory => CreateBaseline(
                 disabledFeatures with { EnableFileMemory = true }) with
-                {
-                    FileMemoryStore = new InMemoryAgentFileStoreFake(),
-                },
+            {
+                FileMemoryStore = new InMemoryAgentFileStoreFake(),
+            },
             FoundryHarnessFeature.FileAccess => CreateBaseline(disabledFeatures) with
             {
                 FileAccessStore = new InMemoryAgentFileStoreFake(),
             },
             FoundryHarnessFeature.AgentSkills => CreateBaseline(
                 disabledFeatures with { EnableAgentSkills = true }) with
-                {
-                    AgentSkillsSource = new FakeAgentSkillsSource(),
-                },
+            {
+                AgentSkillsSource = new FakeAgentSkillsSource(),
+            },
             _ => throw new ArgumentOutOfRangeException(nameof(feature), feature, null),
         };
 

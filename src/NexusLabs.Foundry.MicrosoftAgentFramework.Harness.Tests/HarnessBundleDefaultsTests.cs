@@ -8,8 +8,8 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// requested/effective axis and the separate backing-selection axis) for the installed
 /// <c>Microsoft.Agents.AI.Harness</c> 1.17.0 bundle: always-on-unavoidable dimensions, toggle
 /// dimensions tracking <see cref="FoundryHarnessFeatureSelections"/>, opt-in dimensions driven by
-/// backing-object presence, and dimensions not yet exposed by this API candidate reported as
-/// limitations rather than silently omitted. Also validates that
+/// backing-object presence, and background agents reported as a limitation rather than silently
+/// omitted. Also validates that
 /// <see cref="FoundryHarnessFeatureDisposition.Create"/> and
 /// <see cref="FoundryHarnessEffectiveDefaults.Create"/> enforce their factory invariants.
 /// </summary>
@@ -406,14 +406,57 @@ public sealed class HarnessBundleDefaultsTests
         Assert.Contains("1", disposition.BackingDescription, StringComparison.Ordinal);
     }
 
-    [Theory]
-    [InlineData(FoundryHarnessFeature.BackgroundAgents)]
-    [InlineData(FoundryHarnessFeature.LoopEvaluation)]
-    public void OutOfScopeDimensions_AlwaysReportNotRequestedDisabledWithLimitation(FoundryHarnessFeature feature)
+    [Fact]
+    public void LoopEvaluation_Disabled_ReportsRequestedDisabled()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline();
+
+        var disposition = Factory.DescribeEffectiveDefaults(configuration)
+            .GetDisposition(FoundryHarnessFeature.LoopEvaluation);
+
+        Assert.Equal(FoundryHarnessFeatureRequestedState.RequestedDisabled, disposition.RequestedState);
+        Assert.Equal(FoundryHarnessFeatureEffectiveState.Disabled, disposition.EffectiveState);
+        Assert.Null(disposition.Limitation);
+        Assert.Equal(FoundryHarnessFeatureBackingSelection.NotApplicable, disposition.BackingSelection);
+    }
+
+    [Fact]
+    public void LoopEvaluation_Enabled_ReportsCallerSuppliedBackingAndLimitation()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with
+            {
+                EnableLoopEvaluation = true,
+            }) with
+        {
+            LoopEvaluators =
+            [
+                new Microsoft.Agents.AI.CompletionMarkerLoopEvaluator("DONE"),
+            ],
+            LoopAgentOptions = new Microsoft.Agents.AI.LoopAgentOptions
+            {
+                MaxIterations = 3,
+            },
+        };
+
+        var disposition = Factory.DescribeEffectiveDefaults(configuration)
+            .GetDisposition(FoundryHarnessFeature.LoopEvaluation);
+
+        Assert.Equal(FoundryHarnessFeatureRequestedState.RequestedEnabled, disposition.RequestedState);
+        Assert.Equal(FoundryHarnessFeatureEffectiveState.Enabled, disposition.EffectiveState);
+        Assert.Equal(FoundryHarnessFeatureBackingSelection.CallerSupplied, disposition.BackingSelection);
+        Assert.Contains("1", disposition.BackingDescription, StringComparison.Ordinal);
+        Assert.Contains("caller-supplied", disposition.BackingDescription, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("idempotent", disposition.Limitation, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void BackgroundAgents_AlwaysReportsNotRequestedDisabledWithLimitation()
     {
         var configuration = AllFeaturesEnabledWithBudgets();
 
-        var disposition = Factory.DescribeEffectiveDefaults(configuration).GetDisposition(feature);
+        var disposition = Factory.DescribeEffectiveDefaults(configuration)
+            .GetDisposition(FoundryHarnessFeature.BackgroundAgents);
 
         Assert.Equal(FoundryHarnessFeatureRequestedState.NotRequested, disposition.RequestedState);
         Assert.Equal(FoundryHarnessFeatureEffectiveState.Disabled, disposition.EffectiveState);

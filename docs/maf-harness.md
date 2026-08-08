@@ -60,6 +60,7 @@ var features = new FoundryHarnessFeatureSelections
     EnableOpenTelemetry = true,
     EnableTodoProvider = false,
     EnableAgentModeProvider = false,
+    EnableLoopEvaluation = false,
     EnableCompaction = false,
     EnableHybridCompaction = false,
 };
@@ -78,6 +79,8 @@ var configuration = new FoundryHarnessAgentConfiguration
     MaxContextWindowTokens = null,
     MaxOutputTokens = 1_000,
     MaximumIterationsPerRequest = 8,
+    LoopEvaluators = [],
+    LoopAgentOptions = null,
     FileAccessStore = null,
     FileAccessProviderOptions = null,
     ChatHistoryProvider = null,
@@ -170,9 +173,68 @@ foreach (var disposition in defaults.Dispositions)
 ```
 
 Function invocation, message injection, and per-service-call history
-persistence are unavoidable in the complete bundle. Background agents and
-loop evaluators are upstream opt-ins that this public candidate does not yet
-expose.
+persistence are unavoidable in the complete bundle. Background agents remain
+an upstream opt-in that this public candidate does not yet expose.
+
+## Repeat a phase until its artifact is acceptable
+
+Enable upstream loop evaluation when one Harness phase should inspect its own
+result and revise it before returning across a macro workflow boundary:
+
+```csharp
+configuration = configuration with
+{
+    Features = configuration.Features with
+    {
+        EnableLoopEvaluation = true,
+    },
+    LoopEvaluators =
+    [
+        new DelegateLoopEvaluator((context, cancellationToken) =>
+        {
+            bool artifactAccepted = ValidateArtifact(context.LastResponse);
+            return ValueTask.FromResult(
+                artifactAccepted
+                    ? LoopEvaluation.Stop()
+                    : LoopEvaluation.Continue(
+                        "The artifact is missing required evidence. Revise it."));
+        }),
+    ],
+    LoopAgentOptions = new LoopAgentOptions
+    {
+        MaxIterations = 3,
+        FreshContextPerIteration = true,
+        NonStreamingReturnsLastResponseOnly = true,
+    },
+};
+```
+
+The evaluators and options are upstream MAF types and are passed through
+directly. `LoopAgent` is the outermost upstream decorator, so every iteration
+is a complete Harness run with its own tool loop, approvals, and telemetry.
+Tools with external side effects must therefore be idempotent or
+caller-deduplicated. `FreshContextPerIteration` also requires a caller-supplied
+session to support serialization **and** to serialize independently cloneable
+history. A service-managed session whose serialized form contains only a
+remote conversation identifier can restore another reference to the same
+server-side history instead of a fresh context. Use fresh-context looping only
+with a history/session implementation whose clone behavior you have verified.
+
+Evaluators run in order. The first evaluator that requests another iteration
+wins; an evaluator returning `Stop()` does not veto a later evaluator that
+requests continuation. The maximum iteration count is a safety cap: reaching
+it returns the latest response without proving the artifact was accepted, so
+the macro phase boundary must still validate the artifact. For non-streaming
+runs, `AgentResponse.Usage` reflects the final iteration; Foundry's progress
+events aggregate model and tool usage across the complete loop. An
+`AIJudgeLoopEvaluator` uses its own `IChatClient`, which needs independent
+instrumentation if its judge calls must appear in telemetry.
+
+Loop evaluation does not extend upstream compaction into each iteration.
+Measured with an always-firing strategy over two loop iterations, upstream
+compaction was consulted once for the outer caller turn. Foundry hybrid
+compaction observed both provider requests because it remains at the innermost
+per-call position.
 
 ## Add Foundry progress without duplicate telemetry
 
