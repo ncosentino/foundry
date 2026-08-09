@@ -10,11 +10,14 @@ internal sealed record ReferencePipelineOptions
 
     internal required bool HoldBackgroundWorkersUntilRelease { get; init; }
 
+    internal required ReferenceSynthesisExecutorKind SynthesisExecutorKind { get; init; }
+
     internal static ReferencePipelineOptions Default { get; } = new()
     {
         FailRequiredSpecialist = false,
         FailOptionalSpecialist = false,
         HoldSpecialistsUntilCancellation = false,
         HoldBackgroundWorkersUntilRelease = false,
+        SynthesisExecutorKind = ReferenceSynthesisExecutorKind.Harness,
     };
 }

@@ -41,22 +41,9 @@ internal sealed class SynthesisPhaseExecutor(
         ReferenceArtifactManifest manifest = artifacts.GetManifest(
             manifestReference,
             runId);
-        string branches = string.Join(
-            ",",
-            manifest.Branches.Select(
-                branch => $"{branch.Phase}:{branch.Outcome}"));
-        string gaps = manifest.Gaps.Length == 0
-            ? "none"
-            : string.Join(",", manifest.Gaps);
-        string prompt =
-            $"""
-            Build the synthesis artifact from the accepted manifest.
-            {ManifestIdPrefix}{manifestReference.Id}
-            manifest_outcome={manifest.Outcome}
-            branch_outcomes={branches}
-            explicit_gaps={gaps}
-            Resolve artifact bodies through the manifest tool; no prior transcript is authoritative.
-            """;
+        string prompt = ReferenceSynthesisPrompt.Build(
+            manifestReference,
+            manifest);
 
         try
         {

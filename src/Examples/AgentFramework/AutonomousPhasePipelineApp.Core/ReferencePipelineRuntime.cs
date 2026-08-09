@@ -27,7 +27,9 @@ internal sealed class ReferencePipelineRuntime
 
     internal required SpecialistChatClient OperationsClient { get; init; }
 
-    internal required SynthesisChatClient SynthesisClient { get; init; }
+    internal required SynthesisChatClient? SynthesisClient { get; init; }
+
+    internal required MagenticPhaseProbe? MagenticProbe { get; init; }
 
     internal required IReadOnlyList<AIAgent> HarnessAgents { get; init; }
 }

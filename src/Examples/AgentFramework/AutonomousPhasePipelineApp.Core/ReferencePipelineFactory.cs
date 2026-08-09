@@ -135,61 +135,6 @@ internal static class ReferencePipelineFactory
             backgroundOptions: null,
             maximumIterationsPerRequest: 6);
 
-        AIFunction readManifest = AIFunctionFactory.Create(
-            (string manifestId) => artifacts.ReadManifestBundle(
-                request.RunId,
-                manifestId),
-            new AIFunctionFactoryOptions
-            {
-                Name = ReadManifestToolName,
-                Description =
-                    "Reads an accepted outcome manifest and its referenced artifact bodies.",
-            });
-        var synthesisClient = new SynthesisChatClient(
-            ReadManifestToolName);
-        AIAgent synthesisAgent = CreateHarnessAgent(
-            "synthesis-phase",
-            "Synthesizes accepted artifact references and explicit gaps.",
-            synthesisClient,
-            tools: [readManifest],
-            features: DisabledFeatures() with
-            {
-                EnableLoopEvaluation = true,
-            },
-            loopEvaluators:
-            [
-                new DelegateLoopEvaluator(
-                    (context, _) =>
-                    {
-                        string manifestId =
-                            SynthesisPhaseExecutor.GetManifestId(
-                                context.InitialMessages);
-                        ReferenceArtifactManifest manifest =
-                            artifacts.GetManifest(
-                                manifestId,
-                                request.RunId);
-                        bool accepted =
-                            ReferenceArtifactValidator.TryValidateSynthesis(
-                                context.LastResponse.Text,
-                                manifest,
-                                out string error);
-                        return ValueTask.FromResult(
-                            accepted
-                                ? LoopEvaluation.Stop()
-                                : LoopEvaluation.Continue(
-                                    $"{ReferenceArtifactValidator.SynthesisCorrectionCode}; validation_error={error}"));
-                    }),
-            ],
-            loopAgentOptions: new LoopAgentOptions
-            {
-                MaxIterations = 2,
-                FreshContextPerIteration = false,
-                NonStreamingReturnsLastResponseOnly = true,
-            },
-            backgroundAgents: [],
-            backgroundOptions: null,
-            maximumIterationsPerRequest: 6);
-
         var riskBranch = new ReferenceBranchDefinition(
             "risk",
             0,
@@ -223,10 +168,94 @@ internal static class ReferencePipelineFactory
             artifacts,
             request.RunId,
             [riskBranch, operationsBranch]);
-        var synthesis = new SynthesisPhaseExecutor(
-            synthesisAgent,
-            artifacts,
-            request.RunId);
+        SynthesisChatClient? synthesisClient = null;
+        MagenticPhaseProbe? magenticProbe = null;
+        ExecutorBinding synthesis;
+        var harnessAgents = new List<AIAgent>
+        {
+            evidenceWorker,
+            feasibilityWorker,
+            researchAgent,
+            riskAgent,
+            operationsAgent,
+        };
+        if (options.SynthesisExecutorKind ==
+            ReferenceSynthesisExecutorKind.Harness)
+        {
+            AIFunction readManifest = AIFunctionFactory.Create(
+                (string manifestId) => artifacts.ReadManifestBundle(
+                    request.RunId,
+                    manifestId),
+                new AIFunctionFactoryOptions
+                {
+                    Name = ReadManifestToolName,
+                    Description =
+                        "Reads an accepted outcome manifest and its referenced artifact bodies.",
+                });
+            synthesisClient = new SynthesisChatClient(
+                ReadManifestToolName);
+            AIAgent synthesisAgent = CreateHarnessAgent(
+                "synthesis-phase",
+                "Synthesizes accepted artifact references and explicit gaps.",
+                synthesisClient,
+                tools: [readManifest],
+                features: DisabledFeatures() with
+                {
+                    EnableLoopEvaluation = true,
+                },
+                loopEvaluators:
+                [
+                    new DelegateLoopEvaluator(
+                        (context, _) =>
+                        {
+                            string manifestId =
+                                SynthesisPhaseExecutor.GetManifestId(
+                                    context.InitialMessages);
+                            ReferenceArtifactManifest manifest =
+                                artifacts.GetManifest(
+                                    manifestId,
+                                    request.RunId);
+                            bool accepted =
+                                ReferenceArtifactValidator.TryValidateSynthesis(
+                                    context.LastResponse.Text,
+                                    manifest,
+                                    out string error);
+                            return ValueTask.FromResult(
+                                accepted
+                                    ? LoopEvaluation.Stop()
+                                    : LoopEvaluation.Continue(
+                                        $"{ReferenceArtifactValidator.SynthesisCorrectionCode}; validation_error={error}"));
+                        }),
+                ],
+                loopAgentOptions: new LoopAgentOptions
+                {
+                    MaxIterations = 2,
+                    FreshContextPerIteration = false,
+                    NonStreamingReturnsLastResponseOnly = true,
+                },
+                backgroundAgents: [],
+                backgroundOptions: null,
+                maximumIterationsPerRequest: 6);
+            harnessAgents.Add(synthesisAgent);
+            synthesis = new SynthesisPhaseExecutor(
+                synthesisAgent,
+                artifacts,
+                request.RunId).BindExecutor();
+        }
+        else
+        {
+            magenticProbe = new MagenticPhaseProbe();
+            MagenticPhaseProbe probe = magenticProbe;
+            synthesis = new MagenticSynthesisPhaseExecutor(
+                artifacts,
+                request.RunId,
+                () => MagenticPhaseFactory.CreateStallThenRecover(
+                    artifacts,
+                    request.RunId,
+                    probe,
+                    requirePlanSignoff: false)).BindExecutor();
+        }
+
         var synthesisBoundary = new SynthesisArtifactBoundaryExecutor(
             artifacts,
             request.RunId);
@@ -267,19 +296,12 @@ internal static class ReferencePipelineFactory
             RiskClient = riskClient,
             OperationsClient = operationsClient,
             SynthesisClient = synthesisClient,
-            HarnessAgents =
-            [
-                evidenceWorker,
-                feasibilityWorker,
-                researchAgent,
-                riskAgent,
-                operationsAgent,
-                synthesisAgent,
-            ],
+            MagenticProbe = magenticProbe,
+            HarnessAgents = harnessAgents,
         };
     }
 
-    private static AIAgent CreateHarnessAgent(
+    internal static AIAgent CreateHarnessAgent(
         string id,
         string description,
         IChatClient chatClient,
@@ -324,7 +346,7 @@ internal static class ReferencePipelineFactory
         return s_harnessFactory.Create(configuration);
     }
 
-    private static FoundryHarnessFeatureSelections DisabledFeatures() =>
+    internal static FoundryHarnessFeatureSelections DisabledFeatures() =>
         new()
         {
             EnableWebSearch = false,

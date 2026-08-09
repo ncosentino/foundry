@@ -5,11 +5,19 @@ using Microsoft.Agents.AI.Workflows;
 var request = new ReferencePipelineRequest(
     "offline-reference-run",
     "Synthetic release readiness");
+ReferenceSynthesisExecutorKind synthesisKind = args.Contains(
+    "--magentic",
+    StringComparer.Ordinal)
+    ? ReferenceSynthesisExecutorKind.Magentic
+    : ReferenceSynthesisExecutorKind.Harness;
 var artifacts = new ReferenceArtifactStore();
 var delivery = new IdempotentDeliverySink();
 ReferencePipelineRuntime runtime = ReferencePipelineFactory.Create(
     request,
-    ReferencePipelineOptions.Default,
+    ReferencePipelineOptions.Default with
+    {
+        SynthesisExecutorKind = synthesisKind,
+    },
     artifacts,
     delivery);
 CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
@@ -99,6 +107,8 @@ if (restoredResult is null ||
 
 Console.WriteLine(
     $"AutonomousPhasePipelineApp:outcome:{restoredResult.Outcome}");
+Console.WriteLine(
+    $"AutonomousPhasePipelineApp:synthesis:{synthesisKind}");
 Console.WriteLine(
     $"AutonomousPhasePipelineApp:background-concurrency:{runtime.BackgroundGate.MaximumConcurrency}");
 Console.WriteLine(

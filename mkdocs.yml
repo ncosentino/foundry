@@ -59,6 +59,7 @@ nav:
       - Declarative Workflows: declarative-workflows.md
       - Checkpointed Workflows: checkpointed-workflows.md
       - Fixed-Macro Autonomous Phases: autonomous-phase-pipeline.md
+      - Phase-Local Magentic Comparison: magentic-phase-comparison.md
       - Workspace: workspace.md
       - Progress Reporting: progress-reporting.md
       - Pipeline Metrics: pipeline-metrics.md
