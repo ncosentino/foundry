@@ -15,8 +15,20 @@ internal static class MagenticPhaseFactory
         ReferenceArtifactStore artifacts,
         string runId,
         MagenticPhaseProbe probe,
-        bool requirePlanSignoff)
+        ReferenceSynthesisBudget budget,
+        bool requirePlanSignoff,
+        bool requireArtifactCorrection)
     {
+        Func<IReadOnlyList<ChatMessage>, string> finalArtifact =
+            requireArtifactCorrection
+                ? MagenticScriptedResponses
+                    .CorrectionAwareSynthesisArtifact(
+                        artifacts,
+                        runId)
+                : MagenticScriptedResponses.SynthesisArtifact(
+                    artifacts,
+                    runId,
+                    includeRecommendation: true);
         Func<IReadOnlyList<ChatMessage>, string>[] responses =
         [
             MagenticScriptedResponses.Static("Initial facts"),
@@ -43,50 +55,15 @@ internal static class MagenticPhaseFactory
                 isProgressBeingMade: true,
                 ManifestAnalystName,
                 MagenticScriptedResponses.Static("The artifact contract is satisfied.")),
-            MagenticScriptedResponses.Static(
-                ReferenceSynthesisArtifacts.Valid),
+            finalArtifact,
         ];
         return Create(
             artifacts,
             runId,
             probe,
             responses,
+            budget,
             requirePlanSignoff,
-            maxRounds: 8,
-            maxStalls: 0,
-            maxResets: 2);
-    }
-
-    internal static MagenticPhaseRuntime CreateReplanRecovery(
-        ReferenceArtifactStore artifacts,
-        string runId,
-        MagenticPhaseProbe probe)
-    {
-        Func<IReadOnlyList<ChatMessage>, string>[] responses =
-        [
-            MagenticScriptedResponses.Ledger(
-                isRequestSatisfied: false,
-                isInLoop: false,
-                isProgressBeingMade: true,
-                ManifestAnalystName,
-                messages => MagenticScriptedResponses.InstructionWithManifestId(
-                    messages,
-                    ManifestAnalystName)),
-            MagenticScriptedResponses.Ledger(
-                isRequestSatisfied: true,
-                isInLoop: false,
-                isProgressBeingMade: true,
-                ManifestAnalystName,
-                MagenticScriptedResponses.Static("The artifact contract is satisfied.")),
-            MagenticScriptedResponses.Static(
-                ReferenceSynthesisArtifacts.Valid),
-        ];
-        return Create(
-            artifacts,
-            runId,
-            probe,
-            responses,
-            requirePlanSignoff: true,
             maxRounds: 8,
             maxStalls: 0,
             maxResets: 2);
@@ -95,7 +72,8 @@ internal static class MagenticPhaseFactory
     internal static MagenticPhaseRuntime CreateRevisionThenApprove(
         ReferenceArtifactStore artifacts,
         string runId,
-        MagenticPhaseProbe probe)
+        MagenticPhaseProbe probe,
+        ReferenceSynthesisBudget budget)
     {
         Func<IReadOnlyList<ChatMessage>, string>[] responses =
         [
@@ -109,14 +87,17 @@ internal static class MagenticPhaseFactory
                 isProgressBeingMade: true,
                 ManifestAnalystName,
                 MagenticScriptedResponses.Static("The revised plan is complete.")),
-            MagenticScriptedResponses.Static(
-                ReferenceSynthesisArtifacts.Valid),
+            MagenticScriptedResponses.SynthesisArtifact(
+                artifacts,
+                runId,
+                includeRecommendation: true),
         ];
         return Create(
             artifacts,
             runId,
             probe,
             responses,
+            budget,
             requirePlanSignoff: true,
             maxRounds: 4,
             maxStalls: 1,
@@ -126,7 +107,8 @@ internal static class MagenticPhaseFactory
     internal static MagenticPhaseRuntime CreateInvalidSpeaker(
         ReferenceArtifactStore artifacts,
         string runId,
-        MagenticPhaseProbe probe)
+        MagenticPhaseProbe probe,
+        ReferenceSynthesisBudget budget)
     {
         Func<IReadOnlyList<ChatMessage>, string>[] responses =
         [
@@ -138,14 +120,58 @@ internal static class MagenticPhaseFactory
                 isProgressBeingMade: true,
                 "UnknownParticipant",
                 MagenticScriptedResponses.Static("Continue.")),
-            MagenticScriptedResponses.Static(
-                ReferenceSynthesisArtifacts.Valid),
+            MagenticScriptedResponses.SynthesisArtifact(
+                artifacts,
+                runId,
+                includeRecommendation: true),
         ];
         return Create(
             artifacts,
             runId,
             probe,
             responses,
+            budget,
+            requirePlanSignoff: false,
+            maxRounds: 4,
+            maxStalls: 1,
+            maxResets: 2);
+    }
+
+    internal static MagenticPhaseRuntime CreateEmptySpeaker(
+        ReferenceArtifactStore artifacts,
+        string runId,
+        MagenticPhaseProbe probe,
+        ReferenceSynthesisBudget budget)
+    {
+        Func<IReadOnlyList<ChatMessage>, string>[] responses =
+        [
+            MagenticScriptedResponses.Static("Initial facts"),
+            MagenticScriptedResponses.Static("Initial plan"),
+            MagenticScriptedResponses.Ledger(
+                isRequestSatisfied: false,
+                isInLoop: false,
+                isProgressBeingMade: true,
+                string.Empty,
+                messages => MagenticScriptedResponses.InstructionWithManifestId(
+                    messages,
+                    ManifestAnalystName)),
+            MagenticScriptedResponses.Ledger(
+                isRequestSatisfied: true,
+                isInLoop: false,
+                isProgressBeingMade: true,
+                ManifestAnalystName,
+                MagenticScriptedResponses.Static("Complete.")),
+            MagenticScriptedResponses.SynthesisArtifact(
+                artifacts,
+                runId,
+                includeRecommendation: true),
+        ];
+        return Create(
+            artifacts,
+            runId,
+            probe,
+            responses,
+            budget,
             requirePlanSignoff: false,
             maxRounds: 4,
             maxStalls: 1,
@@ -155,7 +181,8 @@ internal static class MagenticPhaseFactory
     internal static MagenticPhaseRuntime CreateInvalidFinalArtifact(
         ReferenceArtifactStore artifacts,
         string runId,
-        MagenticPhaseProbe probe)
+        MagenticPhaseProbe probe,
+        ReferenceSynthesisBudget budget)
     {
         Func<IReadOnlyList<ChatMessage>, string>[] responses =
         [
@@ -167,14 +194,17 @@ internal static class MagenticPhaseFactory
                 isProgressBeingMade: true,
                 ManifestAnalystName,
                 MagenticScriptedResponses.Static("Complete.")),
-            MagenticScriptedResponses.Static(
-                ReferenceSynthesisArtifacts.Invalid),
+            MagenticScriptedResponses.SynthesisArtifact(
+                artifacts,
+                runId,
+                includeRecommendation: false),
         ];
         return Create(
             artifacts,
             runId,
             probe,
             responses,
+            budget,
             requirePlanSignoff: false,
             maxRounds: 4,
             maxStalls: 1,
@@ -186,6 +216,7 @@ internal static class MagenticPhaseFactory
         string runId,
         MagenticPhaseProbe probe,
         IReadOnlyList<Func<IReadOnlyList<ChatMessage>, string>> managerResponses,
+        ReferenceSynthesisBudget budget,
         bool requirePlanSignoff,
         int maxRounds,
         int maxStalls,
@@ -193,7 +224,8 @@ internal static class MagenticPhaseFactory
     {
         var managerClient = new MagenticManagerChatClient(
             managerResponses,
-            probe);
+            probe,
+            budget);
         AIAgent manager = ReferencePipelineFactory.CreateHarnessAgent(
             ManagerName,
             "Plans and coordinates the phase-local Magentic team.",
@@ -204,7 +236,7 @@ internal static class MagenticPhaseFactory
             loopAgentOptions: null,
             backgroundAgents: [],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 6);
+            maximumIterationsPerRequest: budget.MaxProviderCalls);
 
         AIFunction readManifest = AIFunctionFactory.Create(
             (string manifestId) => artifacts.ReadManifestBundle(
@@ -219,7 +251,8 @@ internal static class MagenticPhaseFactory
         var manifestAnalystClient = new MagenticParticipantChatClient(
             ManifestAnalystName,
             "Manifest analysis completed.",
-            ReferencePipelineFactory.ReadManifestToolName);
+            ReferencePipelineFactory.ReadManifestToolName,
+            budget);
         AIAgent manifestAnalyst = ReferencePipelineFactory.CreateHarnessAgent(
             ManifestAnalystName,
             "Reads and analyzes the accepted artifact manifest.",
@@ -230,11 +263,12 @@ internal static class MagenticPhaseFactory
             loopAgentOptions: null,
             backgroundAgents: [],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 6);
+            maximumIterationsPerRequest: budget.MaxProviderCalls);
         var contractCriticClient = new MagenticParticipantChatClient(
             ContractCriticName,
             "Contract critique completed.",
-            readManifestToolName: null);
+            readManifestToolName: null,
+            budget: budget);
         AIAgent contractCritic = ReferencePipelineFactory.CreateHarnessAgent(
             ContractCriticName,
             "Checks explicit gaps and the synthesis artifact contract.",
@@ -245,7 +279,7 @@ internal static class MagenticPhaseFactory
             loopAgentOptions: null,
             backgroundAgents: [],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 6);
+            maximumIterationsPerRequest: budget.MaxProviderCalls);
 
         Workflow workflow = new MagenticWorkflowBuilder(manager)
             .AddParticipants([manifestAnalyst, contractCritic])
@@ -264,8 +298,10 @@ internal static class MagenticPhaseFactory
                         Complete the synthesis task using only accepted evidence:
                         {task}
 
-                        Return one JSON object containing nonempty summary,
-                        evidence, and recommendation fields.
+                        Return one JSON object containing nonempty summary and
+                        recommendation fields. Evidence must contain exactly the
+                        accepted artifact references, and gaps must match the
+                        accepted manifest exactly.
                         """,
                 })
             .Build();
@@ -277,6 +313,7 @@ internal static class MagenticPhaseFactory
             ManifestAnalystClient = manifestAnalystClient,
             ContractCriticClient = contractCriticClient,
             Probe = probe,
+            Budget = budget,
             Agents = [manager, manifestAnalyst, contractCritic],
             MaxRounds = maxRounds,
             MaxStalls = maxStalls,

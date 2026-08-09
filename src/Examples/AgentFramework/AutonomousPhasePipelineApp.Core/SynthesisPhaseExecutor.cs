@@ -7,7 +7,8 @@ namespace AutonomousPhasePipelineApp.Core;
 internal sealed class SynthesisPhaseExecutor(
     AIAgent agent,
     ReferenceArtifactStore artifacts,
-    string runId) :
+    string runId,
+    ReferenceSynthesisBudget budget) :
     Executor<ReferencePhaseArtifact, ReferencePhaseArtifact>(ExecutorId)
 {
     internal const string ExecutorId = "synthesis-phase.v1";
@@ -44,6 +45,7 @@ internal sealed class SynthesisPhaseExecutor(
         string prompt = ReferenceSynthesisPrompt.Build(
             manifestReference,
             manifest);
+        budget.BeginExecution();
 
         try
         {

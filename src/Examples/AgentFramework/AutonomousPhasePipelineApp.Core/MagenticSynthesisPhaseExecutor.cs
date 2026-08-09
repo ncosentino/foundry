@@ -5,10 +5,15 @@ namespace AutonomousPhasePipelineApp.Core;
 internal sealed class MagenticSynthesisPhaseExecutor(
     ReferenceArtifactStore artifacts,
     string runId,
-    Func<MagenticPhaseRuntime> runtimeFactory) :
+    Func<MagenticPhaseRuntime> runtimeFactory,
+    ReferenceSynthesisBudget budget,
+    int maxArtifactAttempts) :
     Executor<ReferencePhaseArtifact, ReferencePhaseArtifact>(
         SynthesisPhaseExecutor.ExecutorId)
 {
+    private readonly int _maxArtifactAttempts =
+        ValidateMaxArtifactAttempts(maxArtifactAttempts);
+
     public override async ValueTask<ReferencePhaseArtifact> HandleAsync(
         ReferencePhaseArtifact message,
         IWorkflowContext context,
@@ -36,29 +41,68 @@ internal sealed class MagenticSynthesisPhaseExecutor(
         ReferenceArtifactManifest manifest = artifacts.GetManifest(
             manifestReference,
             runId);
-        string task = ReferenceSynthesisPrompt.Build(
+        string baseTask = ReferenceSynthesisPrompt.Build(
             manifestReference,
             manifest);
-        MagenticPhaseRunResult result =
-            await MagenticPhaseRunner.RunAsync(
-                runtimeFactory(),
-                task,
-                cancellationToken);
-        if (!result.Succeeded || string.IsNullOrWhiteSpace(result.FinalText))
+        budget.BeginExecution();
+        string task = baseTask;
+        string? finalText = null;
+        for (int attempt = 1; attempt <= _maxArtifactAttempts; attempt++)
         {
-            return ReferencePhaseArtifact.Failed(
-                SynthesisPhaseExecutor.Phase,
-                ordinal: 200,
-                required: true,
-                result.FailureCode ?? "magentic-failed",
-                [manifestReference]);
+            MagenticPhaseRuntime runtime = runtimeFactory();
+            if (!ReferenceEquals(runtime.Budget, budget))
+            {
+                throw new InvalidOperationException(
+                    "The Magentic runtime did not use the synthesis execution budget.");
+            }
+
+            MagenticPhaseRunResult result =
+                await MagenticPhaseRunner.RunAsync(
+                    runtime,
+                    task,
+                    cancellationToken);
+            if (!result.Succeeded ||
+                string.IsNullOrWhiteSpace(result.FinalText))
+            {
+                return ReferencePhaseArtifact.Failed(
+                    SynthesisPhaseExecutor.Phase,
+                    ordinal: 200,
+                    required: true,
+                    result.FailureCode ?? "magentic-failed",
+                    [manifestReference]);
+            }
+
+            finalText = result.FinalText;
+            if (ReferenceArtifactValidator.TryValidateSynthesis(
+                finalText,
+                manifest,
+                out string error))
+            {
+                break;
+            }
+
+            if (attempt < _maxArtifactAttempts)
+            {
+                task = ReferenceSynthesisPrompt.WithCorrection(
+                    baseTask,
+                    finalText,
+                    error);
+            }
         }
 
         return ReferencePhaseArtifact.Candidate(
             SynthesisPhaseExecutor.Phase,
             ordinal: 200,
             required: true,
-            result.FinalText,
+            finalText!,
             manifestReference);
+    }
+
+    private static int ValidateMaxArtifactAttempts(
+        int maxArtifactAttempts)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(
+            maxArtifactAttempts);
+        return maxArtifactAttempts;
     }
 }

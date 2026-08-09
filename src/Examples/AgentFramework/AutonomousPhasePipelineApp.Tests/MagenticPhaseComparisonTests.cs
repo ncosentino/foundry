@@ -36,23 +36,37 @@ public sealed class MagenticPhaseComparisonTests
         Assert.Equal(
             harnessResult.Branches.Select(branch => branch.Outcome),
             magenticResult.Branches.Select(branch => branch.Outcome));
+        AssertAcceptedSynthesis(harness, harnessResult);
+        AssertAcceptedSynthesis(magentic, magenticResult);
         Assert.Equal(
-            harnessResult.Synthesis.Artifact?.Digest,
-            magenticResult.Synthesis.Artifact?.Digest);
+            harness.SynthesisBudget.MaxProviderCalls,
+            magentic.SynthesisBudget.MaxProviderCalls);
+        Assert.InRange(
+            harness.SynthesisBudget.UsedProviderCalls,
+            1,
+            harness.SynthesisBudget.MaxProviderCalls);
+        Assert.InRange(
+            magentic.SynthesisBudget.UsedProviderCalls,
+            1,
+            magentic.SynthesisBudget.MaxProviderCalls);
         MagenticPhaseProbe probe = Assert.IsType<MagenticPhaseProbe>(
             magentic.MagenticProbe);
-        Assert.Single(probe.Plans);
-        Assert.Single(probe.Replans);
-        Assert.Equal(3, probe.Ledgers.Count);
-        Assert.Equal(3, probe.ProgressEventCount);
-        Assert.True(probe.Ledgers[0].IsInLoop);
-        Assert.False(probe.Ledgers[0].IsProgressBeingMade);
-        Assert.False(probe.Ledgers[0].IsRequestSatisfied);
-        Assert.False(probe.Ledgers[1].IsInLoop);
-        Assert.True(probe.Ledgers[1].IsProgressBeingMade);
-        Assert.False(probe.Ledgers[1].IsRequestSatisfied);
-        Assert.True(probe.Ledgers[2].IsRequestSatisfied);
-        Assert.Equal(1, probe.ExecutionCount);
+        Assert.Equal(2, probe.Plans.Count);
+        Assert.Equal(2, probe.Replans.Count);
+        Assert.Equal(6, probe.Ledgers.Count);
+        Assert.Equal(6, probe.ProgressEventCount);
+        Assert.Equal(
+            2,
+            probe.Ledgers.Count(
+                ledger =>
+                    ledger.IsInLoop &&
+                    !ledger.IsProgressBeingMade &&
+                    !ledger.IsRequestSatisfied));
+        Assert.Equal(
+            2,
+            probe.Ledgers.Count(
+                ledger => ledger.IsRequestSatisfied));
+        Assert.Equal(2, probe.ExecutionCount);
         Assert.Null(magentic.SynthesisClient);
 
         var (_, runId, _, _) = CreateAcceptedMagenticTask();
@@ -61,7 +75,9 @@ public sealed class MagenticPhaseComparisonTests
                 new ReferenceArtifactStore(),
                 runId,
                 new MagenticPhaseProbe(),
-                requirePlanSignoff: false);
+                new ReferenceSynthesisBudget(24),
+                requirePlanSignoff: false,
+                requireArtifactCorrection: false);
         Assert.Equal(8, phaseRuntime.MaxRounds);
         Assert.Equal(0, phaseRuntime.MaxStalls);
         Assert.Equal(2, phaseRuntime.MaxResets);
@@ -77,26 +93,25 @@ public sealed class MagenticPhaseComparisonTests
     [Fact]
     public async Task PlanReview_RevisionThenApproval_EmitsReplanAndCompletes()
     {
-        var (artifacts, runId, task, _) =
+        var (artifacts, runId, task, manifestReference) =
             CreateAcceptedMagenticTask();
         var probe = new MagenticPhaseProbe();
+        var budget = new ReferenceSynthesisBudget(12);
         MagenticPhaseRuntime runtime =
             MagenticPhaseFactory.CreateRevisionThenApprove(
                 artifacts,
                 runId,
-                probe);
+                probe,
+                budget);
         CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
         var environment = InProcessExecution.Lockstep.WithCheckpointing(
             checkpoints);
 
-        MagenticRunSlice first;
-        await using (StreamingRun initial = await OpenAsync(
+        await using StreamingRun run = await OpenAsync(
             runtime,
             environment,
-            task))
-        {
-            first = await DrainAsync(initial, probe);
-        }
+            task);
+        MagenticRunSlice first = await DrainAsync(run, probe);
         ExternalRequest initialRequest = Assert.IsType<ExternalRequest>(
             first.Request);
         MagenticPlanReviewRequest initialReview =
@@ -104,19 +119,11 @@ public sealed class MagenticPhaseComparisonTests
             ?? throw new InvalidOperationException(
                 "Initial plan review was unavailable.");
 
-        MagenticRunSlice second;
-        await using (StreamingRun revised =
-            await environment.ResumeStreamingAsync(
-                runtime.Workflow,
-                Assert.IsType<CheckpointInfo>(first.Checkpoint),
-                TestContext.Current.CancellationToken))
-        {
-            await revised.SendResponseAsync(
-                initialRequest.CreateResponse(
-                    initialReview.Revise(
-                        "Include explicit artifact-contract validation.")));
-            second = await DrainAsync(revised, probe);
-        }
+        await run.SendResponseAsync(
+            initialRequest.CreateResponse(
+                initialReview.Revise(
+                    "Include explicit artifact-contract validation.")));
+        MagenticRunSlice second = await DrainAsync(run, probe);
         ExternalRequest revisedRequest = Assert.IsType<ExternalRequest>(
             second.Request);
         MagenticPlanReviewRequest revisedReview =
@@ -128,52 +135,53 @@ public sealed class MagenticPhaseComparisonTests
             revisedReview.Plan.Text,
             StringComparison.Ordinal);
 
-        MagenticRunSlice completed;
-        await using (StreamingRun approved =
-            await environment.ResumeStreamingAsync(
-                runtime.Workflow,
-                Assert.IsType<CheckpointInfo>(second.Checkpoint),
-                TestContext.Current.CancellationToken))
-        {
-            await approved.SendResponseAsync(
-                revisedRequest.CreateResponse(
-                    revisedReview.Approve()));
-            completed = await DrainAsync(approved, probe);
-        }
+        await run.SendResponseAsync(
+            revisedRequest.CreateResponse(
+                revisedReview.Approve()));
+        MagenticRunSlice completed = await DrainAsync(run, probe);
 
         Assert.NotNull(completed.Output);
+        ReferenceArtifactManifest manifest = artifacts.GetManifest(
+            manifestReference,
+            runId);
         Assert.True(
             ReferenceArtifactValidator.TryValidateSynthesis(
                 completed.Output[^1].Text,
-                out _));
+                manifest,
+                out string error),
+            error);
         Assert.Single(probe.Plans);
         Assert.Single(probe.Replans);
+        Assert.InRange(
+            budget.UsedProviderCalls,
+            1,
+            budget.MaxProviderCalls);
     }
 
     [Fact]
-    public async Task StallReplanCheckpoint_RestoresWithStableFreshWorkflow()
+    public async Task StallReplanCheckpoint_RestoresOnSameRun()
     {
-        var (artifacts, runId, task, _) =
+        var (artifacts, runId, task, manifestReference) =
             CreateAcceptedMagenticTask();
         var probe = new MagenticPhaseProbe();
-        MagenticPhaseRuntime initialRuntime =
+        var budget = new ReferenceSynthesisBudget(12);
+        MagenticPhaseRuntime runtime =
             MagenticPhaseFactory.CreateStallThenRecover(
                 artifacts,
                 runId,
                 probe,
-                requirePlanSignoff: true);
+                budget,
+                requirePlanSignoff: true,
+                requireArtifactCorrection: false);
         CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
         var environment = InProcessExecution.Lockstep.WithCheckpointing(
             checkpoints);
 
-        MagenticRunSlice first;
-        await using (StreamingRun initial = await OpenAsync(
-            initialRuntime,
+        await using StreamingRun run = await OpenAsync(
+            runtime,
             environment,
-            task))
-        {
-            first = await DrainAsync(initial, probe);
-        }
+            task);
+        MagenticRunSlice first = await DrainAsync(run, probe);
         ExternalRequest initialRequest = Assert.IsType<ExternalRequest>(
             first.Request);
         MagenticPlanReviewRequest initialReview =
@@ -181,20 +189,12 @@ public sealed class MagenticPhaseComparisonTests
             ?? throw new InvalidOperationException(
                 "Initial plan review was unavailable.");
 
-        MagenticRunSlice replanned;
-        await using (StreamingRun afterInitialApproval =
-            await environment.ResumeStreamingAsync(
-                initialRuntime.Workflow,
-                Assert.IsType<CheckpointInfo>(first.Checkpoint),
-                TestContext.Current.CancellationToken))
-        {
-            await afterInitialApproval.SendResponseAsync(
-                initialRequest.CreateResponse(
-                    initialReview.Approve()));
-            replanned = await DrainAsync(
-                afterInitialApproval,
-                probe);
-        }
+        await run.SendResponseAsync(
+            initialRequest.CreateResponse(
+                initialReview.Approve()));
+        MagenticRunSlice replanned = await DrainAsync(
+            run,
+            probe);
         ExternalRequest replanRequest = Assert.IsType<ExternalRequest>(
             replanned.Request);
         MagenticPlanReviewRequest replanReview =
@@ -204,46 +204,52 @@ public sealed class MagenticPhaseComparisonTests
         Assert.True(replanReview.IsStalled);
         Assert.Single(probe.Replans);
 
-        MagenticPhaseRuntime recoveredRuntime =
-            MagenticPhaseFactory.CreateReplanRecovery(
-                artifacts,
-                runId,
-                probe);
-        MagenticRunSlice completed;
-        await using (StreamingRun recovered =
-            await environment.ResumeStreamingAsync(
-                recoveredRuntime.Workflow,
-                Assert.IsType<CheckpointInfo>(replanned.Checkpoint),
-                TestContext.Current.CancellationToken))
-        {
-            await recovered.SendResponseAsync(
-                replanRequest.CreateResponse(
-                    replanReview.Approve()));
-            completed = await DrainAsync(
-                recovered,
-                probe);
-        }
+        await run.RestoreCheckpointAsync(
+            Assert.IsType<CheckpointInfo>(replanned.Checkpoint),
+            TestContext.Current.CancellationToken);
+        MagenticRunSlice restored = await DrainAsync(run, probe);
+        ExternalRequest restoredRequest = Assert.IsType<ExternalRequest>(
+            restored.Request);
+        MagenticPlanReviewRequest restoredReview =
+            restoredRequest.Data.As<MagenticPlanReviewRequest>()
+            ?? throw new InvalidOperationException(
+                "Restored replan review was unavailable.");
+        Assert.True(restoredReview.IsStalled);
+
+        await run.SendResponseAsync(
+            restoredRequest.CreateResponse(
+                restoredReview.Approve()));
+        MagenticRunSlice completed = await DrainAsync(
+            run,
+            probe);
 
         Assert.NotNull(completed.Output);
+        ReferenceArtifactManifest manifest = artifacts.GetManifest(
+            manifestReference,
+            runId);
         Assert.True(
             ReferenceArtifactValidator.TryValidateSynthesis(
                 completed.Output[^1].Text,
-                out _));
+                manifest,
+                out string error),
+            error);
         Assert.True(
-            recoveredRuntime.ManifestAnalystClient.CallCount > 0);
+            runtime.ManifestAnalystClient.CallCount > 0);
     }
 
     [Fact]
     public async Task InvalidSpeaker_UpstreamFinalizesButAdapterRejects()
     {
-        var (artifacts, runId, task, _) =
+        var (artifacts, runId, task, manifestReference) =
             CreateAcceptedMagenticTask();
         var probe = new MagenticPhaseProbe();
+        var budget = new ReferenceSynthesisBudget(12);
         MagenticPhaseRuntime runtime =
             MagenticPhaseFactory.CreateInvalidSpeaker(
                 artifacts,
                 runId,
-                probe);
+                probe,
+                budget);
 
         MagenticPhaseRunResult result =
             await MagenticPhaseRunner.RunAsync(
@@ -251,9 +257,19 @@ public sealed class MagenticPhaseComparisonTests
                 task,
                 TestContext.Current.CancellationToken);
 
-        Assert.False(result.Succeeded);
+        Assert.False(
+            result.Succeeded,
+            $"failure={result.FailureCode}; warnings={string.Join(" | ", probe.Warnings)}");
         Assert.Equal("invalid-next-speaker", result.FailureCode);
-        Assert.Equal(ReferenceSynthesisArtifacts.Valid, result.FinalText);
+        ReferenceArtifactManifest manifest = artifacts.GetManifest(
+            manifestReference,
+            runId);
+        Assert.True(
+            ReferenceArtifactValidator.TryValidateSynthesis(
+                result.FinalText,
+                manifest,
+                out string error),
+            error);
         Assert.Contains(
             probe.Warnings,
             warning => warning.Contains(
@@ -264,16 +280,59 @@ public sealed class MagenticPhaseComparisonTests
     }
 
     [Fact]
+    public async Task EmptySpeaker_FallbackStillFailsClosed()
+    {
+        var (artifacts, runId, task, manifestReference) =
+            CreateAcceptedMagenticTask();
+        var probe = new MagenticPhaseProbe();
+        var budget = new ReferenceSynthesisBudget(12);
+        MagenticPhaseRuntime runtime =
+            MagenticPhaseFactory.CreateEmptySpeaker(
+                artifacts,
+                runId,
+                probe,
+                budget);
+
+        MagenticPhaseRunResult result =
+            await MagenticPhaseRunner.RunAsync(
+                runtime,
+                task,
+                TestContext.Current.CancellationToken);
+
+        Assert.False(
+            result.Succeeded,
+            $"failure={result.FailureCode}; warnings={string.Join(" | ", probe.Warnings)}");
+        Assert.Equal("invalid-next-speaker", result.FailureCode);
+        ReferenceArtifactManifest manifest = artifacts.GetManifest(
+            manifestReference,
+            runId);
+        Assert.True(
+            ReferenceArtifactValidator.TryValidateSynthesis(
+                result.FinalText,
+                manifest,
+                out string error),
+            error);
+        Assert.Contains(
+            probe.Warnings,
+            warning => warning.Contains(
+                "Next speaker answer empty",
+                StringComparison.Ordinal));
+        Assert.True(runtime.ManifestAnalystClient.CallCount > 0);
+    }
+
+    [Fact]
     public async Task InvalidMagenticFinal_IsRejectedByExistingArtifactBoundary()
     {
         var (artifacts, runId, task, manifestReference) =
             CreateAcceptedMagenticTask();
         var probe = new MagenticPhaseProbe();
+        var budget = new ReferenceSynthesisBudget(12);
         MagenticPhaseRuntime runtime =
             MagenticPhaseFactory.CreateInvalidFinalArtifact(
                 artifacts,
                 runId,
-                probe);
+                probe,
+                budget);
         MagenticPhaseRunResult phaseResult =
             await MagenticPhaseRunner.RunAsync(
                 runtime,
@@ -299,6 +358,107 @@ public sealed class MagenticPhaseComparisonTests
             ReferencePipelineOutcome.Failed,
             validated.Outcome);
         Assert.Equal("missing-recommendation", validated.Error);
+    }
+
+    [Fact]
+    public async Task MagenticArtifactCorrection_UsesSharedManifestPolicy()
+    {
+        var (artifacts, runId, _, manifestReference) =
+            CreateAcceptedMagenticTask();
+        var probe = new MagenticPhaseProbe();
+        var budget = new ReferenceSynthesisBudget(24);
+        var runtimes = new List<MagenticPhaseRuntime>();
+        var executor = new MagenticSynthesisPhaseExecutor(
+            artifacts,
+            runId,
+            () =>
+            {
+                MagenticPhaseRuntime runtime =
+                    MagenticPhaseFactory.CreateStallThenRecover(
+                        artifacts,
+                        runId,
+                        probe,
+                        budget,
+                        requirePlanSignoff: false,
+                        requireArtifactCorrection: true);
+                runtimes.Add(runtime);
+                return runtime;
+            },
+            budget,
+            maxArtifactAttempts: 2);
+        ReferencePhaseArtifact manifestArtifact =
+            ReferencePhaseArtifact.WithArtifact(
+                ReferencePhaseArtifact.Candidate(
+                    SpecialistManifestBarrierExecutor.Phase,
+                    ordinal: 100,
+                    required: true,
+                    content: "{}"),
+                manifestReference);
+
+        ReferencePhaseArtifact candidate = await executor.HandleAsync(
+            manifestArtifact,
+            context: null!,
+            TestContext.Current.CancellationToken);
+        var boundary = new SynthesisArtifactBoundaryExecutor(
+            artifacts,
+            runId);
+        ReferencePhaseArtifact validated = await boundary.HandleAsync(
+            candidate,
+            context: null!,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, runtimes.Count);
+        Assert.Equal(2, probe.ExecutionCount);
+        Assert.False(
+            ContainsManagerText(
+                runtimes[0],
+                ReferenceArtifactValidator.SynthesisCorrectionCode));
+        Assert.True(
+            ContainsManagerText(
+                runtimes[1],
+                ReferenceArtifactValidator.CreateSynthesisCorrection(
+                    "missing-recommendation")));
+        Assert.Equal(
+            ReferencePipelineOutcome.Completed,
+            validated.Outcome);
+        Assert.InRange(
+            budget.UsedProviderCalls,
+            1,
+            budget.MaxProviderCalls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SynthesisArms_EnforceSameProviderCallBudget(
+        bool useMagentic)
+    {
+        ReferenceSynthesisExecutorKind synthesisKind = useMagentic
+            ? ReferenceSynthesisExecutorKind.Magentic
+            : ReferenceSynthesisExecutorKind.Harness;
+        var request = new ReferencePipelineRequest(
+            $"budget-{synthesisKind}-{Guid.NewGuid():N}",
+            "Synthetic release readiness");
+        ReferencePipelineRuntime runtime = ReferencePipelineFactory.Create(
+            request,
+            ReferencePipelineOptions.Default with
+            {
+                SynthesisExecutorKind = synthesisKind,
+                SynthesisMaxProviderCalls = 2,
+            },
+            new ReferenceArtifactStore(),
+            new IdempotentDeliverySink());
+
+        ReferencePipelineResult result = await RunOuterAsync(
+            runtime,
+            captureCheckpoint: false);
+
+        Assert.Equal(2, runtime.SynthesisBudget.MaxProviderCalls);
+        Assert.Equal(2, runtime.SynthesisBudget.UsedProviderCalls);
+        Assert.Equal(ReferencePipelineOutcome.Failed, result.Outcome);
+        Assert.Equal(
+            ReferencePipelineOutcome.Failed,
+            result.Synthesis.Outcome);
     }
 
     [Fact]
@@ -338,7 +498,7 @@ public sealed class MagenticPhaseComparisonTests
         Assert.Equal(
             operationsResponses,
             runtime.OperationsClient.ArtifactResponseCount);
-        Assert.Equal(2, runtime.MagenticProbe?.ExecutionCount);
+        Assert.Equal(4, runtime.MagenticProbe?.ExecutionCount);
         Assert.Equal(2, runtime.Delivery.AttemptCount);
         Assert.Equal(1, runtime.Delivery.AuthoritativeCount);
         Assert.Equal(
@@ -357,6 +517,38 @@ public sealed class MagenticPhaseComparisonTests
             },
             new ReferenceArtifactStore(),
             new IdempotentDeliverySink());
+
+    private static void AssertAcceptedSynthesis(
+        ReferencePipelineRuntime runtime,
+        ReferencePipelineResult result)
+    {
+        ReferenceArtifactReference synthesisReference =
+            Assert.IsType<ReferenceArtifactReference>(
+                result.Synthesis.Artifact);
+        ReferenceArtifactManifest manifest = runtime.Artifacts.GetManifest(
+            result.Manifest,
+            runtime.Request.RunId);
+        string content = runtime.Artifacts.Read(
+            runtime.Request.RunId,
+            synthesisReference.Id);
+        Assert.True(
+            ReferenceArtifactValidator.TryValidateSynthesis(
+                content,
+                manifest,
+                out string error),
+            error);
+    }
+
+    private static bool ContainsManagerText(
+        MagenticPhaseRuntime runtime,
+        string expected) =>
+        runtime.ManagerClient.RecordedInputs
+            .SelectMany(messages => messages)
+            .Select(message => message.Text)
+            .OfType<string>()
+            .Any(text => text.Contains(
+                expected,
+                StringComparison.Ordinal));
 
     private static async Task<ReferencePipelineResult> RunOuterAsync(
         ReferencePipelineRuntime runtime,

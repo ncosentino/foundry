@@ -21,7 +21,7 @@ Only the synthesis executor changes:
 
 | Arm | Internal behavior | Macro input | Macro output |
 | --- | --- | --- | --- |
-| Harness | One Harness agent, manifest tool, schema loop evaluator | Accepted manifest reference and gaps | Candidate synthesis artifact |
+| Harness | One Harness agent, manifest tool, artifact loop evaluator | Accepted manifest reference and gaps | Candidate synthesis artifact |
 | Magentic | Manager plus fixed participant catalog, plan, progress ledgers, stall replan | Accepted manifest reference and gaps | Candidate synthesis artifact |
 
 Neighboring macro nodes and result consumers cannot distinguish the arms
@@ -30,8 +30,31 @@ through IDs or message types. Both use executor ID `synthesis-phase.v1`, receive
 `SynthesisArtifactBoundaryExecutor` remains authoritative.
 
 The executor CLR types are different, so checkpoint compatibility is
-arm-specific. Resume a run with the same synthesis arm that created its
-checkpoint; changing arms is a new run, not an in-place recovery operation.
+arm-specific. Restore only the retained live run that created the checkpoint;
+changing arms is a new run, not an in-place recovery operation.
+
+## Matched comparison envelope
+
+The deterministic probe gives both arms the same phase-level constraints:
+
+| Constraint | Harness | Magentic |
+| --- | --- | --- |
+| Manifest input | Same accepted manifest | Same accepted manifest |
+| Artifact policy | Exact accepted evidence and gaps | Exact accepted evidence and gaps |
+| Correction attempts | At most 2 | At most 2 |
+| Provider-call cap | 24 per synthesis execution | 24 shared by manager and participants per synthesis execution |
+| Final authority | `SynthesisArtifactBoundaryExecutor` | `SynthesisArtifactBoundaryExecutor` |
+
+The common provider-call budget counts chat-client invocations, including tool
+rounds. It resets when an outer checkpoint replays the synthesis phase, but is
+shared across all correction attempts within that phase execution. Exhausting
+the cap fails the synthesis arm rather than granting one architecture extra
+work.
+
+Magentic's round, stall, and reset limits remain explicit because they control
+different orchestration behaviors; they are not treated as equivalent to
+provider calls. The probe records actual call usage under the common cap but
+does not turn those deterministic counts into a quality or cost recommendation.
 
 ## Raw MAF composition
 
@@ -53,8 +76,10 @@ Workflow workflow = new MagenticWorkflowBuilder(manager)
                 Complete the synthesis task using only accepted evidence:
                 {task}
 
-                Return one JSON object containing nonempty summary,
-                evidence, and recommendation fields.
+                Return one JSON object containing nonempty summary and
+                recommendation fields. Evidence must contain exactly the
+                accepted artifact references, and gaps must match the
+                accepted manifest exactly.
                 """,
         })
     .Build();
@@ -76,7 +101,13 @@ orchestrator is not available through the public builder API for re-selection.
 
 ## Planning and progress evidence
 
-The autonomous comparison arm forces one stalled plan:
+The correction probe runs the same bounded Magentic factory twice. The first
+attempt forces one stalled plan and returns a manifest-grounded artifact that
+omits `recommendation`; the shared validator supplies correction feedback, and
+the second attempt follows the same bounded path before returning a valid
+artifact.
+
+Within each attempt:
 
 1. manager creates the initial task ledger;
 2. first progress ledger reports a stall;
@@ -156,9 +187,22 @@ Speaker matching is exact, case-sensitive, and untrimmed.
   manager for a final answer.
 
 That second path can emit a plausible final artifact even though the progress
-ledger said the request was not satisfied. The phase adapter therefore rejects
-any run that observed an invalid-speaker warning or lacks a satisfied final
-ledger. The unchanged artifact boundary still validates the final JSON.
+ledger said the request was not satisfied. The phase adapter therefore rejects any run that observed an invalid-speaker
+warning or lacks a satisfied final ledger, even if upstream emitted plausible
+final text. The unchanged artifact boundary still validates the final JSON.
+
+## Shared artifact correction policy
+
+Both arms use `ReferenceArtifactValidator` and the same structured correction
+feedback. The Harness arm applies it through `DelegateLoopEvaluator`. The
+Magentic adapter validates each final answer and may run one new phase-local
+Magentic attempt with the same feedback before returning the candidate to the
+macro graph. Both attempts share the phase's 24-call cap.
+
+The final deterministic boundary remains authoritative after either arm
+exhausts its two attempts. A focused test drives Magentic from a
+manifest-grounded but incomplete artifact to a corrected artifact; adversarial
+unknown evidence and gap mismatches are covered by the shared artifact corpus.
 
 ## Two checkpoint layers
 
@@ -179,9 +223,8 @@ sessions, plan-review request, and progress state. A focused test:
 1. approves the initial plan;
 2. forces a stall and replan;
 3. captures the checkpoint at the stalled replan review;
-4. builds a structurally identical workflow with stable manager and participant
-   IDs;
-5. restores the checkpoint;
+4. restores that checkpoint on the same live `StreamingRun`;
+5. observes the restored review request;
 6. approves the replanned plan; and
 7. completes with a valid artifact.
 
@@ -189,6 +232,8 @@ Embedding Magentic inside one outer executor does not automatically expose its
 inner checkpoint to the outer workflow. A production host that needs mid-phase
 recovery must persist and associate that inner checkpoint separately. The
 reference keeps the production recovery unit at the outer artifact boundary.
+It does not claim fresh-workflow or process-restart resume; ADR-0016 documents
+why Foundry limits checkpoint recovery to the retained live run on MAF 1.17.
 
 ## Sequential coordination tradeoff
 
@@ -205,20 +250,20 @@ The fixed macro graph therefore keeps its specialist fan-out outside Magentic.
 Magentic is compared only for the synthesis phase where sequential coordination
 may be justified.
 
-## Result
+## Probe status
 
-The raw MAF builder is sufficient for this comparison. Foundry does not need a
-Magentic convenience API yet:
+This implementation is a behavioral probe, not a recommendation about which arm
+to ship and not a decision about whether Foundry should add a Magentic
+convenience API. It establishes that:
 
-- construction is already concise;
-- bounds and review behavior remain visible;
-- raw events expose the important state;
-- the existing artifact boundary corrects Magentic's untyped final output; and
-- a wrapper would mostly mirror upstream types while hiding important limits.
+- raw MAF composition can stay inside one fixed macro phase;
+- plan, replan, review, warning, and ledger behavior is observable;
+- invalid-speaker paths can be rejected fail closed;
+- both arms can share one artifact policy and provider-call cap; and
+- outer same-run checkpoint replay preserves the macro recovery boundary.
 
-This is not a general endorsement. Hosted evaluation must compare reliability,
-latency, token usage, and recovery quality before choosing Magentic over the
-plain Harness synthesis phase.
+Hosted evaluation still needs calibrated reliability, latency, token, and
+recovery evidence before any architecture recommendation is made.
 
 ## Run both arms
 
@@ -234,9 +279,9 @@ dotnet run --project \
 ```
 
 The deterministic tests cover plan creation, progress ledgers, forced
-stall/replan, plan revision and approval, invalid speakers, fresh-workflow
-checkpoint restoration, outer checkpoint replay, and final artifact
-validation.
+stall/replan, plan revision and approval, invalid speakers, same-run inner and
+outer checkpoint restoration, matched provider-call exhaustion, shared artifact
+correction, and final artifact validation.
 
 ## References
 

@@ -31,5 +31,7 @@ internal sealed class ReferencePipelineRuntime
 
     internal required MagenticPhaseProbe? MagenticProbe { get; init; }
 
+    internal required ReferenceSynthesisBudget SynthesisBudget { get; init; }
+
     internal required IReadOnlyList<AIAgent> HarnessAgents { get; init; }
 }

@@ -4,7 +4,8 @@ namespace AutonomousPhasePipelineApp.Core;
 
 internal sealed class MagenticManagerChatClient(
     IReadOnlyList<Func<IReadOnlyList<ChatMessage>, string>> responses,
-    MagenticPhaseProbe probe) :
+    MagenticPhaseProbe probe,
+    ReferenceSynthesisBudget budget) :
     IChatClient
 {
     private readonly List<IReadOnlyList<ChatMessage>> _recordedInputs = [];
@@ -21,6 +22,7 @@ internal sealed class MagenticManagerChatClient(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        budget.ConsumeProviderCall(MagenticPhaseFactory.ManagerName);
         ChatMessage[] messages = [.. chatMessages];
         _recordedInputs.Add(messages);
         int index = Interlocked.Increment(ref _callCount) - 1;

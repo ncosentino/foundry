@@ -7,7 +7,8 @@ namespace AutonomousPhasePipelineApp.Core;
 internal sealed class MagenticParticipantChatClient(
     string participantName,
     string responseText,
-    string? readManifestToolName) : IChatClient
+    string? readManifestToolName,
+    ReferenceSynthesisBudget budget) : IChatClient
 {
     private readonly string _readCallId = $"{participantName}-read-manifest";
     private int _callCount;
@@ -55,6 +56,7 @@ internal sealed class MagenticParticipantChatClient(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        budget.ConsumeProviderCall(participantName);
         Interlocked.Increment(ref _callCount);
         ChatMessage[] messages = [.. chatMessages];
         if (readManifestToolName is not null)

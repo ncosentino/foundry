@@ -23,6 +23,10 @@ internal static class ReferencePipelineFactory
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(artifacts);
         ArgumentNullException.ThrowIfNull(delivery);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(
+            options.SynthesisMaxArtifactAttempts);
+        var synthesisBudget = new ReferenceSynthesisBudget(
+            options.SynthesisMaxProviderCalls);
         var backgroundGate = new ConcurrentInvocationGate(
             expectedParticipants: 2,
             holdUntilCancellation: false,
@@ -193,7 +197,8 @@ internal static class ReferencePipelineFactory
                         "Reads an accepted outcome manifest and its referenced artifact bodies.",
                 });
             synthesisClient = new SynthesisChatClient(
-                ReadManifestToolName);
+                ReadManifestToolName,
+                synthesisBudget);
             AIAgent synthesisAgent = CreateHarnessAgent(
                 "synthesis-phase",
                 "Synthesizes accepted artifact references and explicit gaps.",
@@ -224,23 +229,28 @@ internal static class ReferencePipelineFactory
                                 accepted
                                     ? LoopEvaluation.Stop()
                                     : LoopEvaluation.Continue(
-                                        $"{ReferenceArtifactValidator.SynthesisCorrectionCode}; validation_error={error}"));
+                                        ReferenceArtifactValidator
+                                            .CreateSynthesisCorrection(
+                                                error)));
                         }),
                 ],
                 loopAgentOptions: new LoopAgentOptions
                 {
-                    MaxIterations = 2,
+                    MaxIterations =
+                        options.SynthesisMaxArtifactAttempts,
                     FreshContextPerIteration = false,
                     NonStreamingReturnsLastResponseOnly = true,
                 },
                 backgroundAgents: [],
                 backgroundOptions: null,
-                maximumIterationsPerRequest: 6);
+                maximumIterationsPerRequest:
+                    options.SynthesisMaxProviderCalls);
             harnessAgents.Add(synthesisAgent);
             synthesis = new SynthesisPhaseExecutor(
                 synthesisAgent,
                 artifacts,
-                request.RunId).BindExecutor();
+                request.RunId,
+                synthesisBudget).BindExecutor();
         }
         else
         {
@@ -253,7 +263,11 @@ internal static class ReferencePipelineFactory
                     artifacts,
                     request.RunId,
                     probe,
-                    requirePlanSignoff: false)).BindExecutor();
+                    synthesisBudget,
+                    requirePlanSignoff: false,
+                    requireArtifactCorrection: true),
+                synthesisBudget,
+                options.SynthesisMaxArtifactAttempts).BindExecutor();
         }
 
         var synthesisBoundary = new SynthesisArtifactBoundaryExecutor(
@@ -297,6 +311,7 @@ internal static class ReferencePipelineFactory
             OperationsClient = operationsClient,
             SynthesisClient = synthesisClient,
             MagenticProbe = magenticProbe,
+            SynthesisBudget = synthesisBudget,
             HarnessAgents = harnessAgents,
         };
     }

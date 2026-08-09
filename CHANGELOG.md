@@ -72,9 +72,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   public phase or artifact abstraction.
 - Phase-local Magentic comparison arm for the reference pipeline. It uses the
   raw upstream builder with explicit participants and limits, captures plan,
-  replan, progress-ledger, review, warning, and checkpoint behavior, preserves
-  the existing synthesis artifact boundary, and introduces no Foundry Magentic
-  wrapper or general endorsement before hosted evaluation.
+  replan, progress-ledger, review, warning, and same-run checkpoint behavior.
+  Harness and Magentic share the exact manifest-grounded artifact policy, two
+  correction attempts, and a 24-provider-call phase cap. The comparison remains
+  a behavioral probe with no Foundry wrapper or architecture recommendation
+  before calibrated hosted evaluation.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry

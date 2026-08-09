@@ -23,4 +23,18 @@ internal static class ReferenceSynthesisPrompt
             Resolve artifact bodies through the manifest tool; no prior transcript is authoritative.
             """;
     }
+
+    internal static string WithCorrection(
+        string task,
+        string candidate,
+        string error) =>
+        $"""
+        {task}
+
+        {ReferenceArtifactValidator.CreateSynthesisCorrection(error)}
+        The prior candidate was:
+        {candidate}
+
+        Return a corrected JSON artifact that satisfies the accepted manifest.
+        """;
 }

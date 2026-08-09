@@ -100,6 +100,40 @@ internal static class MagenticScriptedResponses
         string response) =>
         _ => response;
 
+    internal static Func<IReadOnlyList<ChatMessage>, string>
+        SynthesisArtifact(
+            ReferenceArtifactStore artifacts,
+            string runId,
+            bool includeRecommendation) =>
+        messages =>
+        {
+            string manifestId = ExtractManifestId(messages);
+            ReferenceArtifactManifest manifest = artifacts.GetManifest(
+                manifestId,
+                runId);
+            return ReferenceSynthesisArtifacts.Create(
+                manifest,
+                includeRecommendation);
+        };
+
+    internal static Func<IReadOnlyList<ChatMessage>, string>
+        CorrectionAwareSynthesisArtifact(
+            ReferenceArtifactStore artifacts,
+            string runId) =>
+        messages =>
+        {
+            bool corrected = messages
+                .Select(message => message.Text)
+                .OfType<string>()
+                .Any(text => text.Contains(
+                    ReferenceArtifactValidator.SynthesisCorrectionCode,
+                    StringComparison.Ordinal));
+            return SynthesisArtifact(
+                artifacts,
+                runId,
+                includeRecommendation: corrected)(messages);
+        };
+
     internal static Func<IReadOnlyList<ChatMessage>, string> Ledger(
         bool isRequestSatisfied,
         bool isInLoop,
@@ -117,6 +151,14 @@ internal static class MagenticScriptedResponses
         IReadOnlyList<ChatMessage> messages,
         string participantName)
     {
+        string manifestId = ExtractManifestId(messages);
+        return
+            $"Participant={participantName}\nmanifest_id={manifestId}\nReview the accepted artifact manifest.";
+    }
+
+    private static string ExtractManifestId(
+        IReadOnlyList<ChatMessage> messages)
+    {
         const string Prefix = "manifest_id=";
         string source = messages
             .Select(message => message.Text)
@@ -130,8 +172,13 @@ internal static class MagenticScriptedResponses
         string manifestId = (end < 0
             ? source[start..]
             : source[start..end]).Trim();
-        return
-            $"Participant={participantName}\nmanifest_id={manifestId}\nReview the accepted artifact manifest.";
+        if (string.IsNullOrWhiteSpace(manifestId))
+        {
+            throw new InvalidOperationException(
+                "The Magentic conversation contained an empty manifest ID.");
+        }
+
+        return manifestId;
     }
 
     private static string CreateLedger(

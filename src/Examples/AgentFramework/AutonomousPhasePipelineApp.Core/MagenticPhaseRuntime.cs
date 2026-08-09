@@ -15,6 +15,8 @@ internal sealed class MagenticPhaseRuntime
 
     internal required MagenticPhaseProbe Probe { get; init; }
 
+    internal required ReferenceSynthesisBudget Budget { get; init; }
+
     internal required IReadOnlyList<AIAgent> Agents { get; init; }
 
     internal required int MaxRounds { get; init; }

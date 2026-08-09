@@ -47,9 +47,7 @@ internal static class MagenticPhaseRunner
             switch (workflowEvent)
             {
                 case WorkflowWarningEvent warning:
-                    invalidSpeaker |= warning.Data?.ToString()?.Contains(
-                        "Invalid next speaker",
-                        StringComparison.Ordinal) == true;
+                    invalidSpeaker |= IsSpeakerSelectionWarning(warning);
                     break;
                 case RequestInfoEvent:
                     pendingReview = true;
@@ -124,5 +122,17 @@ internal static class MagenticPhaseRunner
             Succeeded: true,
             FinalText: finalText,
             FailureCode: null);
+    }
+
+    private static bool IsSpeakerSelectionWarning(
+        WorkflowWarningEvent warning)
+    {
+        string text = warning.Data?.ToString() ?? string.Empty;
+        return text.Contains(
+                "Invalid next speaker",
+                StringComparison.Ordinal) ||
+            text.Contains(
+                "Next speaker answer empty",
+                StringComparison.Ordinal);
     }
 }

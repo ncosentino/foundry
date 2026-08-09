@@ -7,6 +7,10 @@ internal static class ReferenceArtifactValidator
     internal const string SynthesisCorrectionCode =
         "correction_code=SYNTHESIS_ARTIFACT_INVALID";
 
+    internal static string CreateSynthesisCorrection(
+        string error) =>
+        $"{SynthesisCorrectionCode}; validation_error={error}";
+
     internal static bool TryValidateResearch(
         string? content,
         out string error) =>

@@ -12,6 +12,10 @@ internal sealed record ReferencePipelineOptions
 
     internal required ReferenceSynthesisExecutorKind SynthesisExecutorKind { get; init; }
 
+    internal required int SynthesisMaxArtifactAttempts { get; init; }
+
+    internal required int SynthesisMaxProviderCalls { get; init; }
+
     internal static ReferencePipelineOptions Default { get; } = new()
     {
         FailRequiredSpecialist = false,
@@ -19,5 +23,7 @@ internal sealed record ReferencePipelineOptions
         HoldSpecialistsUntilCancellation = false,
         HoldBackgroundWorkersUntilRelease = false,
         SynthesisExecutorKind = ReferenceSynthesisExecutorKind.Harness,
+        SynthesisMaxArtifactAttempts = 2,
+        SynthesisMaxProviderCalls = 24,
     };
 }

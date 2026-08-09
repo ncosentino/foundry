@@ -5,7 +5,8 @@ using Microsoft.Extensions.AI;
 namespace AutonomousPhasePipelineApp.Core;
 
 internal sealed class SynthesisChatClient(
-    string readManifestToolName) : IChatClient
+    string readManifestToolName,
+    ReferenceSynthesisBudget budget) : IChatClient
 {
     private const string ReadManifestCallId = "synthesis-read-manifest";
 
@@ -26,6 +27,7 @@ internal sealed class SynthesisChatClient(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        budget.ConsumeProviderCall("Harness synthesis");
         Interlocked.Increment(ref _callCount);
         ChatMessage[] messages = [.. chatMessages];
         string combinedText = string.Join(
@@ -71,7 +73,7 @@ internal sealed class SynthesisChatClient(
             new ChatResponse(
                 new ChatMessage(
                     ChatRole.Assistant,
-                    CreateArtifact(
+                    ReferenceSynthesisArtifacts.Create(
                         manifest,
                         includeRecommendation: corrected))));
     }
@@ -101,36 +103,4 @@ internal sealed class SynthesisChatClient(
                 "Synthesis received an empty artifact manifest.");
     }
 
-    private static string CreateArtifact(
-        ReferenceArtifactManifest manifest,
-        bool includeRecommendation)
-    {
-        string[] evidence =
-        [
-            manifest.Research.Id,
-            .. manifest.Branches
-                .Where(branch => branch.Outcome is
-                    ReferencePipelineOutcome.Completed or
-                    ReferencePipelineOutcome.Partial)
-                .Select(branch =>
-                    branch.Artifact?.Id ??
-                    throw new InvalidOperationException(
-                        $"Accepted branch '{branch.Phase}' has no artifact.")),
-        ];
-        var artifact = new Dictionary<string, object?>
-        {
-            ["summary"] = includeRecommendation
-                ? "Synthesis completed from accepted artifacts."
-                : "Initial synthesis is missing a required field.",
-            ["evidence"] = evidence,
-            ["gaps"] = manifest.Gaps,
-        };
-        if (includeRecommendation)
-        {
-            artifact["recommendation"] =
-                "Proceed with the synthetic release.";
-        }
-
-        return JsonSerializer.Serialize(artifact);
-    }
 }
