@@ -15,6 +15,9 @@ of the fixed-macro reference pipeline:
 The outer artifact manifest, synthesis boundary, checkpoint, and idempotent
 delivery contracts remain unchanged.
 
+The first hosted diagnostic result is recorded in
+[Autonomous Phase Evaluation 001 Results](autonomous-phase-001-results.md).
+
 ## Status and interpretation
 
 The pull-request run is a **diagnostic matrix**, not a powered statistical
