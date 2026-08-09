@@ -1,6 +1,6 @@
 ---
 title: "ADR-0015: Upstream-first checkpointed workflow runs"
-status: "Accepted"
+status: "Superseded"
 date: "2026-08-08"
 authors: ["Nick Cosentino"]
 tags: ["architecture", "decision", "agent-framework", "workflows", "checkpointing", "recovery"]
