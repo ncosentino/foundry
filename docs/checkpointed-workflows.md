@@ -9,6 +9,10 @@ agent workflows whose macro topology is fixed in code. The caller supplies the
 upstream `CheckpointManager`, observes upstream `CheckpointInfo` values, and
 retains the upstream `StreamingRun` handle needed for live restoration.
 
+The [Fixed-Macro Autonomous Phases](autonomous-phase-pipeline.md) reference
+shows checkpoint selection after an all-settled artifact manifest and before
+autonomous synthesis.
+
 This surface belongs to
 `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows`:
 
