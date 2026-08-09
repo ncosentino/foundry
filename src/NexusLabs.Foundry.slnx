@@ -4,6 +4,7 @@
     <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
     <Project Path="Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj" />
     <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp.Core/AutonomousPhasePipelineApp.Core.csproj" />
+    <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp.Evaluation.Tests/AutonomousPhasePipelineApp.Evaluation.Tests.csproj" />
     <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp.Evaluation/AutonomousPhasePipelineApp.Evaluation.csproj" />
     <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp.Tests/AutonomousPhasePipelineApp.Tests.csproj" />
     <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp/AutonomousPhasePipelineApp.csproj" />

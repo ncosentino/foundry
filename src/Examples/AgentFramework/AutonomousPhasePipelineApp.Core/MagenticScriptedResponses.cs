@@ -181,7 +181,7 @@ internal static class MagenticScriptedResponses
         return manifestId;
     }
 
-    private static string CreateLedger(
+    internal static string CreateLedger(
         bool isRequestSatisfied,
         bool isInLoop,
         bool isProgressBeingMade,

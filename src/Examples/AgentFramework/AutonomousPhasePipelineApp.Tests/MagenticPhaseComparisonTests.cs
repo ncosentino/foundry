@@ -234,7 +234,8 @@ public sealed class MagenticPhaseComparisonTests
                 out string error),
             error);
         Assert.True(
-            runtime.ManifestAnalystClient.CallCount > 0);
+            GetParticipant(
+                runtime.ManifestAnalystClient).CallCount > 0);
     }
 
     [Fact]
@@ -275,8 +276,12 @@ public sealed class MagenticPhaseComparisonTests
             warning => warning.Contains(
                 "Invalid next speaker",
                 StringComparison.Ordinal));
-        Assert.Equal(0, runtime.ManifestAnalystClient.CallCount);
-        Assert.Equal(0, runtime.ContractCriticClient.CallCount);
+        Assert.Equal(
+            0,
+            GetParticipant(runtime.ManifestAnalystClient).CallCount);
+        Assert.Equal(
+            0,
+            GetParticipant(runtime.ContractCriticClient).CallCount);
     }
 
     [Fact]
@@ -518,6 +523,7 @@ public sealed class MagenticPhaseComparisonTests
             new ReferenceArtifactStore(),
             new IdempotentDeliverySink());
 
+<<<<<<< HEAD
     private static void AssertAcceptedSynthesis(
         ReferencePipelineRuntime runtime,
         ReferencePipelineResult result)
@@ -549,6 +555,11 @@ public sealed class MagenticPhaseComparisonTests
             .Any(text => text.Contains(
                 expected,
                 StringComparison.Ordinal));
+=======
+    private static MagenticParticipantChatClient GetParticipant(
+        IChatClient chatClient) =>
+        Assert.IsType<MagenticParticipantChatClient>(chatClient);
+>>>>>>> 3cfcf9dc (feat(evaluation): add hosted diagnostic matrix)
 
     private static async Task<ReferencePipelineResult> RunOuterAsync(
         ReferencePipelineRuntime runtime,

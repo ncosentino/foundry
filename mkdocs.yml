@@ -71,6 +71,7 @@ nav:
       - Evaluation: evaluation.md
       - Experiment Runner: experiment-runner.md
       - Langfuse: langfuse.md
+      - Autonomous Phase Evaluation 001: evaluations/autonomous-phase-001.md
   - Providers:
       - GitHub Copilot: copilot.md
   - Testing:
