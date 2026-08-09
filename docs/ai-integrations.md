@@ -91,6 +91,8 @@ Dynamic skills, scripts, reflection fallbacks, and other provider features can s
 | Iterative loop | Workspace files should drive fresh per-iteration prompts | Foundry outer loop |
 
 See [Microsoft Agent Framework Harness](maf-harness.md) for complete-bundle configuration, effective defaults, progress, AOT, and current limitations.
+For the recommended composition of known macro workflows with open-ended
+phases, see [Fixed-Macro Autonomous Phases](autonomous-phase-pipeline.md).
 
 The packages are independent choices. Installing the core runtime alone does
 not provide `UsingAgentFramework`, workflow middleware, scenario runners, or

@@ -237,8 +237,21 @@ checkpoint restore, cross-run artifact isolation, and delivery replay.
 
 ## Current scope
 
-The reference deliberately keeps its contracts and stores example-local. It
-does not introduce a generic Foundry phase, artifact, manifest, or delivery API.
+The supported recommendation is the fixed macro pattern itself:
+
+- use plain Harness as the default autonomous phase candidate;
+- use phase-local loop evaluation for bounded correction;
+- keep background delegation explicit and independently bounded;
+- validate and persist artifacts at deterministic macro boundaries;
+- keep all-settled branch envelopes and manifests application-owned;
+- checkpoint after accepted artifacts and before replayable downstream work;
+  and
+- keep business delivery deterministic and idempotent.
+
+The reference deliberately keeps its contracts and stores example-local.
+Foundry does not introduce a generic phase, artifact, manifest, all-settled, or
+delivery API. The hosted comparison did not provide evidence for extraction;
+see [Autonomous Phase Evaluation 001 Results](evaluations/autonomous-phase-001-results.md).
 
 The in-memory artifact store, checkpoint manager, and delivery ledger prove the
 same-process architecture. A process-restart deployment must persist all three

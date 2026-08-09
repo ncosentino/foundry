@@ -216,9 +216,11 @@ Magentic convenience API yet:
 - the existing artifact boundary corrects Magentic's untyped final output; and
 - a wrapper would mostly mirror upstream types while hiding important limits.
 
-This is not a general endorsement. Hosted evaluation must compare reliability,
-latency, token usage, and recovery quality before choosing Magentic over the
-plain Harness synthesis phase.
+This is not a general endorsement. The first hosted diagnostic found Magentic
+directionally more expensive and less stable than plain Harness in the
+reference workload, but the comparison was insufficiently powered. Magentic
+therefore remains optional, phase-local, and experimental; see
+[Autonomous Phase Evaluation 001 Results](evaluations/autonomous-phase-001-results.md).
 
 ## Run both arms
 

@@ -23,6 +23,11 @@ The complete bundle is optional. Referencing
 For an end-to-end fixed macro graph whose individual Harness phases retain
 autonomy, see [Fixed-Macro Autonomous Phases](autonomous-phase-pipeline.md).
 
+For known macro workflows, start with one plain Harness agent per autonomous
+phase. Add loop evaluation when the phase must correct its artifact. Add
+background delegation only when independently bounded child concurrency has a
+demonstrated benefit; do not make correctness depend on an exact child count.
+
 ## Install the optional bundle
 
 ```powershell

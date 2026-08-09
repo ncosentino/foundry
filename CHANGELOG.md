@@ -78,6 +78,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   provenance and recovery evidence, separates deterministic checks from
   uncalibrated semantic quality, and predeclares no supported recommendation
   from the one-trial pull-request run.
+- Final fixed-macro/autonomous-phase composition guidance. Plain Harness is the
+  default phase candidate, loop evaluation remains phase-local correction,
+  background delegation and Magentic remain explicit optional mechanisms, and
+  artifact, all-settled, delivery, and durable persistence contracts stay
+  application-owned rather than becoming new Foundry public APIs. See
+  ADR-0016.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry

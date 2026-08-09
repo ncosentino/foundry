@@ -136,6 +136,7 @@ nav:
       - ADR-0013 Phase-Local Harness Loop Evaluation: adr/adr-0013-phase-local-harness-loop-evaluation.md
       - ADR-0014 Phase-Local Harness Background Delegation: adr/adr-0014-phase-local-harness-background-delegation.md
       - ADR-0015 Upstream-First Checkpointed Workflow Runs: adr/adr-0015-upstream-first-checkpointed-workflow-runs.md
+      - ADR-0016 Fixed-Macro Autonomous-Phase Composition: adr/adr-0016-fixed-macro-autonomous-phase-composition.md
 
 plugins:
   - search
