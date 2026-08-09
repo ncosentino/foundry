@@ -15,9 +15,13 @@ internal sealed class HostedEvaluationTelemetry
     private long _outputTokens;
     private int _providerFailures;
     private int _toolCalls;
+    private string? _lastTerminalText;
     private string? _observedModel;
 
     internal TaskCompletionSource FirstCallStarted { get; } =
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    internal TaskCompletionSource FaultActivated { get; } =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal void RecordCallStarted(
@@ -73,6 +77,18 @@ internal sealed class HostedEvaluationTelemetry
                 _observedModel ??= response.ModelId;
             }
         }
+
+        if (!response.Messages
+                .SelectMany(message => message.Contents)
+                .OfType<FunctionCallContent>()
+                .Any() &&
+            !string.IsNullOrWhiteSpace(response.Text))
+        {
+            lock (_sync)
+            {
+                _lastTerminalText = response.Text;
+            }
+        }
     }
 
     internal void RecordFailure(bool isChild)
@@ -84,14 +100,19 @@ internal sealed class HostedEvaluationTelemetry
         }
     }
 
+    internal void RecordFaultActivated() =>
+        FaultActivated.TrySetResult();
+
     internal HostedEvaluationTelemetrySnapshot Snapshot()
     {
         int childCount;
         string? observedModel;
+        string? lastTerminalText;
         lock (_sync)
         {
             childCount = _childAgents.Count;
             observedModel = _observedModel;
+            lastTerminalText = _lastTerminalText;
         }
 
         return new HostedEvaluationTelemetrySnapshot(
@@ -106,6 +127,7 @@ internal sealed class HostedEvaluationTelemetry
             ChildSessionCount: childCount,
             ChildFailureCount: Volatile.Read(ref _childProviderFailures),
             ProviderFailures: Volatile.Read(ref _providerFailures),
-            ObservedModel: observedModel);
+            ObservedModel: observedModel,
+            LastTerminalText: lastTerminalText);
     }
 }

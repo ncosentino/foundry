@@ -6,7 +6,8 @@ namespace AutonomousPhasePipelineApp.Evaluation;
 
 internal sealed class HostedFaultInjectingChatClient(
     IChatClient innerClient,
-    HostedFaultMode mode) : DelegatingChatClient(innerClient)
+    HostedFaultMode mode,
+    HostedEvaluationTelemetry telemetry) : DelegatingChatClient(innerClient)
 {
     private int _callCount;
     private int _ledgerCount;
@@ -22,6 +23,7 @@ internal sealed class HostedFaultInjectingChatClient(
         if (mode == HostedFaultMode.DelayFirstCallUntilCanceled &&
             call == 1)
         {
+            telemetry.RecordFaultActivated();
             await Task.Delay(
                 Timeout.InfiniteTimeSpan,
                 cancellationToken);

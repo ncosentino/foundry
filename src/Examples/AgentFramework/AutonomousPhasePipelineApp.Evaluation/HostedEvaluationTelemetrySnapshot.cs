@@ -9,4 +9,5 @@ internal sealed record HostedEvaluationTelemetrySnapshot(
     int ChildSessionCount,
     int ChildFailureCount,
     int ProviderFailures,
-    string? ObservedModel);
+    string? ObservedModel,
+    string? LastTerminalText);

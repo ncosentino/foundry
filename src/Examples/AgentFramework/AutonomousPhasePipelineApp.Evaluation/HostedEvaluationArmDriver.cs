@@ -250,7 +250,9 @@ internal static class HostedEvaluationArmDriver
             TraceId: activity?.TraceId.ToString() ?? string.Empty,
             ArtifactDigest: result?.Synthesis.Artifact?.Digest,
             FailureCode: failureCode ?? result?.Synthesis.Error,
-            OutputText: scores.OutputText,
+            OutputText:
+                scores.OutputText
+                ?? telemetrySnapshot.LastTerminalText,
             QualityEvidenceStatus: "DETERMINISTIC_ONLY",
             Provenance: CreateProvenance(
                 protocol,
@@ -328,7 +330,7 @@ internal static class HostedEvaluationArmDriver
         Task<HostedEvaluationRunObservation> observation = ObserveAsync(
             run,
             cancellationToken);
-        await telemetry.FirstCallStarted.Task.WaitAsync(
+        await telemetry.FaultActivated.Task.WaitAsync(
             TimeSpan.FromMinutes(2),
             cancellationToken);
         Task cancellation = run.CancelRunAsync().AsTask();
