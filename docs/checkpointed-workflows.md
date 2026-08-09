@@ -35,14 +35,19 @@ await using StreamingRun run =
 
 The returned object is the raw upstream `StreamingRun`. The caller owns:
 
-- consuming `WatchStreamAsync`;
+- consuming `WatchStreamAsync` through one active event-loop owner;
 - selecting and persisting checkpoints;
 - calling `CancelRunAsync` when execution should stop;
-- restoring or resuming;
+- restoring the live run;
 - disposing the run; and
 - the lifetime and backing store of the `CheckpointManager`.
 
 Foundry does not wrap checkpoint bytes or define another storage interface.
+
+`WatchStreamAsync` permits only one active enumerator. A second concurrent
+consumer throws `InvalidOperationException`. Hosts that need multiple event
+consumers must appoint one event-loop owner and multiplex the observed events
+to diagnostics, progress, checkpoint selection, and other subscribers.
 
 ## Select an accepted artifact boundary
 
@@ -124,33 +129,28 @@ Diagnostics middleware records the provider calls that actually execute after
 the restore. Existing terminal helpers such as `RunWithDiagnosticsAsync` do not
 expose a restorable handle and remain unchanged.
 
-## Resume after failure or process restart
+## Fresh-workflow resume is not exposed
 
-A failed or disposed run cannot be used as the live restore handle. Rebuild a
-structurally compatible workflow and resume through the same checkpoint manager:
+MAF 1.17 includes `InProcessExecution.ResumeStreamingAsync`, but Foundry does
+not expose a convenience wrapper for it. Two upstream behaviors make a
+fresh-workflow recovery contract unsafe:
 
-```csharp
-Workflow recoveredWorkflow = BuildWorkflowWithTheSameStableIds();
+- resume takes ownership of the supplied `Workflow` before checkpoint
+  compatibility is validated, and a failed resume returns no run handle that
+  can release that ownership; and
+- checkpointed state for fan-in and fan-out edges is keyed by an `EdgeId`
+  assigned from builder insertion order, while compatibility validation
+  compares edge structure without comparing those IDs.
 
-await using StreamingRun recoveredRun =
-    await recoveredWorkflow.ResumeCheckpointedAgentRunAsync(
-        acceptedArtifactCheckpoint,
-        checkpointManager,
-        cancellationToken);
-```
+An equivalent workflow rebuilt with a different edge insertion order can
+therefore pass compatibility validation while mapping stateful edge data to a
+different edge. A durable checkpoint store does not resolve either problem.
 
-The rebuilt workflow must retain the same topology and stable executor IDs.
-For agents created from `IChatClient`, set `ChatClientAgentOptions.Id`
-explicitly. Random executor IDs make a fresh workflow incompatible with the
-stored checkpoint and MAF throws `InvalidDataException`.
-
-Successful same-handle restoration is not proof that a newly constructed
-workflow will skip the same work. Exercise the fresh-workflow resume path when
-process recovery matters.
-
-Process restart also requires a durable caller-owned checkpoint store.
-`CheckpointManager.CreateInMemory()` supports recovery only while that in-memory
-store remains available.
+Keep the original `StreamingRun` alive when same-process replay is required.
+If that handle becomes unusable or is disposed, or if the process restarts,
+recover from application-owned accepted artifacts and idempotency records.
+Foundry will not claim fresh-process workflow recovery until the upstream
+ownership and edge-identity contracts are safe.
 
 ## Delivery and side-effect semantics
 
@@ -173,8 +173,8 @@ consumer. In MAF 1.17, canceling it ends observation normally and leaves the
 workflow running. A later watcher can continue observing the run.
 
 Call `StreamingRun.CancelRunAsync` to cancel execution. A canceled run should
-not be treated as a live restore handle; resume a compatible fresh workflow from
-a previously persisted checkpoint instead.
+not be treated as a live restore handle. Recover from application-owned
+accepted artifacts rather than assuming the MAF checkpoint can open a new run.
 
 ## NativeAOT
 
@@ -190,8 +190,8 @@ even though these Foundry extensions are compatible.
 ## Runnable example
 
 `src/Examples/AgentFramework/CheckpointWorkflowApp` runs offline. Its downstream
-phase fails once, a fresh compatible workflow resumes from the accepted artifact
-boundary, the accepted producer phase is not called again, and one recovered
+phase completes once, the same live run restores the accepted artifact
+checkpoint, the accepted producer phase is not called again, and one restored
 terminal output is observed.
 
 ```bash

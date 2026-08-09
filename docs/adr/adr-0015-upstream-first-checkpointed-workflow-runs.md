@@ -5,7 +5,7 @@ date: "2026-08-08"
 authors: ["Nick Cosentino"]
 tags: ["architecture", "decision", "agent-framework", "workflows", "checkpointing", "recovery"]
 supersedes: ""
-superseded_by: ""
+superseded_by: "adr-0016-same-run-checkpoint-restoration.md"
 ---
 
 # ADR-0015: Upstream-first checkpointed workflow runs

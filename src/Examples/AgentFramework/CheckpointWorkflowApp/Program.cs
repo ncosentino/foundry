@@ -10,101 +10,94 @@ var producerClient = new CheckpointScriptedChatClient(
     ["validated research artifact"]);
 var synthesisClient = new CheckpointScriptedChatClient(
     [
-        new InvalidOperationException("simulated downstream failure"),
+        "initial synthesis",
+        "restored synthesis",
     ]);
 CheckpointManager checkpointManager = CheckpointManager.CreateInMemory();
 CheckpointInfo? acceptedArtifactCheckpoint = null;
-bool failureObserved = false;
 bool acceptedArtifactBoundaryCompleted = false;
+var initialOutputs = new List<string>();
 
-await using (StreamingRun initialRun = await BuildWorkflow(
+await using StreamingRun run = await BuildWorkflow(
     producerClient,
     synthesisClient).StartCheckpointedAgentRunAsync(
         "Produce and synthesize the artifact.",
         checkpointManager,
         "checkpoint-workflow-example",
-        CancellationToken.None))
+        CancellationToken.None);
+await foreach (WorkflowEvent workflowEvent in run.WatchStreamAsync())
 {
-    await foreach (WorkflowEvent workflowEvent in initialRun.WatchStreamAsync())
+    if (workflowEvent is ExecutorCompletedEvent
+        {
+            ExecutorId: "accepted-artifact-boundary",
+        })
     {
-        if (workflowEvent is ExecutorCompletedEvent
-            {
-                ExecutorId: "accepted-artifact-boundary",
-            })
-        {
-            acceptedArtifactBoundaryCompleted = true;
-        }
+        acceptedArtifactBoundaryCompleted = true;
+    }
 
-        if (acceptedArtifactBoundaryCompleted &&
-            workflowEvent is SuperStepCompletedEvent
-            {
-                CompletionInfo.Checkpoint: { } checkpoint,
-            })
+    if (acceptedArtifactBoundaryCompleted &&
+        workflowEvent is SuperStepCompletedEvent
         {
-            acceptedArtifactCheckpoint ??= checkpoint;
-            acceptedArtifactBoundaryCompleted = false;
-        }
+            CompletionInfo.Checkpoint: { } checkpoint,
+        })
+    {
+        acceptedArtifactCheckpoint ??= checkpoint;
+        acceptedArtifactBoundaryCompleted = false;
+    }
 
-        if (workflowEvent is WorkflowErrorEvent or ExecutorFailedEvent)
-        {
-            failureObserved = true;
-        }
+    if (workflowEvent is AgentResponseUpdateEvent update)
+    {
+        initialOutputs.Add(update.Update.ToString());
+    }
+
+    if (workflowEvent is WorkflowErrorEvent error)
+    {
+        Console.WriteLine($"CheckpointWorkflowApp:initial-error:{error.Exception?.Message}");
+        return 1;
     }
 }
 
-if (acceptedArtifactCheckpoint is null || !failureObserved)
+if (acceptedArtifactCheckpoint is null ||
+    producerClient.CallCount != 1 ||
+    synthesisClient.CallCount != 1 ||
+    initialOutputs.Count(output => output == "initial synthesis") != 1)
 {
-    Console.WriteLine("CheckpointWorkflowApp:initial-run-did-not-reach-recovery-point");
+    Console.WriteLine("CheckpointWorkflowApp:initial-run-invalid");
     return 1;
 }
 
-var recoveredProducerClient = new CheckpointScriptedChatClient(
-    [new InvalidOperationException("accepted producer phase replayed")]);
-var recoveredSynthesisClient = new CheckpointScriptedChatClient(
-    ["recovered synthesis"]);
-var recoveredOutputs = new List<string>();
-await using (StreamingRun recoveredRun = await BuildWorkflow(
-    recoveredProducerClient,
-    recoveredSynthesisClient).ResumeCheckpointedAgentRunAsync(
-        acceptedArtifactCheckpoint,
-        checkpointManager,
-        CancellationToken.None))
+await run.RestoreCheckpointAsync(
+    acceptedArtifactCheckpoint,
+    CancellationToken.None);
+var restoredOutputs = new List<string>();
+await foreach (WorkflowEvent workflowEvent in run.WatchStreamAsync())
 {
-    await foreach (WorkflowEvent workflowEvent in recoveredRun.WatchStreamAsync())
+    if (workflowEvent is AgentResponseUpdateEvent update)
     {
-        if (workflowEvent is AgentResponseUpdateEvent update)
-        {
-            recoveredOutputs.Add(update.Update.ToString());
-        }
+        restoredOutputs.Add(update.Update.ToString());
+    }
 
-        if (workflowEvent is WorkflowErrorEvent error)
-        {
-            Console.WriteLine($"CheckpointWorkflowApp:resume-error:{error.Exception?.Message}");
-            return 1;
-        }
+    if (workflowEvent is WorkflowErrorEvent error)
+    {
+        Console.WriteLine($"CheckpointWorkflowApp:restore-error:{error.Exception?.Message}");
+        return 1;
     }
 }
 
-int recoveredOutputCount = recoveredOutputs.Count(
-    output => output == "recovered synthesis");
 if (producerClient.CallCount != 1 ||
-    synthesisClient.CallCount != 1 ||
-    recoveredProducerClient.CallCount != 0 ||
-    recoveredSynthesisClient.CallCount != 1 ||
-    recoveredOutputCount != 1)
+    synthesisClient.CallCount != 2 ||
+    restoredOutputs.Count(output => output == "restored synthesis") != 1)
 {
     Console.WriteLine(
         "CheckpointWorkflowApp:unexpected-replay:" +
-        $"initial-producer={producerClient.CallCount}:" +
-        $"initial-synthesis={synthesisClient.CallCount}:" +
-        $"recovered-producer={recoveredProducerClient.CallCount}:" +
-        $"recovered-synthesis={recoveredSynthesisClient.CallCount}:" +
-        $"outputs={recoveredOutputCount}");
+        $"producer={producerClient.CallCount}:" +
+        $"synthesis={synthesisClient.CallCount}:" +
+        $"outputs={restoredOutputs.Count}");
     return 1;
 }
 
 Console.WriteLine(
-    $"CheckpointWorkflowApp:resumed:{acceptedArtifactCheckpoint.CheckpointId}");
+    $"CheckpointWorkflowApp:restored:{acceptedArtifactCheckpoint.CheckpointId}");
 Console.WriteLine("CheckpointWorkflowApp:completed");
 return 0;
 

@@ -147,91 +147,6 @@ public sealed class CheckpointedWorkflowRunExtensionsTests
     }
 
     [Fact]
-    public async Task ResumeCheckpointedAgentRun_AfterFailureUsesFreshWorkflowAndAcceptedCheckpoint()
-    {
-        var releaseSecondPhase = new TaskCompletionSource(
-            TaskCreationOptions.RunContinuationsAsynchronously);
-        var firstClient = new CheckpointScriptedChatClient("phase-one-result");
-        var secondClient = new CheckpointScriptedChatClient(
-            [
-                new InvalidOperationException("phase two failed"),
-            ],
-            async cancellationToken =>
-                await releaseSecondPhase.Task.WaitAsync(cancellationToken));
-        var workflow = BuildCheckpointBoundaryWorkflow(firstClient, secondClient);
-        var checkpointManager = CheckpointManager.CreateInMemory();
-        CheckpointInfo? acceptedPhaseCheckpoint = null;
-        bool failureObserved = false;
-        bool acceptedBoundaryCompleted = false;
-
-        await using (var initialRun = await workflow.StartCheckpointedAgentRunAsync(
-            "start",
-            checkpointManager,
-            sessionId: null,
-            TestContext.Current.CancellationToken))
-        {
-            await foreach (var workflowEvent in initialRun.WatchStreamAsync(
-                TestContext.Current.CancellationToken))
-            {
-                if (workflowEvent is ExecutorCompletedEvent
-                    {
-                        ExecutorId: "accepted-artifact-boundary",
-                    })
-                {
-                    acceptedBoundaryCompleted = true;
-                }
-
-                if (acceptedBoundaryCompleted &&
-                    workflowEvent is SuperStepCompletedEvent superStep &&
-                    acceptedPhaseCheckpoint is null &&
-                    superStep.CompletionInfo?.Checkpoint is { } checkpoint)
-                {
-                    acceptedPhaseCheckpoint = checkpoint;
-                    acceptedBoundaryCompleted = false;
-                    releaseSecondPhase.TrySetResult();
-                }
-
-                if (workflowEvent is WorkflowErrorEvent or ExecutorFailedEvent)
-                {
-                    failureObserved = true;
-                }
-            }
-        }
-
-        Assert.NotNull(acceptedPhaseCheckpoint);
-        Assert.True(failureObserved);
-        Assert.Equal(1, firstClient.CallCount);
-        Assert.Equal(1, secondClient.CallCount);
-
-        var resumedFirstClient = new CheckpointScriptedChatClient(
-            new InvalidOperationException("accepted phase replayed"));
-        var resumedSecondClient = new CheckpointScriptedChatClient(
-            "phase-two-resumed");
-        var resumedWorkflow = BuildCheckpointBoundaryWorkflow(
-            resumedFirstClient,
-            resumedSecondClient);
-        await using var resumedRun = await resumedWorkflow.ResumeCheckpointedAgentRunAsync(
-            acceptedPhaseCheckpoint,
-            checkpointManager,
-            TestContext.Current.CancellationToken);
-        int resumedOutputs = 0;
-        await foreach (var workflowEvent in resumedRun.WatchStreamAsync(
-            TestContext.Current.CancellationToken))
-        {
-            if (workflowEvent is WorkflowOutputEvent)
-            {
-                resumedOutputs++;
-            }
-        }
-
-        Assert.Equal(1, firstClient.CallCount);
-        Assert.Equal(1, secondClient.CallCount);
-        Assert.Equal(0, resumedFirstClient.CallCount);
-        Assert.Equal(1, resumedSecondClient.CallCount);
-        Assert.True(resumedOutputs > 0);
-    }
-
-    [Fact]
     public async Task StartCheckpointedAgentRun_ConcurrentFanOutCreatesCheckpoint()
     {
         int entered = 0;
@@ -305,7 +220,6 @@ public sealed class CheckpointedWorkflowRunExtensionsTests
                     new CheckpointScriptedChatClient("unused")),
             ]);
         CheckpointManager checkpointManager = CheckpointManager.CreateInMemory();
-        var checkpoint = new CheckpointInfo("session", "checkpoint");
 
         await Assert.ThrowsAsync<ArgumentNullException>(
             () => ((Workflow)null!).StartCheckpointedAgentRunAsync(
@@ -330,55 +244,6 @@ public sealed class CheckpointedWorkflowRunExtensionsTests
                 "start",
                 null!,
                 sessionId: null,
-                TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ArgumentNullException>(
-            () => ((Workflow)null!).ResumeCheckpointedAgentRunAsync(
-                checkpoint,
-                checkpointManager,
-                TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ArgumentNullException>(
-            () => workflow.ResumeCheckpointedAgentRunAsync(
-                null!,
-                checkpointManager,
-                TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ArgumentNullException>(
-            () => workflow.ResumeCheckpointedAgentRunAsync(
-                checkpoint,
-                null!,
-                TestContext.Current.CancellationToken));
-    }
-
-    [Fact]
-    public async Task ResumeCheckpointedAgentRun_IncompatibleWorkflow_Throws()
-    {
-        Workflow workflow = AgentWorkflowBuilder.BuildSequential(
-            "compatible-workflow",
-            [
-                CreateAgent(
-                    "compatible-agent",
-                    new CheckpointScriptedChatClient("complete")),
-            ]);
-        CheckpointManager checkpointManager = CheckpointManager.CreateInMemory();
-
-        await using var run = await workflow.StartCheckpointedAgentRunAsync(
-            "start",
-            checkpointManager,
-            sessionId: null,
-            TestContext.Current.CancellationToken);
-        var observation = await CollectCheckpointsAsync(run);
-        CheckpointInfo checkpoint = observation.Checkpoints[0];
-        Workflow incompatibleWorkflow = AgentWorkflowBuilder.BuildSequential(
-            "incompatible-workflow",
-            [
-                CreateAgent(
-                    "different-agent",
-                    new CheckpointScriptedChatClient("unused")),
-            ]);
-
-        await Assert.ThrowsAsync<InvalidDataException>(
-            () => incompatibleWorkflow.ResumeCheckpointedAgentRunAsync(
-                checkpoint,
-                checkpointManager,
                 TestContext.Current.CancellationToken));
     }
 
@@ -419,6 +284,50 @@ public sealed class CheckpointedWorkflowRunExtensionsTests
 
         Assert.Equal(1, client.CallCount);
         Assert.NotEmpty(observation.Checkpoints);
+    }
+
+    [Fact]
+    public async Task WatchStreamAsync_SecondConcurrentObserver_Throws()
+    {
+        var entered = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var client = new CheckpointScriptedChatClient(
+            ["complete"],
+            async cancellationToken =>
+            {
+                entered.TrySetResult();
+                await release.Task.WaitAsync(cancellationToken);
+            });
+        Workflow workflow = AgentWorkflowBuilder.BuildSequential(
+            [
+                CreateAgent("single-observer", client),
+            ]);
+        CheckpointManager checkpointManager = CheckpointManager.CreateInMemory();
+
+        await using var run = await workflow.StartCheckpointedAgentRunAsync(
+            "start",
+            checkpointManager,
+            sessionId: null,
+            TestContext.Current.CancellationToken);
+        Task firstObserver = ConsumeEventsAsync(
+            run,
+            TestContext.Current.CancellationToken);
+        await entered.Task.WaitAsync(TestContext.Current.CancellationToken);
+
+        try
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => ConsumeEventsAsync(
+                    run,
+                    TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            release.TrySetResult();
+            await firstObserver.WaitAsync(TestContext.Current.CancellationToken);
+        }
     }
 
     private static AIAgent CreateAgent(

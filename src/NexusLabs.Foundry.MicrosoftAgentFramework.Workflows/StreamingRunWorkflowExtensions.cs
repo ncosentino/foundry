@@ -96,41 +96,6 @@ public static class StreamingRunWorkflowExtensions
     }
 
     /// <summary>
-    /// Creates a new streaming run resumed from an upstream workflow checkpoint.
-    /// </summary>
-    /// <param name="workflow">
-    /// A structurally compatible workflow definition with the same stable executor identifiers
-    /// as the workflow that produced the checkpoint.
-    /// </param>
-    /// <param name="checkpoint">The checkpoint to restore.</param>
-    /// <param name="checkpointManager">The manager and backing store that own the checkpoint.</param>
-    /// <param name="cancellationToken">Cancellation token for resuming the run.</param>
-    /// <returns>
-    /// A raw upstream <see cref="StreamingRun"/> resumed from <paramref name="checkpoint"/>.
-    /// No new initial message or <see cref="TurnToken"/> is sent.
-    /// </returns>
-    /// <exception cref="InvalidDataException">
-    /// The checkpoint does not belong to a structurally compatible workflow.
-    /// </exception>
-    public static async Task<StreamingRun> ResumeCheckpointedAgentRunAsync(
-        this Workflow workflow,
-        CheckpointInfo checkpoint,
-        CheckpointManager checkpointManager,
-        CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(workflow);
-        ArgumentNullException.ThrowIfNull(checkpoint);
-        ArgumentNullException.ThrowIfNull(checkpointManager);
-        cancellationToken.ThrowIfCancellationRequested();
-
-        return await InProcessExecution.ResumeStreamingAsync(
-            workflow,
-            checkpoint,
-            checkpointManager,
-            cancellationToken);
-    }
-
-    /// <summary>
     /// Creates a streaming execution of the workflow, sends the message, and collects all agent responses.
     /// </summary>
     /// <param name="workflow">The workflow to execute.</param>
