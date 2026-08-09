@@ -72,6 +72,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   replan, progress-ledger, review, warning, and checkpoint behavior, preserves
   the existing synthesis artifact boundary, and introduces no Foundry Magentic
   wrapper or general endorsement before hosted evaluation.
+- Hosted autonomous-phase diagnostic protocol and fail-closed Copilot provider
+  probe. The advisory matrix runs nine scenarios across plain Harness,
+  delegated Harness, and phase-local Magentic arms, publishes incremental
+  provenance and recovery evidence, separates deterministic checks from
+  uncalibrated semantic quality, and predeclares no supported recommendation
+  from the one-trial pull-request run.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry

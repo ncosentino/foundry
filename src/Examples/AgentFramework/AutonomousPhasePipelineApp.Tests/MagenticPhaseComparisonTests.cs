@@ -230,7 +230,8 @@ public sealed class MagenticPhaseComparisonTests
                 completed.Output[^1].Text,
                 out _));
         Assert.True(
-            recoveredRuntime.ManifestAnalystClient.CallCount > 0);
+            GetParticipant(
+                recoveredRuntime.ManifestAnalystClient).CallCount > 0);
     }
 
     [Fact]
@@ -259,8 +260,12 @@ public sealed class MagenticPhaseComparisonTests
             warning => warning.Contains(
                 "Invalid next speaker",
                 StringComparison.Ordinal));
-        Assert.Equal(0, runtime.ManifestAnalystClient.CallCount);
-        Assert.Equal(0, runtime.ContractCriticClient.CallCount);
+        Assert.Equal(
+            0,
+            GetParticipant(runtime.ManifestAnalystClient).CallCount);
+        Assert.Equal(
+            0,
+            GetParticipant(runtime.ContractCriticClient).CallCount);
     }
 
     [Fact]
@@ -357,6 +362,10 @@ public sealed class MagenticPhaseComparisonTests
             },
             new ReferenceArtifactStore(),
             new IdempotentDeliverySink());
+
+    private static MagenticParticipantChatClient GetParticipant(
+        IChatClient chatClient) =>
+        Assert.IsType<MagenticParticipantChatClient>(chatClient);
 
     private static async Task<ReferencePipelineResult> RunOuterAsync(
         ReferencePipelineRuntime runtime,

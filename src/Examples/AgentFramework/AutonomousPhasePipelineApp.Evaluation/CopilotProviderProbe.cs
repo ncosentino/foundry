@@ -27,10 +27,10 @@ internal static class CopilotProviderProbe
                 Timeout = TimeSpan.FromMinutes(3),
             };
             using var chatClient = new CopilotChatClient(
+                new GitHubActionsCopilotTokenProvider(),
                 new CopilotChatClientOptions
                 {
                     DefaultModel = model,
-                    TokenSource = CopilotTokenSource.EnvironmentVariable,
                     MaxRetries = 0,
                 },
                 httpClient);

@@ -134,7 +134,7 @@ internal static class MagenticScriptedResponses
             $"Participant={participantName}\nmanifest_id={manifestId}\nReview the accepted artifact manifest.";
     }
 
-    private static string CreateLedger(
+    internal static string CreateLedger(
         bool isRequestSatisfied,
         bool isInLoop,
         bool isProgressBeingMade,
