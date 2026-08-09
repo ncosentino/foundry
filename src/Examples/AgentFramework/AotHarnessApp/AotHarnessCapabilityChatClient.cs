@@ -47,16 +47,13 @@ internal sealed class AotHarnessCapabilityChatClient(
                     "background_agents_wait_for_first_completion",
                     new Dictionary<string, object?>
                     {
-                        ["taskIds"] = new object?[] { BackgroundTaskId },
+                        ["taskIds"] = CreateTaskIdArray(),
                     },
                     options),
-                4 => CreateFunctionCall(
+                4 => CreateFunctionCallAfterCompletedWait(
+                    chatMessages,
+                    "aot-capability-background-wait",
                     "aot-capability-background-result",
-                    "background_agents_get_task_results",
-                    new Dictionary<string, object?>
-                    {
-                        ["taskId"] = BackgroundTaskId,
-                    },
                     options),
                 5 => CreateFunctionCall(
                     "aot-capability-background-continue",
@@ -72,16 +69,13 @@ internal sealed class AotHarnessCapabilityChatClient(
                     "background_agents_wait_for_first_completion",
                     new Dictionary<string, object?>
                     {
-                        ["taskIds"] = new object?[] { BackgroundTaskId },
+                        ["taskIds"] = CreateTaskIdArray(),
                     },
                     options),
-                7 => CreateFunctionCall(
+                7 => CreateFunctionCallAfterCompletedWait(
+                    chatMessages,
+                    "aot-capability-background-wait-after-continue",
                     "aot-capability-background-result-after-continue",
-                    "background_agents_get_task_results",
-                    new Dictionary<string, object?>
-                    {
-                        ["taskId"] = BackgroundTaskId,
-                    },
                     options),
                 _ => CreateFinalResponse(chatMessages),
             });
@@ -128,24 +122,9 @@ internal sealed class AotHarnessCapabilityChatClient(
     private static ChatResponse CreateFinalResponse(
         IEnumerable<ChatMessage> chatMessages)
     {
-        var result = chatMessages
-            .SelectMany(message => message.Contents)
-            .OfType<FunctionResultContent>()
-            .SingleOrDefault(content =>
-                string.Equals(
-                    content.CallId,
-                    "aot-capability-background-result-after-continue",
-                    StringComparison.Ordinal));
-        string? resultText = result?.Result switch
-        {
-            string text => text,
-            JsonElement
-            {
-                ValueKind: JsonValueKind.String,
-            } json => json.GetString(),
-            null => null,
-            _ => result.Result.ToString(),
-        };
+        string? resultText = GetFunctionResultText(
+            chatMessages,
+            "aot-capability-background-result-after-continue");
         if (!string.Equals(resultText, "background-complete", StringComparison.Ordinal))
         {
             throw new InvalidOperationException(
@@ -156,5 +135,63 @@ internal sealed class AotHarnessCapabilityChatClient(
             new ChatMessage(
                 ChatRole.Assistant,
                 $"harness-result:{resultText}"));
+    }
+
+    private static ChatResponse CreateFunctionCallAfterCompletedWait(
+        IEnumerable<ChatMessage> chatMessages,
+        string waitCallId,
+        string resultCallId,
+        ChatOptions? options)
+    {
+        string? waitResult = GetFunctionResultText(
+            chatMessages,
+            waitCallId);
+        if (waitResult?.Contains(
+            $"Task {BackgroundTaskId} finished with status: Completed",
+            StringComparison.Ordinal) != true)
+        {
+            throw new InvalidOperationException(
+                $"The background wait result was '{waitResult ?? "missing"}'.");
+        }
+
+        return CreateFunctionCall(
+            resultCallId,
+            "background_agents_get_task_results",
+            new Dictionary<string, object?>
+            {
+                ["taskId"] = BackgroundTaskId,
+            },
+            options);
+    }
+
+    private static string? GetFunctionResultText(
+        IEnumerable<ChatMessage> chatMessages,
+        string callId)
+    {
+        var result = chatMessages
+            .SelectMany(message => message.Contents)
+            .OfType<FunctionResultContent>()
+            .SingleOrDefault(content =>
+                string.Equals(
+                    content.CallId,
+                    callId,
+                    StringComparison.Ordinal));
+        return result?.Result switch
+        {
+            string text => text,
+            JsonElement
+            {
+                ValueKind: JsonValueKind.String,
+            } json => json.GetString(),
+            null => null,
+            _ => result.Result.ToString(),
+        };
+    }
+
+    private static JsonElement CreateTaskIdArray()
+    {
+        using JsonDocument document = JsonDocument.Parse(
+            $"[{BackgroundTaskId}]");
+        return document.RootElement.Clone();
     }
 }

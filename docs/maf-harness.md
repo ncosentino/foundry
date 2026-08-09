@@ -182,6 +182,14 @@ persistence are unavoidable in the complete bundle.
 
 Background agents are an opt-in child catalog for internal phase work:
 
+MAF 1.17 marks the background provider, completion evaluator, and related
+options experimental. A consumer must acknowledge the upstream diagnostic
+explicitly, for example at project scope:
+
+```xml
+<NoWarn>$(NoWarn);MAAI001</NoWarn>
+```
+
 ```csharp
 configuration = configuration with
 {
