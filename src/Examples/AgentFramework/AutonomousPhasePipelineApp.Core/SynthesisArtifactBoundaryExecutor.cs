@@ -19,17 +19,33 @@ internal sealed class SynthesisArtifactBoundaryExecutor(
             return ValueTask.FromResult(message);
         }
 
+        if (message.Inputs.Length != 1)
+        {
+            throw new InvalidOperationException(
+                "Synthesis artifact did not reference exactly one accepted manifest.");
+        }
+
+        ReferenceArtifactManifest manifest = artifacts.GetManifest(
+            message.Inputs[0],
+            runId);
         if (!ReferenceArtifactValidator.TryValidateSynthesis(
             message.CandidateContent,
+            manifest,
             out string error))
         {
+            string[] gaps =
+            [
+                .. manifest.Gaps,
+                $"{message.Phase}:{error}",
+            ];
             return ValueTask.FromResult(
                 ReferencePhaseArtifact.Failed(
                     message.Phase,
                     message.Ordinal,
                     message.Required,
                     error,
-                    message.Inputs));
+                    message.Inputs,
+                    gaps));
         }
 
         ReferenceArtifactReference reference = artifacts.Write(
@@ -38,6 +54,8 @@ internal sealed class SynthesisArtifactBoundaryExecutor(
         return ValueTask.FromResult(
             ReferencePhaseArtifact.WithArtifact(
                 message,
-                reference));
+                reference,
+                ReferencePipelineOutcome.Completed,
+                manifest.Gaps));
     }
 }

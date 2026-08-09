@@ -57,16 +57,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   child identities, reserves the six upstream delegation tool names, maps the
   catalog directly to the official provider, and documents its non-propagating
   cancellation and lost-on-restore behavior.
-- Checkpoint-aware agent workflow start and resume extensions that return the
-  upstream `StreamingRun`, accept a caller-owned `CheckpointManager`, and
-  preserve MAF checkpoint, restore, cancellation, and event semantics. The
-  documented artifact-boundary pattern prevents replay of an accepted phase
-  while retaining at-least-once behavior for downstream work.
+- Checkpoint-aware agent workflow start extensions that return the upstream
+  `StreamingRun`, accept a caller-owned `CheckpointManager`, and preserve MAF
+  same-run restore, cancellation, and event semantics. Fresh-workflow resume is
+  not exposed on MAF 1.17 because failed compatibility checks can retain
+  workflow ownership and stateful edge identity depends on builder insertion
+  order. The documented artifact-boundary pattern prevents replay of an
+  accepted phase while retaining at-least-once behavior for downstream work.
 - Offline fixed-macro autonomous-phase reference pipeline demonstrating
   Harness background delegation, schema-driven loop correction, real
   all-settled specialist concurrency, content-addressed artifact handoff,
-  pre-synthesis checkpoint restore, and idempotent deterministic delivery
-  without introducing a generic public phase or artifact abstraction.
+  manifest-grounded evidence and gap validation, pre-synthesis checkpoint
+  restore, and idempotent deterministic delivery without introducing a generic
+  public phase or artifact abstraction.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry

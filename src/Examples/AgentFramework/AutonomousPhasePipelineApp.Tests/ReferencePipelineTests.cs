@@ -94,6 +94,7 @@ public sealed class ReferencePipelineTests
             gap => gap.Contains(
                 "operations",
                 StringComparison.Ordinal));
+        Assert.Equal(result.Gaps, result.Synthesis.Gaps);
         Assert.Equal(
             ReferencePipelineOutcome.Completed,
             result.Synthesis.Outcome);

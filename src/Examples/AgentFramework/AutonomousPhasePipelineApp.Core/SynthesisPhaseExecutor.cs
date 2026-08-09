@@ -1,5 +1,6 @@
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
+using Microsoft.Extensions.AI;
 
 namespace AutonomousPhasePipelineApp.Core;
 
@@ -11,6 +12,7 @@ internal sealed class SynthesisPhaseExecutor(
 {
     internal const string ExecutorId = "synthesis-phase.v1";
     internal const string Phase = "synthesis";
+    internal const string ManifestIdPrefix = "manifest_id=";
 
     public override async ValueTask<ReferencePhaseArtifact> HandleAsync(
         ReferencePhaseArtifact message,
@@ -49,7 +51,7 @@ internal sealed class SynthesisPhaseExecutor(
         string prompt =
             $"""
             Build the synthesis artifact from the accepted manifest.
-            manifest_id={manifestReference.Id}
+            {ManifestIdPrefix}{manifestReference.Id}
             manifest_outcome={manifest.Outcome}
             branch_outcomes={branches}
             explicit_gaps={gaps}
@@ -86,5 +88,34 @@ internal sealed class SynthesisPhaseExecutor(
                 exception.GetType().Name,
                 [manifestReference]);
         }
+    }
+
+    internal static string GetManifestId(
+        IEnumerable<ChatMessage> messages)
+    {
+        string prompt = messages
+            .FirstOrDefault(message => message.Role == ChatRole.User)
+            ?.Text ?? throw new InvalidOperationException(
+                "Synthesis messages did not contain a user prompt.");
+        int start = prompt.IndexOf(
+            ManifestIdPrefix,
+            StringComparison.Ordinal);
+        if (start < 0)
+        {
+            throw new InvalidOperationException(
+                $"Synthesis prompt did not contain '{ManifestIdPrefix}'.");
+        }
+
+        start += ManifestIdPrefix.Length;
+        int end = prompt.IndexOf('\n', start);
+        string manifestId =
+            (end < 0 ? prompt[start..] : prompt[start..end]).Trim();
+        if (string.IsNullOrWhiteSpace(manifestId))
+        {
+            throw new InvalidOperationException(
+                "Synthesis prompt contained an empty manifest ID.");
+        }
+
+        return manifestId;
     }
 }

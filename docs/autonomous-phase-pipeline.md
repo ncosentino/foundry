@@ -66,8 +66,9 @@ a required schema field. A `DelegateLoopEvaluator` applies deterministic JSON
 validation and requests one corrected iteration with structured feedback. The
 second candidate passes without rerunning research or either specialist.
 
-The evaluator does not accept marker prose. It validates required properties
-and non-empty evidence.
+The evaluator does not accept marker prose. It applies the same
+manifest-grounded evidence and gap contract as the final synthesis artifact
+gate.
 
 ## Real concurrent all-settled specialists
 
@@ -110,7 +111,7 @@ gaps. The pre-synthesis gate writes an accepted manifest containing:
 
 - the research reference;
 - each settled branch outcome;
-- successful specialist references;
+- completed or partial specialist references;
 - required versus optional status; and
 - explicit gaps.
 
@@ -121,6 +122,20 @@ manifest and its referenced bodies when the phase needs them.
 Artifact tools authorize each reference against the active run ID. A model
 cannot substitute an artifact or manifest that exists in the shared store but
 belongs to another run.
+
+The synthesis artifact gate derives its acceptance contract from that stored
+manifest. The candidate must report:
+
+- exactly the research reference and every completed or partial specialist
+  reference in `evidence`;
+- no unknown reference and no reference from a failed or skipped branch; and
+- exactly the manifest's explicit gap set in `gaps`.
+
+Order is not significant, but omissions, additions, labels in place of
+content-addressed references, and duplicate values fail validation. Execution
+details such as tool order or child-agent count are not part of acceptance.
+The offline contract corpus includes both known-good variants and adversarial
+missing, duplicate, unknown, failed-branch, and gap-mismatch candidates.
 
 The host owns both persistence boundaries and injects them while constructing
 the example runtime:

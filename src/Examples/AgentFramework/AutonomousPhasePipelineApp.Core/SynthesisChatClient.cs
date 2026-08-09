@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using Microsoft.Extensions.AI;
 
 namespace AutonomousPhasePipelineApp.Core;
@@ -30,24 +32,6 @@ internal sealed class SynthesisChatClient(
             "\n",
             messages.Select(message => message.Text));
 
-        if (combinedText.Contains(
-            ReferenceArtifactValidator.SynthesisCorrectionCode,
-            StringComparison.Ordinal))
-        {
-            Interlocked.Increment(ref _artifactResponseCount);
-            return Task.FromResult(
-                new ChatResponse(
-                    new ChatMessage(
-                        ChatRole.Assistant,
-                        """
-                        {
-                          "summary": "Synthesis completed from accepted artifacts.",
-                          "evidence": ["research", "required-specialist"],
-                          "recommendation": "Proceed with the synthetic release."
-                        }
-                        """)));
-        }
-
         string? manifestResult = ScriptedFunctionCall.GetResultText(
             messages,
             ReadManifestCallId);
@@ -57,7 +41,8 @@ internal sealed class SynthesisChatClient(
                 .First(message => message.Role == ChatRole.User)
                 .Text ?? string.Empty;
             _initialPrompts.Add(prompt);
-            string manifestId = ExtractValue(prompt, "manifest_id=");
+            string manifestId =
+                SynthesisPhaseExecutor.GetManifestId(messages);
             return Task.FromResult(
                 ScriptedFunctionCall.Create(
                     ReadManifestCallId,
@@ -77,17 +62,18 @@ internal sealed class SynthesisChatClient(
                 "Synthesis did not receive the artifact manifest bundle.");
         }
 
+        ReferenceArtifactManifest manifest = ParseManifest(manifestResult);
         Interlocked.Increment(ref _artifactResponseCount);
+        bool corrected = combinedText.Contains(
+            ReferenceArtifactValidator.SynthesisCorrectionCode,
+            StringComparison.Ordinal);
         return Task.FromResult(
             new ChatResponse(
                 new ChatMessage(
                     ChatRole.Assistant,
-                    """
-                    {
-                      "summary": "Initial synthesis is missing a required field.",
-                      "evidence": ["research"]
-                    }
-                    """)));
+                    CreateArtifact(
+                        manifest,
+                        includeRecommendation: corrected))));
     }
 
     IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
@@ -103,19 +89,48 @@ internal sealed class SynthesisChatClient(
     {
     }
 
-    private static string ExtractValue(
-        string prompt,
-        string prefix)
+    private static ReferenceArtifactManifest ParseManifest(
+        string manifestBundle)
     {
-        int start = prompt.IndexOf(prefix, StringComparison.Ordinal);
-        if (start < 0)
+        int end = manifestBundle.IndexOfAny(['\r', '\n']);
+        string manifestJson = end < 0
+            ? manifestBundle
+            : manifestBundle[..end];
+        return JsonSerializer.Deserialize<ReferenceArtifactManifest>(
+            manifestJson) ?? throw new InvalidOperationException(
+                "Synthesis received an empty artifact manifest.");
+    }
+
+    private static string CreateArtifact(
+        ReferenceArtifactManifest manifest,
+        bool includeRecommendation)
+    {
+        string[] evidence =
+        [
+            manifest.Research.Id,
+            .. manifest.Branches
+                .Where(branch => branch.Outcome is
+                    ReferencePipelineOutcome.Completed or
+                    ReferencePipelineOutcome.Partial)
+                .Select(branch =>
+                    branch.Artifact?.Id ??
+                    throw new InvalidOperationException(
+                        $"Accepted branch '{branch.Phase}' has no artifact.")),
+        ];
+        var artifact = new Dictionary<string, object?>
         {
-            throw new InvalidOperationException(
-                $"Prompt did not contain '{prefix}'.");
+            ["summary"] = includeRecommendation
+                ? "Synthesis completed from accepted artifacts."
+                : "Initial synthesis is missing a required field.",
+            ["evidence"] = evidence,
+            ["gaps"] = manifest.Gaps,
+        };
+        if (includeRecommendation)
+        {
+            artifact["recommendation"] =
+                "Proceed with the synthetic release.";
         }
 
-        start += prefix.Length;
-        int end = prompt.IndexOf('\n', start);
-        return (end < 0 ? prompt[start..] : prompt[start..end]).Trim();
+        return JsonSerializer.Serialize(artifact);
     }
 }

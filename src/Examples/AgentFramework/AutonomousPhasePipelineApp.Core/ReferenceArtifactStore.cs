@@ -70,22 +70,27 @@ internal sealed class ReferenceArtifactStore
 
     internal ReferenceArtifactManifest GetManifest(
         ReferenceArtifactReference reference,
+        string runId) =>
+        GetManifest(reference.Id, runId);
+
+    internal ReferenceArtifactManifest GetManifest(
+        string manifestId,
         string runId)
     {
-        _ = Read(runId, reference.Id);
+        _ = Read(runId, manifestId);
         ReferenceArtifactManifest manifest = _manifests.TryGetValue(
-            reference.Id,
+            manifestId,
             out ReferenceArtifactManifest? storedManifest)
             ? storedManifest
             : throw new KeyNotFoundException(
-                $"Manifest '{reference.Id}' was not found.");
+                $"Manifest '{manifestId}' was not found.");
         if (!string.Equals(
             manifest.RunId,
             runId,
             StringComparison.Ordinal))
         {
             throw new InvalidOperationException(
-                $"Manifest '{reference.Id}' belongs to a different run.");
+                $"Manifest '{manifestId}' belongs to a different run.");
         }
 
         return manifest;

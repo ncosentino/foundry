@@ -161,9 +161,17 @@ internal static class ReferencePipelineFactory
                 new DelegateLoopEvaluator(
                     (context, _) =>
                     {
+                        string manifestId =
+                            SynthesisPhaseExecutor.GetManifestId(
+                                context.InitialMessages);
+                        ReferenceArtifactManifest manifest =
+                            artifacts.GetManifest(
+                                manifestId,
+                                request.RunId);
                         bool accepted =
                             ReferenceArtifactValidator.TryValidateSynthesis(
                                 context.LastResponse.Text,
+                                manifest,
                                 out string error);
                         return ValueTask.FromResult(
                             accepted
@@ -213,7 +221,8 @@ internal static class ReferencePipelineFactory
             [riskBranch, operationsBranch]);
         var manifestBarrier = new SpecialistManifestBarrierExecutor(
             artifacts,
-            request.RunId);
+            request.RunId,
+            [riskBranch, operationsBranch]);
         var synthesis = new SynthesisPhaseExecutor(
             synthesisAgent,
             artifacts,

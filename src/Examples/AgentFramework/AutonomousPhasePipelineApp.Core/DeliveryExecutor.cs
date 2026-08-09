@@ -26,6 +26,11 @@ internal sealed class DeliveryExecutor(
                 or ReferencePipelineOutcome.Skipped
                 ? ReferencePipelineOutcome.Failed
                 : manifest.Outcome;
+        string[] gaps = manifest.Gaps
+            .Concat(message.Gaps)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
         var candidate = new ReferencePipelineResult(
             runId,
             outcome,
@@ -33,7 +38,7 @@ internal sealed class DeliveryExecutor(
             manifestReference,
             message,
             manifest.Branches,
-            manifest.Gaps);
+            gaps);
         return ValueTask.FromResult(delivery.Publish(candidate));
     }
 }
