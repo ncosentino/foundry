@@ -1,8 +1,14 @@
 ---
-description: Results from the first hosted diagnostic run of the autonomous-phase comparison protocol.
+description: Protocol-invalidated raw evidence from the first hosted autonomous-phase comparison run.
+status: protocol-invalidated
 ---
 
 # Autonomous Phase Evaluation 001 Results
+
+!!! danger "Protocol invalidated"
+    This run is preserved as immutable debugging evidence, but its arm pass
+    counts and comparative conclusions are invalid. It must not be used to
+    recommend, rank, or reject an orchestration architecture.
 
 ## Evidence identity
 
@@ -29,18 +35,40 @@ OAuth exchange endpoint does not accept that token type.
 
 ## Run disposition
 
+- Protocol status: **INVALIDATED**.
 - 9 of 9 blocks completed.
 - 0 infrastructure failures occurred.
 - 14 applicable arm/scenario contracts failed.
-- Evidence strength: **INSUFFICIENTLY_POWERED**.
-- Recommendation: **NO_SUPPORTED_RECOMMENDATION_YET**.
+- Comparative evidence strength: **PROTOCOL_INVALID**.
+- Recommendation: **NONE**.
 - Model-based semantic quality: **not calibrated and not scored**.
 
 Contract failures are retained as evidence. The successful workflow conclusion
 means the diagnostic matrix and publication infrastructure completed; it does
 not mean every arm passed.
 
-## Aggregate diagnostic results
+## Why the protocol was invalidated
+
+An adversarial audit found that the implementation did not measure equivalent
+arm quality:
+
+- delegated Harness correctness required observing two child sessions, so an
+  otherwise-correct result failed when the model used fewer children;
+- prompts contained the expected JSON shape and expected evidence IDs;
+- evidence scoring accepted an authorized subset instead of requiring complete
+  manifest-derived coverage;
+- one Magentic fault injector searched for text that differed from the actual
+  prompt, so the intended fault did not activate;
+- cancellation stopped an injected delay before provider or child work began;
+- displayed fallback output could come from the response before fault
+  injection rather than the value evaluated by the workflow; and
+- the arms used different correction, round, reset, and provider-call budgets.
+
+The same source and observed model also produced materially different
+plain-Harness results across hosted and locally authorized runs. One trial per
+scenario cannot separate stochastic variation from systematic behavior.
+
+## Raw invalidated counts
 
 | Arm | Applicable scenarios | Contract passes | Model calls | Input tokens | Output tokens |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -49,9 +77,9 @@ not mean every arm passed.
 | Phase-local Magentic | 8 | 4 | 85 | 230,129 | 25,371 |
 
 These are single-trial workload totals. They are diagnostic observations, not
-population estimates.
+population estimates or valid comparative scores.
 
-## Scenario contract matrix
+## Raw invalidated scenario matrix
 
 | Scenario | Plain Harness | Delegated Harness | Magentic |
 | --- | --- | --- | --- |
@@ -65,72 +93,32 @@ population estimates.
 | Delivery replay | Fail | Fail | Pass |
 | Ineffective progress | Fail | Fail | Fail |
 
-## Verified findings
+## Evidence that remains valid
 
-The following claims are direct deterministic observations from the run:
+Only transport and publication facts survive protocol invalidation:
 
 - The Actions `GITHUB_TOKEN` path can authenticate the direct Copilot client
   when used as the API bearer under `copilot-requests: write`.
 - Every block and every available failure record was published.
-- Required-branch failure correctly skipped synthesis and preserved the
-  optional sibling in all three arms.
-- Plain Harness completed the ordinary, optional-failure, correction-success,
-  correction-exhaustion, cancellation, and checkpoint-restore contracts.
-- Delegated Harness did not demonstrate both configured background children in
-  its live synthesis scenarios; observed child-session count was at most one.
-- Magentic created plans and replans, and its participant coordination consumed
-  substantially more provider calls and tokens than plain Harness in this
-  fixture.
 - No calibrated model-judge evidence exists for semantic quality.
 
-## Directional findings
-
-The following observations are useful engineering signals but are not powered
-recommendations:
-
-- Plain Harness was the least expensive and most contract-reliable arm in this
-  one synthetic case.
-- Background delegation added configuration and operational cost without a
-  demonstrated contract benefit. The model often failed to use both children
-  despite explicit instructions.
-- Magentic handled the optional-gap scenario but was unstable on ordinary
-  completion and recovery, and consumed about 19.5 times the plain-Harness input
-  tokens in aggregate.
-- The one-speaker-per-round manager loop is a poor match for work that is
-  naturally parallel; the outer macro fan-out should remain outside Magentic.
-- The existing artifact boundary and idempotent delivery contract were more
-  reliable than the internal orchestration strategies they contained.
-
-## Insufficiently powered or unresolved
+## Unresolved
 
 - One trial per scenario cannot establish superiority, non-inferiority, or
   equivalence.
-- Some failures were provider or trajectory failures after a single call; they
-  need repeated trials to distinguish stochastic behavior from systematic arm
-  defects.
 - Semantic fidelity, unsupported-claim rate, usefulness, and uncertainty
   honesty were not judged because the required calibration set does not exist.
 - Cost is represented by tokens and calls, not authoritative billed AI credits.
 - The stable model alias does not identify immutable backend model weights.
-- A fixed-size study should not be started until the remaining scenario
-  adapters and arm behavior are stable enough that additional trials would
-  measure the arms rather than test-harness drift.
+- No additional live trials are valid until the scorer, fault injection,
+  cancellation boundary, arm budgets, traces, and calibration contracts are
+  corrected and independently reviewed.
 
 ## API and guidance implication
 
 This run does not justify a new public phase, artifact, all-settled, Magentic,
 or evaluation abstraction.
 
-The evidence supports:
-
-- keeping the fixed macro graph and artifact contracts example-local;
-- documenting plain Harness as the simplest candidate for open-ended phases,
-  without claiming statistical superiority;
-- keeping background delegation opt-in and bounded;
-- keeping Magentic phase-local and experimental;
-- preserving raw MAF checkpoint ownership with caller-owned persistence; and
-- deferring API extraction until the same glue repeats in another real
-  integration with stronger hosted evidence.
-
-The supported recommendation remains **no promotion from the demonstrated
-experimental/example surfaces**.
+No positive or negative architecture recommendation may be derived from these
+counts. API decisions must use corrected evidence plus the independent
+deterministic contracts of the affected feature.
