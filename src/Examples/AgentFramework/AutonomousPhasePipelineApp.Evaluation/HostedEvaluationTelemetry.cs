@@ -10,6 +10,7 @@ internal sealed class HostedEvaluationTelemetry
     private long _cachedInputTokens;
     private int _cachedUsageObserved;
     private long _inputTokens;
+    private int _childProviderFailures;
     private int _modelCalls;
     private long _outputTokens;
     private int _providerFailures;
@@ -74,8 +75,14 @@ internal sealed class HostedEvaluationTelemetry
         }
     }
 
-    internal void RecordFailure() =>
+    internal void RecordFailure(bool isChild)
+    {
         Interlocked.Increment(ref _providerFailures);
+        if (isChild)
+        {
+            Interlocked.Increment(ref _childProviderFailures);
+        }
+    }
 
     internal HostedEvaluationTelemetrySnapshot Snapshot()
     {
@@ -97,6 +104,7 @@ internal sealed class HostedEvaluationTelemetry
                     ? null
                     : Volatile.Read(ref _cachedInputTokens),
             ChildSessionCount: childCount,
+            ChildFailureCount: Volatile.Read(ref _childProviderFailures),
             ProviderFailures: Volatile.Read(ref _providerFailures),
             ObservedModel: observedModel);
     }

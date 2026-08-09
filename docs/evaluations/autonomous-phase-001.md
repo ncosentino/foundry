@@ -101,7 +101,7 @@ The provider wrapper records:
 - input and output tokens;
 - cached input tokens when the provider reports them;
 - distinct child agents that actually received a provider call;
-- provider and phase failures;
+- provider, child-provider, and phase failures as separate counters;
 - checkpoints and restores;
 - plan, replan, and progress-event counts;
 - wall-clock duration; and
@@ -142,6 +142,19 @@ Each completed block is written atomically before the next block starts.
 `run-status.json` is replaced after every block. The Actions artifact upload
 runs under `if: always()`, so provider, execution, cancellation, and reporting
 failures retain whatever evidence was available.
+
+The final state is one of:
+
+- `Completed` — every block was produced and every applicable scenario contract
+  passed;
+- `CompletedWithContractFailures` — the full matrix completed, but one or more
+  arms failed their expected scenario contract; or
+- `FailedInfrastructure` — an experiment item failed before producing its block
+  result.
+
+Contract failures are evaluation evidence and do not suppress the report.
+Infrastructure failures make the process fail after the partial report is
+written.
 
 ## Engineering conclusion
 

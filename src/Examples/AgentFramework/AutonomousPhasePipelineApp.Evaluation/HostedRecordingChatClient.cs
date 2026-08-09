@@ -27,7 +27,7 @@ internal sealed class HostedRecordingChatClient(
         }
         catch
         {
-            telemetry.RecordFailure();
+            telemetry.RecordFailure(isChild);
             throw;
         }
     }
@@ -60,7 +60,7 @@ internal sealed class HostedRecordingChatClient(
         {
             if (!completed)
             {
-                telemetry.RecordFailure();
+                telemetry.RecordFailure(isChild);
             }
         }
     }

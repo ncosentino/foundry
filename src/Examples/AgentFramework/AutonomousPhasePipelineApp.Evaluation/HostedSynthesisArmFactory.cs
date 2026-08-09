@@ -239,7 +239,7 @@ internal static class HostedSynthesisArmFactory
                     model,
                     telemetry,
                     MagenticPhaseFactory.ManifestAnalystName,
-                    isChild: false,
+                    isChild: true,
                     HostedFaultMode.None,
                     ledgerProbe: null,
                     resources);
@@ -259,7 +259,7 @@ internal static class HostedSynthesisArmFactory
                     model,
                     telemetry,
                     MagenticPhaseFactory.ContractCriticName,
-                    isChild: false,
+                    isChild: true,
                     HostedFaultMode.None,
                     ledgerProbe: null,
                     resources);

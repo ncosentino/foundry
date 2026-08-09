@@ -7,5 +7,6 @@ internal sealed record HostedEvaluationTelemetrySnapshot(
     long OutputTokens,
     long? CachedInputTokens,
     int ChildSessionCount,
+    int ChildFailureCount,
     int ProviderFailures,
     string? ObservedModel);
