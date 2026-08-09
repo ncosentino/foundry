@@ -51,7 +51,12 @@ jobs:
         run: dotnet restore src/NexusLabs.Foundry.slnx
 
       - name: Build
-        run: dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore
+        env:
+          GITHUB_ENV: ${{ runner.temp }}/discard-build-env-${{ github.run_id }}-${{ github.run_attempt }}
+          GITHUB_OUTPUT: ${{ runner.temp }}/discard-build-output-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          rm -f "$GITHUB_ENV" "$GITHUB_OUTPUT"
+          dotnet build src/NexusLabs.Foundry.slnx --configuration Release --no-restore
 
       - name: Test
         shell: bash
