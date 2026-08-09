@@ -4,6 +4,15 @@ applyTo: ".github/workflows/*.{yml,yaml},.github/actions/**/*.{yml,yaml},.github
 
 # CI, runner, and SDK trust boundaries
 
+- Automated triggers must never invoke a live LLM, directly or indirectly.
+- A live-LLM workflow must be manual-only, run exactly on the `foundry-ci`
+  PitCrew runner, require an explicit approval input, and reject every actor or
+  triggering actor other than `ncosentino`.
+- The only permitted live-LLM process in a workflow is GitHub Copilot CLI.
+  Direct model APIs, provider SDKs, and live evaluation applications are
+  prohibited even in manual workflows.
+- Agents must not dispatch a permitted workflow without explicit user approval
+  for that specific run.
 - Untrusted fork pull requests must use GitHub-hosted infrastructure before any
   repository-variable runner override is considered.
 - Runner-image validation and publication remain GitHub-hosted; pull requests

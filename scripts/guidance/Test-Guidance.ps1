@@ -405,6 +405,143 @@ function Test-PublicGuidanceContent {
     }
 }
 
+function Test-LiveLlmWorkflowPolicy {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Root
+    )
+
+    $workflowRoot = Join-Path $Root '.github' 'workflows'
+    if (-not (Test-Path -LiteralPath $workflowRoot -PathType Container)) {
+        return
+    }
+
+    $copilotCliPattern =
+        '(?im)^\s*(?:(?:-\s*)?run:\s*)?(?:copilot|copilot\.exe)\s+'
+    $liveLlmIndicators = @(
+        '(?im)^\s*copilot-requests\s*:\s*write\s*$',
+        '(?im)^\s*(?:COPILOT_GITHUB_TOKEN|GITHUB_COPILOT_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*:',
+        $copilotCliPattern,
+        '(?i)npm\s+(?:install|exec).*\@github/copilot',
+        '(?i)api\.githubcopilot\.com',
+        '(?i)\bCopilotChatClient\b'
+    )
+    $forbiddenDirectModelIndicators = @(
+        '(?i)api\.githubcopilot\.com',
+        '(?i)\bCopilotChatClient\b',
+        '(?i)\bOpenAIClient\b',
+        '(?i)api\.anthropic\.com',
+        '(?i)generativelanguage\.googleapis\.com',
+        '(?im)^\s*dotnet\s+run\b.*(?:Evaluation|EVAL_MODEL)'
+    )
+    $forbiddenTriggers = @(
+        'push',
+        'pull_request',
+        'pull_request_target',
+        'schedule',
+        'workflow_call',
+        'workflow_run',
+        'repository_dispatch',
+        'merge_group'
+    )
+
+    foreach ($workflow in Get-ChildItem $workflowRoot -File |
+        Where-Object Extension -in @('.yml', '.yaml')) {
+        $content = Get-Content -LiteralPath $workflow.FullName -Raw -Encoding UTF8
+        $isLiveLlmWorkflow = $false
+        foreach ($indicator in $liveLlmIndicators) {
+            if ($content -match $indicator) {
+                $isLiveLlmWorkflow = $true
+                break
+            }
+        }
+        if (-not $isLiveLlmWorkflow) {
+            continue
+        }
+
+        $relative = [IO.Path]::GetRelativePath(
+            $Root,
+            $workflow.FullName
+        ).Replace('\', '/')
+        Assert-Contract (
+            $content -match '(?im)^\s*#\s*live-llm-workflow:\s*true\s*$'
+        ) "Live-LLM workflow '$relative' is missing the explicit live-llm-workflow marker."
+        foreach ($trigger in $forbiddenTriggers) {
+            Assert-Contract (
+                $content -notmatch "(?m)^\s{2}$([regex]::Escape($trigger)):\s*"
+            ) "Live-LLM workflow '$relative' contains forbidden automated trigger '$trigger'."
+        }
+        Assert-Contract (
+            $content -match '(?m)^on:\r?\n\s{2}workflow_dispatch:\s*$'
+        ) "Live-LLM workflow '$relative' must use only workflow_dispatch."
+        $confirmInput = [regex]::Match(
+            $content,
+            '(?ms)^\s{6}confirm_live_llm:\s*\r?\n(?<body>(?:\s{8}.*(?:\r?\n|\z))*)')
+        Assert-Contract (
+            $confirmInput.Success -and
+            $confirmInput.Groups['body'].Value -match '(?m)^\s{8}type:\s*boolean\s*$' -and
+            $confirmInput.Groups['body'].Value -match '(?m)^\s{8}required:\s*true\s*$' -and
+            $confirmInput.Groups['body'].Value -match '(?m)^\s{8}default:\s*false\s*$'
+        ) "Live-LLM workflow '$relative' must require a false-by-default confirm_live_llm input."
+        $reasonInput = [regex]::Match(
+            $content,
+            '(?ms)^\s{6}reason:\s*\r?\n(?<body>(?:\s{8}.*(?:\r?\n|\z))*)')
+        Assert-Contract (
+            $reasonInput.Success -and
+            $reasonInput.Groups['body'].Value -match '(?m)^\s{8}type:\s*string\s*$' -and
+            $reasonInput.Groups['body'].Value -match '(?m)^\s{8}required:\s*true\s*$'
+        ) "Live-LLM workflow '$relative' must require a non-optional reason input."
+
+        $jobsMatch = [regex]::Match(
+            $content,
+            '(?ms)^jobs:\s*\r?\n(?<jobs>.*)\z')
+        Assert-Contract $jobsMatch.Success "Live-LLM workflow '$relative' has no jobs section."
+        $jobs = $jobsMatch.Groups['jobs'].Value
+        $jobHeaders = @(
+            [regex]::Matches(
+                $jobs,
+                '(?m)^  (?<name>[A-Za-z0-9_-]+):\s*$')
+        )
+        Assert-Contract (
+            $jobHeaders.Count -eq 1 -and
+            $jobHeaders[0].Groups['name'].Value -ceq 'live-llm'
+        ) "Live-LLM workflow '$relative' must contain exactly one job named 'live-llm'."
+        $jobIf = @(
+            [regex]::Matches(
+                $jobs,
+                '(?m)^    if:\s*(?<condition>.+?)\s*$')
+        )
+        Assert-Contract (
+            $jobIf.Count -eq 1 -and
+            $jobIf[0].Groups['condition'].Value -match "github\.actor\s*==\s*'ncosentino'" -and
+            $jobIf[0].Groups['condition'].Value -match "github\.triggering_actor\s*==\s*'ncosentino'" -and
+            $jobIf[0].Groups['condition'].Value -match 'inputs\.confirm_live_llm\s*==\s*true' -and
+            $jobIf[0].Groups['condition'].Value -match "inputs\.reason\s*!=\s*''"
+        ) "Live-LLM workflow '$relative' must guard actor, triggering actor, and explicit approval on its only job."
+        $runners = @(
+            [regex]::Matches(
+                $jobs,
+                '(?m)^    runs-on:\s*(?<runner>.+?)\s*$')
+        )
+        Assert-Contract (
+            $runners.Count -eq 1 -and
+            $runners[0].Groups['runner'].Value -ceq 'foundry-ci'
+        ) "Live-LLM workflow '$relative' must run exactly on the foundry-ci PitCrew runner."
+        Assert-Contract (
+            $content -match '(?m)^\s+contents:\s*read\s*$' -and
+            $content -match '(?m)^\s+copilot-requests:\s*write\s*$'
+        ) "Live-LLM workflow '$relative' must use read-only contents and explicit Copilot request permission."
+        Assert-Contract (
+            $content -match $copilotCliPattern
+        ) "Live-LLM workflow '$relative' must invoke GitHub Copilot CLI."
+        foreach ($indicator in $forbiddenDirectModelIndicators) {
+            Assert-Contract (
+                $content -notmatch $indicator
+            ) "Live-LLM workflow '$relative' directly invokes a model API, SDK, or live evaluation application."
+        }
+    }
+}
+
 function Test-GuidanceContract {
     param(
         [Parameter(Mandatory)]
@@ -576,6 +713,7 @@ function Test-GuidanceContract {
         ) "CI job '$job' must depend on guidance."
     }
 
+    Test-LiveLlmWorkflowPolicy -Root $Root
     Test-PublicGuidanceContent -Root $Root
 
     $maxContext = $contextRecords |
@@ -697,6 +835,70 @@ function Assert-MutationRejected {
 $result = Test-GuidanceContract $RepositoryRoot
 
 if ($SelfTest) {
+    Assert-MutationRejected `
+        -Name 'automated live LLM workflow' `
+        -ExpectedMessage "forbidden automated trigger 'pull_request'" `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\unsafe-llm.yml'
+            @'
+# live-llm-workflow: true
+name: Unsafe LLM
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      confirm_live_llm:
+        type: boolean
+        required: true
+        default: false
+      reason:
+        type: string
+        required: true
+jobs:
+  live-llm:
+    if: github.actor == 'ncosentino' && github.triggering_actor == 'ncosentino' && inputs.confirm_live_llm == true && inputs.reason != ''
+    runs-on: foundry-ci
+    permissions:
+      contents: read
+      copilot-requests: write
+    steps:
+      - run: |
+          copilot --no-ask-user -p "unsafe"
+'@ | Set-Content -LiteralPath $path
+        }
+    Assert-MutationRejected `
+        -Name 'direct model SDK in manual workflow' `
+        -ExpectedMessage 'directly invokes a model API, SDK, or live evaluation application' `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\unsafe-sdk.yml'
+            @'
+# live-llm-workflow: true
+name: Unsafe SDK
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_live_llm:
+        type: boolean
+        required: true
+        default: false
+      reason:
+        type: string
+        required: true
+jobs:
+  live-llm:
+    if: github.actor == 'ncosentino' && github.triggering_actor == 'ncosentino' && inputs.confirm_live_llm == true && inputs.reason != ''
+    runs-on: foundry-ci
+    permissions:
+      contents: read
+      copilot-requests: write
+    steps:
+      - run: |
+          copilot --no-ask-user -p "wrapper"
+          dotnet run --project LiveEvaluation
+'@ | Set-Content -LiteralPath $path
+        }
     Assert-MutationRejected `
         -Name 'oversized root guidance' `
         -ExpectedMessage 'AGENTS.md exceeds' `
