@@ -41,7 +41,8 @@ internal static class HostedProviderClientFactory
         {
             current = new HostedFaultInjectingChatClient(
                 current,
-                faultMode);
+                faultMode,
+                telemetry);
         }
 
         if (ledgerProbe is not null)

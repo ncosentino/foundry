@@ -76,8 +76,9 @@ internal static class HostedSynthesisArmFactory
             "hosted-harness-plain",
             """
             Read the accepted manifest through the tool.
-            Return one JSON object with nonempty summary, evidence, and recommendation.
-            Evidence values must use only IDs present in the accepted artifacts.
+            Your entire final response must be one JSON object with exactly these fields:
+            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
+            Do not use markdown fences or commentary. Evidence values must use only IDs present in the accepted artifacts.
             """,
             client,
             tools: [readManifest],
@@ -88,7 +89,7 @@ internal static class HostedSynthesisArmFactory
             loopEvaluators: [CreateArtifactEvaluator()],
             loopAgentOptions: new LoopAgentOptions
             {
-                MaxIterations = 2,
+                MaxIterations = 3,
                 FreshContextPerIteration = false,
                 NonStreamingReturnsLastResponseOnly = true,
             },
@@ -126,7 +127,10 @@ internal static class HostedSynthesisArmFactory
             resources);
         AIAgent analyst = ReferencePipelineFactory.CreateHarnessAgent(
             "ManifestAnalyst",
-            "Read the manifest and report only accepted evidence IDs.",
+            """
+            Read the manifest with the tool.
+            Report the exact accepted evidence IDs and no unsupported claims.
+            """,
             analystClient,
             tools: [readManifest],
             features: ReferencePipelineFactory.DisabledFeatures(),
@@ -145,9 +149,12 @@ internal static class HostedSynthesisArmFactory
             resources);
         AIAgent critic = ReferencePipelineFactory.CreateHarnessAgent(
             "ContractCritic",
-            "Check explicit gaps and required synthesis fields.",
+            """
+            Read the manifest with the tool.
+            Report explicit gaps and verify summary, evidence, and recommendation are required.
+            """,
             criticClient,
-            tools: [],
+            tools: [readManifest],
             features: ReferencePipelineFactory.DisabledFeatures(),
             loopEvaluators: [],
             loopAgentOptions: null,
@@ -165,9 +172,11 @@ internal static class HostedSynthesisArmFactory
         AIAgent parent = ReferencePipelineFactory.CreateHarnessAgent(
             "hosted-harness-delegated",
             """
-            Start both background specialists, wait for and retrieve both results,
-            then return one JSON object with nonempty summary, evidence, and recommendation.
-            Evidence values must use only accepted IDs reported by the specialists.
+            You must start both ManifestAnalyst and ContractCritic, wait for both,
+            retrieve both results, and then answer.
+            Your entire final response must be one JSON object with exactly these fields:
+            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
+            Do not use markdown fences or commentary. Evidence values must use only accepted IDs reported by the specialists.
             """,
             parentClient,
             tools: [],
@@ -183,7 +192,7 @@ internal static class HostedSynthesisArmFactory
             ],
             loopAgentOptions: new LoopAgentOptions
             {
-                MaxIterations = 3,
+                MaxIterations = 4,
                 FreshContextPerIteration = false,
                 NonStreamingReturnsLastResponseOnly = true,
             },
@@ -209,6 +218,10 @@ internal static class HostedSynthesisArmFactory
         HostedFaultMode faultMode,
         List<IDisposable> resources)
     {
+        int maxStalls = faultMode == HostedFaultMode.ForceFirstMagenticStall
+            ? 0
+            : 2;
+
         MagenticPhaseRuntime CreateRuntime()
         {
             IChatClient managerClient = HostedProviderClientFactory.Create(
@@ -221,7 +234,11 @@ internal static class HostedSynthesisArmFactory
                 resources);
             AIAgent manager = ReferencePipelineFactory.CreateHarnessAgent(
                 MagenticPhaseFactory.ManagerName,
-                "Plan and coordinate the fixed synthesis participants.",
+                """
+                Coordinate the fixed synthesis participants.
+                Delegate manifest inspection before declaring the request satisfied.
+                The final answer must obey the exact JSON contract.
+                """,
                 managerClient,
                 tools: [],
                 features: ReferencePipelineFactory.DisabledFeatures(),
@@ -245,7 +262,10 @@ internal static class HostedSynthesisArmFactory
                     resources);
             AIAgent analyst = ReferencePipelineFactory.CreateHarnessAgent(
                 MagenticPhaseFactory.ManifestAnalystName,
-                "Read the accepted manifest and report exact evidence IDs.",
+                """
+                Read the accepted manifest with the tool.
+                Return exact accepted evidence IDs and explicit gaps.
+                """,
                 analystClient,
                 tools: [readManifest],
                 features: ReferencePipelineFactory.DisabledFeatures(),
@@ -265,9 +285,12 @@ internal static class HostedSynthesisArmFactory
                     resources);
             AIAgent critic = ReferencePipelineFactory.CreateHarnessAgent(
                 MagenticPhaseFactory.ContractCriticName,
-                "Check explicit gaps and the final artifact schema.",
+                """
+                Read the accepted manifest with the tool.
+                Check gaps and require summary, evidence, and recommendation.
+                """,
                 criticClient,
-                tools: [],
+                tools: [readManifest],
                 features: ReferencePipelineFactory.DisabledFeatures(),
                 loopEvaluators: [],
                 loopAgentOptions: null,
@@ -278,9 +301,9 @@ internal static class HostedSynthesisArmFactory
                 .AddParticipants([analyst, critic])
                 .WithName("hosted-phase-local-magentic.v1")
                 .RequirePlanSignoff(false)
-                .WithMaxRounds(8)
-                .WithMaxStalls(0)
-                .WithMaxResets(2)
+                .WithMaxRounds(12)
+                .WithMaxStalls(maxStalls)
+                .WithMaxResets(3)
                 .WithPromptOverrides(
                     new MagenticPromptOverrides
                     {
@@ -289,9 +312,9 @@ internal static class HostedSynthesisArmFactory
                             Complete this synthesis task using only accepted evidence:
                             {task}
 
-                            Return one JSON object with nonempty summary,
-                            evidence, and recommendation. Evidence values must
-                            use only IDs found in accepted artifacts.
+                            Return exactly one JSON object and no other text:
+                            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
+                            Evidence values must use only IDs found in accepted artifacts.
                             """,
                     })
                 .Build();
@@ -303,9 +326,9 @@ internal static class HostedSynthesisArmFactory
                 ContractCriticClient = criticClient,
                 Probe = probe,
                 Agents = [manager, analyst, critic],
-                MaxRounds = 8,
-                MaxStalls = 0,
-                MaxResets = 2,
+                MaxRounds = 12,
+                MaxStalls = maxStalls,
+                MaxResets = 3,
                 RequirePlanSignoff = false,
             };
         }
@@ -349,6 +372,10 @@ internal static class HostedSynthesisArmFactory
                     accepted
                         ? LoopEvaluation.Stop()
                         : LoopEvaluation.Continue(
-                            $"{ReferenceArtifactValidator.SynthesisCorrectionCode}; validation_error={error}"));
+                            $$"""
+                            {{ReferenceArtifactValidator.SynthesisCorrectionCode}}; validation_error={{error}}
+                            Return exactly one JSON object and no other text:
+                            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
+                            """));
             });
 }
