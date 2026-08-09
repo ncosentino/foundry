@@ -1,17 +1,14 @@
-using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 
 namespace AutonomousPhasePipelineApp.Core;
 
-internal sealed class SynthesisPhaseExecutor(
-    AIAgent agent,
+internal sealed class MagenticSynthesisPhaseExecutor(
     ReferenceArtifactStore artifacts,
-    string runId) :
-    Executor<ReferencePhaseArtifact, ReferencePhaseArtifact>(ExecutorId)
+    string runId,
+    Func<MagenticPhaseRuntime> runtimeFactory) :
+    Executor<ReferencePhaseArtifact, ReferencePhaseArtifact>(
+        SynthesisPhaseExecutor.ExecutorId)
 {
-    internal const string ExecutorId = "synthesis-phase.v1";
-    internal const string Phase = "synthesis";
-
     public override async ValueTask<ReferencePhaseArtifact> HandleAsync(
         ReferencePhaseArtifact message,
         IWorkflowContext context,
@@ -20,7 +17,7 @@ internal sealed class SynthesisPhaseExecutor(
         if (message.Artifact is not { } manifestReference)
         {
             return ReferencePhaseArtifact.Skipped(
-                Phase,
+                SynthesisPhaseExecutor.Phase,
                 ordinal: 200,
                 required: true,
                 "manifest-missing");
@@ -29,7 +26,7 @@ internal sealed class SynthesisPhaseExecutor(
         if (message.Outcome == ReferencePipelineOutcome.Failed)
         {
             return ReferencePhaseArtifact.Skipped(
-                Phase,
+                SynthesisPhaseExecutor.Phase,
                 ordinal: 200,
                 required: true,
                 "blocked-by-required-branch",
@@ -39,39 +36,29 @@ internal sealed class SynthesisPhaseExecutor(
         ReferenceArtifactManifest manifest = artifacts.GetManifest(
             manifestReference,
             runId);
-        string prompt = ReferenceSynthesisPrompt.Build(
+        string task = ReferenceSynthesisPrompt.Build(
             manifestReference,
             manifest);
-
-        try
-        {
-            AgentSession session = await agent.CreateSessionAsync(
+        MagenticPhaseRunResult result =
+            await MagenticPhaseRunner.RunAsync(
+                runtimeFactory(),
+                task,
                 cancellationToken);
-            AgentResponse response = await agent.RunAsync(
-                prompt,
-                session,
-                options: null,
-                cancellationToken);
-            return ReferencePhaseArtifact.Candidate(
-                Phase,
-                ordinal: 200,
-                required: true,
-                response.Text,
-                manifestReference);
-        }
-        catch (OperationCanceledException) when (
-            cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (InvalidOperationException exception)
+        if (!result.Succeeded || string.IsNullOrWhiteSpace(result.FinalText))
         {
             return ReferencePhaseArtifact.Failed(
-                Phase,
+                SynthesisPhaseExecutor.Phase,
                 ordinal: 200,
                 required: true,
-                exception.GetType().Name,
+                result.FailureCode ?? "magentic-failed",
                 [manifestReference]);
         }
+
+        return ReferencePhaseArtifact.Candidate(
+            SynthesisPhaseExecutor.Phase,
+            ordinal: 200,
+            required: true,
+            result.FinalText,
+            manifestReference);
     }
 }

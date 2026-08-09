@@ -27,6 +27,9 @@ graph.
 The complete offline implementation is under
 `src/Examples/AgentFramework/AutonomousPhasePipelineApp*`.
 
+The [Phase-Local Magentic Comparison](magentic-phase-comparison.md) swaps only
+the synthesis executor while preserving this outer graph and artifact contract.
+
 ## Ownership boundaries
 
 | Owner | Responsibilities | Does not own |

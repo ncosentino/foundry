@@ -19,6 +19,7 @@ public sealed class ReferencePipelineTests
         var (result, checkpoint) = await ObserveAsync(
             run,
             captureCheckpoint: true);
+        SynthesisChatClient synthesis = GetHarnessSynthesis(runtime);
 
         Assert.NotNull(checkpoint);
         Assert.Equal(ReferencePipelineOutcome.Completed, result.Outcome);
@@ -51,15 +52,15 @@ public sealed class ReferencePipelineTests
         Assert.Equal(1, runtime.Delivery.AuthoritativeCount);
         Assert.Contains(
             "manifest_id=",
-            runtime.SynthesisClient.InitialPrompts[0],
+            synthesis.InitialPrompts[0],
             StringComparison.Ordinal);
         Assert.DoesNotContain(
             "evidence-complete",
-            runtime.SynthesisClient.InitialPrompts[0],
+            synthesis.InitialPrompts[0],
             StringComparison.Ordinal);
         Assert.DoesNotContain(
             "risk-evidence",
-            runtime.SynthesisClient.InitialPrompts[0],
+            synthesis.InitialPrompts[0],
             StringComparison.Ordinal);
     }
 
@@ -129,7 +130,7 @@ public sealed class ReferencePipelineTests
         Assert.Equal(
             ReferencePipelineOutcome.Skipped,
             result.Synthesis.Outcome);
-        Assert.Equal(0, runtime.SynthesisClient.CallCount);
+        Assert.Equal(0, GetHarnessSynthesis(runtime).CallCount);
         Assert.Equal(1, runtime.Delivery.AuthoritativeCount);
     }
 
@@ -145,14 +146,15 @@ public sealed class ReferencePipelineTests
         var (result, _) = await ObserveAsync(
             run,
             captureCheckpoint: false);
+        SynthesisChatClient synthesis = GetHarnessSynthesis(runtime);
 
         Assert.Equal(ReferencePipelineOutcome.Completed, result.Outcome);
         Assert.Equal(1, runtime.EvidenceWorkerClient.CallCount);
         Assert.Equal(1, runtime.FeasibilityWorkerClient.CallCount);
         Assert.Equal(1, runtime.RiskClient.ArtifactResponseCount);
         Assert.Equal(1, runtime.OperationsClient.ArtifactResponseCount);
-        Assert.Equal(2, runtime.SynthesisClient.ArtifactResponseCount);
-        Assert.Single(runtime.SynthesisClient.InitialPrompts);
+        Assert.Equal(2, synthesis.ArtifactResponseCount);
+        Assert.Single(synthesis.InitialPrompts);
     }
 
     [Fact]
@@ -241,9 +243,9 @@ public sealed class ReferencePipelineTests
         int riskCalls = runtime.RiskClient.CallCount;
         int operationsCalls = runtime.OperationsClient.CallCount;
         int synthesisArtifacts =
-            runtime.SynthesisClient.ArtifactResponseCount;
+            GetHarnessSynthesis(runtime).ArtifactResponseCount;
         int synthesisPrompts =
-            runtime.SynthesisClient.InitialPrompts.Count;
+            GetHarnessSynthesis(runtime).InitialPrompts.Count;
 
         await run.RestoreCheckpointAsync(
             checkpoint,
@@ -259,10 +261,10 @@ public sealed class ReferencePipelineTests
             runtime.OperationsClient.CallCount);
         Assert.Equal(
             synthesisArtifacts + 2,
-            runtime.SynthesisClient.ArtifactResponseCount);
+            GetHarnessSynthesis(runtime).ArtifactResponseCount);
         Assert.Equal(
             synthesisPrompts + 1,
-            runtime.SynthesisClient.InitialPrompts.Count);
+            GetHarnessSynthesis(runtime).InitialPrompts.Count);
         Assert.Equal(2, runtime.Delivery.AttemptCount);
         Assert.Equal(1, runtime.Delivery.AuthoritativeCount);
         Assert.Equal(initialResult.DeliveryId, restoredResult.DeliveryId);
@@ -326,6 +328,10 @@ public sealed class ReferencePipelineTests
             new ReferenceArtifactStore(),
             new IdempotentDeliverySink());
     }
+
+    private static SynthesisChatClient GetHarnessSynthesis(
+        ReferencePipelineRuntime runtime) =>
+        Assert.IsType<SynthesisChatClient>(runtime.SynthesisClient);
 
     private static Task<StreamingRun> StartAsync(
         ReferencePipelineRuntime runtime,

@@ -67,6 +67,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   all-settled specialist concurrency, content-addressed artifact handoff,
   pre-synthesis checkpoint restore, and idempotent deterministic delivery
   without introducing a generic public phase or artifact abstraction.
+- Phase-local Magentic comparison arm for the reference pipeline. It uses the
+  raw upstream builder with explicit participants and limits, captures plan,
+  replan, progress-ledger, review, warning, and checkpoint behavior, preserves
+  the existing synthesis artifact boundary, and introduces no Foundry Magentic
+  wrapper or general endorsement before hosted evaluation.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry

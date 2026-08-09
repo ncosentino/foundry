@@ -39,13 +39,7 @@ internal sealed class SynthesisChatClient(
                 new ChatResponse(
                     new ChatMessage(
                         ChatRole.Assistant,
-                        """
-                        {
-                          "summary": "Synthesis completed from accepted artifacts.",
-                          "evidence": ["research", "required-specialist"],
-                          "recommendation": "Proceed with the synthetic release."
-                        }
-                        """)));
+                        ReferenceSynthesisArtifacts.Valid)));
         }
 
         string? manifestResult = ScriptedFunctionCall.GetResultText(
@@ -82,12 +76,7 @@ internal sealed class SynthesisChatClient(
             new ChatResponse(
                 new ChatMessage(
                     ChatRole.Assistant,
-                    """
-                    {
-                      "summary": "Initial synthesis is missing a required field.",
-                      "evidence": ["research"]
-                    }
-                    """)));
+                    ReferenceSynthesisArtifacts.Invalid)));
     }
 
     IAsyncEnumerable<ChatResponseUpdate> IChatClient.GetStreamingResponseAsync(
