@@ -77,12 +77,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   correction attempts, and a 24-provider-call phase cap. The comparison remains
   a behavioral probe with no Foundry wrapper or architecture recommendation
   before calibrated hosted evaluation.
-- Hosted autonomous-phase diagnostic protocol and fail-closed Copilot provider
-  probe. The advisory matrix runs nine scenarios across plain Harness,
-  delegated Harness, and phase-local Magentic arms, publishes incremental
-  provenance and recovery evidence, separates deterministic checks from
-  uncalibrated semantic quality, and predeclares no supported recommendation
-  from the one-trial pull-request run.
+- Autonomous-phase evaluation protocol v2 with versioned Langfuse dataset
+  cases, separate correctness/resilience/resource/infrastructure evidence,
+  typed post-work fault activation, same-run checkpoint recovery, exact common
+  arm budgets, and a fail-closed recommendation gate. The executable defaults
+  to model-free protocol publication and exposes no live-provider path;
+  semantic evidence remains inadmissible without calibration.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry

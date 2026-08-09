@@ -116,6 +116,9 @@ Two runnable examples live under `src/Examples/AgentFramework/`:
 - `LangfuseConformanceApp` — a small Langfuse-supported eval that **reads the trace and scores back** from a live Langfuse (local Docker by default) to prove ingestion. It also has no-server modes:
   - `resiliency` proves cancellation, context-safe experiment item callbacks, safe trace propagation, structured link failure, score-failure reporting, and bounded shutdown while Langfuse is unreachable.
   - `dependency-injection` proves `ILangfuseClient` exposes the complete evaluation surface through one host-owned telemetry pipeline without registering a standalone session.
+- `AutonomousPhasePipelineApp.Evaluation` — defaults to a model-free protocol mode that
+  upserts and reads back the versioned autonomous-phase dataset. It exposes no
+  live-model execution mode.
 
 ## What appears in Langfuse
 

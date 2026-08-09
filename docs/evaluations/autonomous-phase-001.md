@@ -1,8 +1,14 @@
 ---
 description: Hosted diagnostic protocol for comparing plain Harness, delegated Harness, and phase-local Magentic synthesis.
+status: superseded
 ---
 
 # Autonomous Phase Evaluation 001
+
+!!! danger "Superseded and invalidated"
+    This protocol is retained as historical context only. Its first run was
+    invalidated and the protocol has been superseded by
+    [Autonomous Phase Evaluation 002](autonomous-phase-002.md).
 
 This protocol evaluates three alternative executors inside the synthesis phase
 of the fixed-macro reference pipeline:
