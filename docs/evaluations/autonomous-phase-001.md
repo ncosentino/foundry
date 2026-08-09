@@ -20,8 +20,8 @@ The first hosted diagnostic result is recorded in
 
 ## Status and interpretation
 
-The pull-request run is a **diagnostic matrix**, not a powered statistical
-comparison:
+The first pull-request run was a **diagnostic matrix**, not a powered
+statistical comparison:
 
 - one public synthetic case;
 - nine scenarios;
@@ -34,9 +34,12 @@ The report recommendation is therefore predeclared as
 instrumentation, scenario contracts, and recovery mechanics. It does not prove
 superiority, non-inferiority, or cost advantage.
 
-`workflow_dispatch` accepts up to six trials per scenario. Six trials cover each
-arm-order permutation once and form an external pilot, but still do not
-automatically support a product recommendation.
+After that evidence run, the workflow is manual-only to prevent documentation
+or maintenance pushes from consuming credits, hitting provider rate limits, or
+overwriting the fixed protocol. `workflow_dispatch` accepts up to six trials
+per scenario. Six trials cover each arm-order permutation once and form an
+external pilot, but still do not automatically support a product
+recommendation.
 
 ## Fail-closed provider probe
 
