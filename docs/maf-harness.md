@@ -20,6 +20,9 @@ The complete bundle is optional. Referencing
 `NexusLabs.Foundry.MicrosoftAgentFramework` alone does not add
 `Microsoft.Agents.AI.Harness` or change existing agents.
 
+For an end-to-end fixed macro graph whose individual Harness phases retain
+autonomy, see [Fixed-Macro Autonomous Phases](autonomous-phase-pipeline.md).
+
 ## Install the optional bundle
 
 ```powershell
