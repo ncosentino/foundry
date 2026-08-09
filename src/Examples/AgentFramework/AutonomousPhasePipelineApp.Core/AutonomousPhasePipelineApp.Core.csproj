@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="AutonomousPhasePipelineApp" />
+    <InternalsVisibleTo Include="AutonomousPhasePipelineApp.Evaluation" />
     <InternalsVisibleTo Include="AutonomousPhasePipelineApp.Tests" />
   </ItemGroup>
 
