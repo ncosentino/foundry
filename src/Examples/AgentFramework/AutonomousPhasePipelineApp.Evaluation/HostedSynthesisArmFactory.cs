@@ -337,11 +337,13 @@ internal static class HostedSynthesisArmFactory
 
     private static DelegateLoopEvaluator CreateArtifactEvaluator() =>
         new(
-            (context, _) =>
+            (context, cancellationToken) =>
             {
+                _ = cancellationToken;
                 bool accepted =
-                    ReferenceArtifactValidator.TryValidateSynthesis(
+                    ReferenceArtifactValidator.TryNormalizeSynthesis(
                         context.LastResponse.Text,
+                        out _,
                         out string error);
                 return ValueTask.FromResult(
                     accepted

@@ -6,6 +6,23 @@ namespace AutonomousPhasePipelineApp.Evaluation.Tests;
 public sealed class HostedDeterministicScorerTests
 {
     [Fact]
+    public void SynthesisNormalizer_AcceptsFencedJsonAndStoresCanonicalObject()
+    {
+        bool valid = ReferenceArtifactValidator.TryNormalizeSynthesis(
+            $$"""
+            ```json
+            {{ReferenceSynthesisArtifacts.Valid}}
+            ```
+            """,
+            out string normalized,
+            out string error);
+
+        Assert.True(valid, error);
+        Assert.StartsWith("{", normalized, StringComparison.Ordinal);
+        Assert.DoesNotContain("```", normalized, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void OptionalFailure_RequiresExplicitGapAndAuthorizedEvidence()
     {
         string runId = "optional";

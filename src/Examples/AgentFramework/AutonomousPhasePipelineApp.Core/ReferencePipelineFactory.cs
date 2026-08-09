@@ -205,11 +205,13 @@ internal static class ReferencePipelineFactory
                 loopEvaluators:
                 [
                     new DelegateLoopEvaluator(
-                        (context, _) =>
+                        (context, cancellationToken) =>
                         {
+                            _ = cancellationToken;
                             bool accepted =
-                                ReferenceArtifactValidator.TryValidateSynthesis(
+                                ReferenceArtifactValidator.TryNormalizeSynthesis(
                                     context.LastResponse.Text,
+                                    out _,
                                     out string error);
                             return ValueTask.FromResult(
                                 accepted

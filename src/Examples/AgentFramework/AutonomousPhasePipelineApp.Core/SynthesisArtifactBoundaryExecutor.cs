@@ -19,8 +19,9 @@ internal sealed class SynthesisArtifactBoundaryExecutor(
             return ValueTask.FromResult(message);
         }
 
-        if (!ReferenceArtifactValidator.TryValidateSynthesis(
+        if (!ReferenceArtifactValidator.TryNormalizeSynthesis(
             message.CandidateContent,
+            out string normalized,
             out string error))
         {
             return ValueTask.FromResult(
@@ -34,7 +35,7 @@ internal sealed class SynthesisArtifactBoundaryExecutor(
 
         ReferenceArtifactReference reference = artifacts.Write(
             runId,
-            message.CandidateContent!);
+            normalized);
         return ValueTask.FromResult(
             ReferencePhaseArtifact.WithArtifact(
                 message,

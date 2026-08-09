@@ -214,7 +214,8 @@ internal static class HostedEvaluationArmDriver
             acceptedPriorReran,
             restoreAttempted,
             restoreSucceeded,
-            probe);
+            probe,
+            telemetrySnapshot);
         return new HostedEvaluationArmResult(
             Arm: arm,
             Scenario: @case.Scenario,
@@ -280,6 +281,7 @@ internal static class HostedEvaluationArmDriver
             telemetry,
             probe,
             faultMode,
+            failBeforeSynthesis: false,
             runId);
         CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
         await using StreamingRun run = await InProcessExecution.RunStreamingAsync(
@@ -314,6 +316,7 @@ internal static class HostedEvaluationArmDriver
             telemetry,
             probe,
             faultMode,
+            failBeforeSynthesis: false,
             runId);
         CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
         await using StreamingRun run = await InProcessExecution.RunStreamingAsync(
@@ -364,7 +367,8 @@ internal static class HostedEvaluationArmDriver
             fixture,
             telemetry,
             probe,
-            HostedFaultMode.FailFirstTerminal,
+            HostedFaultMode.None,
+            failBeforeSynthesis: true,
             runId))
         {
             await using StreamingRun run = await InProcessExecution.RunStreamingAsync(
@@ -395,6 +399,7 @@ internal static class HostedEvaluationArmDriver
             telemetry,
             probe,
             HostedFaultMode.None,
+            failBeforeSynthesis: false,
             runId);
         await using StreamingRun resumed =
             await InProcessExecution.ResumeStreamingAsync(
@@ -420,6 +425,7 @@ internal static class HostedEvaluationArmDriver
         HostedEvaluationTelemetry telemetry,
         MagenticPhaseProbe probe,
         HostedFaultMode faultMode,
+        bool failBeforeSynthesis,
         string runId)
     {
         HostedSynthesisArm synthesis = HostedSynthesisArmFactory.Create(
@@ -432,6 +438,8 @@ internal static class HostedEvaluationArmDriver
             faultMode);
         var start = new HostedManifestStartExecutor(
             fixture.Manifest);
+        var preSynthesisFault = new HostedPreSynthesisFaultExecutor(
+            failBeforeSynthesis);
         var boundary = new SynthesisArtifactBoundaryExecutor(
             artifacts,
             runId);
@@ -440,7 +448,8 @@ internal static class HostedEvaluationArmDriver
             delivery,
             runId);
         Workflow workflow = new WorkflowBuilder(start)
-            .AddEdge(start, synthesis.Executor)
+            .AddEdge(start, preSynthesisFault)
+            .AddEdge(preSynthesisFault, synthesis.Executor)
             .AddEdge(synthesis.Executor, boundary)
             .AddEdge(boundary, deliveryExecutor)
             .WithOutputFrom(deliveryExecutor)
@@ -532,8 +541,10 @@ internal static class HostedEvaluationArmDriver
         bool acceptedPriorReran,
         bool restoreAttempted,
         bool restoreSucceeded,
-        MagenticPhaseProbe probe) =>
-        scenario switch
+        MagenticPhaseProbe probe,
+        HostedEvaluationTelemetrySnapshot telemetry)
+    {
+        bool scenarioPass = scenario switch
         {
             HostedEvaluationScenario.Success =>
                 executionStatus == HostedEvaluationExecutionStatus.Completed &&
@@ -581,6 +592,12 @@ internal static class HostedEvaluationArmDriver
                     : result.Synthesis.Artifact is not null),
             _ => false,
         };
+        bool delegatedChildrenObserved =
+            arm != HostedEvaluationArm.HarnessDelegated ||
+            scenario == HostedEvaluationScenario.RequiredBranchFailure ||
+            telemetry.ChildSessionCount >= 2;
+        return scenarioPass && delegatedChildrenObserved;
+    }
 
     private static bool IsApplicable(
         HostedEvaluationScenario scenario,
@@ -606,8 +623,6 @@ internal static class HostedEvaluationArmDriver
                 HostedFaultMode.InvalidEveryTerminal,
             HostedEvaluationScenario.Cancellation =>
                 HostedFaultMode.DelayFirstCallUntilCanceled,
-            HostedEvaluationScenario.CheckpointRestore =>
-                HostedFaultMode.FailFirstTerminal,
             HostedEvaluationScenario.IneffectiveProgress
                 when arm == HostedEvaluationArm.Magentic =>
                 HostedFaultMode.ForceFirstMagenticStall,
