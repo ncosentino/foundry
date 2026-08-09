@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>exe</OutputType>
+    <NoWarn>$(NoWarn);MAAI001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutonomousPhasePipelineApp.Core\AutonomousPhasePipelineApp.Core.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.Copilot\NexusLabs.Foundry.Copilot.csproj" />
+    <ProjectReference Include="..\..\..\NexusLabs.Foundry.MicrosoftAgentFramework.Harness\NexusLabs.Foundry.MicrosoftAgentFramework.Harness.csproj" />
+  </ItemGroup>
+
+</Project>
