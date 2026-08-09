@@ -75,18 +75,66 @@ internal static class HostedEvaluationFixture
                 outcome,
                 gaps);
         string[] evidenceIds = branches
-            .Where(branch => branch.Outcome == ReferencePipelineOutcome.Completed)
-            .Select(branch =>
-                branch.Phase == "risk"
-                    ? "required-specialist"
-                    : "optional-specialist")
-            .Prepend("research")
+            .Where(branch => branch.Outcome is
+                ReferencePipelineOutcome.Completed or
+                ReferencePipelineOutcome.Partial)
+            .Select(branch => branch.Artifact!.Id)
+            .Prepend(research.Id)
             .ToArray();
-        return new HostedEvaluationFixtureData(
-            manifestArtifact,
+        HostedEvaluationExpectedOutput expected = CreateExpectedOutput(
+            scenario,
             evidenceIds,
             gaps);
+        return new HostedEvaluationFixtureData(
+            manifestArtifact,
+            expected);
     }
+
+    private static HostedEvaluationExpectedOutput CreateExpectedOutput(
+        HostedEvaluationScenario scenario,
+        string[] evidenceIds,
+        string[] gaps) =>
+        scenario switch
+        {
+            HostedEvaluationScenario.OptionalBranchFailure => new(
+                ReferencePipelineOutcome.Partial,
+                ReferencePipelineOutcome.Completed,
+                evidenceIds,
+                gaps,
+                ["risk"],
+                AuthoritativeDeliveries: 1),
+            HostedEvaluationScenario.RequiredBranchFailure => new(
+                ReferencePipelineOutcome.Failed,
+                ReferencePipelineOutcome.Skipped,
+                [],
+                [
+                    .. gaps,
+                    "synthesis:blocked-by-required-branch",
+                ],
+                ["operations"],
+                AuthoritativeDeliveries: 1),
+            HostedEvaluationScenario.CorrectionExhausted => new(
+                ReferencePipelineOutcome.Failed,
+                ReferencePipelineOutcome.Failed,
+                [],
+                ["synthesis:missing-recommendation"],
+                ["risk", "operations"],
+                AuthoritativeDeliveries: 1),
+            HostedEvaluationScenario.Cancellation => new(
+                PipelineOutcome: null,
+                SynthesisOutcome: null,
+                [],
+                [],
+                ["risk", "operations"],
+                AuthoritativeDeliveries: 0),
+            _ => new(
+                ReferencePipelineOutcome.Completed,
+                ReferencePipelineOutcome.Completed,
+                evidenceIds,
+                gaps,
+                ["risk", "operations"],
+                AuthoritativeDeliveries: 1),
+        };
 
     private static ReferencePhaseArtifact CreateBranch(
         ReferenceArtifactStore artifacts,

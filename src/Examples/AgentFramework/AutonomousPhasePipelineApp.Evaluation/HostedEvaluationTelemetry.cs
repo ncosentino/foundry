@@ -6,16 +6,25 @@ internal sealed class HostedEvaluationTelemetry
 {
     private readonly HashSet<string> _childAgents =
         new(StringComparer.Ordinal);
+    private readonly HashSet<string> _completedChildAgents =
+        new(StringComparer.Ordinal);
     private readonly object _sync = new();
     private long _cachedInputTokens;
     private int _cachedUsageObserved;
     private long _inputTokens;
     private int _childProviderFailures;
+    private int _completedChildSessionCountAtFault;
+    private int _completedModelCalls;
+    private int _completedModelCallsAtFault;
+    private long _boundaryOutputOrdinal;
+    private long _eventOrdinal;
+    private long _faultActivationOrdinal;
+    private int _faultActivated;
+    private HostedEvaluationAgentRole? _faultRole;
     private int _modelCalls;
     private long _outputTokens;
     private int _providerFailures;
     private int _toolCalls;
-    private string? _lastTerminalText;
     private string? _observedModel;
 
     internal TaskCompletionSource FirstCallStarted { get; } =
@@ -40,8 +49,21 @@ internal sealed class HostedEvaluationTelemetry
         FirstCallStarted.TrySetResult();
     }
 
-    internal void RecordResponse(ChatResponse response)
+    internal void RecordResponse(
+        ChatResponse response,
+        string agentId,
+        bool isChild)
     {
+        Interlocked.Increment(ref _completedModelCalls);
+        if (isChild)
+        {
+            lock (_sync)
+            {
+                _completedChildAgents.Add(agentId);
+            }
+        }
+
+        _ = Interlocked.Increment(ref _eventOrdinal);
         Interlocked.Add(
             ref _toolCalls,
             response.Messages
@@ -77,18 +99,6 @@ internal sealed class HostedEvaluationTelemetry
                 _observedModel ??= response.ModelId;
             }
         }
-
-        if (!response.Messages
-                .SelectMany(message => message.Contents)
-                .OfType<FunctionCallContent>()
-                .Any() &&
-            !string.IsNullOrWhiteSpace(response.Text))
-        {
-            lock (_sync)
-            {
-                _lastTerminalText = response.Text;
-            }
-        }
     }
 
     internal void RecordFailure(bool isChild)
@@ -100,19 +110,40 @@ internal sealed class HostedEvaluationTelemetry
         }
     }
 
-    internal void RecordFaultActivated() =>
+    internal void RecordFaultActivated(
+        HostedEvaluationAgentRole role)
+    {
+        if (Interlocked.Exchange(ref _faultActivated, 1) != 0)
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            _faultRole = role;
+            _completedChildSessionCountAtFault =
+                _completedChildAgents.Count;
+        }
+
+        _completedModelCallsAtFault =
+            Volatile.Read(ref _completedModelCalls);
+        _faultActivationOrdinal =
+            Interlocked.Increment(ref _eventOrdinal);
         FaultActivated.TrySetResult();
+    }
+
+    internal void RecordBoundaryOutput() =>
+        _boundaryOutputOrdinal =
+            Interlocked.Increment(ref _eventOrdinal);
 
     internal HostedEvaluationTelemetrySnapshot Snapshot()
     {
         int childCount;
         string? observedModel;
-        string? lastTerminalText;
         lock (_sync)
         {
             childCount = _childAgents.Count;
             observedModel = _observedModel;
-            lastTerminalText = _lastTerminalText;
         }
 
         return new HostedEvaluationTelemetrySnapshot(
@@ -127,7 +158,19 @@ internal sealed class HostedEvaluationTelemetry
             ChildSessionCount: childCount,
             ChildFailureCount: Volatile.Read(ref _childProviderFailures),
             ProviderFailures: Volatile.Read(ref _providerFailures),
-            ObservedModel: observedModel,
-            LastTerminalText: lastTerminalText);
+            CompletedModelCalls:
+                Volatile.Read(ref _completedModelCalls),
+            FaultActivated: Volatile.Read(ref _faultActivated) != 0,
+            FaultRole: _faultRole,
+            CompletedModelCallsAtFault:
+                Volatile.Read(ref _completedModelCallsAtFault),
+            CompletedChildSessionCountAtFault:
+                Volatile.Read(
+                    ref _completedChildSessionCountAtFault),
+            FaultActivationOrdinal:
+                Volatile.Read(ref _faultActivationOrdinal),
+            BoundaryOutputOrdinal:
+                Volatile.Read(ref _boundaryOutputOrdinal),
+            ObservedModel: observedModel);
     }
 }

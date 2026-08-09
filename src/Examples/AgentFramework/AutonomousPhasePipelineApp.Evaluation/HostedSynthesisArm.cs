@@ -8,6 +8,7 @@ internal sealed class HostedSynthesisArm(
     ExecutorBinding executor,
     HostedEvaluationTelemetry telemetry,
     MagenticPhaseProbe? magenticProbe,
+    ReferenceSynthesisBudget budget,
     IReadOnlyList<IDisposable> resources) : IDisposable
 {
     internal ExecutorBinding Executor { get; } = executor;
@@ -15,6 +16,8 @@ internal sealed class HostedSynthesisArm(
     internal HostedEvaluationTelemetry Telemetry { get; } = telemetry;
 
     internal MagenticPhaseProbe? MagenticProbe { get; } = magenticProbe;
+
+    internal ReferenceSynthesisBudget Budget { get; } = budget;
 
     public void Dispose()
     {

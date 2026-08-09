@@ -8,7 +8,6 @@ using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
-using NexusLabs.Foundry.Copilot;
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 namespace AutonomousPhasePipelineApp.Evaluation;
@@ -20,19 +19,11 @@ internal static class HostedEvaluationArmDriver
         HostedEvaluationCase @case,
         int trialIndex,
         HostedEvaluationArm arm,
+        HostedEvaluationChatClientFactory clientFactory,
         CancellationToken cancellationToken)
     {
         string trialId =
             $"{@case.CaseId}:{@case.Scenario}:r{trialIndex:D2}:{arm}";
-        if (!IsApplicable(@case.Scenario, arm))
-        {
-            return CreateNotApplicable(
-                protocol,
-                @case,
-                trialId,
-                arm);
-        }
-
         string runId = $"{protocol.RunId}:{trialId}";
         var artifacts = new ReferenceArtifactStore();
         var delivery = new IdempotentDeliverySink();
@@ -43,19 +34,28 @@ internal static class HostedEvaluationArmDriver
                 @case.Scenario);
         var telemetry = new HostedEvaluationTelemetry();
         var probe = new MagenticPhaseProbe();
-        HostedFaultMode faultMode = GetFaultMode(
+        HostedFaultPlan faultPlan = HostedEvaluationFaultCatalog.GetPlan(
             @case.Scenario,
             arm);
-        using Activity activity = new Activity(
-            "autonomous-phase.arm").Start();
+        using Activity? activity =
+            HostedEvaluationActivitySource.Source.StartActivity(
+                "phase.synthesis",
+                ActivityKind.Internal);
+        activity?.SetTag("foundry.eval.arm", arm.ToString());
+        activity?.SetTag(
+            "foundry.eval.scenario",
+            @case.Scenario.ToString());
+        activity?.SetTag(
+            "foundry.eval.protocol",
+            HostedEvaluationProtocol.Version);
         var stopwatch = Stopwatch.StartNew();
 
+        HostedEvaluationRunObservation observation = EmptyObservation();
         ReferencePipelineResult? result = null;
-        HostedEvaluationRunObservation observation;
-        int restoreEvents = 0;
         bool restoreAttempted = false;
         bool restoreSucceeded = false;
         bool acceptedPriorReran = false;
+        int restoreEvents = 0;
         int phaseFailures = 0;
         HostedEvaluationExecutionStatus executionStatus;
         string? failureCode = null;
@@ -73,17 +73,19 @@ internal static class HostedEvaluationArmDriver
                         fixture,
                         telemetry,
                         probe,
-                        faultMode,
+                        faultPlan,
+                        clientFactory,
                         runId,
                         cancellationToken);
-                    executionStatus = HostedEvaluationExecutionStatus.Canceled;
+                    executionStatus =
+                        ClassifyCancellation(observation);
                     failureCode = observation.FailureCode;
                     break;
 
                 case HostedEvaluationScenario.CheckpointRestore:
                     restoreAttempted = true;
                     (observation, result, acceptedPriorReran) =
-                        await RunFreshRestoreAsync(
+                        await RunSameRunRestoreAsync(
                             protocol,
                             arm,
                             artifacts,
@@ -91,13 +93,14 @@ internal static class HostedEvaluationArmDriver
                             fixture,
                             telemetry,
                             probe,
+                            clientFactory,
                             runId,
                             cancellationToken);
-                    restoreEvents = result is null ? 0 : 1;
                     restoreSucceeded = result is not null;
-                    executionStatus = result is null
-                        ? HostedEvaluationExecutionStatus.Failed
-                        : HostedEvaluationExecutionStatus.Completed;
+                    restoreEvents = restoreSucceeded ? 1 : 0;
+                    executionStatus = restoreSucceeded
+                        ? HostedEvaluationExecutionStatus.Completed
+                        : HostedEvaluationExecutionStatus.Failed;
                     failureCode = observation.FailureCode;
                     break;
 
@@ -110,7 +113,8 @@ internal static class HostedEvaluationArmDriver
                         fixture,
                         telemetry,
                         probe,
-                        faultMode,
+                        faultPlan,
+                        clientFactory,
                         runId,
                         cancellationToken);
                     result = observation.Result;
@@ -134,7 +138,8 @@ internal static class HostedEvaluationArmDriver
                         fixture,
                         telemetry,
                         probe,
-                        faultMode,
+                        faultPlan,
+                        clientFactory,
                         runId,
                         cancellationToken);
                     result = observation.Result;
@@ -150,116 +155,151 @@ internal static class HostedEvaluationArmDriver
         catch (OperationCanceledException) when (
             cancellationToken.IsCancellationRequested)
         {
-            observation = new HostedEvaluationRunObservation(
-                Result: null,
-                BeforeSynthesis: null,
-                FailureCode: "caller-canceled",
-                Canceled: true,
-                CheckpointEvents: 0);
-            executionStatus = HostedEvaluationExecutionStatus.Canceled;
+            observation = EmptyObservation() with
+            {
+                FailureCode = "caller-canceled",
+                Canceled = true,
+            };
+            executionStatus =
+                HostedEvaluationExecutionStatus.Canceled;
             failureCode = "caller-canceled";
         }
         catch (OperationCanceledException)
         {
-            observation = new HostedEvaluationRunObservation(
-                Result: null,
-                BeforeSynthesis: null,
-                FailureCode: "provider-timeout",
-                Canceled: false,
-                CheckpointEvents: 0);
-            executionStatus = HostedEvaluationExecutionStatus.Failed;
+            observation = EmptyObservation() with
+            {
+                FailureCode = "provider-timeout",
+            };
+            executionStatus =
+                HostedEvaluationExecutionStatus.Failed;
             failureCode = "provider-timeout";
             phaseFailures++;
         }
         catch (Exception exception) when (
             exception is InvalidOperationException
                 or HttpRequestException
-                or TimeoutException
-                or CopilotAuthException
-                or CopilotRateLimitException)
+                or TimeoutException)
         {
-            observation = new HostedEvaluationRunObservation(
-                Result: null,
-                BeforeSynthesis: null,
-                FailureCode: exception.GetType().Name,
-                Canceled: false,
-                CheckpointEvents: 0);
-            executionStatus = HostedEvaluationExecutionStatus.Failed;
+            observation = EmptyObservation() with
+            {
+                FailureCode = exception.GetType().Name,
+            };
+            executionStatus =
+                HostedEvaluationExecutionStatus.Failed;
             failureCode = exception.GetType().Name;
             phaseFailures++;
         }
 
         stopwatch.Stop();
         result ??= observation.Result;
-        var scores = HostedDeterministicScorer.Score(
-            artifacts,
-            runId,
-            @case.Scenario,
-            fixture,
-            result);
+        var (correctness, outputText) =
+            HostedDeterministicScorer.Score(
+                artifacts,
+                runId,
+                fixture,
+                result,
+                delivery.AuthoritativeCount);
         HostedEvaluationTelemetrySnapshot telemetrySnapshot =
             telemetry.Snapshot();
-        if (result?.Synthesis.Outcome == ReferencePipelineOutcome.Failed)
-        {
-            phaseFailures++;
-        }
-
-        bool contractPass = EvaluateContract(
-            arm,
-            @case.Scenario,
-            executionStatus,
-            result,
-            scores,
-            delivery,
-            acceptedPriorReran,
+        bool faultAfterProviderWork =
+            !faultPlan.MustActivate ||
+            telemetrySnapshot.CompletedModelCallsAtFault > 0;
+        bool collaboratorRequired =
+            @case.Scenario ==
+                HostedEvaluationScenario.Cancellation &&
+            (arm is HostedEvaluationArm.HarnessDelegated
+                or HostedEvaluationArm.Magentic);
+        bool faultAfterCollaboratorWork =
+            !faultPlan.MustActivate ||
+            !collaboratorRequired ||
+            telemetrySnapshot.CompletedChildSessionCountAtFault > 0;
+        bool cancellationObserved =
+            executionStatus ==
+                HostedEvaluationExecutionStatus.Canceled;
+        bool noDeliveryAfterCancellation =
+            @case.Scenario !=
+                HostedEvaluationScenario.Cancellation ||
+            delivery.AuthoritativeCount == 0;
+        bool replayIdempotent =
+            @case.Scenario !=
+                HostedEvaluationScenario.DeliveryReplay ||
+            (delivery.AttemptCount == 2 &&
+             delivery.AuthoritativeCount == 1);
+        bool correctionRecovered =
+            @case.Scenario is not (
+                HostedEvaluationScenario.CorrectionSucceeds or
+                HostedEvaluationScenario.IneffectiveProgress) ||
+            (telemetrySnapshot.FaultActivated &&
+             correctness.TaskContractPass);
+        var resilience = new HostedEvaluationResilience(
+            faultPlan.MustActivate,
+            telemetrySnapshot.FaultActivated,
+            faultAfterProviderWork,
+            faultAfterCollaboratorWork,
+            cancellationObserved,
+            noDeliveryAfterCancellation,
             restoreAttempted,
             restoreSucceeded,
-            probe,
-            telemetrySnapshot);
+            acceptedPriorReran,
+            replayIdempotent,
+            correctionRecovered,
+            failureCode ?? result?.Synthesis.Error);
+        var resources = new HostedEvaluationResources(
+            observation.ProviderCallLimit,
+            observation.ProviderCallsUsed,
+            telemetrySnapshot.ModelCalls,
+            telemetrySnapshot.ToolCalls,
+            telemetrySnapshot.InputTokens,
+            telemetrySnapshot.OutputTokens,
+            telemetrySnapshot.CachedInputTokens,
+            telemetrySnapshot.ChildSessionCount,
+            telemetrySnapshot.ChildFailureCount,
+            observation.CheckpointEvents,
+            restoreEvents,
+            probe.Plans.Count,
+            probe.Replans.Count,
+            probe.ProgressEventCount,
+            (long)stopwatch.Elapsed.TotalMilliseconds);
+        var infrastructure = new HostedEvaluationInfrastructure(
+            executionStatus,
+            telemetrySnapshot.ProviderFailures,
+            phaseFailures,
+            outputText is not null &&
+                (!faultPlan.MustActivate ||
+                 (telemetrySnapshot.FaultActivated &&
+                  telemetrySnapshot.BoundaryOutputOrdinal >
+                    telemetrySnapshot.FaultActivationOrdinal)),
+            HostedSemanticQualityStatus
+                .NotScoredCalibrationRequired);
+        bool scenarioPass = EvaluateScenarioContract(
+            arm,
+            @case.Scenario,
+            correctness,
+            resilience,
+            infrastructure,
+            probe);
+
         return new HostedEvaluationArmResult(
-            Arm: arm,
-            Scenario: @case.Scenario,
-            ExecutionStatus: executionStatus,
+            arm,
+            @case.Scenario,
             Applicable: true,
-            ScenarioContractPass: contractPass,
-            ArtifactSchemaValid: scores.SchemaValid,
-            RequiredArtifactCoverage: scores.RequiredCoverage,
-            GapReportingCorrect: scores.GapCorrect,
-            SuccessfulSiblingPreserved: scores.SiblingPreserved,
-            EvidenceReferencesValid: scores.EvidenceValid,
-            AcceptedPriorPhaseReran: acceptedPriorReran,
-            RestoreAttempted: restoreAttempted,
-            RestoreSucceeded: restoreSucceeded,
-            DeliveryAttempts: delivery.AttemptCount,
-            AuthoritativeDeliveries: delivery.AuthoritativeCount,
-            ModelCalls: telemetrySnapshot.ModelCalls,
-            ToolCalls: telemetrySnapshot.ToolCalls,
-            InputTokens: telemetrySnapshot.InputTokens,
-            OutputTokens: telemetrySnapshot.OutputTokens,
-            CachedInputTokens: telemetrySnapshot.CachedInputTokens,
-            ChildSessionCount: telemetrySnapshot.ChildSessionCount,
-            ChildFailureCount: telemetrySnapshot.ChildFailureCount,
-            ProviderFailureCount: telemetrySnapshot.ProviderFailures,
-            PhaseFailureCount: phaseFailures,
-            CheckpointCount: observation.CheckpointEvents,
-            RestoreEventCount: restoreEvents,
-            PlanCount: probe.Plans.Count,
-            ReplanCount: probe.Replans.Count,
-            ProgressEventCount: probe.ProgressEventCount,
-            DurationMilliseconds: (long)stopwatch.Elapsed.TotalMilliseconds,
-            TraceId: activity?.TraceId.ToString() ?? string.Empty,
-            ArtifactDigest: result?.Synthesis.Artifact?.Digest,
-            FailureCode: failureCode ?? result?.Synthesis.Error,
-            OutputText:
-                scores.OutputText
-                ?? telemetrySnapshot.LastTerminalText,
-            QualityEvidenceStatus: "DETERMINISTIC_ONLY",
-            Provenance: CreateProvenance(
+            scenarioPass,
+            result?.Outcome,
+            result?.Synthesis.Outcome,
+            activity?.TraceId.ToString() ?? string.Empty,
+            result?.Synthesis.Artifact?.Digest,
+            outputText,
+            correctness,
+            resilience,
+            resources,
+            infrastructure,
+            CreateProvenance(
                 protocol,
                 @case,
                 trialId,
                 arm,
-                telemetrySnapshot.ObservedModel));
+                telemetrySnapshot.ObservedModel,
+                faultPlan));
     }
 
     private static async Task<HostedEvaluationRunObservation> RunOnceAsync(
@@ -270,7 +310,8 @@ internal static class HostedEvaluationArmDriver
         HostedEvaluationFixtureData fixture,
         HostedEvaluationTelemetry telemetry,
         MagenticPhaseProbe probe,
-        HostedFaultMode faultMode,
+        HostedFaultPlan faultPlan,
+        HostedEvaluationChatClientFactory clientFactory,
         string runId,
         CancellationToken cancellationToken)
     {
@@ -282,32 +323,41 @@ internal static class HostedEvaluationArmDriver
             fixture,
             telemetry,
             probe,
-            faultMode,
-            failBeforeSynthesis: false,
+            faultPlan,
+            clientFactory,
+            failFirstBeforeSynthesis: false,
             runId);
         CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
-        await using StreamingRun run = await InProcessExecution.RunStreamingAsync(
-            execution.Workflow,
-            "start",
-            checkpoints,
-            $"hosted-eval:{runId}",
-            cancellationToken);
-        return await ObserveAsync(
-            run,
-            cancellationToken);
+        await using StreamingRun run =
+            await InProcessExecution.RunStreamingAsync(
+                execution.Workflow,
+                "start",
+                checkpoints,
+                $"hosted-eval:{runId}",
+                cancellationToken);
+        HostedEvaluationRunObservation observation =
+            await ObserveAsync(
+                run,
+                telemetry,
+                cancellationToken);
+        return AddBudget(
+            observation,
+            execution.Synthesis.Budget);
     }
 
-    private static async Task<HostedEvaluationRunObservation> RunCancellationAsync(
-        HostedEvaluationProtocol protocol,
-        HostedEvaluationArm arm,
-        ReferenceArtifactStore artifacts,
-        IdempotentDeliverySink delivery,
-        HostedEvaluationFixtureData fixture,
-        HostedEvaluationTelemetry telemetry,
-        MagenticPhaseProbe probe,
-        HostedFaultMode faultMode,
-        string runId,
-        CancellationToken cancellationToken)
+    private static async Task<HostedEvaluationRunObservation>
+        RunCancellationAsync(
+            HostedEvaluationProtocol protocol,
+            HostedEvaluationArm arm,
+            ReferenceArtifactStore artifacts,
+            IdempotentDeliverySink delivery,
+            HostedEvaluationFixtureData fixture,
+            HostedEvaluationTelemetry telemetry,
+            MagenticPhaseProbe probe,
+            HostedFaultPlan faultPlan,
+            HostedEvaluationChatClientFactory clientFactory,
+            string runId,
+            CancellationToken cancellationToken)
     {
         using HostedEvaluationArmExecution execution = BuildExecution(
             protocol,
@@ -317,38 +367,48 @@ internal static class HostedEvaluationArmDriver
             fixture,
             telemetry,
             probe,
-            faultMode,
-            failBeforeSynthesis: false,
+            faultPlan,
+            clientFactory,
+            failFirstBeforeSynthesis: false,
             runId);
         CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
-        await using StreamingRun run = await InProcessExecution.RunStreamingAsync(
-            execution.Workflow,
-            "start",
-            checkpoints,
-            $"hosted-eval:{runId}",
-            cancellationToken);
-        Task<HostedEvaluationRunObservation> observation = ObserveAsync(
-            run,
-            cancellationToken);
+        await using StreamingRun run =
+            await InProcessExecution.RunStreamingAsync(
+                execution.Workflow,
+                "start",
+                checkpoints,
+                $"hosted-eval:{runId}",
+                cancellationToken);
+        Task<HostedEvaluationRunObservation> observation =
+            ObserveAsync(
+                run,
+                telemetry,
+                cancellationToken);
         await telemetry.FaultActivated.Task.WaitAsync(
             TimeSpan.FromMinutes(2),
             cancellationToken);
-        Task cancellation = run.CancelRunAsync().AsTask();
-        await Task.WhenAll(cancellation, observation).WaitAsync(
-            TimeSpan.FromMinutes(2),
+        await run.CancelRunAsync();
+        HostedEvaluationRunObservation observed =
+            await observation.WaitAsync(
+                TimeSpan.FromMinutes(2),
+                cancellationToken);
+        RunStatus status = await run.GetStatusAsync(
             cancellationToken);
-        HostedEvaluationRunObservation observed = await observation;
-        return observed with
-        {
-            Canceled = true,
-            FailureCode = "caller-canceled",
-        };
+        return AddBudget(
+            observed with
+            {
+                Canceled = status == RunStatus.Ended,
+                FailureCode = status == RunStatus.Ended
+                    ? "caller-canceled"
+                    : "cancellation-not-observed",
+            },
+            execution.Synthesis.Budget);
     }
 
     private static async Task<(
         HostedEvaluationRunObservation Observation,
         ReferencePipelineResult? Result,
-        bool AcceptedPriorReran)> RunFreshRestoreAsync(
+        bool AcceptedPriorReran)> RunSameRunRestoreAsync(
         HostedEvaluationProtocol protocol,
         HostedEvaluationArm arm,
         ReferenceArtifactStore artifacts,
@@ -356,12 +416,11 @@ internal static class HostedEvaluationArmDriver
         HostedEvaluationFixtureData fixture,
         HostedEvaluationTelemetry telemetry,
         MagenticPhaseProbe probe,
+        HostedEvaluationChatClientFactory clientFactory,
         string runId,
         CancellationToken cancellationToken)
     {
-        CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
-        HostedEvaluationRunObservation initial;
-        using (HostedEvaluationArmExecution first = BuildExecution(
+        using HostedEvaluationArmExecution execution = BuildExecution(
             protocol,
             arm,
             artifacts,
@@ -369,53 +428,53 @@ internal static class HostedEvaluationArmDriver
             fixture,
             telemetry,
             probe,
-            HostedFaultMode.None,
-            failBeforeSynthesis: true,
-            runId))
-        {
-            await using StreamingRun run = await InProcessExecution.RunStreamingAsync(
-                first.Workflow,
+            HostedFaultPlan.None,
+            clientFactory,
+            failFirstBeforeSynthesis: true,
+            runId);
+        CheckpointManager checkpoints = CheckpointManager.CreateInMemory();
+        await using StreamingRun run =
+            await InProcessExecution.RunStreamingAsync(
+                execution.Workflow,
                 "start",
                 checkpoints,
                 $"hosted-eval:{runId}",
                 cancellationToken);
-            initial = await ObserveAsync(
+        HostedEvaluationRunObservation initial =
+            await ObserveAsync(
                 run,
+                telemetry,
                 cancellationToken);
-        }
-
         if (initial.BeforeSynthesis is null)
         {
             return (
-                initial,
+                AddBudget(
+                    initial,
+                    execution.Synthesis.Budget),
                 Result: null,
                 AcceptedPriorReran: true);
         }
 
-        using HostedEvaluationArmExecution recovered = BuildExecution(
-            protocol,
-            arm,
-            artifacts,
-            delivery,
-            fixture,
-            telemetry,
-            probe,
-            HostedFaultMode.None,
-            failBeforeSynthesis: false,
-            runId);
-        await using StreamingRun resumed =
-            await InProcessExecution.ResumeStreamingAsync(
-                recovered.Workflow,
-                initial.BeforeSynthesis,
-                checkpoints,
-                cancellationToken);
-        HostedEvaluationRunObservation restored = await ObserveAsync(
-            resumed,
+        await run.RestoreCheckpointAsync(
+            initial.BeforeSynthesis,
             cancellationToken);
+        HostedEvaluationRunObservation restored =
+            await ObserveAsync(
+                run,
+                telemetry,
+                cancellationToken);
         return (
-            restored,
+            AddBudget(
+                restored with
+                {
+                    CheckpointEvents =
+                        initial.CheckpointEvents +
+                        restored.CheckpointEvents,
+                },
+                execution.Synthesis.Budget),
             restored.Result,
-            AcceptedPriorReran: recovered.Start.CallCount != 0);
+            AcceptedPriorReran:
+                execution.Start.CallCount != 1);
     }
 
     private static HostedEvaluationArmExecution BuildExecution(
@@ -426,26 +485,27 @@ internal static class HostedEvaluationArmDriver
         HostedEvaluationFixtureData fixture,
         HostedEvaluationTelemetry telemetry,
         MagenticPhaseProbe probe,
-        HostedFaultMode faultMode,
-        bool failBeforeSynthesis,
+        HostedFaultPlan faultPlan,
+        HostedEvaluationChatClientFactory clientFactory,
+        bool failFirstBeforeSynthesis,
         string runId)
     {
         HostedSynthesisArm synthesis = HostedSynthesisArmFactory.Create(
             arm,
-            protocol.Model,
             artifacts,
             runId,
             telemetry,
             probe,
-            faultMode);
+            faultPlan,
+            clientFactory);
         var start = new HostedManifestStartExecutor(
             fixture.Manifest);
         var preSynthesisFault = new HostedPreSynthesisFaultExecutor(
-            failBeforeSynthesis);
-        var boundary = new SynthesisArtifactBoundaryExecutor(
+            failFirstBeforeSynthesis);
+        var boundary = new HostedSynthesisBoundaryExecutor(
             artifacts,
             runId);
-        var deliveryExecutor = new DeliveryExecutor(
+        var deliveryExecutor = new HostedDeliveryExecutor(
             artifacts,
             delivery,
             runId);
@@ -455,7 +515,7 @@ internal static class HostedEvaluationArmDriver
             .AddEdge(synthesis.Executor, boundary)
             .AddEdge(boundary, deliveryExecutor)
             .WithOutputFrom(deliveryExecutor)
-            .WithName($"hosted-synthesis-{arm}.v1")
+            .WithName($"hosted-synthesis-{arm}.v2")
             .Build();
         return new HostedEvaluationArmExecution(
             workflow,
@@ -467,6 +527,7 @@ internal static class HostedEvaluationArmDriver
 
     private static async Task<HostedEvaluationRunObservation> ObserveAsync(
         StreamingRun run,
+        HostedEvaluationTelemetry telemetry,
         CancellationToken cancellationToken)
     {
         ReferencePipelineResult? result = null;
@@ -504,6 +565,7 @@ internal static class HostedEvaluationArmDriver
                 })
             {
                 result = currentResult;
+                telemetry.RecordBoundaryOutput();
             }
 
             if (workflowEvent is WorkflowErrorEvent error)
@@ -524,176 +586,108 @@ internal static class HostedEvaluationArmDriver
             beforeSynthesis,
             failureCode,
             Canceled: false,
-            checkpointEvents);
+            checkpointEvents,
+            ProviderCallLimit: 0,
+            ProviderCallsUsed: 0);
     }
 
-    private static bool EvaluateContract(
+    private static HostedEvaluationRunObservation AddBudget(
+        HostedEvaluationRunObservation observation,
+        ReferenceSynthesisBudget budget) =>
+        observation with
+        {
+            ProviderCallLimit = budget.MaxProviderCalls,
+            ProviderCallsUsed = budget.UsedProviderCalls,
+        };
+
+    private static bool EvaluateScenarioContract(
         HostedEvaluationArm arm,
         HostedEvaluationScenario scenario,
-        HostedEvaluationExecutionStatus executionStatus,
-        ReferencePipelineResult? result,
-        (
-            bool SchemaValid,
-            bool RequiredCoverage,
-            bool GapCorrect,
-            bool SiblingPreserved,
-            bool EvidenceValid,
-            string? OutputText) scores,
-        IdempotentDeliverySink delivery,
-        bool acceptedPriorReran,
-        bool restoreAttempted,
-        bool restoreSucceeded,
-        MagenticPhaseProbe probe,
-        HostedEvaluationTelemetrySnapshot telemetry)
+        HostedEvaluationCorrectness correctness,
+        HostedEvaluationResilience resilience,
+        HostedEvaluationInfrastructure infrastructure,
+        MagenticPhaseProbe probe)
     {
-        bool scenarioPass = scenario switch
+        bool infrastructureHealthy =
+            infrastructure.ProviderFailureCount == 0 &&
+            infrastructure.PhaseFailureCount == 0;
+        if (!infrastructureHealthy)
         {
-            HostedEvaluationScenario.Success =>
-                executionStatus == HostedEvaluationExecutionStatus.Completed &&
-                result?.Outcome == ReferencePipelineOutcome.Completed &&
-                scores.SchemaValid &&
-                scores.RequiredCoverage &&
-                scores.EvidenceValid &&
-                delivery.AuthoritativeCount == 1,
-            HostedEvaluationScenario.OptionalBranchFailure =>
-                result?.Outcome == ReferencePipelineOutcome.Partial &&
-                scores.SchemaValid &&
-                scores.GapCorrect &&
-                scores.SiblingPreserved &&
-                scores.EvidenceValid,
-            HostedEvaluationScenario.RequiredBranchFailure =>
-                result?.Outcome == ReferencePipelineOutcome.Failed &&
-                result.Synthesis.Outcome == ReferencePipelineOutcome.Skipped &&
-                scores.SiblingPreserved &&
-                delivery.AuthoritativeCount == 1,
-            HostedEvaluationScenario.CorrectionSucceeds =>
-                result?.Outcome == ReferencePipelineOutcome.Completed &&
-                scores.SchemaValid &&
-                scores.EvidenceValid,
-            HostedEvaluationScenario.CorrectionExhausted =>
-                result?.Outcome == ReferencePipelineOutcome.Failed &&
-                delivery.AuthoritativeCount == 1,
+            return false;
+        }
+
+        if (resilience.FaultRequired &&
+            (!resilience.FaultActivated ||
+             !resilience.FaultActivatedAfterProviderWork ||
+             !resilience.FaultActivatedAfterCollaboratorWork))
+        {
+            return false;
+        }
+
+        return scenario switch
+        {
             HostedEvaluationScenario.Cancellation =>
-                executionStatus == HostedEvaluationExecutionStatus.Canceled &&
-                delivery.AuthoritativeCount == 0,
+                resilience.CancellationObserved &&
+                resilience.NoDeliveryAfterCancellation,
             HostedEvaluationScenario.CheckpointRestore =>
-                restoreAttempted &&
-                restoreSucceeded &&
-                !acceptedPriorReran &&
-                result?.Outcome == ReferencePipelineOutcome.Completed &&
-                delivery.AuthoritativeCount == 1,
+                correctness.TaskContractPass &&
+                resilience.RestoreAttempted &&
+                resilience.SameRunRestoreSucceeded &&
+                !resilience.AcceptedPriorPhaseReran,
             HostedEvaluationScenario.DeliveryReplay =>
-                result is not null &&
-                delivery.AttemptCount == 2 &&
-                delivery.AuthoritativeCount == 1,
+                correctness.TaskContractPass &&
+                resilience.ReplayIdempotent,
+            HostedEvaluationScenario.CorrectionSucceeds =>
+                correctness.TaskContractPass &&
+                resilience.CorrectionRecoveredWithinBound,
             HostedEvaluationScenario.IneffectiveProgress =>
-                result?.Outcome == ReferencePipelineOutcome.Completed &&
-                scores.SchemaValid &&
-                (arm == HostedEvaluationArm.Magentic
-                    ? probe.Replans.Count > 0
-                    : result.Synthesis.Artifact is not null),
-            _ => false,
+                correctness.TaskContractPass &&
+                resilience.CorrectionRecoveredWithinBound &&
+                (arm != HostedEvaluationArm.Magentic ||
+                 probe.Replans.Count > 0),
+            _ => correctness.TaskContractPass,
         };
-        bool delegatedChildrenObserved =
-            arm != HostedEvaluationArm.HarnessDelegated ||
-            scenario == HostedEvaluationScenario.RequiredBranchFailure ||
-            telemetry.ChildSessionCount >= 2;
-        return scenarioPass && delegatedChildrenObserved;
     }
 
-    private static bool IsApplicable(
-        HostedEvaluationScenario scenario,
-        HostedEvaluationArm arm) =>
-        scenario switch
-        {
-            HostedEvaluationScenario.CorrectionSucceeds
-                when arm == HostedEvaluationArm.Magentic => false,
-            _ => true,
-        };
-
-    private static HostedFaultMode GetFaultMode(
-        HostedEvaluationScenario scenario,
-        HostedEvaluationArm arm) =>
-        scenario switch
-        {
-            HostedEvaluationScenario.CorrectionSucceeds =>
-                HostedFaultMode.InvalidFirstTerminal,
-            HostedEvaluationScenario.CorrectionExhausted
-                when arm == HostedEvaluationArm.Magentic =>
-                HostedFaultMode.InvalidMagenticFinal,
-            HostedEvaluationScenario.CorrectionExhausted =>
-                HostedFaultMode.InvalidEveryTerminal,
-            HostedEvaluationScenario.Cancellation =>
-                HostedFaultMode.DelayFirstCallUntilCanceled,
-            HostedEvaluationScenario.IneffectiveProgress
-                when arm == HostedEvaluationArm.Magentic =>
-                HostedFaultMode.ForceFirstMagenticStall,
-            HostedEvaluationScenario.IneffectiveProgress =>
-                HostedFaultMode.InvalidFirstTerminal,
-            _ => HostedFaultMode.None,
-        };
-
-    private static HostedEvaluationArmResult CreateNotApplicable(
-        HostedEvaluationProtocol protocol,
-        HostedEvaluationCase @case,
-        string trialId,
-        HostedEvaluationArm arm) =>
+    private static HostedEvaluationRunObservation EmptyObservation() =>
         new(
-            Arm: arm,
-            Scenario: @case.Scenario,
-            ExecutionStatus: HostedEvaluationExecutionStatus.NotApplicable,
-            Applicable: false,
-            ScenarioContractPass: false,
-            ArtifactSchemaValid: false,
-            RequiredArtifactCoverage: false,
-            GapReportingCorrect: false,
-            SuccessfulSiblingPreserved: false,
-            EvidenceReferencesValid: false,
-            AcceptedPriorPhaseReran: false,
-            RestoreAttempted: false,
-            RestoreSucceeded: false,
-            DeliveryAttempts: 0,
-            AuthoritativeDeliveries: 0,
-            ModelCalls: 0,
-            ToolCalls: 0,
-            InputTokens: 0,
-            OutputTokens: 0,
-            CachedInputTokens: null,
-            ChildSessionCount: 0,
-            ChildFailureCount: 0,
-            ProviderFailureCount: 0,
-            PhaseFailureCount: 0,
-            CheckpointCount: 0,
-            RestoreEventCount: 0,
-            PlanCount: 0,
-            ReplanCount: 0,
-            ProgressEventCount: 0,
-            DurationMilliseconds: 0,
-            TraceId: string.Empty,
-            ArtifactDigest: null,
+            Result: null,
+            BeforeSynthesis: null,
             FailureCode: null,
-            OutputText: null,
-            QualityEvidenceStatus: "NOT_APPLICABLE",
-            Provenance: CreateProvenance(
-                protocol,
-                @case,
-                trialId,
-                arm,
-                observedModel: null));
+            Canceled: false,
+            CheckpointEvents: 0,
+            ProviderCallLimit:
+                HostedSynthesisArmFactory.MaxProviderCalls,
+            ProviderCallsUsed: 0);
+
+    internal static HostedEvaluationExecutionStatus ClassifyCancellation(
+        HostedEvaluationRunObservation observation)
+    {
+        ArgumentNullException.ThrowIfNull(observation);
+        return observation.Canceled
+            ? HostedEvaluationExecutionStatus.Canceled
+            : HostedEvaluationExecutionStatus.Failed;
+    }
 
     private static HostedEvaluationProvenance CreateProvenance(
         HostedEvaluationProtocol protocol,
         HostedEvaluationCase @case,
         string trialId,
         HostedEvaluationArm arm,
-        string? observedModel)
+        string? observedModel,
+        HostedFaultPlan faultPlan)
     {
         string configuration = string.Join(
             "|",
             HostedEvaluationProtocol.Version,
             protocol.Model,
             arm,
-            @case.Scenario);
+            @case.Scenario,
+            HostedSynthesisArmFactory.MaxProviderCalls,
+            HostedSynthesisArmFactory.MaxArtifactAttempts,
+            faultPlan.Mode,
+            faultPlan.ActivationPoint,
+            faultPlan.TargetRole);
         string configurationHash = Convert
             .ToHexString(
                 SHA256.HashData(

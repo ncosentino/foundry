@@ -9,4 +9,6 @@ internal sealed record HostedEvaluationRunObservation(
     CheckpointInfo? BeforeSynthesis,
     string? FailureCode,
     bool Canceled,
-    int CheckpointEvents);
+    int CheckpointEvents,
+    int ProviderCallLimit,
+    int ProviderCallsUsed);

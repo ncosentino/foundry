@@ -2,7 +2,7 @@ namespace AutonomousPhasePipelineApp.Evaluation;
 
 internal sealed record HostedEvaluationProtocol
 {
-    internal const string Version = "autonomous-phase-eval-v1";
+    internal const string Version = "autonomous-phase-eval-v2";
 
     internal required string Repository { get; init; }
 
@@ -17,6 +17,8 @@ internal sealed record HostedEvaluationProtocol
     internal required string OutputDirectory { get; init; }
 
     internal required string RunId { get; init; }
+
+    internal required string DatasetName { get; init; }
 
     internal static HostedEvaluationProtocol FromEnvironment()
     {
@@ -55,6 +57,10 @@ internal sealed record HostedEvaluationProtocol
                     "artifacts",
                     "autonomous-phase-evaluation"),
             RunId = runId,
+            DatasetName =
+                Environment.GetEnvironmentVariable(
+                    "EVAL_LANGFUSE_DATASET")
+                ?? "foundry/autonomous-phase-synthesis",
         };
     }
 }

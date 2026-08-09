@@ -19,7 +19,13 @@ internal sealed class HostedManifestStartExecutor(
         IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
+        using System.Diagnostics.Activity? activity =
+            HostedEvaluationActivitySource.Source.StartActivity(
+                "phase.manifest-start");
         Interlocked.Increment(ref _callCount);
+        activity?.SetTag(
+            "foundry.manifest.id",
+            manifest.Artifact?.Id);
         return ValueTask.FromResult(manifest);
     }
 }

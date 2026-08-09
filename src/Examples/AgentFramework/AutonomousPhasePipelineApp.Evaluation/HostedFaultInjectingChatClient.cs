@@ -1,3 +1,7 @@
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
 using AutonomousPhasePipelineApp.Core;
 
 using Microsoft.Extensions.AI;
@@ -6,89 +10,122 @@ namespace AutonomousPhasePipelineApp.Evaluation;
 
 internal sealed class HostedFaultInjectingChatClient(
     IChatClient innerClient,
-    HostedFaultMode mode,
+    HostedFaultPlan plan,
+    HostedFaultState state,
+    HostedEvaluationAgentRole role,
     HostedEvaluationTelemetry telemetry) : DelegatingChatClient(innerClient)
 {
-    private int _callCount;
-    private int _ledgerCount;
-    private int _terminalCount;
-
     public override async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options,
         CancellationToken cancellationToken)
     {
-        ChatMessage[] messageSnapshot = [.. messages];
-        int call = Interlocked.Increment(ref _callCount);
-        if (mode == HostedFaultMode.DelayFirstCallUntilCanceled &&
-            call == 1)
+        ChatResponse response = await base.GetResponseAsync(
+            messages,
+            options,
+            cancellationToken);
+        if (plan.Mode == HostedFaultMode.None ||
+            plan.TargetRole != role)
         {
-            telemetry.RecordFaultActivated();
-            await Task.Delay(
-                Timeout.InfiniteTimeSpan,
-                cancellationToken);
+            return response;
         }
 
-        ChatResponse response;
-        if (mode == HostedFaultMode.FailFirstTerminal &&
-            Volatile.Read(ref _terminalCount) == 0)
+        bool ledger = MagenticScriptedResponses.TryParseLedger(
+            response.Text ?? string.Empty,
+            out _);
+        if (ledger)
         {
-            response = await base.GetResponseAsync(
-                messageSnapshot,
-                options,
-                cancellationToken);
-            if (!HasFunctionCall(response))
+            int ledgerIndex = state.IncrementLedger();
+            if (plan.Mode == HostedFaultMode.ForceFirstMagenticStall &&
+                plan.ActivationPoint ==
+                    HostedFaultActivationPoint.AfterMagenticProgressLedger &&
+                ledgerIndex == 1)
             {
-                Interlocked.Increment(ref _terminalCount);
-                throw new InvalidOperationException(
-                    "Injected synthesis failure after the macro checkpoint.");
+                telemetry.RecordFaultActivated(role);
+                return ReplaceText(
+                    response,
+                    MagenticScriptedResponses.CreateLedger(
+                        isRequestSatisfied: false,
+                        isInLoop: true,
+                        isProgressBeingMade: false,
+                        nextSpeaker:
+                            MagenticPhaseFactory.ManifestAnalystName,
+                        instruction:
+                            "The current approach is ineffective."));
             }
 
             return response;
         }
 
-        response = await base.GetResponseAsync(
-            messageSnapshot,
-            options,
-            cancellationToken);
-        if (mode == HostedFaultMode.ForceFirstMagenticStall &&
-            MagenticScriptedResponses.TryParseLedger(
-                response.Text ?? string.Empty,
-                out _) &&
-            Interlocked.Increment(ref _ledgerCount) == 1)
+        if (!IsTerminalResponse(response, role))
         {
-            return ReplaceText(
-                response,
-                MagenticScriptedResponses.CreateLedger(
-                    isRequestSatisfied: false,
-                    isInLoop: true,
-                    isProgressBeingMade: false,
-                    nextSpeaker: MagenticPhaseFactory.ManifestAnalystName,
-                    instruction: "The current approach is ineffective."));
+            return response;
         }
 
-        if (mode == HostedFaultMode.InvalidMagenticFinal &&
-            IsMagenticFinalRequest(messageSnapshot))
+        int terminal = state.IncrementTerminal();
+        bool injectInvalid =
+            plan.ActivationPoint ==
+                HostedFaultActivationPoint.AfterTerminalProviderResponse &&
+            (plan.Mode == HostedFaultMode.InvalidEveryTerminal ||
+             plan.Mode == HostedFaultMode.InvalidMagenticFinal ||
+             (plan.Mode == HostedFaultMode.InvalidFirstTerminal &&
+              terminal == 1));
+        if (injectInvalid)
         {
+            telemetry.RecordFaultActivated(role);
             return ReplaceText(
                 response,
-                ReferenceSynthesisArtifacts.Invalid);
+                RemoveRecommendation(response.Text));
         }
 
-        if (!HasFunctionCall(response))
+        if (plan.Mode ==
+                HostedFaultMode.DelayFirstTerminalUntilCanceled &&
+            plan.ActivationPoint ==
+                HostedFaultActivationPoint.AfterTerminalProviderResponse &&
+            terminal == 1)
         {
-            int terminal = Interlocked.Increment(ref _terminalCount);
-            if (mode == HostedFaultMode.InvalidEveryTerminal ||
-                (mode == HostedFaultMode.InvalidFirstTerminal &&
-                 terminal == 1))
-            {
-                return ReplaceText(
-                    response,
-                    ReferenceSynthesisArtifacts.Invalid);
-            }
+            telemetry.RecordFaultActivated(role);
+            await Task.Delay(
+                Timeout.InfiniteTimeSpan,
+                cancellationToken);
         }
 
         return response;
+    }
+
+    public override async IAsyncEnumerable<ChatResponseUpdate>
+        GetStreamingResponseAsync(
+            IEnumerable<ChatMessage> messages,
+            ChatOptions? options,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        ChatResponse response = await GetResponseAsync(
+            messages,
+            options,
+            cancellationToken);
+        foreach (ChatMessage message in response.Messages)
+        {
+            yield return new ChatResponseUpdate
+            {
+                Role = message.Role,
+                AuthorName = message.AuthorName,
+                Contents = [.. message.Contents],
+            };
+        }
+    }
+
+    private bool IsTerminalResponse(
+        ChatResponse response,
+        HostedEvaluationAgentRole currentRole)
+    {
+        if (HasFunctionCall(response) ||
+            string.IsNullOrWhiteSpace(response.Text))
+        {
+            return false;
+        }
+
+        return currentRole != HostedEvaluationAgentRole.MagenticManager ||
+            state.LedgerCount > 0;
     }
 
     private static bool HasFunctionCall(ChatResponse response) =>
@@ -97,14 +134,45 @@ internal sealed class HostedFaultInjectingChatClient(
             .OfType<FunctionCallContent>()
             .Any();
 
-    private static bool IsMagenticFinalRequest(
-        IEnumerable<ChatMessage> messages) =>
-        messages
-            .Select(message => message.Text)
-            .OfType<string>()
-            .Any(text => text.Contains(
-                "Return one JSON object",
-                StringComparison.Ordinal));
+    private static string RemoveRecommendation(
+        string? content)
+    {
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            string candidate = ExtractJsonObject(content);
+            try
+            {
+                if (JsonNode.Parse(candidate) is JsonObject artifact)
+                {
+                    _ = artifact.Remove("recommendation");
+                    return artifact.ToJsonString();
+                }
+            }
+            catch (JsonException)
+            {
+            }
+        }
+
+        return
+            """
+            {
+              "summary": "Injected invalid synthesis artifact.",
+              "evidence": [],
+              "gaps": []
+            }
+            """;
+    }
+
+    private static string ExtractJsonObject(
+        string content)
+    {
+        string candidate = content.Trim();
+        int objectStart = candidate.IndexOf('{');
+        int objectEnd = candidate.LastIndexOf('}');
+        return objectStart >= 0 && objectEnd > objectStart
+            ? candidate[objectStart..(objectEnd + 1)]
+            : candidate;
+    }
 
     private static ChatResponse ReplaceText(
         ChatResponse response,

@@ -9,43 +9,55 @@ namespace AutonomousPhasePipelineApp.Evaluation;
 
 internal static class HostedSynthesisArmFactory
 {
+    internal const int MaxArtifactAttempts = 2;
+    internal const int MaxProviderCalls = 24;
+
     internal static HostedSynthesisArm Create(
         HostedEvaluationArm arm,
-        string model,
         ReferenceArtifactStore artifacts,
         string runId,
         HostedEvaluationTelemetry telemetry,
         MagenticPhaseProbe magenticProbe,
-        HostedFaultMode faultMode)
+        HostedFaultPlan faultPlan,
+        HostedEvaluationChatClientFactory clientFactory)
     {
         var resources = new List<IDisposable>();
+        var budget = new ReferenceSynthesisBudget(
+            MaxProviderCalls);
+        var faultState = new HostedFaultState();
         return arm switch
         {
             HostedEvaluationArm.HarnessPlain =>
                 CreatePlainHarness(
-                    model,
                     artifacts,
                     runId,
                     telemetry,
-                    faultMode,
-                    resources),
+                    faultPlan,
+                    faultState,
+                    budget,
+                    resources,
+                    clientFactory),
             HostedEvaluationArm.HarnessDelegated =>
                 CreateDelegatedHarness(
-                    model,
                     artifacts,
                     runId,
                     telemetry,
-                    faultMode,
-                    resources),
+                    faultPlan,
+                    faultState,
+                    budget,
+                    resources,
+                    clientFactory),
             HostedEvaluationArm.Magentic =>
                 CreateMagentic(
-                    model,
                     artifacts,
                     runId,
                     telemetry,
                     magenticProbe,
-                    faultMode,
-                    resources),
+                    faultPlan,
+                    faultState,
+                    budget,
+                    resources,
+                    clientFactory),
             _ => throw new ArgumentOutOfRangeException(
                 nameof(arm),
                 arm,
@@ -54,31 +66,33 @@ internal static class HostedSynthesisArmFactory
     }
 
     private static HostedSynthesisArm CreatePlainHarness(
-        string model,
         ReferenceArtifactStore artifacts,
         string runId,
         HostedEvaluationTelemetry telemetry,
-        HostedFaultMode faultMode,
-        List<IDisposable> resources)
+        HostedFaultPlan faultPlan,
+        HostedFaultState faultState,
+        ReferenceSynthesisBudget budget,
+        List<IDisposable> resources,
+        HostedEvaluationChatClientFactory clientFactory)
     {
         AIFunction readManifest = CreateReadManifestTool(
             artifacts,
             runId);
-        IChatClient client = HostedProviderClientFactory.Create(
-            model,
-            telemetry,
+        IChatClient client = clientFactory(
             "synthesis-parent",
             isChild: false,
-            faultMode,
+            budget,
+            HostedEvaluationAgentRole.SynthesisParent,
+            faultPlan,
+            faultState,
             ledgerProbe: null,
             resources);
         AIAgent agent = ReferencePipelineFactory.CreateHarnessAgent(
             "hosted-harness-plain",
             """
-            Read the accepted manifest through the tool.
-            Your entire final response must be one JSON object with exactly these fields:
-            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
-            Do not use markdown fences or commentary. Evidence values must use only IDs present in the accepted artifacts.
+            Read the accepted manifest through the tool and synthesize only from
+            its authorized artifacts. Return one JSON object whose evidence and
+            gaps exactly match the manifest. Do not add markdown commentary.
             """,
             client,
             tools: [readManifest],
@@ -86,50 +100,55 @@ internal static class HostedSynthesisArmFactory
             {
                 EnableLoopEvaluation = true,
             },
-            loopEvaluators: [CreateArtifactEvaluator()],
-            loopAgentOptions: new LoopAgentOptions
-            {
-                MaxIterations = 3,
-                FreshContextPerIteration = false,
-                NonStreamingReturnsLastResponseOnly = true,
-            },
+            loopEvaluators:
+            [
+                CreateArtifactEvaluator(
+                    artifacts,
+                    runId),
+            ],
+            loopAgentOptions: CreateLoopOptions(),
             backgroundAgents: [],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 8);
+            maximumIterationsPerRequest: MaxProviderCalls);
         return new HostedSynthesisArm(
             new SynthesisPhaseExecutor(
                 agent,
                 artifacts,
-                runId).BindExecutor(),
+                runId,
+                budget).BindExecutor(),
             telemetry,
             magenticProbe: null,
+            budget,
             resources);
     }
 
     private static HostedSynthesisArm CreateDelegatedHarness(
-        string model,
         ReferenceArtifactStore artifacts,
         string runId,
         HostedEvaluationTelemetry telemetry,
-        HostedFaultMode faultMode,
-        List<IDisposable> resources)
+        HostedFaultPlan faultPlan,
+        HostedFaultState faultState,
+        ReferenceSynthesisBudget budget,
+        List<IDisposable> resources,
+        HostedEvaluationChatClientFactory clientFactory)
     {
         AIFunction readManifest = CreateReadManifestTool(
             artifacts,
             runId);
-        IChatClient analystClient = HostedProviderClientFactory.Create(
-            model,
-            telemetry,
+        IChatClient analystClient = clientFactory(
             "manifest-analyst",
             isChild: true,
-            HostedFaultMode.None,
+            budget,
+            HostedEvaluationAgentRole.ManifestAnalyst,
+            faultPlan,
+            faultState,
             ledgerProbe: null,
             resources);
         AIAgent analyst = ReferencePipelineFactory.CreateHarnessAgent(
             "ManifestAnalyst",
             """
-            Read the manifest with the tool.
-            Report the exact accepted evidence IDs and no unsupported claims.
+            Read the manifest with the tool. Report the accepted artifact
+            references and the claims they support. Do not invent evidence.
             """,
             analystClient,
             tools: [readManifest],
@@ -138,20 +157,21 @@ internal static class HostedSynthesisArmFactory
             loopAgentOptions: null,
             backgroundAgents: [],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 6);
-        IChatClient criticClient = HostedProviderClientFactory.Create(
-            model,
-            telemetry,
+            maximumIterationsPerRequest: MaxProviderCalls);
+        IChatClient criticClient = clientFactory(
             "contract-critic",
             isChild: true,
-            HostedFaultMode.None,
+            budget,
+            HostedEvaluationAgentRole.ContractCritic,
+            faultPlan,
+            faultState,
             ledgerProbe: null,
             resources);
         AIAgent critic = ReferencePipelineFactory.CreateHarnessAgent(
             "ContractCritic",
             """
-            Read the manifest with the tool.
-            Report explicit gaps and verify summary, evidence, and recommendation are required.
+            Read the manifest with the tool. Identify its exact gap set and
+            reject unsupported or incomplete synthesis claims.
             """,
             criticClient,
             tools: [readManifest],
@@ -160,23 +180,22 @@ internal static class HostedSynthesisArmFactory
             loopAgentOptions: null,
             backgroundAgents: [],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 6);
-        IChatClient parentClient = HostedProviderClientFactory.Create(
-            model,
-            telemetry,
+            maximumIterationsPerRequest: MaxProviderCalls);
+        IChatClient parentClient = clientFactory(
             "synthesis-parent",
             isChild: false,
-            faultMode,
+            budget,
+            HostedEvaluationAgentRole.SynthesisParent,
+            faultPlan,
+            faultState,
             ledgerProbe: null,
             resources);
         AIAgent parent = ReferencePipelineFactory.CreateHarnessAgent(
             "hosted-harness-delegated",
             """
-            You must start both ManifestAnalyst and ContractCritic, wait for both,
-            retrieve both results, and then answer.
-            Your entire final response must be one JSON object with exactly these fields:
-            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
-            Do not use markdown fences or commentary. Evidence values must use only accepted IDs reported by the specialists.
+            Use the available specialists when they improve the synthesis.
+            Return one JSON object whose evidence and gaps exactly match the
+            accepted manifest. Do not add markdown commentary.
             """,
             parentClient,
             tools: [],
@@ -188,56 +207,54 @@ internal static class HostedSynthesisArmFactory
             loopEvaluators:
             [
                 new BackgroundTaskCompletionLoopEvaluator(),
-                CreateArtifactEvaluator(),
+                CreateArtifactEvaluator(
+                    artifacts,
+                    runId),
             ],
-            loopAgentOptions: new LoopAgentOptions
-            {
-                MaxIterations = 4,
-                FreshContextPerIteration = false,
-                NonStreamingReturnsLastResponseOnly = true,
-            },
+            loopAgentOptions: CreateLoopOptions(),
             backgroundAgents: [analyst, critic],
             backgroundOptions: null,
-            maximumIterationsPerRequest: 16);
+            maximumIterationsPerRequest: MaxProviderCalls);
         return new HostedSynthesisArm(
             new SynthesisPhaseExecutor(
                 parent,
                 artifacts,
-                runId).BindExecutor(),
+                runId,
+                budget).BindExecutor(),
             telemetry,
             magenticProbe: null,
+            budget,
             resources);
     }
 
     private static HostedSynthesisArm CreateMagentic(
-        string model,
         ReferenceArtifactStore artifacts,
         string runId,
         HostedEvaluationTelemetry telemetry,
         MagenticPhaseProbe probe,
-        HostedFaultMode faultMode,
-        List<IDisposable> resources)
+        HostedFaultPlan faultPlan,
+        HostedFaultState faultState,
+        ReferenceSynthesisBudget budget,
+        List<IDisposable> resources,
+        HostedEvaluationChatClientFactory clientFactory)
     {
-        int maxStalls = faultMode == HostedFaultMode.ForceFirstMagenticStall
-            ? 0
-            : 2;
-
         MagenticPhaseRuntime CreateRuntime()
         {
-            IChatClient managerClient = HostedProviderClientFactory.Create(
-                model,
-                telemetry,
-                MagenticPhaseFactory.ManagerName,
-                isChild: false,
-                faultMode,
-                probe,
-                resources);
+            IChatClient managerClient =
+                clientFactory(
+                    MagenticPhaseFactory.ManagerName,
+                    isChild: false,
+                    budget,
+                    HostedEvaluationAgentRole.MagenticManager,
+                    faultPlan,
+                    faultState,
+                    probe,
+                    resources);
             AIAgent manager = ReferencePipelineFactory.CreateHarnessAgent(
                 MagenticPhaseFactory.ManagerName,
                 """
-                Coordinate the fixed synthesis participants.
-                Delegate manifest inspection before declaring the request satisfied.
-                The final answer must obey the exact JSON contract.
+                Coordinate the fixed synthesis participants. Require manifest
+                inspection before declaring the request satisfied.
                 """,
                 managerClient,
                 tools: [],
@@ -246,25 +263,26 @@ internal static class HostedSynthesisArmFactory
                 loopAgentOptions: null,
                 backgroundAgents: [],
                 backgroundOptions: null,
-                maximumIterationsPerRequest: 8);
+                maximumIterationsPerRequest: MaxProviderCalls);
 
             AIFunction readManifest = CreateReadManifestTool(
                 artifacts,
                 runId);
             IChatClient analystClient =
-                HostedProviderClientFactory.Create(
-                    model,
-                    telemetry,
+                clientFactory(
                     MagenticPhaseFactory.ManifestAnalystName,
                     isChild: true,
-                    HostedFaultMode.None,
+                    budget,
+                    HostedEvaluationAgentRole.ManifestAnalyst,
+                    faultPlan,
+                    faultState,
                     ledgerProbe: null,
                     resources);
             AIAgent analyst = ReferencePipelineFactory.CreateHarnessAgent(
                 MagenticPhaseFactory.ManifestAnalystName,
                 """
-                Read the accepted manifest with the tool.
-                Return exact accepted evidence IDs and explicit gaps.
+                Read the accepted manifest with the tool and report its exact
+                authorized artifact references.
                 """,
                 analystClient,
                 tools: [readManifest],
@@ -273,21 +291,22 @@ internal static class HostedSynthesisArmFactory
                 loopAgentOptions: null,
                 backgroundAgents: [],
                 backgroundOptions: null,
-                maximumIterationsPerRequest: 8);
+                maximumIterationsPerRequest: MaxProviderCalls);
             IChatClient criticClient =
-                HostedProviderClientFactory.Create(
-                    model,
-                    telemetry,
+                clientFactory(
                     MagenticPhaseFactory.ContractCriticName,
                     isChild: true,
-                    HostedFaultMode.None,
+                    budget,
+                    HostedEvaluationAgentRole.ContractCritic,
+                    faultPlan,
+                    faultState,
                     ledgerProbe: null,
                     resources);
             AIAgent critic = ReferencePipelineFactory.CreateHarnessAgent(
                 MagenticPhaseFactory.ContractCriticName,
                 """
-                Read the accepted manifest with the tool.
-                Check gaps and require summary, evidence, and recommendation.
+                Read the accepted manifest with the tool. Verify its exact gaps
+                and reject unsupported synthesis claims.
                 """,
                 criticClient,
                 tools: [readManifest],
@@ -296,25 +315,25 @@ internal static class HostedSynthesisArmFactory
                 loopAgentOptions: null,
                 backgroundAgents: [],
                 backgroundOptions: null,
-                maximumIterationsPerRequest: 8);
+                maximumIterationsPerRequest: MaxProviderCalls);
             Workflow workflow = new MagenticWorkflowBuilder(manager)
                 .AddParticipants([analyst, critic])
-                .WithName("hosted-phase-local-magentic.v1")
+                .WithName("hosted-phase-local-magentic.v2")
                 .RequirePlanSignoff(false)
-                .WithMaxRounds(12)
-                .WithMaxStalls(maxStalls)
-                .WithMaxResets(3)
+                .WithMaxRounds(8)
+                .WithMaxStalls(0)
+                .WithMaxResets(2)
                 .WithPromptOverrides(
                     new MagenticPromptOverrides
                     {
                         FinalAnswerPrompt =
                             """
-                            Complete this synthesis task using only accepted evidence:
+                            Complete this synthesis task using only the accepted
+                            manifest and participant findings:
                             {task}
 
-                            Return exactly one JSON object and no other text:
-                            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
-                            Evidence values must use only IDs found in accepted artifacts.
+                            Return one JSON object whose evidence and gaps
+                            exactly match the accepted manifest.
                             """,
                     })
                 .Build();
@@ -325,10 +344,11 @@ internal static class HostedSynthesisArmFactory
                 ManifestAnalystClient = analystClient,
                 ContractCriticClient = criticClient,
                 Probe = probe,
+                Budget = budget,
                 Agents = [manager, analyst, critic],
-                MaxRounds = 12,
-                MaxStalls = maxStalls,
-                MaxResets = 3,
+                MaxRounds = 8,
+                MaxStalls = 0,
+                MaxResets = 2,
                 RequirePlanSignoff = false,
             };
         }
@@ -337,9 +357,12 @@ internal static class HostedSynthesisArmFactory
             new MagenticSynthesisPhaseExecutor(
                 artifacts,
                 runId,
-                CreateRuntime).BindExecutor(),
+                CreateRuntime,
+                budget,
+                MaxArtifactAttempts).BindExecutor(),
             telemetry,
             probe,
+            budget,
             resources);
     }
 
@@ -358,24 +381,40 @@ internal static class HostedSynthesisArmFactory
                     "Reads the accepted manifest and authorized artifact bodies.",
             });
 
-    private static DelegateLoopEvaluator CreateArtifactEvaluator() =>
+    private static DelegateLoopEvaluator CreateArtifactEvaluator(
+        ReferenceArtifactStore artifacts,
+        string runId) =>
         new(
             (context, cancellationToken) =>
             {
                 _ = cancellationToken;
+                string manifestId =
+                    SynthesisPhaseExecutor.GetManifestId(
+                        context.InitialMessages);
+                ReferenceArtifactManifest manifest =
+                    artifacts.GetManifest(
+                        manifestId,
+                        runId);
                 bool accepted =
                     ReferenceArtifactValidator.TryNormalizeSynthesis(
                         context.LastResponse.Text,
+                        manifest,
                         out _,
                         out string error);
                 return ValueTask.FromResult(
                     accepted
                         ? LoopEvaluation.Stop()
                         : LoopEvaluation.Continue(
-                            $$"""
-                            {{ReferenceArtifactValidator.SynthesisCorrectionCode}}; validation_error={{error}}
-                            Return exactly one JSON object and no other text:
-                            {"summary":"nonempty text","evidence":["research","required-specialist"],"recommendation":"nonempty text"}
-                            """));
+                            ReferenceArtifactValidator
+                                .CreateSynthesisCorrection(
+                                    error)));
             });
+
+    private static LoopAgentOptions CreateLoopOptions() =>
+        new()
+        {
+            MaxIterations = MaxArtifactAttempts,
+            FreshContextPerIteration = false,
+            NonStreamingReturnsLastResponseOnly = true,
+        };
 }

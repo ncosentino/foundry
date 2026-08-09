@@ -322,7 +322,9 @@ public sealed class MagenticPhaseComparisonTests
             warning => warning.Contains(
                 "Next speaker answer empty",
                 StringComparison.Ordinal));
-        Assert.True(runtime.ManifestAnalystClient.CallCount > 0);
+        Assert.True(
+            GetParticipant(
+                runtime.ManifestAnalystClient).CallCount > 0);
     }
 
     [Fact]
@@ -523,7 +525,6 @@ public sealed class MagenticPhaseComparisonTests
             new ReferenceArtifactStore(),
             new IdempotentDeliverySink());
 
-<<<<<<< HEAD
     private static void AssertAcceptedSynthesis(
         ReferencePipelineRuntime runtime,
         ReferencePipelineResult result)
@@ -548,18 +549,22 @@ public sealed class MagenticPhaseComparisonTests
     private static bool ContainsManagerText(
         MagenticPhaseRuntime runtime,
         string expected) =>
-        runtime.ManagerClient.RecordedInputs
+        GetManager(runtime.ManagerClient)
+            .RecordedInputs
             .SelectMany(messages => messages)
             .Select(message => message.Text)
             .OfType<string>()
             .Any(text => text.Contains(
                 expected,
                 StringComparison.Ordinal));
-=======
+
+    private static MagenticManagerChatClient GetManager(
+        IChatClient chatClient) =>
+        Assert.IsType<MagenticManagerChatClient>(chatClient);
+
     private static MagenticParticipantChatClient GetParticipant(
         IChatClient chatClient) =>
         Assert.IsType<MagenticParticipantChatClient>(chatClient);
->>>>>>> 3cfcf9dc (feat(evaluation): add hosted diagnostic matrix)
 
     private static async Task<ReferencePipelineResult> RunOuterAsync(
         ReferencePipelineRuntime runtime,

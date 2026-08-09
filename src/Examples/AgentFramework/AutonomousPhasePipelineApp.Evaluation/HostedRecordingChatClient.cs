@@ -1,5 +1,7 @@
 using System.Runtime.CompilerServices;
 
+using AutonomousPhasePipelineApp.Core;
+
 using Microsoft.Extensions.AI;
 
 namespace AutonomousPhasePipelineApp.Evaluation;
@@ -8,13 +10,15 @@ internal sealed class HostedRecordingChatClient(
     IChatClient innerClient,
     HostedEvaluationTelemetry telemetry,
     string agentId,
-    bool isChild) : DelegatingChatClient(innerClient)
+    bool isChild,
+    ReferenceSynthesisBudget budget) : DelegatingChatClient(innerClient)
 {
     public override async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options,
         CancellationToken cancellationToken)
     {
+        budget.ConsumeProviderCall(agentId);
         telemetry.RecordCallStarted(agentId, isChild);
         try
         {
@@ -22,7 +26,10 @@ internal sealed class HostedRecordingChatClient(
                 messages,
                 options,
                 cancellationToken);
-            telemetry.RecordResponse(response);
+            telemetry.RecordResponse(
+                response,
+                agentId,
+                isChild);
             return response;
         }
         catch
@@ -38,6 +45,7 @@ internal sealed class HostedRecordingChatClient(
             ChatOptions? options,
             [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        budget.ConsumeProviderCall(agentId);
         telemetry.RecordCallStarted(agentId, isChild);
         var updates = new List<ChatResponseUpdate>();
         bool completed = false;
@@ -53,7 +61,10 @@ internal sealed class HostedRecordingChatClient(
                 yield return update;
             }
 
-            telemetry.RecordResponse(updates.ToChatResponse());
+            telemetry.RecordResponse(
+                updates.ToChatResponse(),
+                agentId,
+                isChild);
             completed = true;
         }
         finally

@@ -9,5 +9,11 @@ internal sealed record HostedEvaluationTelemetrySnapshot(
     int ChildSessionCount,
     int ChildFailureCount,
     int ProviderFailures,
-    string? ObservedModel,
-    string? LastTerminalText);
+    int CompletedModelCalls,
+    bool FaultActivated,
+    HostedEvaluationAgentRole? FaultRole,
+    int CompletedModelCallsAtFault,
+    int CompletedChildSessionCountAtFault,
+    long FaultActivationOrdinal,
+    long BoundaryOutputOrdinal,
+    string? ObservedModel);

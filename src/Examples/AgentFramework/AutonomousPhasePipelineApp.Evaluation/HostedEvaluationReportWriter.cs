@@ -9,7 +9,6 @@ internal static class HostedEvaluationReportWriter
 {
     internal static async Task<HostedEvaluationReport> WriteAsync(
         HostedEvaluationProtocol protocol,
-        ProviderProbeResult providerProbe,
         ExperimentRunOutcome<
             HostedEvaluationCase,
             HostedEvaluationBlockResult> outcome,
@@ -28,23 +27,52 @@ internal static class HostedEvaluationReportWriter
                 item.Failure?.Code.ToString(),
                 item.Failure?.Message))
             .ToArray();
-        int contractFailureCount = blocks
+        HostedEvaluationArmResult[] results = blocks
             .SelectMany(block => block.Arms)
-            .Count(arm =>
-                arm.Applicable &&
-                !arm.ScenarioContractPass);
+            .ToArray();
+        int scenarioFailureCount = results.Count(result =>
+            result.Applicable &&
+            HostedEvaluationRecommendationGate.IsAdmissible(
+                result) &&
+            !result.ScenarioContractPass);
         int infrastructureFailureCount =
             itemFailures.Length +
-            Math.Max(
-                0,
-                outcome.Result.Items.Count - blocks.Length - itemFailures.Length);
-        string runState = infrastructureFailureCount > 0
-            ? "FailedInfrastructure"
-            : contractFailureCount > 0
-                ? "CompletedWithContractFailures"
-                : "Completed";
+            results.Count(result =>
+                result.Applicable &&
+                (result.Infrastructure.ProviderFailureCount > 0 ||
+                 result.Infrastructure.PhaseFailureCount > 0));
+        HostedEvaluationRecommendationDecision recommendation =
+            HostedEvaluationRecommendationGate.Evaluate(
+                protocol,
+                blocks,
+                itemFailures.Length);
+        HostedEvaluationArmSummary[] summaries =
+            Enum.GetValues<HostedEvaluationArm>()
+                .Select(arm => BuildSummary(results, arm))
+                .ToArray();
+        HostedEvaluationScenarioSummary[] scenarioSummaries =
+            Enum.GetValues<HostedEvaluationArm>()
+                .SelectMany(arm =>
+                    Enum.GetValues<HostedEvaluationScenario>()
+                        .Select(scenario =>
+                            BuildScenarioSummary(
+                                results,
+                                arm,
+                                scenario)))
+                .ToArray();
+        string runState = recommendation.Status switch
+        {
+            HostedEvaluationRecommendationStatus.ProtocolInvalid =>
+                "ProtocolInvalid",
+            HostedEvaluationRecommendationStatus
+                .InfrastructureUnreliable =>
+                "InfrastructureUnreliable",
+            _ when scenarioFailureCount > 0 =>
+                "CompletedWithScenarioFailures",
+            _ => "Completed",
+        };
         var report = new HostedEvaluationReport(
-            SchemaVersion: 1,
+            SchemaVersion: 2,
             ProtocolVersion: HostedEvaluationProtocol.Version,
             RunId: protocol.RunId,
             CommitSha: protocol.CommitSha,
@@ -53,14 +81,12 @@ internal static class HostedEvaluationReportWriter
             RunState: runState,
             TotalItems: outcome.Result.Items.Count,
             CompletedBlocks: blocks.Length,
-            ContractFailureCount: contractFailureCount,
+            ScenarioFailureCount: scenarioFailureCount,
             InfrastructureFailureCount: infrastructureFailureCount,
-            EvidenceStrength: "INSUFFICIENTLY_POWERED",
-            Recommendation: "NO_SUPPORTED_RECOMMENDATION_YET",
-            ExtractionRecommendation:
-                "Keep all synthesis-arm integration and evaluation code example-local until a fixed-size hosted study justifies extraction.",
             GeneratedAtUtc: DateTimeOffset.UtcNow,
-            ProviderProbe: providerProbe,
+            Recommendation: recommendation,
+            ArmSummaries: summaries,
+            ScenarioSummaries: scenarioSummaries,
             Blocks: blocks,
             ItemFailures: itemFailures);
         string reportPath = Path.Combine(
@@ -71,60 +97,150 @@ internal static class HostedEvaluationReportWriter
             await JsonSerializer.SerializeAsync(
                 stream,
                 report,
-                ProviderProbeJsonContext.Default.HostedEvaluationReport,
+                HostedEvaluationJsonContext.Default.HostedEvaluationReport,
                 cancellationToken);
         }
 
-        string markdown = BuildMarkdown(report);
         await File.WriteAllTextAsync(
             Path.Combine(
                 protocol.OutputDirectory,
                 "report.md"),
-            markdown,
+            BuildMarkdown(report),
             cancellationToken);
         return report;
+    }
+
+    private static HostedEvaluationArmSummary BuildSummary(
+        IReadOnlyList<HostedEvaluationArmResult> results,
+        HostedEvaluationArm arm)
+    {
+        HostedEvaluationArmResult[] applicable = results
+            .Where(result =>
+                result.Arm == arm &&
+                result.Applicable)
+            .ToArray();
+        HostedEvaluationArmResult[] pooled = applicable
+            .Where(result =>
+                HostedEvaluationDatasetCatalog.IsPoolable(
+                    result.Scenario))
+            .ToArray();
+        HostedEvaluationArmResult[] admissible = pooled
+            .Where(HostedEvaluationRecommendationGate.IsAdmissible)
+            .ToArray();
+        int passed = admissible.Count(result =>
+            result.ScenarioContractPass);
+        double? rate = admissible.Length == 0
+            ? null
+            : (double)passed / admissible.Length;
+        return new(
+            arm,
+            applicable.Length,
+            applicable.Length - pooled.Length,
+            admissible.Length,
+            passed,
+            rate,
+            applicable.Sum(result =>
+                result.Resources.ProviderCallsUsed),
+            applicable.Sum(result =>
+                result.Resources.InputTokens),
+            applicable.Sum(result =>
+                result.Resources.OutputTokens),
+            applicable.Sum(result =>
+                result.Resources.DurationMilliseconds));
+    }
+
+    private static HostedEvaluationScenarioSummary BuildScenarioSummary(
+        IReadOnlyList<HostedEvaluationArmResult> results,
+        HostedEvaluationArm arm,
+        HostedEvaluationScenario scenario)
+    {
+        HostedEvaluationArmResult[] admissible = results
+            .Where(result =>
+                result.Arm == arm &&
+                result.Scenario == scenario &&
+                result.Applicable &&
+                HostedEvaluationRecommendationGate.IsAdmissible(
+                    result))
+            .ToArray();
+        int passed = admissible.Count(result =>
+            result.ScenarioContractPass);
+        return new(
+            arm,
+            scenario,
+            HostedEvaluationDatasetCatalog.IsPoolable(scenario),
+            admissible.Length,
+            passed,
+            admissible.Length == 0
+                ? null
+                : (double)passed / admissible.Length);
     }
 
     private static string BuildMarkdown(
         HostedEvaluationReport report)
     {
-        HostedEvaluationArmResult[] arms = report.Blocks
-            .SelectMany(block => block.Arms)
-            .ToArray();
         var builder = new StringBuilder();
-        builder.AppendLine("# Autonomous Phase Hosted Evaluation");
+        builder.AppendLine("# Autonomous Phase Evaluation Protocol v2");
         builder.AppendLine();
         builder.AppendLine($"- Run: `{report.RunId}`");
         builder.AppendLine($"- Commit: `{report.CommitSha}`");
-        builder.AppendLine($"- Model: `{report.Model}`");
+        builder.AppendLine($"- Requested model: `{report.Model}`");
         builder.AppendLine($"- Trials per scenario: {report.TrialCount}");
         builder.AppendLine($"- Run state: **{report.RunState}**");
-        builder.AppendLine($"- Completed blocks: {report.CompletedBlocks}/{report.TotalItems}");
-        builder.AppendLine($"- Contract failures: {report.ContractFailureCount}");
-        builder.AppendLine($"- Infrastructure failures: {report.InfrastructureFailureCount}");
-        builder.AppendLine($"- Evidence strength: **{report.EvidenceStrength}**");
-        builder.AppendLine($"- Recommendation: **{report.Recommendation}**");
+        builder.AppendLine(
+            $"- Completed blocks: {report.CompletedBlocks}/{report.TotalItems}");
+        builder.AppendLine(
+            $"- Scenario failures: {report.ScenarioFailureCount}");
+        builder.AppendLine(
+            $"- Infrastructure failures: {report.InfrastructureFailureCount}");
+        builder.AppendLine(
+            $"- Recommendation status: **{report.Recommendation.Status}**");
+        builder.AppendLine(
+            $"- Recommendation reason: {report.Recommendation.Reason}");
         builder.AppendLine();
-        builder.AppendLine("| Arm | Applicable | Contract passes | Model calls | Input tokens | Output tokens |");
-        builder.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: |");
-        foreach (HostedEvaluationArm arm in Enum.GetValues<HostedEvaluationArm>())
+        builder.AppendLine(
+            "| Arm | Pooled admissible | Non-poolable controls | Passed | Descriptive pass rate | Provider calls | Input tokens | Output tokens |");
+        builder.AppendLine(
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        foreach (HostedEvaluationArmSummary summary in report.ArmSummaries)
         {
-            HostedEvaluationArmResult[] armResults = arms
-                .Where(result =>
-                    result.Arm == arm &&
-                    result.Applicable)
-                .ToArray();
+            string rate = summary.PassRate is null
+                ? "n/a"
+                : $"{summary.PassRate:P1}";
             builder.AppendLine(
-                $"| {arm} | {armResults.Length} | " +
-                $"{armResults.Count(result => result.ScenarioContractPass)} | " +
-                $"{armResults.Sum(result => result.ModelCalls)} | " +
-                $"{armResults.Sum(result => result.InputTokens)} | " +
-                $"{armResults.Sum(result => result.OutputTokens)} |");
+                $"| {summary.Arm} | {summary.AdmissibleResults} | " +
+                $"{summary.NonPoolableResults} | " +
+                $"{summary.PassedResults} | {rate} | " +
+                $"{summary.ProviderCalls} | {summary.InputTokens} | " +
+                $"{summary.OutputTokens} |");
         }
 
         builder.AppendLine();
         builder.AppendLine(
-            "This diagnostic run has no calibrated model-based quality score and is not powered for superiority or non-inferiority claims.");
+            "Pass rates are scenario-stratified descriptive summaries, not IID confidence claims. Confirmatory comparisons require paired scenario-level inference.");
+        builder.AppendLine();
+        builder.AppendLine(
+            "| Arm | Scenario | Poolable | Admissible | Passed | Pass rate |");
+        builder.AppendLine(
+            "| --- | --- | --- | ---: | ---: | ---: |");
+        foreach (
+            HostedEvaluationScenarioSummary summary in
+            report.ScenarioSummaries)
+        {
+            string rate = summary.PassRate is null
+                ? "n/a"
+                : $"{summary.PassRate:P1}";
+            builder.AppendLine(
+                $"| {summary.Arm} | {summary.Scenario} | " +
+                $"{summary.Poolable} | {summary.AdmissibleResults} | " +
+                $"{summary.PassedResults} | {rate} |");
+        }
+
+        builder.AppendLine();
+        builder.AppendLine(
+            "Correctness and resilience are scored independently. Provider calls, tokens, latency, child sessions, and Magentic topology are descriptive resource evidence unless a scenario explicitly targets that behavior.");
+        builder.AppendLine();
+        builder.AppendLine(
+            "Semantic quality is calibration-required and cannot influence this recommendation status.");
         if (report.ItemFailures.Length > 0)
         {
             builder.AppendLine();
@@ -133,13 +249,11 @@ internal static class HostedEvaluationReportWriter
             {
                 builder.AppendLine(
                     $"- `{failure.CaseId}` trial {failure.TrialIndex}: " +
-                    $"{failure.Status} / {failure.FailureCode} / {failure.Message}");
+                    $"{failure.Status} / {failure.FailureCode} / " +
+                    $"{failure.Message}");
             }
         }
 
-        builder.AppendLine();
-        builder.AppendLine(
-            $"Extraction: {report.ExtractionRecommendation}");
         return builder.ToString();
     }
 }

@@ -5,8 +5,7 @@ internal enum HostedFaultMode
     None,
     InvalidFirstTerminal,
     InvalidEveryTerminal,
-    FailFirstTerminal,
-    DelayFirstCallUntilCanceled,
+    DelayFirstTerminalUntilCanceled,
     ForceFirstMagenticStall,
     InvalidMagenticFinal,
 }

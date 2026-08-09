@@ -22,7 +22,7 @@ internal sealed class HostedIncrementalResultWriter(
         await WriteAtomicAsync(
             path,
             result,
-            ProviderProbeJsonContext.Default.HostedEvaluationBlockResult,
+            HostedEvaluationJsonContext.Default.HostedEvaluationBlockResult,
             cancellationToken);
     }
 
@@ -42,7 +42,7 @@ internal sealed class HostedIncrementalResultWriter(
                 CompletedBlocks: completedBlocks,
                 TotalBlocks: totalBlocks,
                 UpdatedAtUtc: DateTimeOffset.UtcNow),
-            ProviderProbeJsonContext.Default.HostedEvaluationRunStatus,
+            HostedEvaluationJsonContext.Default.HostedEvaluationRunStatus,
             cancellationToken);
 
     private async Task WriteAtomicAsync<T>(

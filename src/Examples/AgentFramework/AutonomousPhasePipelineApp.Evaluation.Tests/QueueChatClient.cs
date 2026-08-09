@@ -7,6 +7,8 @@ internal sealed class QueueChatClient(
 {
     private int _callCount;
 
+    internal int CallCount => Volatile.Read(ref _callCount);
+
     public Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> chatMessages,
         ChatOptions? options,
