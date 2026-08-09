@@ -181,6 +181,13 @@ an upstream opt-in that this public candidate does not yet expose.
 Enable upstream loop evaluation when one Harness phase should inspect its own
 result and revise it before returning across a macro workflow boundary:
 
+MAF 1.17 marks these loop types experimental. A consumer must acknowledge the
+upstream diagnostic explicitly, for example at project scope:
+
+```xml
+<NoWarn>$(NoWarn);MAAI001</NoWarn>
+```
+
 ```csharp
 configuration = configuration with
 {
