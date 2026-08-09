@@ -28,9 +28,10 @@ internal sealed class SynthesisArtifactBoundaryExecutor(
         ReferenceArtifactManifest manifest = artifacts.GetManifest(
             message.Inputs[0],
             runId);
-        if (!ReferenceArtifactValidator.TryValidateSynthesis(
+        if (!ReferenceArtifactValidator.TryNormalizeSynthesis(
             message.CandidateContent,
             manifest,
+            out string normalized,
             out string error))
         {
             string[] gaps =
@@ -50,7 +51,7 @@ internal sealed class SynthesisArtifactBoundaryExecutor(
 
         ReferenceArtifactReference reference = artifacts.Write(
             runId,
-            message.CandidateContent!);
+            normalized);
         return ValueTask.FromResult(
             ReferencePhaseArtifact.WithArtifact(
                 message,

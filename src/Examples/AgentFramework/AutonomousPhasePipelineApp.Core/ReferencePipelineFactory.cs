@@ -211,8 +211,9 @@ internal static class ReferencePipelineFactory
                 loopEvaluators:
                 [
                     new DelegateLoopEvaluator(
-                        (context, _) =>
+                        (context, cancellationToken) =>
                         {
+                            _ = cancellationToken;
                             string manifestId =
                                 SynthesisPhaseExecutor.GetManifestId(
                                     context.InitialMessages);
@@ -221,9 +222,10 @@ internal static class ReferencePipelineFactory
                                     manifestId,
                                     request.RunId);
                             bool accepted =
-                                ReferenceArtifactValidator.TryValidateSynthesis(
+                                ReferenceArtifactValidator.TryNormalizeSynthesis(
                                     context.LastResponse.Text,
                                     manifest,
+                                    out _,
                                     out string error);
                             return ValueTask.FromResult(
                                 accepted
