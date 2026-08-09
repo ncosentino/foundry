@@ -152,7 +152,7 @@ var definition = new ExperimentDefinition<
                             passRate),
                         new NumericMetric(
                             "provider_failures",
-                            arms.Sum(arm => arm.PhaseFailureCount))));
+                            arms.Sum(arm => arm.ProviderFailureCount))));
             }),
     ],
 };
@@ -190,7 +190,7 @@ HostedEvaluationReport report =
         outcome,
         CancellationToken.None);
 await incrementalWriter.WriteStatusAsync(
-    state: "Completed",
+    state: report.RunState,
     completedBlocks,
     totalBlocks,
     CancellationToken.None);
@@ -202,5 +202,7 @@ Console.WriteLine(
 Console.WriteLine(
     $"AutonomousPhaseEvaluation:recommendation:{report.Recommendation}");
 Console.WriteLine(
+    $"AutonomousPhaseEvaluation:run-state:{report.RunState}");
+Console.WriteLine(
     $"AutonomousPhaseEvaluation:artifact:{Path.GetFullPath(protocol.OutputDirectory)}");
-return 0;
+return report.InfrastructureFailureCount > 0 ? 1 : 0;

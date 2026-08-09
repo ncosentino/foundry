@@ -32,7 +32,11 @@ internal static class HostedProviderClientFactory
         resources.Add(rawClient);
         resources.Add(httpClient);
 
-        IChatClient current = rawClient;
+        IChatClient current = new HostedRecordingChatClient(
+            rawClient,
+            telemetry,
+            agentId,
+            isChild);
         if (faultMode != HostedFaultMode.None)
         {
             current = new HostedFaultInjectingChatClient(
@@ -47,10 +51,6 @@ internal static class HostedProviderClientFactory
                 ledgerProbe);
         }
 
-        return new HostedRecordingChatClient(
-            current,
-            telemetry,
-            agentId,
-            isChild);
+        return current;
     }
 }

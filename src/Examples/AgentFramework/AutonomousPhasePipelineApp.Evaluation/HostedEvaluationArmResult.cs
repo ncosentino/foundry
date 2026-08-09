@@ -22,6 +22,8 @@ internal sealed record HostedEvaluationArmResult(
     long OutputTokens,
     long? CachedInputTokens,
     int ChildSessionCount,
+    int ChildFailureCount,
+    int ProviderFailureCount,
     int PhaseFailureCount,
     int CheckpointCount,
     int RestoreEventCount,

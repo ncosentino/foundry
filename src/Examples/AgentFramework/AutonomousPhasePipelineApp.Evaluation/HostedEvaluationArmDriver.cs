@@ -199,7 +199,6 @@ internal static class HostedEvaluationArmDriver
             result);
         HostedEvaluationTelemetrySnapshot telemetrySnapshot =
             telemetry.Snapshot();
-        phaseFailures += telemetrySnapshot.ProviderFailures;
         if (result?.Synthesis.Outcome == ReferencePipelineOutcome.Failed)
         {
             phaseFailures++;
@@ -238,6 +237,8 @@ internal static class HostedEvaluationArmDriver
             OutputTokens: telemetrySnapshot.OutputTokens,
             CachedInputTokens: telemetrySnapshot.CachedInputTokens,
             ChildSessionCount: telemetrySnapshot.ChildSessionCount,
+            ChildFailureCount: telemetrySnapshot.ChildFailureCount,
+            ProviderFailureCount: telemetrySnapshot.ProviderFailures,
             PhaseFailureCount: phaseFailures,
             CheckpointCount: observation.CheckpointEvents,
             RestoreEventCount: restoreEvents,
@@ -642,6 +643,8 @@ internal static class HostedEvaluationArmDriver
             OutputTokens: 0,
             CachedInputTokens: null,
             ChildSessionCount: 0,
+            ChildFailureCount: 0,
+            ProviderFailureCount: 0,
             PhaseFailureCount: 0,
             CheckpointCount: 0,
             RestoreEventCount: 0,

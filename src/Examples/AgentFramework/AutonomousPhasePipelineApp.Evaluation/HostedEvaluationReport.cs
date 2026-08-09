@@ -7,9 +7,15 @@ internal sealed record HostedEvaluationReport(
     string CommitSha,
     string Model,
     int TrialCount,
+    string RunState,
+    int TotalItems,
+    int CompletedBlocks,
+    int ContractFailureCount,
+    int InfrastructureFailureCount,
     string EvidenceStrength,
     string Recommendation,
     string ExtractionRecommendation,
     DateTimeOffset GeneratedAtUtc,
     ProviderProbeResult ProviderProbe,
-    HostedEvaluationBlockResult[] Blocks);
+    HostedEvaluationBlockResult[] Blocks,
+    HostedEvaluationItemFailure[] ItemFailures);
