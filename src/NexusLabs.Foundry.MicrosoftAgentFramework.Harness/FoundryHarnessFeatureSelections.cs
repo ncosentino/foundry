@@ -1,8 +1,8 @@
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 /// <summary>
-/// Explicit, required choices for every default-on-but-disableable dimension of the upstream
-/// <c>Microsoft.Agents.AI.Harness</c> complete-bundle pipeline (MAF 1.15).
+/// Explicit, required choices for every exposed dimension of the upstream
+/// <c>Microsoft.Agents.AI.Harness</c> complete-bundle pipeline.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -16,9 +16,9 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// per-service-call history persistence) are intentionally absent from this type; see
 /// <see cref="FoundryHarnessFeatureEffectiveState.AlwaysOnUnavoidable"/>. The file-access dimension
 /// is opt-in via <see cref="FoundryHarnessAgentConfiguration.FileAccessStore"/> and is therefore
-/// also absent from this type. Background agent delegation and loop evaluation are not yet exposed
-/// by this API candidate; they are reported as limitations in
-/// <see cref="FoundryHarnessEffectiveDefaults"/> pending a follow-up API-candidate review.
+/// also absent from this type. Background agent delegation is not yet exposed by this API candidate;
+/// it is reported as a limitation in <see cref="FoundryHarnessEffectiveDefaults"/> pending a
+/// follow-up API-candidate review.
 /// </para>
 /// </remarks>
 public sealed record FoundryHarnessFeatureSelections
@@ -76,6 +76,13 @@ public sealed record FoundryHarnessFeatureSelections
     public required bool EnableAgentModeProvider { get; init; }
 
     /// <summary>
+    /// Gets whether the complete Harness agent is wrapped in upstream's outer
+    /// <c>LoopAgent</c> so caller-supplied evaluators can request another complete
+    /// agent run. Upstream default: disabled.
+    /// </summary>
+    public required bool EnableLoopEvaluation { get; init; }
+
+    /// <summary>
     /// Gets whether upstream's context-window compaction is enabled, bounding the conversation the
     /// agent carries <em>between</em> turns. The upstream disable flag defaults to
     /// <see langword="false"/>, but compaction is effectively inert until either an explicit
@@ -94,8 +101,10 @@ public sealed record FoundryHarnessFeatureSelections
     /// <strong>It does not bound a tool loop.</strong> A single turn making several model calls is
     /// compacted only against the state preceding the first round. Measured over a two-round tool loop
     /// with an always-firing strategy: consulted once, against a two-message index, never seeing the
-    /// round that carried the tool call and its result. Identical on 1.15.0, 1.16.0, and 1.17.0. Tracked in
-    /// ncosentino/foundry#73.
+    /// round that carried the tool call and its result. A two-iteration outer <c>LoopAgent</c> run also
+    /// consults upstream compaction once for the complete caller turn, while Foundry hybrid compaction
+    /// observes both provider requests. Identical tool-loop behavior on 1.15.0, 1.16.0, and 1.17.0.
+    /// Tracked in ncosentino/foundry#73.
     /// </para>
     /// <para>
     /// This and <see cref="EnableHybridCompaction"/> are independent rather than layered: either may be

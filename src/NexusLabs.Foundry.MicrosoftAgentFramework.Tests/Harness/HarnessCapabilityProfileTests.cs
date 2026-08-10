@@ -166,6 +166,27 @@ public sealed class HarnessCapabilityProfileTests
     }
 
     [Fact]
+    public void Resolve_LoopEvaluationAcceptedAtG6_ReportsVerifiedAotAndPartialDiagnostics()
+    {
+        var resolver = new HarnessCapabilityResolver();
+
+        var profile = resolver.Resolve(
+            CreateRequest(
+                HarnessConstructionLane.SelectedProviders,
+                HarnessCapabilityAcceptance.StableAndExperimental,
+                HarnessDeliveryPhase.G6,
+                [HarnessCapability.LoopEvaluation],
+                []));
+
+        var evidence = profile.Capabilities[HarnessCapability.LoopEvaluation];
+        Assert.Equal(HarnessCapabilityState.Enabled, evidence.EffectiveState);
+        Assert.Equal(HarnessCapabilityStability.Experimental, evidence.Stability);
+        Assert.Equal(HarnessCapabilityAotStatus.Verified, evidence.AotStatus);
+        Assert.Equal(HarnessCapabilityDiagnosticsStatus.Partial, evidence.DiagnosticsStatus);
+        Assert.Equal(HarnessDeliveryPhase.G6, evidence.DeliveryPhase);
+    }
+
+    [Fact]
     public void Resolve_ProviderDependentWithoutEvidence_DefersIt()
     {
         var resolver = new HarnessCapabilityResolver();

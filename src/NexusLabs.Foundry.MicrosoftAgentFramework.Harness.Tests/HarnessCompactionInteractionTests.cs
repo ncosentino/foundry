@@ -113,6 +113,46 @@ public sealed class HarnessCompactionInteractionTests
         Assert.Equal([1, 2, 4], chatClient.ReceivedCounts);
     }
 
+    [Fact]
+    public async Task Run_LoopEvaluation_HybridObservesEveryIterationWhileUpstreamRunsOnce()
+    {
+        var strategy = new AlwaysFiringCompactionStrategy();
+        var reducer = new PassthroughRecordingChatReducer();
+        var chatClient = new HarnessLoopChatClient(
+            "draft artifact",
+            "accepted artifact DONE");
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with
+            {
+                EnableCompaction = true,
+                EnableHybridCompaction = true,
+                EnableLoopEvaluation = true,
+            }) with
+        {
+            ChatClient = chatClient,
+            CompactionStrategy = strategy,
+            HybridCompactionOptions = CreateOptions(reducer),
+            LoopEvaluators =
+            [
+                new Microsoft.Agents.AI.CompletionMarkerLoopEvaluator("DONE"),
+            ],
+            LoopAgentOptions = new Microsoft.Agents.AI.LoopAgentOptions
+            {
+                MaxIterations = 3,
+                NonStreamingReturnsLastResponseOnly = true,
+            },
+        };
+
+        var agent = new FoundryHarnessAgentFactory().Create(configuration);
+        await agent.RunAsync(
+            "go",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, chatClient.CallCount);
+        Assert.Equal(1, strategy.CompactionCount);
+        Assert.Equal(2, reducer.InputCounts.Count);
+    }
+
     private static FoundryHarnessHybridCompactionOptions CreateOptions(IChatReducer reducer) =>
         new()
         {

@@ -2,14 +2,14 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 /// <summary>
 /// Maps a <see cref="FoundryHarnessAgentConfiguration"/> to the requested-versus-effective
-/// disposition of every upstream <c>Microsoft.Agents.AI.Harness</c> bundle dimension (MAF 1.15).
+/// disposition of every upstream <c>Microsoft.Agents.AI.Harness</c> bundle dimension (MAF 1.17).
 /// </summary>
 /// <remarks>
 /// This mapping is pure and evidence-derived from the upstream
 /// <c>Microsoft.Agents.AI.HarnessAgentOptions</c> XML documentation shipped with
 /// <c>Microsoft.Agents.AI.Harness</c> 1.17.0: it performs no reflection or probing of a live
-/// agent instance. Categorical dimensions this type does not yet expose (background agents,
-/// loop evaluation) are reported as unrequested limitations rather than silently omitted.
+/// agent instance. Background agents remain reported as an unrequested limitation rather than
+/// silently omitted.
 /// </remarks>
 internal sealed class FoundryHarnessBundleDefaultsInspector
 {
@@ -19,9 +19,9 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
         "API-candidate review.";
 
     private const string LoopEvaluationLimitation =
-        "Not exposed by FoundryHarnessAgentConfiguration in this candidate. Upstream supports " +
-        "opt-in re-invocation via HarnessAgentOptions.LoopEvaluators/LoopAgentOptions; tracked for " +
-        "a follow-up API-candidate review.";
+        "Upstream LoopAgent is the outermost decorator and each iteration is a complete Harness " +
+        "run, so tool side effects can repeat and must be idempotent or caller-deduplicated. " +
+        "FreshContextPerIteration also requires caller-supplied sessions to support serialization.";
 
     private const string FunctionInvocationLimitation =
         "Upstream always wraps the provider chat client with FunctionInvokingChatClient. " +
@@ -39,7 +39,9 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
         "Upstream evaluates the compaction strategy once per agent turn, not once per provider " +
         "request, so it does not bound context within a multi-round tool loop: a run whose tool " +
         "rounds grow the conversation is compacted only against the state that preceded the first " +
-        "round. Measured against Microsoft.Agents.AI.Harness 1.15.0, 1.16.0, and 1.17.0; tracked upstream in " +
+        "round. A two-iteration LoopAgent run also consults upstream compaction once for the complete " +
+        "caller turn, while Foundry hybrid compaction observes both provider requests. Measured against " +
+        "Microsoft.Agents.AI.Harness 1.15.0, 1.16.0, and 1.17.0; tracked upstream in " +
         "ncosentino/foundry#73. Enable HybridCompaction for per-provider-call bounding.";
 
     private const string HybridCompactionLimitation =
@@ -75,8 +77,8 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
             DescribeCompaction(configuration),
             DescribeHybridCompaction(configuration),
             DescribeAdditionalContextProviders(configuration),
+            DescribeLoopEvaluation(configuration),
             NotExposed(FoundryHarnessFeature.BackgroundAgents, BackgroundAgentsLimitation),
-            NotExposed(FoundryHarnessFeature.LoopEvaluation, LoopEvaluationLimitation),
         };
 
         return FoundryHarnessEffectiveDefaults.Create(dispositions);
@@ -404,6 +406,34 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
             null,
             FoundryHarnessFeatureBackingSelection.CallerSupplied,
             $"{count} caller-supplied AIContextProvider instance(s) included alongside the built-in providers.");
+    }
+
+    private static FoundryHarnessFeatureDisposition DescribeLoopEvaluation(
+        FoundryHarnessAgentConfiguration configuration)
+    {
+        if (!configuration.Features.EnableLoopEvaluation)
+        {
+            return FoundryHarnessFeatureDisposition.Create(
+                FoundryHarnessFeature.LoopEvaluation,
+                FoundryHarnessFeatureRequestedState.RequestedDisabled,
+                FoundryHarnessFeatureEffectiveState.Disabled,
+                null,
+                FoundryHarnessFeatureBackingSelection.NotApplicable,
+                null);
+        }
+
+        int evaluatorCount = configuration.LoopEvaluators.Count;
+        string optionsDescription = configuration.LoopAgentOptions is null
+            ? "upstream LoopAgentOptions defaults"
+            : "caller-supplied LoopAgentOptions";
+        return FoundryHarnessFeatureDisposition.Create(
+            FoundryHarnessFeature.LoopEvaluation,
+            FoundryHarnessFeatureRequestedState.RequestedEnabled,
+            FoundryHarnessFeatureEffectiveState.Enabled,
+            LoopEvaluationLimitation,
+            FoundryHarnessFeatureBackingSelection.CallerSupplied,
+            $"{evaluatorCount} caller-supplied LoopEvaluator instance(s) in order, with " +
+            $"{optionsDescription}.");
     }
 
     private static FoundryHarnessFeatureDisposition AlwaysOn(

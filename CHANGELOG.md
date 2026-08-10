@@ -47,6 +47,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   compaction, it bounds the exact message set dispatched for every provider
   request including each intermediate tool round, and fails closed rather than
   forwarding over-budget context. See ADR-0011.
+- Explicit Harness loop evaluation through caller-supplied upstream
+  `LoopEvaluator` instances and `LoopAgentOptions`. Foundry validates the
+  enabled/disabled/backing combinations, maps them directly to the official
+  bundle, reports the effective outer-loop behavior, and preserves upstream as
+  the sole loop implementation.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry
@@ -138,6 +143,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   gained a required member for hybrid compaction, which is source-breaking for
   existing construction sites. Set `EnableHybridCompaction = false` and
   `HybridCompactionOptions = null` to keep prior behavior.
+- `FoundryHarnessFeatureSelections` now requires
+  `EnableLoopEvaluation`, and `FoundryHarnessAgentConfiguration` requires
+  `LoopEvaluators` and `LoopAgentOptions`. Set the feature to `false`, supply an
+  empty evaluator list, and pass `null` options to keep prior behavior.
 - The effective-defaults report now discloses that upstream compaction is
   evaluated once per agent turn rather than once per provider request, so it
   does not bound context inside a multi-round tool loop. Measured against

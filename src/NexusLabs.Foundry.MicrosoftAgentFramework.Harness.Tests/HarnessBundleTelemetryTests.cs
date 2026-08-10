@@ -132,6 +132,85 @@ public sealed class HarnessBundleTelemetryTests
     }
 
     [Fact]
+    public async Task Run_LoopEvaluation_EmitsOneFoundryLifecycleAndUpstreamActivityPerIteration()
+    {
+        var chatClient = new HarnessLoopChatClient(
+            "draft artifact",
+            "accepted artifact DONE");
+        string sourceName = $"Foundry.Harness.Loop.Tests.{Guid.NewGuid():N}";
+        var activities = new ConcurrentQueue<Activity>();
+        using var listener = CreateActivityListener(sourceName, activities);
+        var sink = new HarnessBundleProgressSink();
+        using var services = new ServiceCollection()
+            .AddFoundryAgentFramework()
+            .BuildServiceProvider();
+        var progressFactory = services.GetRequiredService<IProgressReporterFactory>();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
+        var reporter = progressFactory.Create("bundle-loop-workflow", [sink]);
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with
+            {
+                EnableOpenTelemetry = true,
+                EnableLoopEvaluation = true,
+            }) with
+        {
+            Id = "bundle-loop-agent",
+            Name = "Bundle Loop Agent",
+            ChatClient = chatClient,
+            ProgressAccessor = progressAccessor,
+            OpenTelemetrySourceName = sourceName,
+            LoopEvaluators =
+            [
+                new CompletionMarkerLoopEvaluator("DONE"),
+            ],
+            LoopAgentOptions = new LoopAgentOptions
+            {
+                MaxIterations = 3,
+                NonStreamingReturnsLastResponseOnly = true,
+            },
+        };
+        var agent = Factory.Create(configuration);
+
+        using (progressAccessor.BeginScope(reporter))
+        {
+            await agent.RunAsync(
+                "produce an artifact",
+                cancellationToken: TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(2, chatClient.CallCount);
+        Assert.Equal(
+            [
+                typeof(AgentInvokedEvent),
+                typeof(LlmCallStartedEvent),
+                typeof(LlmCallCompletedEvent),
+                typeof(LlmCallStartedEvent),
+                typeof(LlmCallCompletedEvent),
+                typeof(AgentCompletedEvent),
+            ],
+            sink.Events.Select(progressEvent => progressEvent.GetType()));
+        var completed = Assert.IsType<AgentCompletedEvent>(sink.Events[^1]);
+        Assert.Equal(24, completed.TotalTokens);
+
+        var operationNames = activities
+            .Select(activity =>
+                activity.GetTagItem("gen_ai.operation.name")?.ToString()
+                ?? activity.OperationName)
+            .ToList();
+        Assert.Equal(
+            2,
+            operationNames.Count(name => name.StartsWith(
+                "invoke_agent",
+                StringComparison.Ordinal)));
+        Assert.Equal(
+            2,
+            operationNames.Count(name => name.StartsWith(
+                "chat",
+                StringComparison.Ordinal)));
+        Assert.Equal(4, operationNames.Count);
+    }
+
+    [Fact]
     public async Task Run_FoundryProgressEnabledWithoutActiveScope_EmitsNoProgress()
     {
         var function = AIFunctionFactory.Create(
@@ -317,6 +396,57 @@ public sealed class HarnessBundleTelemetryTests
         Assert.Equal(
             FoundryHarnessProgressAgent.AbandonedStreamingErrorMessage,
             agentFailed.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task RunStreaming_LoopEarlyDisposal_DoesNotEvaluateOrReinvoke()
+    {
+        int evaluatorCalls = 0;
+        var chatClient = new HarnessBundleStreamingChatClient();
+        var sink = new HarnessBundleProgressSink();
+        using var services = new ServiceCollection()
+            .AddFoundryAgentFramework()
+            .BuildServiceProvider();
+        var progressFactory = services.GetRequiredService<IProgressReporterFactory>();
+        var progressAccessor = services.GetRequiredService<IProgressReporterAccessor>();
+        var reporter = progressFactory.Create("bundle-loop-abandoned-stream-workflow", [sink]);
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with
+            {
+                EnableLoopEvaluation = true,
+            }) with
+        {
+            Id = "bundle-loop-abandoned-stream-agent",
+            Name = "Bundle Loop Abandoned Stream Agent",
+            ChatClient = chatClient,
+            ProgressAccessor = progressAccessor,
+            LoopEvaluators =
+            [
+                new DelegateLoopEvaluator(
+                    (_, _) =>
+                    {
+                        evaluatorCalls++;
+                        return ValueTask.FromResult(LoopEvaluation.Continue("revise"));
+                    }),
+            ],
+        };
+        var agent = Factory.Create(configuration);
+
+        using (progressAccessor.BeginScope(reporter))
+        {
+            var enumerator = agent
+                .RunStreamingAsync(
+                    "stream",
+                    cancellationToken: TestContext.Current.CancellationToken)
+                .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+            Assert.True(await enumerator.MoveNextAsync());
+            await enumerator.DisposeAsync();
+        }
+
+        Assert.Equal(0, evaluatorCalls);
+        Assert.Single(sink.Events.OfType<LlmCallStartedEvent>());
+        Assert.Single(sink.Events.OfType<LlmCallFailedEvent>());
+        Assert.Single(sink.Events.OfType<AgentFailedEvent>());
     }
 
     [Fact]

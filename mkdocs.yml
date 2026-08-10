@@ -128,6 +128,7 @@ nav:
       - ADR-0010 Harness Execution Mode Retention: adr/adr-0010-harness-execution-mode-retention.md
       - ADR-0011 Public Hybrid Context Compaction: adr/adr-0011-public-hybrid-context-compaction.md
       - ADR-0012 Docs-First Agent Guidance: adr/adr-0012-docs-first-agent-guidance.md
+      - ADR-0013 Phase-Local Harness Loop Evaluation: adr/adr-0013-phase-local-harness-loop-evaluation.md
 
 plugins:
   - search

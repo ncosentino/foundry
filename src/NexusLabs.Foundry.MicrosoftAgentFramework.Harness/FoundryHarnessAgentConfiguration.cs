@@ -165,6 +165,39 @@ public sealed record FoundryHarnessAgentConfiguration
     public required int? MaximumIterationsPerRequest { get; init; }
 
     /// <summary>
+    /// Gets the ordered upstream <see cref="LoopEvaluator"/> instances that decide whether the
+    /// complete Harness agent should run again after each iteration. Supply an empty list when
+    /// <see cref="FoundryHarnessFeatureSelections.EnableLoopEvaluation"/> is
+    /// <see langword="false"/>. At least one evaluator is required when it is
+    /// <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// Evaluators are applied in order and upstream honors the first evaluator that requests
+    /// another iteration; an evaluator returning stop does not veto a later evaluator that requests
+    /// continuation. Each iteration is a complete Harness run, so tools with external side effects
+    /// must remain idempotent or otherwise deduplicated by the caller.
+    /// </remarks>
+    public required IReadOnlyList<LoopEvaluator> LoopEvaluators { get; init; }
+
+    /// <summary>
+    /// Gets optional upstream <see cref="Microsoft.Agents.AI.LoopAgentOptions"/> for the outer
+    /// loop, or <see langword="null"/> to use upstream defaults. Only meaningful when
+    /// <see cref="FoundryHarnessFeatureSelections.EnableLoopEvaluation"/> is
+    /// <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// Enabling fresh context per iteration requires the wrapped agent session to support
+    /// serialization when the caller supplies a session, and the serialized form must contain
+    /// independently cloneable history. A service-managed session that serializes only a remote
+    /// conversation identifier can restore another reference to the same history rather than a
+    /// fresh copy. Foundry passes these options through unchanged and does not introduce another
+    /// loop implementation. Reaching the maximum iteration count returns the latest response
+    /// without proving that every evaluator accepted it. Non-streaming response usage comes from
+    /// the final iteration; Foundry progress aggregates model and tool usage across the whole loop.
+    /// </remarks>
+    public required LoopAgentOptions? LoopAgentOptions { get; init; }
+
+    /// <summary>
     /// Gets the <see cref="AgentFileStore"/> that enables the shared file-access provider, or
     /// <see langword="null"/> to leave file access disabled (the upstream default: this dimension
     /// is opt-in, not default-on).
