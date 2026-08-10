@@ -931,6 +931,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../checkpointed-workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkpointed Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../autonomous-phase-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixed-Macro Autonomous Phases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../workspace/" class="md-nav__link">
         
   
@@ -3227,6 +3283,146 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0013-phase-local-harness-loop-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0013 Phase-Local Harness Loop Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0014-phase-local-harness-background-delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0014 Phase-Local Harness Background Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0015-upstream-first-checkpointed-workflow-runs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0015 Upstream-First Checkpointed Workflow Runs
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Superseded"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0016-same-run-checkpoint-restoration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0016 Same-Run Checkpoint Restoration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3259,7 +3455,8 @@
 <h4 id="nexuslabsfoundrymicrosoftagentframeworkworkflows"><a href="../" title="index">NexusLabs.Foundry.MicrosoftAgentFramework.Workflows</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkworkflows" title="Permanent link">&para;</a></h4>
 <h3 id="nexuslabsfoundrymicrosoftagentframeworkworkflows_1"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Workflows/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Workflows">NexusLabs.Foundry.MicrosoftAgentFramework.Workflows</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkworkflows_1" title="Permanent link">&para;</a></h3>
 <h2 id="streamingrunworkflowextensions-class">StreamingRunWorkflowExtensions Class<a class="headerlink" href="#streamingrunworkflowextensions-class" title="Permanent link">&para;</a></h2>
-<p>Extension methods on <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun" title="Microsoft.Agents.AI.Workflows.StreamingRun">Microsoft.Agents.AI.Workflows.StreamingRun</a> and <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.workflow" title="Microsoft.Agents.AI.Workflows.Workflow">Microsoft.Agents.AI.Workflows.Workflow</a> for collecting agent responses.</p>
+<p>Extension methods on <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun" title="Microsoft.Agents.AI.Workflows.StreamingRun">Microsoft.Agents.AI.Workflows.StreamingRun</a> and <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.workflow" title="Microsoft.Agents.AI.Workflows.Workflow">Microsoft.Agents.AI.Workflows.Workflow</a> for
+checkpoint-enabled execution and collecting agent responses.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">StreamingRunWorkflowExtensions</span>
 </code></pre></div>
 <p>Inheritance <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object" title="System.Object">System.Object</a> &#129106; StreamingRunWorkflowExtensions</p>
@@ -3366,6 +3563,60 @@ point of termination. Agents that emitted no text produce no entry.</p>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1" title="System.Threading.Tasks.Task`1">System.Threading.Tasks.Task&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ireadonlydictionary-2" title="System.Collections.Generic.IReadOnlyDictionary`2">System.Collections.Generic.IReadOnlyDictionary&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ireadonlydictionary-2" title="System.Collections.Generic.IReadOnlyDictionary`2">,</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ireadonlydictionary-2" title="System.Collections.Generic.IReadOnlyDictionary`2">&gt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1" title="System.Threading.Tasks.Task`1">&gt;</a><br />
 A dictionary mapping each agent's executor ID to its complete response text.
 Agents that emitted no text produce no entry.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,Microsoft.Extensions.AI.ChatMessage,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken)'></a></p>
+<h2 id="streamingrunworkflowextensionsstartcheckpointedagentrunasyncthis-workflow-chatmessage-checkpointmanager-string-cancellationtoken-method">StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(this Workflow, ChatMessage, CheckpointManager, string, CancellationToken) Method<a class="headerlink" href="#streamingrunworkflowextensionsstartcheckpointedagentrunasyncthis-workflow-chatmessage-checkpointmanager-string-cancellationtoken-method" title="Permanent link">&para;</a></h2>
+<p>Starts a checkpoint-enabled agent workflow and sends the initial chat message and
+<a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.turntoken" title="Microsoft.Agents.AI.Workflows.TurnToken">Microsoft.Agents.AI.Workflows.TurnToken</a> required by MAF agent workflow executors.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Threading</span><span class="p">.</span><span class="n">Tasks</span><span class="p">.</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">Workflows</span><span class="p">.</span><span class="n">StreamingRun</span><span class="o">&gt;</span><span class="w"> </span><span class="n">StartCheckpointedAgentRunAsync</span><span class="p">(</span><span class="k">this</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">Workflows</span><span class="p">.</span><span class="n">Workflow</span><span class="w"> </span><span class="n">workflow</span><span class="p">,</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Extensions</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">ChatMessage</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">Workflows</span><span class="p">.</span><span class="n">CheckpointManager</span><span class="w"> </span><span class="n">checkpointManager</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Threading</span><span class="p">.</span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
+</code></pre></div>
+<h4 id="parameters_5">Parameters<a class="headerlink" href="#parameters_5" title="Permanent link">&para;</a></h4>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,Microsoft.Extensions.AI.ChatMessage,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).workflow'></a></p>
+<p><code>workflow</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.workflow" title="Microsoft.Agents.AI.Workflows.Workflow">Microsoft.Agents.AI.Workflows.Workflow</a></p>
+<p>The agent workflow to execute.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,Microsoft.Extensions.AI.ChatMessage,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).message'></a></p>
+<p><code>message</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.ai.chatmessage" title="Microsoft.Extensions.AI.ChatMessage">Microsoft.Extensions.AI.ChatMessage</a></p>
+<p>The initial chat message.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,Microsoft.Extensions.AI.ChatMessage,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).checkpointManager'></a></p>
+<p><code>checkpointManager</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.checkpointmanager" title="Microsoft.Agents.AI.Workflows.CheckpointManager">Microsoft.Agents.AI.Workflows.CheckpointManager</a></p>
+<p>The caller-owned upstream checkpoint manager.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,Microsoft.Extensions.AI.ChatMessage,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).sessionId'></a></p>
+<p><code>sessionId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>An explicit workflow session identifier, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to let MAF generate one.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,Microsoft.Extensions.AI.ChatMessage,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).cancellationToken'></a></p>
+<p><code>cancellationToken</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken" title="System.Threading.CancellationToken">System.Threading.CancellationToken</a></p>
+<p>Cancellation token for starting the run.</p>
+<h4 id="returns_5">Returns<a class="headerlink" href="#returns_5" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1" title="System.Threading.Tasks.Task`1">System.Threading.Tasks.Task&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun" title="Microsoft.Agents.AI.Workflows.StreamingRun">Microsoft.Agents.AI.Workflows.StreamingRun</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1" title="System.Threading.Tasks.Task`1">&gt;</a><br />
+The raw upstream <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun" title="Microsoft.Agents.AI.Workflows.StreamingRun">Microsoft.Agents.AI.Workflows.StreamingRun</a>. Watching with a canceled token stops only the
+event consumer; call <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun.cancelrunasync" title="Microsoft.Agents.AI.Workflows.StreamingRun.CancelRunAsync">Microsoft.Agents.AI.Workflows.StreamingRun.CancelRunAsync</a> to cancel workflow execution.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,string,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken)'></a></p>
+<h2 id="streamingrunworkflowextensionsstartcheckpointedagentrunasyncthis-workflow-string-checkpointmanager-string-cancellationtoken-method">StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(this Workflow, string, CheckpointManager, string, CancellationToken) Method<a class="headerlink" href="#streamingrunworkflowextensionsstartcheckpointedagentrunasyncthis-workflow-string-checkpointmanager-string-cancellationtoken-method" title="Permanent link">&para;</a></h2>
+<p>Starts a checkpoint-enabled agent workflow and sends the initial user message and
+<a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.turntoken" title="Microsoft.Agents.AI.Workflows.TurnToken">Microsoft.Agents.AI.Workflows.TurnToken</a> required by MAF agent workflow executors.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Threading</span><span class="p">.</span><span class="n">Tasks</span><span class="p">.</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">Workflows</span><span class="p">.</span><span class="n">StreamingRun</span><span class="o">&gt;</span><span class="w"> </span><span class="n">StartCheckpointedAgentRunAsync</span><span class="p">(</span><span class="k">this</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">Workflows</span><span class="p">.</span><span class="n">Workflow</span><span class="w"> </span><span class="n">workflow</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Agents</span><span class="p">.</span><span class="n">AI</span><span class="p">.</span><span class="n">Workflows</span><span class="p">.</span><span class="n">CheckpointManager</span><span class="w"> </span><span class="n">checkpointManager</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Threading</span><span class="p">.</span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
+</code></pre></div>
+<h4 id="parameters_6">Parameters<a class="headerlink" href="#parameters_6" title="Permanent link">&para;</a></h4>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,string,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).workflow'></a></p>
+<p><code>workflow</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.workflow" title="Microsoft.Agents.AI.Workflows.Workflow">Microsoft.Agents.AI.Workflows.Workflow</a></p>
+<p>The agent workflow to execute.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,string,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).message'></a></p>
+<p><code>message</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>The initial user message.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,string,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).checkpointManager'></a></p>
+<p><code>checkpointManager</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.checkpointmanager" title="Microsoft.Agents.AI.Workflows.CheckpointManager">Microsoft.Agents.AI.Workflows.CheckpointManager</a></p>
+<p>The caller-owned upstream checkpoint manager.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,string,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).sessionId'></a></p>
+<p><code>sessionId</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
+<p>An explicit workflow session identifier, or <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null" title="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/null">null</a> to let MAF generate one.
+The returned <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun.sessionid" title="Microsoft.Agents.AI.Workflows.StreamingRun.SessionId">Microsoft.Agents.AI.Workflows.StreamingRun.SessionId</a> identifies checkpoints created for the run.</p>
+<p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.StreamingRunWorkflowExtensions.StartCheckpointedAgentRunAsync(thisMicrosoft.Agents.AI.Workflows.Workflow,string,Microsoft.Agents.AI.Workflows.CheckpointManager,string,System.Threading.CancellationToken).cancellationToken'></a></p>
+<p><code>cancellationToken</code> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken" title="System.Threading.CancellationToken">System.Threading.CancellationToken</a></p>
+<p>Cancellation token for starting the run.</p>
+<h4 id="returns_6">Returns<a class="headerlink" href="#returns_6" title="Permanent link">&para;</a></h4>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1" title="System.Threading.Tasks.Task`1">System.Threading.Tasks.Task&lt;</a><a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun" title="Microsoft.Agents.AI.Workflows.StreamingRun">Microsoft.Agents.AI.Workflows.StreamingRun</a><a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1" title="System.Threading.Tasks.Task`1">&gt;</a><br />
+The raw upstream <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun" title="Microsoft.Agents.AI.Workflows.StreamingRun">Microsoft.Agents.AI.Workflows.StreamingRun</a>. The caller owns event consumption, checkpoint
+persistence, cancellation via <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.agents.ai.workflows.streamingrun.cancelrunasync" title="Microsoft.Agents.AI.Workflows.StreamingRun.CancelRunAsync">Microsoft.Agents.AI.Workflows.StreamingRun.CancelRunAsync</a>, restoration, and
+asynchronous disposal.</p>
 
 
 

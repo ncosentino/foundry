@@ -931,6 +931,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../checkpointed-workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkpointed Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../autonomous-phase-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixed-Macro Autonomous Phases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../workspace/" class="md-nav__link">
         
   
@@ -3227,6 +3283,146 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0013-phase-local-harness-loop-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0013 Phase-Local Harness Loop Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0014-phase-local-harness-background-delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0014 Phase-Local Harness Background Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0015-upstream-first-checkpointed-workflow-runs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0015 Upstream-First Checkpointed Workflow Runs
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Superseded"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0016-same-run-checkpoint-restoration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0016 Same-Run Checkpoint Restoration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3259,7 +3455,7 @@
 <h3 id="nexuslabsfoundrymicrosoftagentframeworkharnessbundle"><a href="../NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle">NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle</a><a class="headerlink" href="#nexuslabsfoundrymicrosoftagentframeworkharnessbundle" title="Permanent link">&para;</a></h3>
 <h2 id="foundryharnessfeature-enum">FoundryHarnessFeature Enum<a class="headerlink" href="#foundryharnessfeature-enum" title="Permanent link">&para;</a></h2>
 <p>Identifies a distinct default-controlling dimension of the upstream
-<code>Microsoft.Agents.AI.Harness</code> complete-bundle pipeline (MAF 1.15).</p>
+<code>Microsoft.Agents.AI.Harness</code> complete-bundle pipeline (MAF 1.17).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">public</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="n">FoundryHarnessFeature</span>
 </code></pre></div>
 <h3 id="fields">Fields<a class="headerlink" href="#fields" title="Permanent link">&para;</a></h3>
@@ -3371,13 +3567,13 @@ built-in providers. Opt-in: disabled unless at least one instance is supplied.</
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.BackgroundAgents'></a></p>
 <p><code>BackgroundAgents</code> 17</p>
 <p>The <code>Microsoft.Agents.AI.BackgroundAgentsProvider</code> context provider for delegating
-to background agents. Not exposed by <a href="../FoundryHarnessAgentConfiguration/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration">FoundryHarnessAgentConfiguration</a> in
-this candidate; tracked as a limitation until a follow-up API-candidate review.</p>
+to caller-supplied, uniquely named agents through independent child sessions and concurrent
+background tasks.</p>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessFeature.LoopEvaluation'></a></p>
 <p><code>LoopEvaluation</code> 18</p>
-<p>The outermost <code>Microsoft.Agents.AI.LoopAgent</code> decorator that re-invokes the agent
-until loop evaluators are satisfied. Not exposed by <a href="../FoundryHarnessAgentConfiguration/" title="NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle.FoundryHarnessAgentConfiguration">FoundryHarnessAgentConfiguration</a>
-in this candidate; tracked as a limitation until a follow-up API-candidate review.</p>
+<p>The outermost <code>Microsoft.Agents.AI.LoopAgent</code> decorator that re-invokes the complete
+Harness agent until caller-supplied evaluators are satisfied or the iteration limit is
+reached.</p>
 <h3 id="remarks_2">Remarks<a class="headerlink" href="#remarks_2" title="Permanent link">&para;</a></h3>
 <p>Every value here corresponds to a specific pipeline decorator, context provider,
 or tool documented on <code>Microsoft.Agents.AI.HarnessAgentOptions</code>. See

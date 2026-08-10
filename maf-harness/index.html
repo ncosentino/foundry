@@ -981,6 +981,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#delegate-bounded-work-inside-one-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delegate bounded work inside one phase
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repeat-a-phase-until-its-artifact-is-acceptable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeat a phase until its artifact is acceptable
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#add-foundry-progress-without-duplicate-telemetry" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1204,6 +1226,62 @@
     
   
     Declarative Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../checkpointed-workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkpointed Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../autonomous-phase-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixed-Macro Autonomous Phases
   
 
     
@@ -3520,6 +3598,146 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0013-phase-local-harness-loop-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0013 Phase-Local Harness Loop Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0014-phase-local-harness-background-delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0014 Phase-Local Harness Background Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0015-upstream-first-checkpointed-workflow-runs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0015 Upstream-First Checkpointed Workflow Runs
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Superseded"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0016-same-run-checkpoint-restoration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0016 Same-Run Checkpoint Restoration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3585,6 +3803,8 @@ should own the agent pipeline and how much upstream behavior you want.</p>
 <p>The complete bundle is optional. Referencing
 <code>NexusLabs.Foundry.MicrosoftAgentFramework</code> alone does not add
 <code>Microsoft.Agents.AI.Harness</code> or change existing agents.</p>
+<p>For an end-to-end fixed macro graph whose individual Harness phases retain
+autonomy, see <a href="../autonomous-phase-pipeline/">Fixed-Macro Autonomous Phases</a>.</p>
 <h2 id="install-the-optional-bundle">Install the optional bundle<a class="headerlink" href="#install-the-optional-bundle" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">dotnet</span> <span class="n">add</span> <span class="n">package</span> <span class="n">NexusLabs</span><span class="p">.</span><span class="n">Foundry</span><span class="p">.</span><span class="n">MicrosoftAgentFramework</span><span class="p">.</span><span class="n">Harness</span>
 </code></pre></div>
@@ -3615,42 +3835,48 @@ when a backing is not applicable.</p>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="n">EnableOpenTelemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="n">EnableTodoProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
 <a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="n">EnableAgentModeProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="n">EnableCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="n">EnableHybridCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="p">};</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="kt">var</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessAgentConfiguration</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="p">{</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">    </span><span class="n">Id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;support-agent&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="n">Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Support Agent&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="n">Description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Answers product support questions.&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="n">Instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Answer concisely and use the supplied tools when needed.&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="n">HarnessInstructionsOverride</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="n">ChatClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chatClient</span><span class="p">,</span>
-<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="n">Tools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tools</span><span class="p">,</span>
-<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">    </span><span class="n">Features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">features</span><span class="p">,</span>
-<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">    </span><span class="n">ProgressAccessor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressAccessor</span><span class="p">,</span>
-<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="n">MaxContextWindowTokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">    </span><span class="n">MaxOutputTokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="n">_000</span><span class="p">,</span>
-<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">    </span><span class="n">MaximumIterationsPerRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
-<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">    </span><span class="n">FileAccessStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">    </span><span class="n">FileAccessProviderOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">    </span><span class="n">ChatHistoryProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">    </span><span class="n">FileMemoryStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">    </span><span class="n">AgentSkillsSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">    </span><span class="n">ToolApprovalAgentOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">    </span><span class="n">AgentModeProviderOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">    </span><span class="n">CompactionStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">    </span><span class="n">HybridCompactionOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="w">    </span><span class="n">OpenTelemetrySourceName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.SupportAgent&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">    </span><span class="n">AdditionalContextProviders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[],</span>
-<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="p">};</span>
-<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>
-<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="kt">var</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessAgentFactory</span><span class="p">();</span>
-<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="kt">var</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span><span class="w"> </span><span class="n">services</span><span class="p">);</span>
-<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="kt">var</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
-<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">    </span><span class="s">&quot;Summarize the open support request.&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="n">EnableBackgroundAgents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="n">EnableLoopEvaluation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="n">EnableCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="n">EnableHybridCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="p">};</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="kt">var</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessAgentConfiguration</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">{</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="n">Id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;support-agent&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="n">Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Support Agent&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="n">Description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Answers product support questions.&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="n">Instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Answer concisely and use the supplied tools when needed.&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="n">HarnessInstructionsOverride</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">    </span><span class="n">ChatClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chatClient</span><span class="p">,</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">    </span><span class="n">Tools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tools</span><span class="p">,</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="n">Features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">features</span><span class="p">,</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">    </span><span class="n">ProgressAccessor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressAccessor</span><span class="p">,</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">    </span><span class="n">MaxContextWindowTokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">    </span><span class="n">MaxOutputTokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="n">_000</span><span class="p">,</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">    </span><span class="n">MaximumIterationsPerRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">    </span><span class="n">LoopEvaluators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">    </span><span class="n">LoopAgentOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">    </span><span class="n">BackgroundAgents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">    </span><span class="n">BackgroundAgentsProviderOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">    </span><span class="n">FileAccessStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">    </span><span class="n">FileAccessProviderOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">    </span><span class="n">ChatHistoryProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="w">    </span><span class="n">FileMemoryStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">    </span><span class="n">AgentSkillsSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">    </span><span class="n">ToolApprovalAgentOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="w">    </span><span class="n">AgentModeProviderOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">    </span><span class="n">CompactionStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">    </span><span class="n">HybridCompactionOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="w">    </span><span class="n">OpenTelemetrySourceName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.SupportAgent&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">    </span><span class="n">AdditionalContextProviders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="p">};</span>
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="kt">var</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessAgentFactory</span><span class="p">();</span>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="kt">var</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span><span class="w"> </span><span class="n">services</span><span class="p">);</span>
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a><span class="kt">var</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a><span class="w">    </span><span class="s">&quot;Summarize the open support request.&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a><span class="w">    </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
 </code></pre></div>
 <p>The factory always constructs the official upstream bundle through
 <code>AsHarnessAgent</code>. It rejects incoherent feature/backing combinations, invalid
@@ -3712,21 +3938,141 @@ Foundry does not grant it, bound it, or sandbox it on your behalf.</p>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">}</span>
 </code></pre></div>
 <p>Function invocation, message injection, and per-service-call history
-persistence are unavoidable in the complete bundle. Background agents and
-loop evaluators are upstream opt-ins that this public candidate does not yet
-expose.</p>
+persistence are unavoidable in the complete bundle.</p>
+<h2 id="delegate-bounded-work-inside-one-phase">Delegate bounded work inside one phase<a class="headerlink" href="#delegate-bounded-work-inside-one-phase" title="Permanent link">&para;</a></h2>
+<p>Background agents are an opt-in child catalog for internal phase work:</p>
+<p>MAF 1.17 marks the background provider, completion evaluator, and related
+options experimental. A consumer must acknowledge the upstream diagnostic
+explicitly, for example at project scope:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">&lt;NoWarn&gt;</span>$(NoWarn);MAAI001<span class="nt">&lt;/NoWarn&gt;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="k">with</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="n">Features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configuration</span><span class="p">.</span><span class="n">Features</span><span class="w"> </span><span class="k">with</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">        </span><span class="n">EnableBackgroundAgents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">        </span><span class="n">EnableLoopEvaluation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="n">BackgroundAgents</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="na">[</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="na">        researchAgent,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="na">        analysisAgent,</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="na">    ]</span><span class="p">,</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="n">BackgroundAgentsProviderOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">    </span><span class="n">LoopEvaluators</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">    </span><span class="na">[</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="na">        new BackgroundTaskCompletionLoopEvaluator(),</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="na">        artifactEvaluator,</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="na">    ]</span><span class="p">,</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="p">};</span>
+</code></pre></div>
+<p>The upstream provider adds six tools:</p>
+<ul>
+<li><code>background_agents_start_task</code></li>
+<li><code>background_agents_wait_for_first_completion</code></li>
+<li><code>background_agents_get_task_results</code></li>
+<li><code>background_agents_get_all_tasks</code></li>
+<li><code>background_agents_continue_task</code></li>
+<li><code>background_agents_clear_completed_task</code></li>
+</ul>
+<p>Each task has its own child session and tasks run concurrently. The background
+task completion evaluator can keep the parent running until no task remains
+active. The macro workflow should still validate the phase artifact rather
+than enforce one exact child-call topology.</p>
+<p>Upstream starts child work without the parent run's cancellation token.
+Canceling the parent therefore does not cancel already-running tasks. In-flight
+runtime task and child-session references are also not serialized; after a
+parent session is restored, tasks that were still running are reported as
+<code>Lost</code>. Bound child work independently, keep side effects idempotent, clear
+terminal tasks to release their sessions, and treat retrieved child text as
+untrusted model input. The provider stores and returns <code>AgentResponse.Text</code>
+only: an approval-only or other non-text child response becomes empty text in
+the result tool. Parent-visible task metadata includes task ID, agent
+name, description, and status, but not the child session ID. Use background
+agents only for work that can complete without surfacing an interactive child
+approval.</p>
+<p>The provider has no built-in task-count, concurrency, timeout, retry, or
+cancellation bound, and its wait tool waits for the first completion rather
+than all completions. Child model and tool events are not emitted through the
+parent's Foundry progress wrapper; instrument child agents independently when
+their internal activity must be observed. Custom provider instructions inject
+the rendered child list only where the text includes the
+<code>{background_agents}</code> placeholder. Foundry pins this measured MAF 1.17
+implementation behavior; the upstream XML documentation currently describes
+the list as always appended.</p>
+<p>Do not combine active background work with
+<code>LoopAgentOptions.FreshContextPerIteration</code>: resetting the parent session
+discards the runtime task/session references and turns running tasks into
+<code>Lost</code>. Foundry rejects that configuration before construction.</p>
+<h2 id="repeat-a-phase-until-its-artifact-is-acceptable">Repeat a phase until its artifact is acceptable<a class="headerlink" href="#repeat-a-phase-until-its-artifact-is-acceptable" title="Permanent link">&para;</a></h2>
+<p>Enable upstream loop evaluation when one Harness phase should inspect its own
+result and revise it before returning across a macro workflow boundary:</p>
+<p>MAF 1.17 marks these loop types experimental. A consumer must acknowledge the
+upstream diagnostic explicitly, for example at project scope:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">&lt;NoWarn&gt;</span>$(NoWarn);MAAI001<span class="nt">&lt;/NoWarn&gt;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="k">with</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="p">{</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="n">Features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configuration</span><span class="p">.</span><span class="n">Features</span><span class="w"> </span><span class="k">with</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">        </span><span class="n">EnableLoopEvaluation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="n">LoopEvaluators</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="na">[</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="na">        new DelegateLoopEvaluator((context, cancellationToken) =&gt;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="na">        {</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="na">            bool artifactAccepted = ValidateArtifact(context.LastResponse);</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="na">            return ValueTask.FromResult(</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="na">                artifactAccepted</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="na">                    ? LoopEvaluation.Stop()</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="na">                    : LoopEvaluation.Continue(</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="na">                        &quot;The artifact is missing required evidence. Revise it.&quot;));</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="na">        }),</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="na">    ]</span><span class="p">,</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">    </span><span class="n">LoopAgentOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LoopAgentOptions</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="w">        </span><span class="n">MaxIterations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">        </span><span class="n">FreshContextPerIteration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="w">        </span><span class="n">NonStreamingReturnsLastResponseOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a><span class="p">};</span>
+</code></pre></div>
+<p>The evaluators and options are upstream MAF types and are passed through
+directly. <code>LoopAgent</code> is the outermost upstream decorator, so every iteration
+is a complete Harness run with its own tool loop, approvals, and telemetry.
+Tools with external side effects must therefore be idempotent or
+caller-deduplicated. <code>FreshContextPerIteration</code> also requires a caller-supplied
+session to support serialization <strong>and</strong> to serialize independently cloneable
+history. A service-managed session whose serialized form contains only a
+remote conversation identifier can restore another reference to the same
+server-side history instead of a fresh context. Use fresh-context looping only
+with a history/session implementation whose clone behavior you have verified.</p>
+<p>Evaluators run in order. The first evaluator that requests another iteration
+wins; an evaluator returning <code>Stop()</code> does not veto a later evaluator that
+requests continuation. The maximum iteration count is a safety cap: reaching
+it returns the latest response without proving the artifact was accepted, so
+the macro phase boundary must still validate the artifact. For non-streaming
+runs, <code>AgentResponse.Usage</code> reflects the final iteration; Foundry's progress
+events aggregate model and tool usage across the complete loop. An
+<code>AIJudgeLoopEvaluator</code> uses its own <code>IChatClient</code>, which needs independent
+instrumentation if its judge calls must appear in telemetry.</p>
+<p>Loop evaluation does not extend upstream compaction into each iteration.
+Measured with an always-firing strategy over two loop iterations, upstream
+compaction was consulted once for the outer caller turn. Foundry hybrid
+compaction observed both provider requests because it remains at the innermost
+per-call position.</p>
 <h2 id="add-foundry-progress-without-duplicate-telemetry">Add Foundry progress without duplicate telemetry<a class="headerlink" href="#add-foundry-progress-without-duplicate-telemetry" title="Permanent link">&para;</a></h2>
 <p>Set <code>ProgressAccessor</code> to Foundry's <code>IProgressReporterAccessor</code> to emit
 agent-, model-, and tool-level progress. Establish a reporter scope around the
 run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">&quot;support-workflow&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">progressSink</span><span class="p">]);</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="n">progressAccessor</span><span class="p">.</span><span class="n">BeginScope</span><span class="p">(</span><span class="n">reporter</span><span class="p">))</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">{</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="s">&quot;Handle the support request.&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">&quot;support-workflow&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">progressSink</span><span class="p">]);</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="n">progressAccessor</span><span class="p">.</span><span class="n">BeginScope</span><span class="p">(</span><span class="n">reporter</span><span class="p">))</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="p">{</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">        </span><span class="s">&quot;Handle the support request.&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="p">}</span>
 </code></pre></div>
 <p>Foundry progress does not add another function loop, <code>ActivitySource</code>, meter,
 or diagnostics writer. The upstream bundle remains the sole owner of its
@@ -3931,25 +4277,25 @@ upstream compaction will not bound it. Tracked in
 <p>Hybrid compaction wraps your chat client at the innermost position, so it
 observes and bounds the exact message set dispatched for every provider
 request, including each intermediate tool round.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessAgentConfiguration</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">{</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="c1">// ...</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="n">Features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessFeatureSelections</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">        </span><span class="c1">// ...</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">        </span><span class="n">EnableCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">        </span><span class="n">EnableHybridCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span><span class="n">CompactionStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="n">HybridCompactionOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessHybridCompactionOptions</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">        </span><span class="n">HardLimitBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">262</span><span class="n">_144</span><span class="p">,</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">        </span><span class="n">TriggerMarginBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">65</span><span class="n">_536</span><span class="p">,</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">        </span><span class="n">RecentMessageRetentionCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">        </span><span class="n">MaximumCompactionAttempts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">        </span><span class="n">UpstreamReducer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myChatReducer</span><span class="p">,</span>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="p">};</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessAgentConfiguration</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="p">{</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="c1">// ...</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="n">Features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessFeatureSelections</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">        </span><span class="c1">// ...</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">        </span><span class="n">EnableCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">,</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">        </span><span class="n">EnableHybridCompaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">    </span><span class="n">CompactionStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">null</span><span class="p">,</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">    </span><span class="n">HybridCompactionOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FoundryHarnessHybridCompactionOptions</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">        </span><span class="n">HardLimitBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">262</span><span class="n">_144</span><span class="p">,</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">        </span><span class="n">TriggerMarginBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">65</span><span class="n">_536</span><span class="p">,</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">        </span><span class="n">RecentMessageRetentionCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">        </span><span class="n">MaximumCompactionAttempts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">        </span><span class="n">UpstreamReducer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myChatReducer</span><span class="p">,</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="p">};</span>
 </code></pre></div>
 <p>The two paths are independent and may be enabled together: upstream bounds
 across turns, hybrid bounds within a call.</p>
@@ -3982,22 +4328,22 @@ configuration are identical across providers, so switching isolates provider
 behavior.</p>
 <p>It defaults to a deterministic offline provider, so <code>dotnet run</code> costs nothing
 and needs no credentials:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/HarnessProviderApp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/HarnessProviderApp
 </code></pre></div>
 <p>To run it against a real model, point it at GitHub Copilot. Create
 <code>appsettings.Development.json</code> next to <code>appsettings.json</code> — that filename is
 already git-ignored:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;Harness&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;Provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;copilot&quot;</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">&quot;Copilot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">&quot;Model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4.1&quot;</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;Harness&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nt">&quot;Provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;copilot&quot;</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="nt">&quot;Copilot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="nt">&quot;Model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4.1&quot;</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="p">}</span>
 </code></pre></div>
 <p>Or set an environment variable for a single run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">Harness__Provider</span><span class="o">=</span>copilot<span class="w"> </span>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/HarnessProviderApp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">Harness__Provider</span><span class="o">=</span>copilot<span class="w"> </span>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/Examples/AgentFramework/HarnessProviderApp
 </code></pre></div>
 <p>The Copilot provider uses <code>CopilotTokenSource.Auto</code>, which resolves the GitHub
 Copilot CLI's local credentials first. If you are already signed in to the CLI,
@@ -4018,9 +4364,10 @@ tool, so only a provider that supports it can execute the declaration.</p>
 <li>trim and AOT warnings treated as errors; and</li>
 <li>native binary execution in CI.</li>
 </ul>
-<p>Dynamic skills/scripts, background agents, and loop evaluators are not
-included in that minimum profile. Hybrid compaction is exercised separately by
-the AOT capability scenario, which enables every reachable feature at once.</p>
+<p>Dynamic skills/scripts, background agents, and loop evaluators are not included
+in the minimum scenario. The AOT capability scenario separately enables every
+reachable feature at once, including a fixed background-agent catalog, loop
+evaluation, and hybrid compaction.</p>
 <h2 id="internal-selected-provider-conformance-example">Internal selected-provider conformance example<a class="headerlink" href="#internal-selected-provider-conformance-example" title="Permanent link">&para;</a></h2>
 <p><code>src/Examples/AgentFramework/HarnessHybridApp</code> demonstrates the stable
 selected-provider seam with:</p>

@@ -1408,6 +1408,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../checkpointed-workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkpointed Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../autonomous-phase-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixed-Macro Autonomous Phases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workspace/" class="md-nav__link">
         
   
@@ -3704,6 +3760,146 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0013-phase-local-harness-loop-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0013 Phase-Local Harness Loop Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0014-phase-local-harness-background-delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0014 Phase-Local Harness Background Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0015-upstream-first-checkpointed-workflow-runs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0015 Upstream-First Checkpointed Workflow Runs
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Superseded"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0016-same-run-checkpoint-restoration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0016 Same-Run Checkpoint Restoration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4253,6 +4449,10 @@ calling <code>write_note</code> and <code>read_note</code>.</p>
 <a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="c1">// responses: IReadOnlyDictionary&lt;string, string&gt; (agentId → text)</span>
 </code></pre></div>
 <p><code>RunAsync</code> is an extension method from <code>NexusLabs.Foundry.MicrosoftAgentFramework.Workflows</code> that wraps the underlying MAF streaming execution.</p>
+<p>When a fixed macro workflow needs recovery between autonomous phases, use the
+checkpoint-aware streaming extensions instead of a terminal convenience method.
+See <a href="../checkpointed-workflows/">Checkpointed Workflows</a> for caller-owned storage,
+artifact boundaries, restore, replay, cancellation, and NativeAOT behavior.</p>
 <h3 id="termination-conditions">Termination conditions<a class="headerlink" href="#termination-conditions" title="Permanent link">&para;</a></h3>
 <p>Termination conditions let you stop a workflow early when a content-based criterion is met. Two layers are available:</p>
 <p><strong>Layer 1 — group chat (fires before the next turn):</strong>
