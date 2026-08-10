@@ -16,9 +16,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// per-service-call history persistence) are intentionally absent from this type; see
 /// <see cref="FoundryHarnessFeatureEffectiveState.AlwaysOnUnavoidable"/>. The file-access dimension
 /// is opt-in via <see cref="FoundryHarnessAgentConfiguration.FileAccessStore"/> and is therefore
-/// also absent from this type. Background agent delegation is not yet exposed by this API candidate;
-/// it is reported as a limitation in <see cref="FoundryHarnessEffectiveDefaults"/> pending a
-/// follow-up API-candidate review.
+/// also absent from this type.
 /// </para>
 /// </remarks>
 public sealed record FoundryHarnessFeatureSelections
@@ -74,6 +72,13 @@ public sealed record FoundryHarnessFeatureSelections
     /// Gets whether the plan/execute agent-mode context provider is included. Upstream default: enabled.
     /// </summary>
     public required bool EnableAgentModeProvider { get; init; }
+
+    /// <summary>
+    /// Gets whether upstream's background-agent context provider is included so the parent agent
+    /// can start, monitor, continue, and clear tasks on caller-supplied child agents. Upstream
+    /// default: disabled.
+    /// </summary>
+    public required bool EnableBackgroundAgents { get; init; }
 
     /// <summary>
     /// Gets whether the complete Harness agent is wrapped in upstream's outer

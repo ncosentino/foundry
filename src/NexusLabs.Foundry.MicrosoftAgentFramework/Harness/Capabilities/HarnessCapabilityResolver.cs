@@ -32,7 +32,7 @@ internal sealed class HarnessCapabilityResolver
         ProviderDependent(HarnessCapability.WebSearch, MafPackage, true, HarnessProviderCapability.HostedWebSearch, HarnessCapabilityTrustBoundary.ExternalContent, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G3),
         Stable(HarnessCapability.OpenTelemetry, MafPackage, true, HarnessCapabilityTrustBoundary.None, HarnessCapabilityAotStatus.Compatible, HarnessCapabilityDiagnosticsStatus.Available, HarnessDeliveryPhase.G2),
         Experimental(HarnessCapability.Compaction, MafPackage, false, HarnessCapabilityTrustBoundary.ExternalContent, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Available, HarnessDeliveryPhase.G5),
-        Experimental(HarnessCapability.BackgroundAgents, MafPackage, false, HarnessCapabilityTrustBoundary.HostIdentity, HarnessCapabilityAotStatus.Unverified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G6),
+        Experimental(HarnessCapability.BackgroundAgents, MafPackage, false, HarnessCapabilityTrustBoundary.HostIdentity, HarnessCapabilityAotStatus.Verified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G6),
         Experimental(HarnessCapability.LoopEvaluation, MafPackage, false, HarnessCapabilityTrustBoundary.None, HarnessCapabilityAotStatus.Verified, HarnessCapabilityDiagnosticsStatus.Partial, HarnessDeliveryPhase.G6),
     ];
 

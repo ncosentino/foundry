@@ -52,6 +52,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   enabled/disabled/backing combinations, maps them directly to the official
   bundle, reports the effective outer-loop behavior, and preserves upstream as
   the sole loop implementation.
+- Explicit Harness background-agent delegation through caller-supplied
+  `AIAgent` instances and `BackgroundAgentsProviderOptions`. Foundry validates
+  child identities, reserves the six upstream delegation tool names, maps the
+  catalog directly to the official provider, and documents its non-propagating
+  cancellation and lost-on-restore behavior.
 - Optional `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows.Declarative` package
   that runs Microsoft Agent Framework declarative (YAML) workflows against
   Foundry-registered agents, with no dependency on a deployed Azure AI Foundry
@@ -147,6 +152,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   `EnableLoopEvaluation`, and `FoundryHarnessAgentConfiguration` requires
   `LoopEvaluators` and `LoopAgentOptions`. Set the feature to `false`, supply an
   empty evaluator list, and pass `null` options to keep prior behavior.
+- `FoundryHarnessFeatureSelections` now requires
+  `EnableBackgroundAgents`, and `FoundryHarnessAgentConfiguration` requires
+  `BackgroundAgents` and `BackgroundAgentsProviderOptions`. Set the feature to
+  `false`, supply an empty child list, and pass `null` options to keep prior
+  behavior.
 - The effective-defaults report now discloses that upstream compaction is
   evaluated once per agent turn rather than once per provider request, so it
   does not bound context inside a multi-round tool loop. Measured against

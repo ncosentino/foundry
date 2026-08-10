@@ -140,6 +140,9 @@ public sealed class FoundryHarnessAgentFactory
         var loopEvaluators = configuration.LoopEvaluators.Count > 0
             ? new List<LoopEvaluator>(configuration.LoopEvaluators)
             : null;
+        var backgroundAgents = configuration.BackgroundAgents.Count > 0
+            ? new List<AIAgent>(configuration.BackgroundAgents)
+            : null;
 
         var options = new HarnessAgentOptions
         {
@@ -159,6 +162,8 @@ public sealed class FoundryHarnessAgentFactory
             MaximumIterationsPerRequest = configuration.MaximumIterationsPerRequest,
             LoopEvaluators = loopEvaluators,
             LoopAgentOptions = configuration.LoopAgentOptions,
+            BackgroundAgents = backgroundAgents,
+            BackgroundAgentsProviderOptions = configuration.BackgroundAgentsProviderOptions,
             ChatHistoryProvider = configuration.ChatHistoryProvider,
             AIContextProviders = additionalContextProviders,
             DisableToolAutoApproval = !configuration.Features.EnableToolAutoApproval,
@@ -227,6 +232,7 @@ public sealed class FoundryHarnessAgentFactory
         ArgumentNullException.ThrowIfNull(configuration.Tools);
         ArgumentNullException.ThrowIfNull(configuration.Features);
         ArgumentNullException.ThrowIfNull(configuration.LoopEvaluators);
+        ArgumentNullException.ThrowIfNull(configuration.BackgroundAgents);
         ArgumentNullException.ThrowIfNull(configuration.AdditionalContextProviders);
 
         if (string.IsNullOrWhiteSpace(configuration.Name))
@@ -355,6 +361,85 @@ public sealed class FoundryHarnessAgentFactory
                 "when provided.");
         }
 
+        for (int i = 0; i < configuration.BackgroundAgents.Count; i++)
+        {
+            var backgroundAgent = configuration.BackgroundAgents[i];
+            if (backgroundAgent is null)
+            {
+                throw new ArgumentException(
+                    "FoundryHarnessAgentConfiguration.BackgroundAgents contains a null " +
+                    $"element at index {i}.",
+                    nameof(configuration));
+            }
+
+            if (string.IsNullOrWhiteSpace(backgroundAgent.Name))
+            {
+                throw new ArgumentException(
+                    $"FoundryHarnessAgentConfiguration.BackgroundAgents[{i}] has a blank or " +
+                    "empty Name. Background agent names must be non-empty.",
+                    nameof(configuration));
+            }
+        }
+
+        var duplicateBackgroundAgentNames = configuration.BackgroundAgents
+            .Select(agent => agent.Name!)
+            .GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (duplicateBackgroundAgentNames.Count > 0)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.BackgroundAgents contains duplicate agent " +
+                "names under upstream's case-insensitive identity rule: " +
+                $"{string.Join(", ", duplicateBackgroundAgentNames)}.",
+                nameof(configuration));
+        }
+
+        if (configuration.Features.EnableBackgroundAgents &&
+            configuration.BackgroundAgents.Count == 0)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.Features.EnableBackgroundAgents is true, but " +
+                "BackgroundAgents is empty. Upstream cannot construct BackgroundAgentsProvider " +
+                "without at least one child agent.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableBackgroundAgents &&
+            configuration.BackgroundAgents.Count > 0)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.BackgroundAgents contains agents while " +
+                "Features.EnableBackgroundAgents is false. Set EnableBackgroundAgents to true " +
+                "to use them, or supply an empty list to leave delegation disabled.",
+                nameof(configuration));
+        }
+
+        if (!configuration.Features.EnableBackgroundAgents &&
+            configuration.BackgroundAgentsProviderOptions is not null)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration.BackgroundAgentsProviderOptions was supplied " +
+                "while Features.EnableBackgroundAgents is false. Set EnableBackgroundAgents to " +
+                "true to use custom options, or pass null here to leave delegation disabled.",
+                nameof(configuration));
+        }
+
+        if (configuration.Features.EnableBackgroundAgents &&
+            configuration.Features.EnableLoopEvaluation &&
+            configuration.LoopAgentOptions?.FreshContextPerIteration == true)
+        {
+            throw new ArgumentException(
+                "FoundryHarnessAgentConfiguration cannot combine background agents with " +
+                "LoopAgentOptions.FreshContextPerIteration. Upstream background task and child " +
+                "session references are runtime-only; resetting the parent session while tasks " +
+                "are running makes those tasks Lost. Disable fresh-context looping or background " +
+                "delegation.",
+                nameof(configuration));
+        }
+
         for (int i = 0; i < configuration.Tools.Count; i++)
         {
             var tool = configuration.Tools[i];
@@ -410,11 +495,23 @@ public sealed class FoundryHarnessAgentFactory
 
         for (int i = 0; i < configuration.AdditionalContextProviders.Count; i++)
         {
-            if (configuration.AdditionalContextProviders[i] is null)
+            var provider = configuration.AdditionalContextProviders[i];
+            if (provider is null)
             {
                 throw new ArgumentException(
                     "FoundryHarnessAgentConfiguration.AdditionalContextProviders contains a null " +
                     $"element at index {i}.",
+                    nameof(configuration));
+            }
+
+            if (provider is BackgroundAgentsProvider)
+            {
+                throw new ArgumentException(
+                    "FoundryHarnessAgentConfiguration.AdditionalContextProviders contains a " +
+                    "BackgroundAgentsProvider. Configure background agents only through the " +
+                    "explicit Features.EnableBackgroundAgents, BackgroundAgents, and " +
+                    "BackgroundAgentsProviderOptions members so selection, state keys, and built-in " +
+                    "tool collisions remain coherent.",
                     nameof(configuration));
             }
         }
@@ -615,6 +712,16 @@ public sealed class FoundryHarnessAgentFactory
             yield return "load_skill";
             yield return "read_skill_resource";
             yield return "run_skill_script";
+        }
+
+        if (configuration.Features.EnableBackgroundAgents)
+        {
+            yield return "background_agents_start_task";
+            yield return "background_agents_wait_for_first_completion";
+            yield return "background_agents_get_task_results";
+            yield return "background_agents_get_all_tasks";
+            yield return "background_agents_continue_task";
+            yield return "background_agents_clear_completed_task";
         }
     }
 }

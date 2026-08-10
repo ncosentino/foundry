@@ -1,3 +1,6 @@
+using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
+
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
@@ -8,8 +11,7 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Tests;
 /// requested/effective axis and the separate backing-selection axis) for the installed
 /// <c>Microsoft.Agents.AI.Harness</c> 1.17.0 bundle: always-on-unavoidable dimensions, toggle
 /// dimensions tracking <see cref="FoundryHarnessFeatureSelections"/>, opt-in dimensions driven by
-/// backing-object presence, and background agents reported as a limitation rather than silently
-/// omitted. Also validates that
+/// backing-object presence, and caller-supplied loop and delegation features. Also validates that
 /// <see cref="FoundryHarnessFeatureDisposition.Create"/> and
 /// <see cref="FoundryHarnessEffectiveDefaults.Create"/> enforce their factory invariants.
 /// </summary>
@@ -451,17 +453,47 @@ public sealed class HarnessBundleDefaultsTests
     }
 
     [Fact]
-    public void BackgroundAgents_AlwaysReportsNotRequestedDisabledWithLimitation()
+    public void BackgroundAgents_Disabled_ReportsRequestedDisabled()
     {
-        var configuration = AllFeaturesEnabledWithBudgets();
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline();
 
         var disposition = Factory.DescribeEffectiveDefaults(configuration)
             .GetDisposition(FoundryHarnessFeature.BackgroundAgents);
 
-        Assert.Equal(FoundryHarnessFeatureRequestedState.NotRequested, disposition.RequestedState);
+        Assert.Equal(FoundryHarnessFeatureRequestedState.RequestedDisabled, disposition.RequestedState);
         Assert.Equal(FoundryHarnessFeatureEffectiveState.Disabled, disposition.EffectiveState);
-        Assert.False(string.IsNullOrWhiteSpace(disposition.Limitation));
+        Assert.Null(disposition.Limitation);
         Assert.Equal(FoundryHarnessFeatureBackingSelection.NotApplicable, disposition.BackingSelection);
+    }
+
+    [Fact]
+    public void BackgroundAgents_Enabled_ReportsCallerSuppliedBackingAndLimitations()
+    {
+        var configuration = HarnessBundleTestsHelpers.CreateBaseline(
+            HarnessBundleTestsHelpers.AllFeaturesDisabled() with
+            {
+                EnableBackgroundAgents = true,
+            }) with
+        {
+            BackgroundAgents =
+            [
+                new FakeHarnessChatClient().AsAIAgent(
+                    name: "worker",
+                    description: "Worker description."),
+            ],
+            BackgroundAgentsProviderOptions = new Microsoft.Agents.AI.BackgroundAgentsProviderOptions(),
+        };
+
+        var disposition = Factory.DescribeEffectiveDefaults(configuration)
+            .GetDisposition(FoundryHarnessFeature.BackgroundAgents);
+
+        Assert.Equal(FoundryHarnessFeatureRequestedState.RequestedEnabled, disposition.RequestedState);
+        Assert.Equal(FoundryHarnessFeatureEffectiveState.Enabled, disposition.EffectiveState);
+        Assert.Equal(FoundryHarnessFeatureBackingSelection.CallerSupplied, disposition.BackingSelection);
+        Assert.Contains("1", disposition.BackingDescription, StringComparison.Ordinal);
+        Assert.Contains("caller-supplied", disposition.BackingDescription, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("does not cancel", disposition.Limitation, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Lost", disposition.Limitation, StringComparison.Ordinal);
     }
 
     [Fact]

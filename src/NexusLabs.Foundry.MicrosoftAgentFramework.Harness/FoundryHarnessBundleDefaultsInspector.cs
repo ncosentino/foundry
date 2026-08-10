@@ -8,15 +8,20 @@ namespace NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
 /// This mapping is pure and evidence-derived from the upstream
 /// <c>Microsoft.Agents.AI.HarnessAgentOptions</c> XML documentation shipped with
 /// <c>Microsoft.Agents.AI.Harness</c> 1.17.0: it performs no reflection or probing of a live
-/// agent instance. Background agents remain reported as an unrequested limitation rather than
-/// silently omitted.
+/// agent instance.
 /// </remarks>
 internal sealed class FoundryHarnessBundleDefaultsInspector
 {
     private const string BackgroundAgentsLimitation =
-        "Not exposed by FoundryHarnessAgentConfiguration in this candidate. Upstream supports " +
-        "opt-in delegation via HarnessAgentOptions.BackgroundAgents; tracked for a follow-up " +
-        "API-candidate review.";
+        "Upstream starts child work with a non-cancelable token, so canceling the parent run does " +
+        "not cancel already-running background tasks. In-flight task and child-session references " +
+        "are not serialized; after a parent-session restore, tasks that were running are reported " +
+        "as Lost. The result tool surfaces AgentResponse.Text only, so approval-only and other " +
+        "non-text child responses become empty text; child session IDs are not exposed in task " +
+        "metadata. The provider has no task-count, concurrency, timeout, retry, or cancellation " +
+        "bound. Child output is model-visible untrusted text, child model/tool events are not " +
+        "reported through the parent Foundry progress wrapper, and terminal tasks must be cleared " +
+        "explicitly to release their sessions.";
 
     private const string LoopEvaluationLimitation =
         "Upstream LoopAgent is the outermost decorator and each iteration is a complete Harness " +
@@ -77,8 +82,8 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
             DescribeCompaction(configuration),
             DescribeHybridCompaction(configuration),
             DescribeAdditionalContextProviders(configuration),
+            DescribeBackgroundAgents(configuration),
             DescribeLoopEvaluation(configuration),
-            NotExposed(FoundryHarnessFeature.BackgroundAgents, BackgroundAgentsLimitation),
         };
 
         return FoundryHarnessEffectiveDefaults.Create(dispositions);
@@ -434,6 +439,33 @@ internal sealed class FoundryHarnessBundleDefaultsInspector
             FoundryHarnessFeatureBackingSelection.CallerSupplied,
             $"{evaluatorCount} caller-supplied LoopEvaluator instance(s) in order, with " +
             $"{optionsDescription}.");
+    }
+
+    private static FoundryHarnessFeatureDisposition DescribeBackgroundAgents(
+        FoundryHarnessAgentConfiguration configuration)
+    {
+        if (!configuration.Features.EnableBackgroundAgents)
+        {
+            return FoundryHarnessFeatureDisposition.Create(
+                FoundryHarnessFeature.BackgroundAgents,
+                FoundryHarnessFeatureRequestedState.RequestedDisabled,
+                FoundryHarnessFeatureEffectiveState.Disabled,
+                null,
+                FoundryHarnessFeatureBackingSelection.NotApplicable,
+                null);
+        }
+
+        int agentCount = configuration.BackgroundAgents.Count;
+        string optionsDescription = configuration.BackgroundAgentsProviderOptions is null
+            ? "upstream BackgroundAgentsProviderOptions defaults"
+            : "caller-supplied BackgroundAgentsProviderOptions";
+        return FoundryHarnessFeatureDisposition.Create(
+            FoundryHarnessFeature.BackgroundAgents,
+            FoundryHarnessFeatureRequestedState.RequestedEnabled,
+            FoundryHarnessFeatureEffectiveState.Enabled,
+            BackgroundAgentsLimitation,
+            FoundryHarnessFeatureBackingSelection.CallerSupplied,
+            $"{agentCount} caller-supplied background agent(s), with {optionsDescription}.");
     }
 
     private static FoundryHarnessFeatureDisposition AlwaysOn(

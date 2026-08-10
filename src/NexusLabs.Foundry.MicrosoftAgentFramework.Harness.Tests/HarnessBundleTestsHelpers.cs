@@ -1,3 +1,4 @@
+using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
 using NexusLabs.Foundry.MicrosoftAgentFramework.Harness.Bundle;
@@ -22,6 +23,7 @@ internal static class HarnessBundleTestsHelpers
             EnableOpenTelemetry = false,
             EnableTodoProvider = false,
             EnableAgentModeProvider = false,
+            EnableBackgroundAgents = false,
             EnableLoopEvaluation = false,
             EnableCompaction = false,
             EnableHybridCompaction = false,
@@ -39,6 +41,9 @@ internal static class HarnessBundleTestsHelpers
             EnableOpenTelemetry = true,
             EnableTodoProvider = true,
             EnableAgentModeProvider = true,
+            // Background agents cannot be enabled here: they fail closed without an explicit,
+            // uniquely named child catalog.
+            EnableBackgroundAgents = false,
             // Loop evaluation cannot be enabled here: it fails closed without at least one
             // caller-supplied evaluator, which this helper has no basis to choose.
             EnableLoopEvaluation = false,
@@ -66,6 +71,8 @@ internal static class HarnessBundleTestsHelpers
             MaximumIterationsPerRequest = null,
             LoopEvaluators = [],
             LoopAgentOptions = null,
+            BackgroundAgents = [],
+            BackgroundAgentsProviderOptions = null,
             FileAccessStore = null,
             FileAccessProviderOptions = null,
             ChatHistoryProvider = null,
@@ -105,6 +112,16 @@ internal static class HarnessBundleTestsHelpers
                 disabledFeatures with { EnableAgentSkills = true }) with
             {
                 AgentSkillsSource = new FakeAgentSkillsSource(),
+            },
+            FoundryHarnessFeature.BackgroundAgents => CreateBaseline(
+                disabledFeatures with { EnableBackgroundAgents = true }) with
+            {
+                BackgroundAgents =
+                [
+                    new FakeHarnessChatClient().AsAIAgent(
+                        name: "background-agent",
+                        description: "Background test agent."),
+                ],
             },
             _ => throw new ArgumentOutOfRangeException(nameof(feature), feature, null),
         };
