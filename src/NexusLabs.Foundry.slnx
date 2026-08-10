@@ -3,6 +3,7 @@
   <Folder Name="/Examples/AgentFramework/">
     <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
     <Project Path="Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj" />
+    <Project Path="Examples/AgentFramework/CheckpointWorkflowApp/CheckpointWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/CodeReviewPipelineApp/CodeReviewPipelineApp.csproj" />
     <Project Path="Examples/AgentFramework/DeclarativeMcpWorkflowApp/DeclarativeMcpWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/DeclarativeWorkflowApp/DeclarativeWorkflowApp.csproj" />

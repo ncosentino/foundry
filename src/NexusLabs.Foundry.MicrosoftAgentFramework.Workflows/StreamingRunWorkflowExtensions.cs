@@ -5,10 +5,96 @@ using NexusLabs.Foundry.MicrosoftAgentFramework;
 namespace NexusLabs.Foundry.MicrosoftAgentFramework.Workflows;
 
 /// <summary>
-/// Extension methods on <see cref="StreamingRun"/> and <see cref="Workflow"/> for collecting agent responses.
+/// Extension methods on <see cref="StreamingRun"/> and <see cref="Workflow"/> for
+/// checkpoint-enabled execution and collecting agent responses.
 /// </summary>
 public static class StreamingRunWorkflowExtensions
 {
+    /// <summary>
+    /// Starts a checkpoint-enabled agent workflow and sends the initial user message and
+    /// <see cref="TurnToken"/> required by MAF agent workflow executors.
+    /// </summary>
+    /// <param name="workflow">The agent workflow to execute.</param>
+    /// <param name="message">The initial user message.</param>
+    /// <param name="checkpointManager">The caller-owned upstream checkpoint manager.</param>
+    /// <param name="sessionId">
+    /// An explicit workflow session identifier, or <see langword="null"/> to let MAF generate one.
+    /// The returned <see cref="StreamingRun.SessionId"/> identifies checkpoints created for the run.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token for starting the run.</param>
+    /// <returns>
+    /// The raw upstream <see cref="StreamingRun"/>. The caller owns event consumption, checkpoint
+    /// persistence, cancellation via <see cref="StreamingRun.CancelRunAsync"/>, restoration, and
+    /// asynchronous disposal.
+    /// </returns>
+    public static Task<StreamingRun> StartCheckpointedAgentRunAsync(
+        this Workflow workflow,
+        string message,
+        CheckpointManager checkpointManager,
+        string? sessionId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(workflow);
+        ArgumentException.ThrowIfNullOrEmpty(message);
+        return workflow.StartCheckpointedAgentRunAsync(
+            new ChatMessage(ChatRole.User, message),
+            checkpointManager,
+            sessionId,
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Starts a checkpoint-enabled agent workflow and sends the initial chat message and
+    /// <see cref="TurnToken"/> required by MAF agent workflow executors.
+    /// </summary>
+    /// <param name="workflow">The agent workflow to execute.</param>
+    /// <param name="message">The initial chat message.</param>
+    /// <param name="checkpointManager">The caller-owned upstream checkpoint manager.</param>
+    /// <param name="sessionId">
+    /// An explicit workflow session identifier, or <see langword="null"/> to let MAF generate one.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token for starting the run.</param>
+    /// <returns>
+    /// The raw upstream <see cref="StreamingRun"/>. Watching with a canceled token stops only the
+    /// event consumer; call <see cref="StreamingRun.CancelRunAsync"/> to cancel workflow execution.
+    /// </returns>
+    public static async Task<StreamingRun> StartCheckpointedAgentRunAsync(
+        this Workflow workflow,
+        ChatMessage message,
+        CheckpointManager checkpointManager,
+        string? sessionId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(workflow);
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(checkpointManager);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var run = await InProcessExecution.RunStreamingAsync(
+            workflow,
+            message,
+            checkpointManager,
+            sessionId,
+            cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            bool sent = await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
+            if (!sent)
+            {
+                throw new InvalidOperationException(
+                    "The workflow did not accept the agent TurnToken required to begin execution.");
+            }
+
+            return run;
+        }
+        catch
+        {
+            await run.DisposeAsync();
+            throw;
+        }
+    }
+
     /// <summary>
     /// Creates a streaming execution of the workflow, sends the message, and collects all agent responses.
     /// </summary>
@@ -275,4 +361,3 @@ public static class StreamingRunWorkflowExtensions
         Dictionary<string, System.Text.StringBuilder> responses)
         => responses.ToDictionary(kv => kv.Key, kv => kv.Value.ToString());
 }
-

@@ -538,6 +538,11 @@ var responses = await workflow.RunAsync("Which countries has Nick visited?");
 
 `RunAsync` is an extension method from `NexusLabs.Foundry.MicrosoftAgentFramework.Workflows` that wraps the underlying MAF streaming execution.
 
+When a fixed macro workflow needs recovery between autonomous phases, use the
+checkpoint-aware streaming extensions instead of a terminal convenience method.
+See [Checkpointed Workflows](checkpointed-workflows.md) for caller-owned storage,
+artifact boundaries, restore, replay, cancellation, and NativeAOT behavior.
+
 ### Termination conditions
 
 Termination conditions let you stop a workflow early when a content-based criterion is met. Two layers are available:

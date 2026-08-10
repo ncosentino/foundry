@@ -57,6 +57,7 @@ nav:
       - Agent Functions: agent-functions.md
       - Iterative Agent Loop: iterative-agent-loop.md
       - Declarative Workflows: declarative-workflows.md
+      - Checkpointed Workflows: checkpointed-workflows.md
       - Workspace: workspace.md
       - Progress Reporting: progress-reporting.md
       - Pipeline Metrics: pipeline-metrics.md
@@ -130,6 +131,8 @@ nav:
       - ADR-0012 Docs-First Agent Guidance: adr/adr-0012-docs-first-agent-guidance.md
       - ADR-0013 Phase-Local Harness Loop Evaluation: adr/adr-0013-phase-local-harness-loop-evaluation.md
       - ADR-0014 Phase-Local Harness Background Delegation: adr/adr-0014-phase-local-harness-background-delegation.md
+      - ADR-0015 Upstream-First Checkpointed Workflow Runs: adr/adr-0015-upstream-first-checkpointed-workflow-runs.md
+      - ADR-0016 Same-Run Checkpoint Restoration: adr/adr-0016-same-run-checkpoint-restoration.md
 
 plugins:
   - search
