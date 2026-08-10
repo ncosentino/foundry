@@ -3,6 +3,9 @@
   <Folder Name="/Examples/AgentFramework/">
     <Project Path="Examples/AgentFramework/AotAgentFrameworkApp/AotAgentFrameworkApp.csproj" />
     <Project Path="Examples/AgentFramework/AotHarnessApp/AotHarnessApp.csproj" />
+    <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp.Core/AutonomousPhasePipelineApp.Core.csproj" />
+    <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp.Tests/AutonomousPhasePipelineApp.Tests.csproj" />
+    <Project Path="Examples/AgentFramework/AutonomousPhasePipelineApp/AutonomousPhasePipelineApp.csproj" />
     <Project Path="Examples/AgentFramework/CheckpointWorkflowApp/CheckpointWorkflowApp.csproj" />
     <Project Path="Examples/AgentFramework/CodeReviewPipelineApp/CodeReviewPipelineApp.csproj" />
     <Project Path="Examples/AgentFramework/DeclarativeMcpWorkflowApp/DeclarativeMcpWorkflowApp.csproj" />
