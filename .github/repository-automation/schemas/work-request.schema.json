@@ -1,0 +1,202 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:repository-automation:work-request:1",
+  "title": "Repository automation work request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "request_id",
+    "idempotency_key",
+    "repository",
+    "module",
+    "configuration",
+    "source",
+    "requested_at"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "urn:repository-automation:work-request:1"
+    },
+    "schema_version": {
+      "const": "1"
+    },
+    "request_id": {
+      "$ref": "#/definitions/correlationId"
+    },
+    "idempotency_key": {
+      "$ref": "#/definitions/digest"
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "id",
+        "full_name"
+      ],
+      "properties": {
+        "provider": {
+          "$ref": "#/definitions/identifier"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "full_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+          "maxLength": 200
+        }
+      }
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "sha256"
+      ],
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/definitions/digest"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trigger",
+        "event_name",
+        "delivery_id",
+        "revision",
+        "work_item",
+        "untrusted_hint"
+      ],
+      "properties": {
+        "trigger": {
+          "enum": [
+            "event",
+            "schedule",
+            "manual",
+            "dispatch"
+          ]
+        },
+        "event_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_-]*$"
+        },
+        "delivery_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "work_item": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "provider_id",
+                "number"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "issue"
+                },
+                "provider_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "number": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          ]
+        },
+        "untrusted_hint": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "issue_number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "comment_id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "workflow_run_id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "dispatch_type": {
+              "$ref": "#/definitions/identifier"
+            }
+          }
+        }
+      }
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

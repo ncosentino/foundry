@@ -53,6 +53,27 @@ The image build context is `.github/runner-images/foundry-ci/`. It contains no
 repository source, credentials, runner registration token, or generated
 workload output.
 
+## Operator-owned private tools
+
+Private maintenance tools are not added to the public image. When a manually
+authorized workflow requires one, the PitCrew profile may attach an explicitly
+reviewed external Docker volume read-only.
+
+The research-automation pilot uses logical volume `repository-automation`, backed by
+operator-owned volume `foundry-repository-automation`, at:
+
+```text
+/mnt/pitcrew-data/repository-automation
+```
+
+The profile verifies the expected package digest, executable, runtime version, and
+contract before accepting workers. Every participating host must provision the same
+volume before the profile is replayed. PitCrew never creates or populates it.
+
+This mechanism does not alter the public image digest. A missing or mismatched volume
+rejects profile rollout or worker verification rather than downloading a private
+package from a workflow.
+
 ## Two-change bootstrap
 
 The repository cannot safely commit a final PitCrew profile until the first
@@ -167,6 +188,11 @@ Every update repeats the same sequence:
 3. Review and merge the profile digest change.
 4. Roll out one approved host.
 5. Verify current and stale workers before continuing.
+
+An external-volume revision follows the same reviewed profile replay, but it does not
+publish a new image. Update the operator-owned volume first, preserve capacity and
+routing, replay the exact profile, and verify the package digest and capability
+commands before allowing new work.
 
 An `update.status` of `rolling` is valid while assigned stale workers finish
 their current jobs.

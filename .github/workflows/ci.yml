@@ -26,6 +26,10 @@ jobs:
         shell: pwsh
         run: scripts/guidance/Test-Guidance.ps1 -SelfTest
 
+      - name: Validate manual research automation
+        shell: pwsh
+        run: scripts/repository-automation/Test-FoundryResearchAutomation.ps1 -SelfTest
+
   build-test-pack:
     needs: guidance
     # PitCrew default. Set CI_RUNNER=ubuntu-latest for the manual cloud fallback.

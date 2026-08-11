@@ -115,6 +115,7 @@ nav:
       - Agent Guidance: agent-guidance.md
       - Local CI Runners: local-runners.md
       - Repository-Owned Runner Image: runner-image.md
+      - Research Issue Automation: research-automation.md
       - Documentation Publishing: publishing.md
       - Releasing: releasing.md
   - Architecture Decisions:
@@ -134,6 +135,7 @@ nav:
       - ADR-0014 Phase-Local Harness Background Delegation: adr/adr-0014-phase-local-harness-background-delegation.md
       - ADR-0015 Upstream-First Checkpointed Workflow Runs: adr/adr-0015-upstream-first-checkpointed-workflow-runs.md
       - ADR-0016 Same-Run Checkpoint Restoration: adr/adr-0016-same-run-checkpoint-restoration.md
+      - ADR-0017 Manual Private-Runtime Research Automation Pilot: adr/adr-0017-manual-private-runtime-research-automation-pilot.md
 
 plugins:
   - search

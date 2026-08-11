@@ -1,0 +1,455 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:repository-automation:analysis-proposal:1",
+  "title": "Repository automation analysis proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "request_id",
+    "idempotency_key",
+    "repository_id",
+    "module",
+    "source_revision",
+    "observed_state_sha256",
+    "created_at",
+    "summary",
+    "operations",
+    "external_output"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "urn:repository-automation:analysis-proposal:1"
+    },
+    "schema_version": {
+      "const": "1"
+    },
+    "request_id": {
+      "$ref": "#/definitions/correlationId"
+    },
+    "idempotency_key": {
+      "$ref": "#/definitions/digest"
+    },
+    "repository_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
+      }
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "observed_state_sha256": {
+      "$ref": "#/definitions/digest"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/definitions/operation"
+      }
+    },
+    "external_output": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/definitions/externalOutput"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "marker": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "operationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "issueReference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "issue_number"
+          ],
+          "properties": {
+            "issue_number": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "client_key"
+          ],
+          "properties": {
+            "client_key": {
+              "$ref": "#/definitions/identifier"
+            }
+          }
+        }
+      ]
+    },
+    "externalOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sink_id",
+        "object_id",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "sink_id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}(?:/[A-Za-z0-9][A-Za-z0-9._-]{0,63})*$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/digest"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "operation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "issue_number",
+            "expected_state_sha256",
+            "add",
+            "remove"
+          ],
+          "anyOf": [
+            {
+              "properties": {
+                "add": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "remove": {
+                  "minItems": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "issue.labels.update"
+            },
+            "issue_number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "expected_state_sha256": {
+              "$ref": "#/definitions/digest"
+            },
+            "add": {
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/definitions/label"
+              }
+            },
+            "remove": {
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/definitions/label"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "owner_key",
+            "relationship",
+            "source",
+            "target"
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "issue.relationship.remove"
+            },
+            "owner_key": {
+              "$ref": "#/definitions/identifier"
+            },
+            "relationship": {
+              "const": "blocked-by"
+            },
+            "source": {
+              "$ref": "#/definitions/issueReference"
+            },
+            "target": {
+              "$ref": "#/definitions/issueReference"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "issue_number",
+            "expected_state_sha256",
+            "marker",
+            "body"
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "issue.comment.upsert"
+            },
+            "issue_number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "expected_state_sha256": {
+              "$ref": "#/definitions/digest"
+            },
+            "marker": {
+              "$ref": "#/definitions/marker"
+            },
+            "body": {
+              "type": "string",
+              "maxLength": 65536
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "issue_number",
+            "expected_state_sha256",
+            "marker",
+            "body"
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "issue.body-section.upsert"
+            },
+            "issue_number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "expected_state_sha256": {
+              "$ref": "#/definitions/digest"
+            },
+            "marker": {
+              "$ref": "#/definitions/marker"
+            },
+            "body": {
+              "type": "string",
+              "maxLength": 65536
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "client_key",
+            "title",
+            "body",
+            "labels"
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "issue.create"
+            },
+            "owner_key": {
+              "$ref": "#/definitions/identifier"
+            },
+            "client_key": {
+              "$ref": "#/definitions/identifier"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "body": {
+              "type": "string",
+              "maxLength": 65536
+            },
+            "labels": {
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/definitions/label"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "relationship",
+            "source",
+            "target"
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "issue.relationship.ensure"
+            },
+            "relationship": {
+              "enum": [
+                "sub-issue-of",
+                "blocked-by"
+              ]
+            },
+            "source": {
+              "$ref": "#/definitions/issueReference"
+            },
+            "target": {
+              "$ref": "#/definitions/issueReference"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "kind",
+            "event_type",
+            "payload"
+          ],
+          "properties": {
+            "operation_id": {
+              "$ref": "#/definitions/operationId"
+            },
+            "kind": {
+              "const": "repository.dispatch"
+            },
+            "event_type": {
+              "$ref": "#/definitions/identifier"
+            },
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "correlation_id"
+              ],
+              "properties": {
+                "correlation_id": {
+                  "$ref": "#/definitions/correlationId"
+                },
+                "work_item_number": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

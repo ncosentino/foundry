@@ -1,0 +1,44 @@
+{
+  "$schema": "./runtime-distribution.schema.json",
+  "schema_version": "1",
+  "runtime": {
+    "command": "repository-automation",
+    "package_id": "RepositoryAutomation.Tool",
+    "version": "0.8.2",
+    "package_source": "packages",
+    "package_file": "RepositoryAutomation.Tool.0.8.2.nupkg",
+    "contract_version": "1"
+  },
+  "analysis_engine": {
+    "command": "copilot",
+    "package_id": "@github/copilot",
+    "version": "1.0.78",
+    "package_source": "https://registry.npmjs.org"
+  },
+  "installation": {
+    "github_hosted": "unavailable",
+    "self_hosted": "preinstalled-only",
+    "missing_self_hosted_behavior": "fail-capability-unavailable",
+    "private_hosted_fallback": "forbidden"
+  },
+  "capabilities": [
+    {
+      "id": "deterministic-control",
+      "runner_variable": "REPOSITORY_AUTOMATION_CONTROL_RUNNER",
+      "hosted_default": "ubuntu-24.04",
+      "physical_reservation": "provider-owned"
+    },
+    {
+      "id": "agentic-maintenance",
+      "runner_variable": "REPOSITORY_AUTOMATION_AGENTIC_RUNNER",
+      "hosted_default": "ubuntu-24.04",
+      "physical_reservation": "provider-owned"
+    },
+    {
+      "id": "background-maintenance",
+      "runner_variable": "REPOSITORY_AUTOMATION_BACKGROUND_RUNNER",
+      "hosted_default": "ubuntu-24.04",
+      "physical_reservation": "provider-owned"
+    }
+  ]
+}

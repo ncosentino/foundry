@@ -418,10 +418,15 @@ function Test-LiveLlmWorkflowPolicy {
 
     $copilotCliPattern =
         '(?im)^\s*(?:(?:-\s*)?run:\s*)?(?:copilot|copilot\.exe)\s+'
+    $repositoryAutomationCopilotPattern =
+        '(?i)Initialize-RepositoryAutomationCopilot\.ps1'
+    $repositoryAutomationAnalyzePattern =
+        '(?i)Invoke-RepositoryAutomationAnalyze\.ps1'
     $liveLlmIndicators = @(
         '(?im)^\s*copilot-requests\s*:\s*write\s*$',
         '(?im)^\s*(?:COPILOT_GITHUB_TOKEN|GITHUB_COPILOT_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*:',
         $copilotCliPattern,
+        $repositoryAutomationCopilotPattern,
         '(?i)npm\s+(?:install|exec).*\@github/copilot',
         '(?i)api\.githubcopilot\.com',
         '(?i)\bCopilotChatClient\b'
@@ -433,16 +438,6 @@ function Test-LiveLlmWorkflowPolicy {
         '(?i)api\.anthropic\.com',
         '(?i)generativelanguage\.googleapis\.com',
         '(?im)^\s*dotnet\s+run\b.*(?:Evaluation|EVAL_MODEL)'
-    )
-    $forbiddenTriggers = @(
-        'push',
-        'pull_request',
-        'pull_request_target',
-        'schedule',
-        'workflow_call',
-        'workflow_run',
-        'repository_dispatch',
-        'merge_group'
     )
 
     foreach ($workflow in Get-ChildItem $workflowRoot -File |
@@ -466,14 +461,30 @@ function Test-LiveLlmWorkflowPolicy {
         Assert-Contract (
             $content -match '(?im)^\s*#\s*live-llm-workflow:\s*true\s*$'
         ) "Live-LLM workflow '$relative' is missing the explicit live-llm-workflow marker."
-        foreach ($trigger in $forbiddenTriggers) {
-            Assert-Contract (
-                $content -notmatch "(?m)^\s{2}$([regex]::Escape($trigger)):\s*"
-            ) "Live-LLM workflow '$relative' contains forbidden automated trigger '$trigger'."
-        }
+
+        $onHeader = [regex]::Match($content, '(?m)^on:\s*$')
+        Assert-Contract $onHeader.Success "Live-LLM workflow '$relative' has no on section."
+        $afterOn = $content.Substring(
+            $onHeader.Index + $onHeader.Length)
+        $nextTopLevel = [regex]::Match(
+            $afterOn,
+            '(?m)^\S[^\r\n]*:\s*(?:\{\})?\s*$')
+        $onBody =
+            if ($nextTopLevel.Success) {
+                $afterOn.Substring(0, $nextTopLevel.Index)
+            } else {
+                $afterOn
+            }
+        $triggers = @(
+            [regex]::Matches(
+                $onBody,
+                '(?m)^  (?<name>[A-Za-z0-9_-]+):\s*')
+        )
         Assert-Contract (
-            $content -match '(?m)^on:\r?\n\s{2}workflow_dispatch:\s*$'
+            $triggers.Count -eq 1 -and
+            $triggers[0].Groups['name'].Value -ceq 'workflow_dispatch'
         ) "Live-LLM workflow '$relative' must use only workflow_dispatch."
+
         $confirmInput = [regex]::Match(
             $content,
             '(?ms)^\s{6}confirm_live_llm:\s*\r?\n(?<body>(?:\s{8}.*(?:\r?\n|\z))*)')
@@ -503,37 +514,105 @@ function Test-LiveLlmWorkflowPolicy {
                 '(?m)^  (?<name>[A-Za-z0-9_-]+):\s*$')
         )
         Assert-Contract (
-            $jobHeaders.Count -eq 1 -and
-            $jobHeaders[0].Groups['name'].Value -ceq 'live-llm'
-        ) "Live-LLM workflow '$relative' must contain exactly one job named 'live-llm'."
-        $jobIf = @(
-            [regex]::Matches(
-                $jobs,
-                '(?m)^    if:\s*(?<condition>.+?)\s*$')
-        )
+            $jobHeaders.Count -gt 0
+        ) "Live-LLM workflow '$relative' must contain at least one job."
+
+        $workflowPrefix = $content.Substring(0, $jobsMatch.Index)
+        $globalCopilotPermission =
+            $workflowPrefix -match '(?m)^\s{2}copilot-requests:\s*write\s*$'
+        $globalIssueWritePermission =
+            $workflowPrefix -match '(?m)^\s{2}issues:\s*write\s*$'
+        if ($jobHeaders.Count -gt 1) {
+            Assert-Contract (
+                -not $globalCopilotPermission -and
+                -not $globalIssueWritePermission
+            ) "Live-LLM workflow '$relative' must scope Copilot and issue-write permissions to separate jobs."
+        }
+
+        $copilotExecutionJobs = 0
+        for ($index = 0; $index -lt $jobHeaders.Count; $index++) {
+            $header = $jobHeaders[$index]
+            $bodyStart = $header.Index + $header.Length
+            $bodyEnd =
+                if ($index + 1 -lt $jobHeaders.Count) {
+                    $jobHeaders[$index + 1].Index
+                } else {
+                    $jobs.Length
+                }
+            $jobBody = $jobs.Substring(
+                $bodyStart,
+                $bodyEnd - $bodyStart)
+            $jobName = $header.Groups['name'].Value
+
+            $jobIf = @(
+                [regex]::Matches(
+                    $jobBody,
+                    '(?m)^    if:\s*(?<condition>.+?)\s*$')
+            )
+            Assert-Contract (
+                $jobIf.Count -eq 1 -and
+                $jobIf[0].Groups['condition'].Value -match "github\.actor\s*==\s*'ncosentino'" -and
+                $jobIf[0].Groups['condition'].Value -match "github\.triggering_actor\s*==\s*'ncosentino'" -and
+                $jobIf[0].Groups['condition'].Value -match 'inputs\.confirm_live_llm\s*==\s*true' -and
+                $jobIf[0].Groups['condition'].Value -match "inputs\.reason\s*!=\s*''"
+            ) "Live-LLM workflow '$relative' job '$jobName' must guard actor, triggering actor, and explicit approval."
+
+            $runners = @(
+                [regex]::Matches(
+                    $jobBody,
+                    '(?m)^    runs-on:\s*(?<runner>.+?)\s*$')
+            )
+            Assert-Contract (
+                $runners.Count -eq 1 -and
+                $runners[0].Groups['runner'].Value -ceq 'foundry-ci'
+            ) "Live-LLM workflow '$relative' job '$jobName' must run exactly on the foundry-ci PitCrew runner."
+
+            $hasJobContentsRead =
+                $jobBody -match '(?m)^\s{6}contents:\s*read\s*$'
+            $hasGlobalContentsRead =
+                $workflowPrefix -match '(?m)^\s{2}contents:\s*read\s*$'
+            Assert-Contract (
+                $hasJobContentsRead -or
+                ($jobHeaders.Count -eq 1 -and $hasGlobalContentsRead)
+            ) "Live-LLM workflow '$relative' job '$jobName' must have read-only contents permission."
+
+            $hasCopilotPermission =
+                $jobBody -match '(?m)^\s{6}copilot-requests:\s*write\s*$' -or
+                ($jobHeaders.Count -eq 1 -and $globalCopilotPermission)
+            $hasIssueWritePermission =
+                $jobBody -match '(?m)^\s{6}issues:\s*write\s*$' -or
+                ($jobHeaders.Count -eq 1 -and $globalIssueWritePermission)
+            Assert-Contract (
+                -not ($hasCopilotPermission -and $hasIssueWritePermission)
+            ) "Live-LLM workflow '$relative' job '$jobName' must separate Copilot analysis from issue-write permissions."
+
+            $hasDirectCopilot = $jobBody -match $copilotCliPattern
+            $hasRepositoryAutomationCopilot =
+                $jobBody -match $repositoryAutomationCopilotPattern -and
+                $jobBody -match $repositoryAutomationAnalyzePattern
+            if ($hasDirectCopilot -or $hasRepositoryAutomationCopilot) {
+                $copilotExecutionJobs++
+                Assert-Contract (
+                    $hasCopilotPermission -and
+                    -not $hasIssueWritePermission
+                ) "Live-LLM workflow '$relative' job '$jobName' must run Copilot without issue-write permission."
+            } elseif ($hasCopilotPermission) {
+                Assert-Contract $false "Live-LLM workflow '$relative' job '$jobName' has Copilot permission but no approved Copilot CLI execution path."
+            }
+
+            if ($hasIssueWritePermission) {
+                Assert-Contract (
+                    $jobBody -notmatch $copilotCliPattern -and
+                    $jobBody -notmatch $repositoryAutomationCopilotPattern -and
+                    $jobBody -notmatch $repositoryAutomationAnalyzePattern -and
+                    $jobBody -notmatch '(?im)^\s*COPILOT_GITHUB_TOKEN\s*:'
+                ) "Live-LLM workflow '$relative' job '$jobName' must not receive or initialize Copilot."
+            }
+        }
+
         Assert-Contract (
-            $jobIf.Count -eq 1 -and
-            $jobIf[0].Groups['condition'].Value -match "github\.actor\s*==\s*'ncosentino'" -and
-            $jobIf[0].Groups['condition'].Value -match "github\.triggering_actor\s*==\s*'ncosentino'" -and
-            $jobIf[0].Groups['condition'].Value -match 'inputs\.confirm_live_llm\s*==\s*true' -and
-            $jobIf[0].Groups['condition'].Value -match "inputs\.reason\s*!=\s*''"
-        ) "Live-LLM workflow '$relative' must guard actor, triggering actor, and explicit approval on its only job."
-        $runners = @(
-            [regex]::Matches(
-                $jobs,
-                '(?m)^    runs-on:\s*(?<runner>.+?)\s*$')
-        )
-        Assert-Contract (
-            $runners.Count -eq 1 -and
-            $runners[0].Groups['runner'].Value -ceq 'foundry-ci'
-        ) "Live-LLM workflow '$relative' must run exactly on the foundry-ci PitCrew runner."
-        Assert-Contract (
-            $content -match '(?m)^\s+contents:\s*read\s*$' -and
-            $content -match '(?m)^\s+copilot-requests:\s*write\s*$'
-        ) "Live-LLM workflow '$relative' must use read-only contents and explicit Copilot request permission."
-        Assert-Contract (
-            $content -match $copilotCliPattern
-        ) "Live-LLM workflow '$relative' must invoke GitHub Copilot CLI."
+            $copilotExecutionJobs -eq 1
+        ) "Live-LLM workflow '$relative' must contain exactly one approved Copilot CLI execution job."
         foreach ($indicator in $forbiddenDirectModelIndicators) {
             Assert-Contract (
                 $content -notmatch $indicator
@@ -837,7 +916,7 @@ $result = Test-GuidanceContract $RepositoryRoot
 if ($SelfTest) {
     Assert-MutationRejected `
         -Name 'automated live LLM workflow' `
-        -ExpectedMessage "forbidden automated trigger 'pull_request'" `
+        -ExpectedMessage 'must use only workflow_dispatch' `
         -Mutation {
             param($root)
             $path = Join-Path $root '.github\workflows\unsafe-llm.yml'
@@ -861,6 +940,38 @@ jobs:
     runs-on: foundry-ci
     permissions:
       contents: read
+      copilot-requests: write
+    steps:
+      - run: |
+          copilot --no-ask-user -p "unsafe"
+'@ | Set-Content -LiteralPath $path
+        }
+    Assert-MutationRejected `
+        -Name 'mixed Copilot and issue write permissions' `
+        -ExpectedMessage 'must separate Copilot analysis from issue-write permissions' `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\unsafe-mixed-permissions.yml'
+            @'
+# live-llm-workflow: true
+name: Unsafe mixed permissions
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_live_llm:
+        type: boolean
+        required: true
+        default: false
+      reason:
+        type: string
+        required: true
+jobs:
+  live-llm:
+    if: github.actor == 'ncosentino' && github.triggering_actor == 'ncosentino' && inputs.confirm_live_llm == true && inputs.reason != ''
+    runs-on: foundry-ci
+    permissions:
+      contents: read
+      issues: write
       copilot-requests: write
     steps:
       - run: |

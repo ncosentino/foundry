@@ -1,0 +1,335 @@
+# live-llm-workflow: true
+name: Manual research-needed analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      work_item_number:
+        description: Open issue number carrying the research-needed label
+        type: number
+        required: true
+      confirm_live_llm:
+        description: Confirm this specific Copilot research run is explicitly authorized
+        type: boolean
+        required: true
+        default: false
+      reason:
+        description: State the specific reason; do not include secrets or private data
+        type: string
+        required: true
+      max_ai_credits:
+        description: Maximum AI credits for this Copilot CLI session (1-100)
+        type: number
+        required: true
+        default: 25
+
+permissions: {}
+
+concurrency:
+  group: manual-research-needed-${{ github.repository_id }}-${{ inputs.work_item_number }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: Resolve trusted research request
+    if: github.actor == 'ncosentino' && github.triggering_actor == 'ncosentino' && inputs.confirm_live_llm == true && inputs.reason != '' && vars.REPOSITORY_AUTOMATION_RESEARCH_NEEDED_ENABLED == 'manual'
+    runs-on: foundry-ci
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      revision: ${{ steps.resolve.outputs.revision }}
+      work_item_provider_id: ${{ steps.resolve.outputs.work_item_provider_id }}
+    steps:
+      - name: Validate authorization and issue
+        id: resolve
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_API_URL: ${{ github.api_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          WORK_ITEM_NUMBER: ${{ inputs.work_item_number }}
+          AUTHORIZATION_REASON: ${{ inputs.reason }}
+          MAX_AI_CREDITS: ${{ inputs.max_ai_credits }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ([string]::IsNullOrWhiteSpace($env:AUTHORIZATION_REASON)) {
+              throw 'reason must contain non-whitespace authorization context.'
+          }
+          $credits = [int]::Parse(
+              $env:MAX_AI_CREDITS,
+              [Globalization.CultureInfo]::InvariantCulture)
+          if ($credits -lt 1 -or $credits -gt 100) {
+              throw 'max_ai_credits must be between 1 and 100.'
+          }
+
+          $issueNumber = [int]::Parse(
+              $env:WORK_ITEM_NUMBER,
+              [Globalization.CultureInfo]::InvariantCulture)
+          if ($issueNumber -lt 1) {
+              throw 'work_item_number must identify an issue.'
+          }
+
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          $branch = [Uri]::EscapeDataString($env:DEFAULT_BRANCH)
+          $branchResponse = Invoke-RestMethod `
+            -Method Get `
+            -Uri "$($env:GITHUB_API_URL.TrimEnd('/'))/repos/$env:GITHUB_REPOSITORY/branches/$branch" `
+            -Headers $headers
+          $revision = [string]$branchResponse.commit.sha
+          if ($revision -notmatch '^[0-9a-f]{40}$') {
+              throw 'Default-branch API response did not contain a 40-hex revision.'
+          }
+
+          $issue = Invoke-RestMethod `
+            -Method Get `
+            -Uri "$($env:GITHUB_API_URL.TrimEnd('/'))/repos/$env:GITHUB_REPOSITORY/issues/$issueNumber" `
+            -Headers $headers
+          if ($issue.PSObject.Properties.Name -contains 'pull_request') {
+              throw 'work_item_number must identify an issue, not a pull request.'
+          }
+          if ([string]$issue.state -cne 'open') {
+              throw 'Research automation requires an open issue.'
+          }
+          $labels = @($issue.labels | ForEach-Object { [string]$_.name })
+          if ($labels -cnotcontains 'research-needed') {
+              throw "Issue #$issueNumber does not carry the research-needed label."
+          }
+          $providerId = [string]$issue.node_id
+          if ([string]::IsNullOrWhiteSpace($providerId)) {
+              throw 'Issue API response did not contain a provider identity.'
+          }
+
+          "revision=$revision" |
+            Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding UTF8
+          "work_item_provider_id=$providerId" |
+            Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding UTF8
+
+          $reason = ($env:AUTHORIZATION_REASON -replace '[\r\n]+', ' ').Trim()
+          if ($reason.Length -gt 240) {
+              $reason = $reason.Substring(0, 240)
+          }
+          @(
+            '## Authorized research run',
+            '',
+            "- Issue: #$issueNumber",
+            "- Trusted revision: ``$revision``",
+            "- Actor: ``$env:GITHUB_ACTOR``",
+            "- Triggering actor: ``$env:GITHUB_TRIGGERING_ACTOR``",
+            "- Maximum AI credits: ``$credits``",
+            "- Reason: $reason"
+          ) | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding UTF8
+
+  analyze:
+    name: Analyze bounded research evidence
+    needs: resolve
+    if: needs.resolve.result == 'success' && github.actor == 'ncosentino' && github.triggering_actor == 'ncosentino' && inputs.confirm_live_llm == true && inputs.reason != '' && vars.REPOSITORY_AUTOMATION_RESEARCH_NEEDED_ENABLED == 'manual'
+    runs-on: foundry-ci
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: read
+      copilot-requests: write
+    outputs:
+      proposal: ${{ steps.analyze.outputs.proposal }}
+      proposal_bytes: ${{ steps.analyze.outputs.proposal_bytes }}
+      proposal_sha256: ${{ steps.analyze.outputs.proposal_sha256 }}
+    steps:
+      - name: Checkout trusted automation files
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/repository-automation
+            scripts/repository-automation
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+
+      - name: Select private repository-automation runtime
+        shell: pwsh
+        run: |
+          $runtimeRoot = '/mnt/pitcrew-data/repository-automation'
+          $runtime = Join-Path $runtimeRoot 'repository-automation'
+          $manifest = Join-Path $runtimeRoot 'files.sha256'
+          if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) {
+              throw 'capability-unavailable: private repository-automation runtime is not mounted.'
+          }
+          $manifestHash = (
+              Get-FileHash -LiteralPath $manifest -Algorithm SHA256
+            ).Hash.ToLowerInvariant()
+          if ($manifestHash -cne 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41') {
+              throw 'capability-unavailable: private repository-automation manifest is not the reviewed revision.'
+          }
+          Push-Location $runtimeRoot
+          try {
+              & sha256sum --check --strict files.sha256
+              if ($LASTEXITCODE -ne 0) {
+                  throw 'capability-unavailable: private repository-automation files failed integrity verification.'
+              }
+          } finally {
+              Pop-Location
+          }
+          $runtimeRoot |
+            Add-Content -LiteralPath $env:GITHUB_PATH -Encoding UTF8
+
+      - name: Verify exact repository-automation runtime
+        shell: pwsh
+        run: |
+          $capabilities =
+            ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
+              -RunnerEnvironment self-hosted `
+              -GitHubPath $env:GITHUB_PATH
+          if ([string]$capabilities.runtime.version -cne '0.8.2') {
+              throw "capability-unavailable: expected repository-automation 0.8.2, found $($capabilities.runtime.version)."
+          }
+
+      - name: Initialize Copilot CLI
+        shell: pwsh
+        run: |
+          ./scripts/repository-automation/Initialize-RepositoryAutomationCopilot.ps1 `
+            -GitHubPath $env:GITHUB_PATH `
+            -GitHubEnvironment $env:GITHUB_ENV |
+              Out-Null
+
+      - name: Build bounded work request
+        id: request
+        shell: pwsh
+        env:
+          REPOSITORY_ID: ${{ github.event.repository.node_id }}
+          REPOSITORY_NAME: ${{ github.repository }}
+          TRUSTED_REVISION: ${{ needs.resolve.outputs.revision }}
+          WORK_ITEM_NUMBER: ${{ inputs.work_item_number }}
+          WORK_ITEM_PROVIDER_ID: ${{ needs.resolve.outputs.work_item_provider_id }}
+          REQUEST_ID: github-${{ github.run_id }}-${{ github.run_attempt }}-analyze
+        run: |
+          ./scripts/repository-automation/New-RepositoryAutomationWorkRequest.ps1 `
+            -ModuleId 'research-needed' `
+            -ModuleVersion '1' `
+            -ConfigurationPath '.github/repository-automation/config-research-needed.json' `
+            -Trigger 'manual' `
+            -EventName 'workflow_dispatch' `
+            -RepositoryId $env:REPOSITORY_ID `
+            -Repository $env:REPOSITORY_NAME `
+            -Revision $env:TRUSTED_REVISION `
+            -DeliveryId '${{ github.run_id }}:${{ github.run_attempt }}' `
+            -RequestId $env:REQUEST_ID `
+            -WorkItemNumber ([int]$env:WORK_ITEM_NUMBER) `
+            -WorkItemProviderId $env:WORK_ITEM_PROVIDER_ID `
+            -GitHubOutputPath $env:GITHUB_OUTPUT |
+              Out-Null
+
+      - name: Analyze
+        id: analyze
+        shell: pwsh
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ github.token }}
+          REPOSITORY_AUTOMATION_READ_TOKEN: ${{ github.token }}
+          REPOSITORY_AUTOMATION_REPOSITORY_ID: ${{ github.event.repository.node_id }}
+          REPOSITORY_AUTOMATION_ACTOR: github-actions[bot]
+          REPOSITORY_AUTOMATION_MAX_AI_CREDITS: ${{ inputs.max_ai_credits }}
+          COPILOT_MODEL: auto
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_API_URL: ${{ github.api_url }}
+          REQUEST_JSON: ${{ steps.request.outputs.request }}
+        run: |
+          ./scripts/repository-automation/Invoke-RepositoryAutomationAnalyze.ps1 `
+            -ConfigurationPath '.github/repository-automation/config-research-needed.json' `
+            -RequestJson $env:REQUEST_JSON `
+            -GitHubOutputPath $env:GITHUB_OUTPUT `
+            -ModuleId 'research-needed' `
+            -ModuleVersion '1' `
+            -RequiredOperations @('issue.labels.update', 'issue.comment.upsert', 'issue.body-section.upsert') `
+            -MinimumRuntimeVersion '0.8.2' |
+              Out-Null
+
+  apply:
+    name: Apply validated research report
+    needs: [resolve, analyze]
+    if: needs.resolve.result == 'success' && needs.analyze.result == 'success' && github.actor == 'ncosentino' && github.triggering_actor == 'ncosentino' && inputs.confirm_live_llm == true && inputs.reason != '' && vars.REPOSITORY_AUTOMATION_RESEARCH_NEEDED_ENABLED == 'manual'
+    runs-on: foundry-ci
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout trusted automation files
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/repository-automation
+            scripts/repository-automation
+          sparse-checkout-cone-mode: false
+
+      - name: Select private repository-automation runtime
+        shell: pwsh
+        run: |
+          $runtimeRoot = '/mnt/pitcrew-data/repository-automation'
+          $runtime = Join-Path $runtimeRoot 'repository-automation'
+          $manifest = Join-Path $runtimeRoot 'files.sha256'
+          if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) {
+              throw 'capability-unavailable: private repository-automation runtime is not mounted.'
+          }
+          $manifestHash = (
+              Get-FileHash -LiteralPath $manifest -Algorithm SHA256
+            ).Hash.ToLowerInvariant()
+          if ($manifestHash -cne 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41') {
+              throw 'capability-unavailable: private repository-automation manifest is not the reviewed revision.'
+          }
+          Push-Location $runtimeRoot
+          try {
+              & sha256sum --check --strict files.sha256
+              if ($LASTEXITCODE -ne 0) {
+                  throw 'capability-unavailable: private repository-automation files failed integrity verification.'
+              }
+          } finally {
+              Pop-Location
+          }
+          $runtimeRoot |
+            Add-Content -LiteralPath $env:GITHUB_PATH -Encoding UTF8
+
+      - name: Verify exact repository-automation runtime
+        shell: pwsh
+        run: |
+          $capabilities =
+            ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
+              -RunnerEnvironment self-hosted `
+              -GitHubPath $env:GITHUB_PATH
+          if ([string]$capabilities.runtime.version -cne '0.8.2') {
+              throw "capability-unavailable: expected repository-automation 0.8.2, found $($capabilities.runtime.version)."
+          }
+
+      - name: Validate and apply
+        shell: pwsh
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_API_URL: ${{ github.api_url }}
+          REPOSITORY_AUTOMATION_APPLY_TOKEN: ${{ github.token }}
+          REPOSITORY_AUTOMATION_ACTOR: github-actions[bot]
+          PROPOSAL_JSON: ${{ needs.analyze.outputs.proposal }}
+          PROPOSAL_BYTES: ${{ needs.analyze.outputs.proposal_bytes }}
+          PROPOSAL_SHA256: ${{ needs.analyze.outputs.proposal_sha256 }}
+        run: |
+          ./scripts/repository-automation/Invoke-RepositoryAutomationApply.ps1 `
+            -ConfigurationPath '.github/repository-automation/config-research-needed.json' `
+            -ProposalJson $env:PROPOSAL_JSON `
+            -ExpectedProposalBytes ([int]$env:PROPOSAL_BYTES) `
+            -ExpectedProposalSha256 $env:PROPOSAL_SHA256 `
+            -ModuleId 'research-needed' `
+            -ModuleVersion '1' `
+            -RequiredOperations @('issue.labels.update', 'issue.comment.upsert', 'issue.body-section.upsert') `
+            -MinimumRuntimeVersion '0.8.2' `
+            -GitHubStepSummaryPath $env:GITHUB_STEP_SUMMARY |
+              Out-Null

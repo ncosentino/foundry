@@ -1,0 +1,52 @@
+name: Research request
+description: Request evidence before Foundry makes an implementation or architecture decision.
+title: "Research: "
+labels:
+  - research-needed
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+      description: State the decision Foundry needs to make.
+      placeholder: How does this apply to Foundry, and should Foundry adopt, watch, or reject it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Public source URLs
+      description: Use canonical public GitHub URLs. Shortened links and redirects are not accepted by the pilot.
+      placeholder: |
+        https://github.com/owner/repository
+        https://github.com/owner/repository/blob/main/path/to/file.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: relevance
+    attributes:
+      label: Potential Foundry relevance
+      description: Identify the package, provider, workflow, evaluation, or architecture surface that may be affected.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Decision needed
+      options:
+        - Adopt or integrate
+        - Keep watching
+        - Confirm existing coverage
+        - Reject as out of scope
+        - Scope deeper verification
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification that may be required
+      description: List builds, source inspection, package analysis, or live probes that a bounded applicability report cannot prove.

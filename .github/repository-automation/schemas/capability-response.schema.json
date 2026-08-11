@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:repository-automation:capability-response:1",
+  "title": "Repository automation capability response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "runtime",
+    "supported_contract_versions",
+    "modules",
+    "operations",
+    "limits",
+    "requirements"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "urn:repository-automation:capability-response:1"
+    },
+    "schema_version": {
+      "const": "1"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "repository-automation"
+        },
+        "version": {
+          "$ref": "#/definitions/semanticVersion"
+        }
+      }
+    },
+    "supported_contract_versions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "contains": {
+        "const": "1"
+      },
+      "items": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$"
+      }
+    },
+    "modules": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "versions"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/identifier"
+          },
+          "versions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/operationKind"
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_bytes",
+        "proposal_bytes",
+        "result_bytes",
+        "operations_per_proposal"
+      ],
+      "properties": {
+        "request_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 1048576
+        },
+        "proposal_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 1048576
+        },
+        "result_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 1048576
+        },
+        "operations_per_proposal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "docker",
+        "actions_artifacts",
+        "actions_cache"
+      ],
+      "properties": {
+        "docker": {
+          "const": false
+        },
+        "actions_artifacts": {
+          "const": false
+        },
+        "actions_cache": {
+          "const": false
+        }
+      }
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "operationKind": {
+      "enum": [
+        "issue.labels.update",
+        "issue.comment.upsert",
+        "issue.body-section.upsert",
+        "issue.create",
+        "issue.relationship.ensure",
+        "issue.relationship.remove",
+        "repository.dispatch"
+      ]
+    }
+  }
+}

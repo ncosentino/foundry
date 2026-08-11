@@ -70,7 +70,7 @@ function Test-RunnerProfileContract {
 
     $profile = Get-Content -LiteralPath $profilePath -Raw | ConvertFrom-Json
     Assert-Contract (
-        $profile.'$schema' -eq 'https://raw.githubusercontent.com/ncosentino/pitcrew/87162e6fad6a961b9bc2f026639f2fa7df0795ba/runner-profile.schema.json'
+        $profile.'$schema' -eq 'https://raw.githubusercontent.com/ncosentino/pitcrew/0613544e58e20af67ff414dc3a216b3d1ee842e7/runner-profile.schema.json'
     ) 'The PitCrew schema must be pinned to the reviewed commit.'
     Assert-Contract ($profile.schemaVersion -eq 1) 'The PitCrew profile schema version must be 1.'
     Assert-Contract ($profile.name -eq 'foundry-ci') "The profile name must be 'foundry-ci'."
@@ -91,6 +91,13 @@ function Test-RunnerProfileContract {
             @($profile.labels) -notcontains $forbiddenLabel
         ) "The profile must not expose broad label '$forbiddenLabel'."
     }
+    Assert-Contract (
+        @($profile.readOnlyVolumes).Count -eq 1
+    ) 'The profile must declare exactly one operator-owned read-only volume.'
+    Assert-Contract (
+        [string]$profile.readOnlyVolumes[0].name -ceq 'repository-automation' -and
+        [string]$profile.readOnlyVolumes[0].source -ceq 'foundry-repository-automation'
+    ) 'The profile must mount the reviewed repository-automation volume.'
     foreach ($command in @(
         'test -x /actions-runner/bin/Runner.Listener',
         "dotnet --list-sdks | grep -F '9.0.316'",
@@ -98,7 +105,13 @@ function Test-RunnerProfileContract {
         'clang --version',
         'pwsh --version',
         'git --version',
-        'gh --version'
+        'gh --version',
+        'test -x /mnt/pitcrew-data/repository-automation/repository-automation',
+        'test -f /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.2.nupkg',
+        "printf 'a960047f3034b77ffc6e3d793bada073469c3e04a7ef86c1ea667e66dfe10421  /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.2.nupkg\n' | sha256sum --check --strict",
+        "printf 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41  /mnt/pitcrew-data/repository-automation/files.sha256\n' | sha256sum --check --strict",
+        'cd /mnt/pitcrew-data/repository-automation && sha256sum --check --strict files.sha256',
+        '/mnt/pitcrew-data/repository-automation/repository-automation capabilities --contract-version 1 | grep -F ''"version":"0.8.2"'''
     )) {
         Assert-Contract (
             @($profile.verificationCommands) -contains $command
@@ -278,6 +291,14 @@ if ($SelfTest) {
         (Get-Content -LiteralPath $path -Raw) `
             -replace '@sha256:[0-9a-f]{64}', ':latest' |
             Set-Content -LiteralPath $path -NoNewline
+    }
+    Assert-MutationRejected 'missing repository automation volume' {
+        param($root)
+        $path = Join-Path $root '.pitcrew/runner-profile.json'
+        $profile = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+        $profile.PSObject.Properties.Remove('readOnlyVolumes')
+        $profile | ConvertTo-Json -Depth 12 |
+            Set-Content -LiteralPath $path
     }
     Assert-MutationRejected 'broad profile label' {
         param($root)

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/ncosentino/pitcrew/87162e6fad6a961b9bc2f026639f2fa7df0795ba/runner-profile.schema.json",
+  "$schema": "https://raw.githubusercontent.com/ncosentino/pitcrew/0613544e58e20af67ff414dc3a216b3d1ee842e7/runner-profile.schema.json",
   "schemaVersion": 1,
   "name": "foundry-ci",
   "description": "Foundry repository CI workers with exact .NET SDKs and NativeAOT prerequisites.",
@@ -10,6 +10,12 @@
   "replicas": 2,
   "pullImage": true,
   "disableDefaultLabels": true,
+  "readOnlyVolumes": [
+    {
+      "name": "repository-automation",
+      "source": "foundry-repository-automation"
+    }
+  ],
   "verificationCommands": [
     "test -x /actions-runner/bin/Runner.Listener",
     "dotnet --list-sdks | grep -F '9.0.316'",
@@ -17,6 +23,12 @@
     "clang --version",
     "pwsh --version",
     "git --version",
-    "gh --version"
+    "gh --version",
+    "test -x /mnt/pitcrew-data/repository-automation/repository-automation",
+    "test -f /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.2.nupkg",
+    "printf 'a960047f3034b77ffc6e3d793bada073469c3e04a7ef86c1ea667e66dfe10421  /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.2.nupkg\\n' | sha256sum --check --strict",
+    "printf 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41  /mnt/pitcrew-data/repository-automation/files.sha256\\n' | sha256sum --check --strict",
+    "cd /mnt/pitcrew-data/repository-automation && sha256sum --check --strict files.sha256",
+    "/mnt/pitcrew-data/repository-automation/repository-automation capabilities --contract-version 1 | grep -F '\"version\":\"0.8.2\"'"
   ]
 }

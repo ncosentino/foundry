@@ -1,0 +1,405 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:repository-automation:apply-result:1",
+  "title": "Repository automation apply result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "request_id",
+    "idempotency_key",
+    "proposal_sha256",
+    "status",
+    "retryable",
+    "completed_at",
+    "current_state_sha256",
+    "operation_results",
+    "failure",
+    "external_output"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "urn:repository-automation:apply-result:1"
+    },
+    "schema_version": {
+      "const": "1"
+    },
+    "request_id": {
+      "$ref": "#/definitions/correlationId"
+    },
+    "idempotency_key": {
+      "$ref": "#/definitions/digest"
+    },
+    "proposal_sha256": {
+      "$ref": "#/definitions/digest"
+    },
+    "status": {
+      "enum": [
+        "applied",
+        "partial",
+        "rejected",
+        "failed"
+      ]
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current_state_sha256": {
+      "$ref": "#/definitions/digest"
+    },
+    "operation_results": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operation_id",
+          "kind",
+          "status",
+          "resource",
+          "failure"
+        ],
+        "properties": {
+          "operation_id": {
+            "$ref": "#/definitions/operationId"
+          },
+          "kind": {
+            "$ref": "#/definitions/operationKind"
+          },
+          "status": {
+            "enum": [
+              "applied",
+              "unchanged",
+              "rejected",
+              "failed"
+            ]
+          },
+          "resource": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "issue",
+                      "comment",
+                      "dispatch"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                }
+              }
+            ]
+          },
+          "failure": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/definitions/failure"
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "applied",
+                    "unchanged"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "failure": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "rejected"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "failure": {
+                  "$ref": "#/definitions/failure"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "failed"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "failure": {
+                  "$ref": "#/definitions/failure"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "failure": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/definitions/failure"
+        }
+      ]
+    },
+    "external_output": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/definitions/externalOutput"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "applied"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "retryable": {
+            "const": false
+          },
+          "failure": {
+            "type": "null"
+          },
+          "operation_results": {
+            "items": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "applied",
+                    "unchanged"
+                  ]
+                },
+                "failure": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "partial"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "failure": {
+            "$ref": "#/definitions/failure"
+          },
+          "operation_results": {
+            "minItems": 2,
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "applied",
+                        "unchanged"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "rejected",
+                        "failed"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "rejected",
+              "failed"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "failure": {
+            "$ref": "#/definitions/failure"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "rejected"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation_results": {
+            "items": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "unchanged",
+                    "rejected"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "operationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "operationKind": {
+      "enum": [
+        "issue.labels.update",
+        "issue.comment.upsert",
+        "issue.body-section.upsert",
+        "issue.create",
+        "issue.relationship.ensure",
+        "issue.relationship.remove",
+        "repository.dispatch"
+      ]
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/identifier"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "externalOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sink_id",
+        "object_id",
+        "sha256",
+        "size_bytes"
+      ],
+      "properties": {
+        "sink_id": {
+          "$ref": "#/definitions/identifier"
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}(?:/[A-Za-z0-9][A-Za-z0-9._-]{0,63})*$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/digest"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

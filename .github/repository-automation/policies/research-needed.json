@@ -1,0 +1,36 @@
+{
+  "$schema": "../schemas/module-policy.schema.json",
+  "schema_version": "1",
+  "module": {
+    "id": "research-needed",
+    "version": "1"
+  },
+  "operations": [
+    "issue.labels.update",
+    "issue.comment.upsert",
+    "issue.body-section.upsert"
+  ],
+  "limits": {
+    "operations": 3,
+    "labels_per_operation": 1,
+    "body_characters": 18000,
+    "body_operations": 1,
+    "created_issues": 0,
+    "relationships": 0,
+    "dispatches": 0
+  },
+  "labels": {
+    "allowed": [
+      "research-needed",
+      "research-completed"
+    ]
+  },
+  "markers": {
+    "allowed": [
+      "repository-automation.research-needed"
+    ]
+  },
+  "external_output": {
+    "mode": "disabled"
+  }
+}

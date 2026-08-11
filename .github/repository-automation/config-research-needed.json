@@ -1,0 +1,38 @@
+{
+  "$schema": "./schemas/repository-config.schema.json",
+  "schema_version": "1",
+  "configuration_version": 1,
+  "runtime": {
+    "minimum_version": "0.8.2",
+    "contract_version": "1"
+  },
+  "execution_capabilities": {
+    "deterministic_control": "deterministic-control",
+    "agentic_maintenance": "agentic-maintenance",
+    "background_maintenance": "background-maintenance"
+  },
+  "modules": [
+    {
+      "id": "research-needed",
+      "version": "1",
+      "enabled": true,
+      "execution_class": "agentic-maintenance",
+      "policy": "policies/research-needed.json",
+      "triggers": [
+        {
+          "kind": "manual"
+        }
+      ],
+      "settings": {
+        "trigger_label": "research-needed",
+        "completion_label": "research-completed",
+        "publish_to_body": false,
+        "allowed_url_prefixes": [
+          "https://github.com/"
+        ],
+        "max_sources": 6,
+        "max_source_bytes": 131072
+      }
+    }
+  ]
+}
