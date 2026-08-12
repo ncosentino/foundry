@@ -66,9 +66,11 @@ operator-owned volume `foundry-repository-automation`, at:
 /mnt/pitcrew-data/repository-automation
 ```
 
-The profile verifies the expected package digest, executable, runtime version, and
-contract before accepting workers. Every participating host must provision the same
-volume before the profile is replayed. PitCrew never creates or populates it.
+The profile verifies the expected private package digest before accepting workers.
+Each authorized job copies that package into its ephemeral checkout, installs the
+runtime into job-local storage, and verifies its exact version and capabilities.
+Every participating host must provision the same volume before the profile is
+replayed. PitCrew never creates or populates it.
 
 This mechanism does not alter the public image digest. A missing or mismatched volume
 rejects profile rollout or worker verification rather than downloading a private

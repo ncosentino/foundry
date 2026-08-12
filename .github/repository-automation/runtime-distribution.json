@@ -4,9 +4,9 @@
   "runtime": {
     "command": "repository-automation",
     "package_id": "RepositoryAutomation.Tool",
-    "version": "0.8.2",
+    "version": "0.8.4",
     "package_source": "packages",
-    "package_file": "RepositoryAutomation.Tool.0.8.2.nupkg",
+    "package_file": "RepositoryAutomation.Tool.0.8.4.nupkg",
     "contract_version": "1"
   },
   "analysis_engine": {
@@ -17,8 +17,8 @@
   },
   "installation": {
     "github_hosted": "unavailable",
-    "self_hosted": "preinstalled-only",
-    "missing_self_hosted_behavior": "fail-capability-unavailable",
+    "self_hosted": "bundled-exact-package",
+    "missing_self_hosted_behavior": "install-bundled-exact-package",
     "private_hosted_fallback": "forbidden"
   },
   "capabilities": [

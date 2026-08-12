@@ -60,7 +60,7 @@ require separately authorized deterministic experiments or live probes.
 
 ## Runtime capability
 
-The private `RepositoryAutomation.Tool` 0.8.2 package is not committed to this public
+The private `RepositoryAutomation.Tool` 0.8.4 package is not committed to this public
 repository and is unavailable on GitHub-hosted runners. Each PitCrew host must provide
 the operator-owned Docker volume `foundry-repository-automation`, mounted read-only at:
 
@@ -68,19 +68,15 @@ the operator-owned Docker volume `foundry-repository-automation`, mounted read-o
 /mnt/pitcrew-data/repository-automation
 ```
 
-The volume contains:
+The volume contains only `RepositoryAutomation.Tool.0.8.4.nupkg`. The profile verifies
+package SHA-256
+`db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b`
+before accepting workers.
 
-- `repository-automation`;
-- `RepositoryAutomation.Tool.0.8.2.nupkg`; and
-- the tool's installation support files.
-
-The profile verifies package SHA-256
-`a960047f3034b77ffc6e3d793bada073469c3e04a7ef86c1ea667e66dfe10421`,
-file-manifest SHA-256
-`a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41`,
-every file listed by that manifest, runtime version 0.8.2, and contract version 1
-before accepting workers. PitCrew 0.8.2 or later is required for the read-only
-volume contract.
+Each analyze or apply job verifies the package again, copies it into the ephemeral
+checkout, installs it into job-local storage, and verifies runtime version 0.8.4,
+contract version 1, required module operations, and artifact-free transport
+requirements. PitCrew 0.8.2 or later is required for the read-only volume contract.
 
 ## Activation
 
@@ -115,6 +111,12 @@ the trigger label, an explicitly authorized idempotency rerun must first restore
 Read, evidence, model, proposal, publication, or label failures retain
 `research-needed`. `research-completed` is added only after the report is published,
 and the trigger label is removed last.
+
+Repository automation uses one shared repository-and-issue concurrency lane. Future
+issue modules therefore serialize with research instead of racing over the same issue.
+Runtime 0.8.4 also retries bounded transient GitHub reads and deterministic mutations,
+including authoritative recovery for ambiguous issue/comment writes, without rerunning
+model analysis.
 
 Unset the activation variable to disable the workflow immediately. Removing the
 workflow, configuration, policy, and public support scripts does not require runtime

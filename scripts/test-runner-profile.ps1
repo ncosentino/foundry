@@ -106,12 +106,8 @@ function Test-RunnerProfileContract {
         'pwsh --version',
         'git --version',
         'gh --version',
-        'test -x /mnt/pitcrew-data/repository-automation/repository-automation',
-        'test -f /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.2.nupkg',
-        "printf 'a960047f3034b77ffc6e3d793bada073469c3e04a7ef86c1ea667e66dfe10421  /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.2.nupkg\n' | sha256sum --check --strict",
-        "printf 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41  /mnt/pitcrew-data/repository-automation/files.sha256\n' | sha256sum --check --strict",
-        'cd /mnt/pitcrew-data/repository-automation && sha256sum --check --strict files.sha256',
-        '/mnt/pitcrew-data/repository-automation/repository-automation capabilities --contract-version 1 | grep -F ''"version":"0.8.2"'''
+        'test -f /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.4.nupkg',
+        "printf 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b  /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.4.nupkg\n' | sha256sum --check --strict"
     )) {
         Assert-Contract (
             @($profile.verificationCommands) -contains $command

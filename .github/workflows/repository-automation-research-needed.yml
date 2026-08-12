@@ -26,7 +26,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: manual-research-needed-${{ github.repository_id }}-${{ inputs.work_item_number }}
+  group: repository-automation-issue-${{ github.repository_id }}-${{ inputs.work_item_number }}
   cancel-in-progress: false
 
 jobs:
@@ -156,43 +156,39 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Select private repository-automation runtime
+      - name: Stage private repository-automation package
         shell: pwsh
         run: |
           $runtimeRoot = '/mnt/pitcrew-data/repository-automation'
-          $runtime = Join-Path $runtimeRoot 'repository-automation'
-          $manifest = Join-Path $runtimeRoot 'files.sha256'
-          if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) {
-              throw 'capability-unavailable: private repository-automation runtime is not mounted.'
+          $source = Join-Path $runtimeRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
+          if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+              throw 'capability-unavailable: private repository-automation package is not mounted.'
           }
-          $manifestHash = (
-              Get-FileHash -LiteralPath $manifest -Algorithm SHA256
+          $sourceHash = (
+              Get-FileHash -LiteralPath $source -Algorithm SHA256
             ).Hash.ToLowerInvariant()
-          if ($manifestHash -cne 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41') {
-              throw 'capability-unavailable: private repository-automation manifest is not the reviewed revision.'
+          if ($sourceHash -cne 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b') {
+              throw 'capability-unavailable: private repository-automation package is not the reviewed revision.'
           }
-          Push-Location $runtimeRoot
-          try {
-              & sha256sum --check --strict files.sha256
-              if ($LASTEXITCODE -ne 0) {
-                  throw 'capability-unavailable: private repository-automation files failed integrity verification.'
-              }
-          } finally {
-              Pop-Location
+          $packageRoot = '.github/repository-automation/packages'
+          New-Item -ItemType Directory -Force -Path $packageRoot |
+            Out-Null
+          $destination = Join-Path $packageRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
+          Copy-Item -LiteralPath $source -Destination $destination
+          $destinationHash = (
+              Get-FileHash -LiteralPath $destination -Algorithm SHA256
+            ).Hash.ToLowerInvariant()
+          if ($destinationHash -cne $sourceHash) {
+              throw 'capability-unavailable: staged repository-automation package failed integrity verification.'
           }
-          $runtimeRoot |
-            Add-Content -LiteralPath $env:GITHUB_PATH -Encoding UTF8
 
-      - name: Verify exact repository-automation runtime
+      - name: Install exact repository-automation runtime
         shell: pwsh
         run: |
-          $capabilities =
-            ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
-              -RunnerEnvironment self-hosted `
-              -GitHubPath $env:GITHUB_PATH
-          if ([string]$capabilities.runtime.version -cne '0.8.2') {
-              throw "capability-unavailable: expected repository-automation 0.8.2, found $($capabilities.runtime.version)."
-          }
+          ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
+            -RunnerEnvironment self-hosted `
+            -GitHubPath $env:GITHUB_PATH |
+              Out-Null
 
       - name: Initialize Copilot CLI
         shell: pwsh
@@ -250,7 +246,7 @@ jobs:
             -ModuleId 'research-needed' `
             -ModuleVersion '1' `
             -RequiredOperations @('issue.labels.update', 'issue.comment.upsert', 'issue.body-section.upsert') `
-            -MinimumRuntimeVersion '0.8.2' |
+            -MinimumRuntimeVersion '0.8.4' |
               Out-Null
 
   apply:
@@ -273,43 +269,39 @@ jobs:
             scripts/repository-automation
           sparse-checkout-cone-mode: false
 
-      - name: Select private repository-automation runtime
+      - name: Stage private repository-automation package
         shell: pwsh
         run: |
           $runtimeRoot = '/mnt/pitcrew-data/repository-automation'
-          $runtime = Join-Path $runtimeRoot 'repository-automation'
-          $manifest = Join-Path $runtimeRoot 'files.sha256'
-          if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) {
-              throw 'capability-unavailable: private repository-automation runtime is not mounted.'
+          $source = Join-Path $runtimeRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
+          if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+              throw 'capability-unavailable: private repository-automation package is not mounted.'
           }
-          $manifestHash = (
-              Get-FileHash -LiteralPath $manifest -Algorithm SHA256
+          $sourceHash = (
+              Get-FileHash -LiteralPath $source -Algorithm SHA256
             ).Hash.ToLowerInvariant()
-          if ($manifestHash -cne 'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41') {
-              throw 'capability-unavailable: private repository-automation manifest is not the reviewed revision.'
+          if ($sourceHash -cne 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b') {
+              throw 'capability-unavailable: private repository-automation package is not the reviewed revision.'
           }
-          Push-Location $runtimeRoot
-          try {
-              & sha256sum --check --strict files.sha256
-              if ($LASTEXITCODE -ne 0) {
-                  throw 'capability-unavailable: private repository-automation files failed integrity verification.'
-              }
-          } finally {
-              Pop-Location
+          $packageRoot = '.github/repository-automation/packages'
+          New-Item -ItemType Directory -Force -Path $packageRoot |
+            Out-Null
+          $destination = Join-Path $packageRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
+          Copy-Item -LiteralPath $source -Destination $destination
+          $destinationHash = (
+              Get-FileHash -LiteralPath $destination -Algorithm SHA256
+            ).Hash.ToLowerInvariant()
+          if ($destinationHash -cne $sourceHash) {
+              throw 'capability-unavailable: staged repository-automation package failed integrity verification.'
           }
-          $runtimeRoot |
-            Add-Content -LiteralPath $env:GITHUB_PATH -Encoding UTF8
 
-      - name: Verify exact repository-automation runtime
+      - name: Install exact repository-automation runtime
         shell: pwsh
         run: |
-          $capabilities =
-            ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
-              -RunnerEnvironment self-hosted `
-              -GitHubPath $env:GITHUB_PATH
-          if ([string]$capabilities.runtime.version -cne '0.8.2') {
-              throw "capability-unavailable: expected repository-automation 0.8.2, found $($capabilities.runtime.version)."
-          }
+          ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
+            -RunnerEnvironment self-hosted `
+            -GitHubPath $env:GITHUB_PATH |
+              Out-Null
 
       - name: Validate and apply
         shell: pwsh
@@ -330,6 +322,6 @@ jobs:
             -ModuleId 'research-needed' `
             -ModuleVersion '1' `
             -RequiredOperations @('issue.labels.update', 'issue.comment.upsert', 'issue.body-section.upsert') `
-            -MinimumRuntimeVersion '0.8.2' `
+            -MinimumRuntimeVersion '0.8.4' `
             -GitHubStepSummaryPath $env:GITHUB_STEP_SUMMARY |
               Out-Null

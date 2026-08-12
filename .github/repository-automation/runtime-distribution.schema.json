@@ -43,7 +43,7 @@
           "const": "packages"
         },
         "package_file": {
-          "const": "RepositoryAutomation.Tool.0.8.2.nupkg"
+          "const": "RepositoryAutomation.Tool.0.8.4.nupkg"
         },
         "contract_version": {
           "const": "1"
@@ -91,10 +91,10 @@
           ]
         },
         "self_hosted": {
-          "const": "preinstalled-only"
+          "const": "bundled-exact-package"
         },
         "missing_self_hosted_behavior": {
-          "const": "fail-capability-unavailable"
+          "const": "install-bundled-exact-package"
         },
         "private_hosted_fallback": {
           "const": "forbidden"

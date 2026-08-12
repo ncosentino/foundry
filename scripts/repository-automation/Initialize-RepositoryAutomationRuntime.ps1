@@ -4,9 +4,9 @@
     Resolves and verifies the repository-automation runtime capability.
 
 .DESCRIPTION
-    Public generated-project command. GitHub-hosted runners install one exact public
-    package when the command is absent. Self-hosted runners must provide a preinstalled
-    runtime and fail distinctly when the capability is unavailable.
+    Public generated-project command. Installs the exact bundled runtime package into
+    job-local storage on GitHub-hosted and self-hosted runners, then verifies the
+    command identity, version, contract, and transport requirements.
 #>
 [CmdletBinding()]
 param(
@@ -68,70 +68,60 @@ $distributionValid = Test-Json `
 if (-not $distributionValid) {
     throw "Runtime distribution contract is invalid: $($schemaErrors -join '; ')"
 }
+if ($RunnerEnvironment -ceq 'github-hosted' -and
+    [string]$distribution.installation.github_hosted -ceq 'unavailable') {
+    throw 'capability-unavailable: this repository does not distribute the private repository-automation runtime to GitHub-hosted runners.'
+}
 
-if ($RunnerEnvironment -ceq 'self-hosted') {
-    try {
-        $null = Get-Command `
-            -Name ([string]$distribution.runtime.command) `
-            -CommandType Application `
-            -ErrorAction Stop
-    } catch [Management.Automation.CommandNotFoundException] {
-        throw 'capability-unavailable: self-hosted runner does not provide the preinstalled repository-automation runtime.'
-    }
-} else {
-    if ([string]$distribution.installation.github_hosted -ceq 'unavailable') {
-        throw 'capability-unavailable: this repository does not distribute the private repository-automation runtime to GitHub-hosted runners.'
-    }
-
-    $null = Get-Command dotnet -CommandType Application -ErrorAction Stop
-    if ([string]::IsNullOrWhiteSpace($ToolRoot)) {
-        $baseTemp =
-            if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
-                [IO.Path]::GetTempPath()
-            } else {
-                $env:RUNNER_TEMP
-            }
-        $ToolRoot = Join-Path $baseTemp 'repository-automation-tool'
-    }
-    $packageSource = [IO.Path]::GetFullPath(
-        (Join-Path $distributionDirectory (
-            [string]$distribution.runtime.package_source
-        )))
-    $packageSourcePrefix = $distributionDirectory.TrimEnd(
-        [IO.Path]::DirectorySeparatorChar,
-        [IO.Path]::AltDirectorySeparatorChar
-    ) + [IO.Path]::DirectorySeparatorChar
-    if (-not $packageSource.StartsWith(
-        $packageSourcePrefix,
-        $comparison
-    )) {
-        throw 'capability-unavailable: bundled package source escapes the distribution directory.'
-    }
-    $packagePath = Join-Path $packageSource (
-        [string]$distribution.runtime.package_file)
-    if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
-        throw 'capability-unavailable: bundled runtime package is missing.'
-    }
-    $installationRoot = Join-Path $ToolRoot (
-        "v$([string]$distribution.runtime.version)")
-    if (Test-Path -LiteralPath $installationRoot) {
-        Remove-Item -LiteralPath $installationRoot -Recurse -Force
-    }
-    New-Item -ItemType Directory -Path $installationRoot -Force |
-        Out-Null
-    $toolName =
-        if ($IsWindows) {
-            'repository-automation.exe'
+$null = Get-Command dotnet -CommandType Application -ErrorAction Stop
+if ([string]::IsNullOrWhiteSpace($ToolRoot)) {
+    $baseTemp =
+        if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
+            [IO.Path]::GetTempPath()
         } else {
-            'repository-automation'
+            $env:RUNNER_TEMP
         }
-    $toolExecutable = Join-Path $installationRoot $toolName
-    $nugetConfigPath = Join-Path $installationRoot 'NuGet.config'
-    $escapedSource = [Security.SecurityElement]::Escape(
-        $packageSource)
-    [IO.File]::WriteAllText(
-        $nugetConfigPath,
-        @"
+    $ToolRoot = Join-Path $baseTemp 'repository-automation-tool'
+}
+$packageSource = [IO.Path]::GetFullPath(
+    (Join-Path $distributionDirectory (
+        [string]$distribution.runtime.package_source
+    )))
+$packageSourcePrefix = $distributionDirectory.TrimEnd(
+    [IO.Path]::DirectorySeparatorChar,
+    [IO.Path]::AltDirectorySeparatorChar
+) + [IO.Path]::DirectorySeparatorChar
+if (-not $packageSource.StartsWith(
+    $packageSourcePrefix,
+    $comparison
+)) {
+    throw 'capability-unavailable: bundled package source escapes the distribution directory.'
+}
+$packagePath = Join-Path $packageSource (
+    [string]$distribution.runtime.package_file)
+if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
+    throw 'capability-unavailable: bundled runtime package is missing.'
+}
+$installationRoot = Join-Path $ToolRoot (
+    "v$([string]$distribution.runtime.version)")
+if (Test-Path -LiteralPath $installationRoot) {
+    Remove-Item -LiteralPath $installationRoot -Recurse -Force
+}
+New-Item -ItemType Directory -Path $installationRoot -Force |
+    Out-Null
+$toolName =
+    if ($IsWindows) {
+        'repository-automation.exe'
+    } else {
+        'repository-automation'
+    }
+$toolExecutable = Join-Path $installationRoot $toolName
+$nugetConfigPath = Join-Path $installationRoot 'NuGet.config'
+$escapedSource = [Security.SecurityElement]::Escape(
+    $packageSource)
+[IO.File]::WriteAllText(
+    $nugetConfigPath,
+    @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
@@ -140,33 +130,32 @@ if ($RunnerEnvironment -ceq 'self-hosted') {
   </packageSources>
 </configuration>
 "@,
-        [Text.UTF8Encoding]::new($false))
-    try {
-        $installOutput = @(
-            & dotnet tool install `
-                ([string]$distribution.runtime.package_id) `
-                --tool-path $installationRoot `
-                --version ([string]$distribution.runtime.version) `
-                --configfile $nugetConfigPath `
-                --no-cache 2>&1
-        )
-        if ($LASTEXITCODE -ne 0) {
-            throw "capability-unavailable: exact runtime package installation failed: $($installOutput -join "`n")"
-        }
-    } finally {
-        if (Test-Path -LiteralPath $nugetConfigPath) {
-            Remove-Item -LiteralPath $nugetConfigPath -Force
-        }
+    [Text.UTF8Encoding]::new($false))
+try {
+    $installOutput = @(
+        & dotnet tool install `
+            ([string]$distribution.runtime.package_id) `
+            --tool-path $installationRoot `
+            --version ([string]$distribution.runtime.version) `
+            --configfile $nugetConfigPath `
+            --no-cache 2>&1
+    )
+    if ($LASTEXITCODE -ne 0) {
+        throw "capability-unavailable: exact runtime package installation failed: $($installOutput -join "`n")"
     }
+} finally {
+    if (Test-Path -LiteralPath $nugetConfigPath) {
+        Remove-Item -LiteralPath $nugetConfigPath -Force
+    }
+}
 
-    $pathSeparator = [IO.Path]::PathSeparator
-    $env:PATH = "$installationRoot$pathSeparator$($env:PATH)"
-    if (-not [string]::IsNullOrWhiteSpace($GitHubPath)) {
-        Add-Content `
-            -LiteralPath $GitHubPath `
-            -Encoding UTF8 `
-            -Value $installationRoot
-    }
+$pathSeparator = [IO.Path]::PathSeparator
+$env:PATH = "$installationRoot$pathSeparator$($env:PATH)"
+if (-not [string]::IsNullOrWhiteSpace($GitHubPath)) {
+    Add-Content `
+        -LiteralPath $GitHubPath `
+        -Encoding UTF8 `
+        -Value $installationRoot
 }
 
 $capabilityResult = Invoke-RepositoryAutomationCommand `
@@ -188,16 +177,9 @@ if ([string]$capabilities.runtime.name -cne
     [string]$distribution.runtime.command) {
     throw 'capability-unavailable: runtime command identity is incorrect.'
 }
-if ($RunnerEnvironment -ceq 'github-hosted' -and
-    [string]$capabilities.runtime.version -cne
-        [string]$distribution.runtime.version) {
-    throw "capability-unavailable: hosted runtime $($capabilities.runtime.version) does not match exact version $($distribution.runtime.version)."
-}
-if ($RunnerEnvironment -ceq 'self-hosted' -and
-    -not (Test-SemanticVersionAtLeast `
-        -Actual ([string]$capabilities.runtime.version) `
-        -Minimum ([string]$distribution.runtime.version))) {
-    throw "capability-unavailable: runtime $($capabilities.runtime.version) is older than required $($distribution.runtime.version)."
+if ([string]$capabilities.runtime.version -cne
+    [string]$distribution.runtime.version) {
+    throw "capability-unavailable: installed runtime $($capabilities.runtime.version) does not match exact version $($distribution.runtime.version)."
 }
 if (@($capabilities.supported_contract_versions) -notcontains
     [string]$distribution.runtime.contract_version) {

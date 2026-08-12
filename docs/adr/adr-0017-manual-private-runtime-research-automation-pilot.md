@@ -42,7 +42,7 @@ label-triggered, repository-dispatch, parallel, or unattended model execution.
 
 ## Decision
 
-Foundry will pilot `RepositoryAutomation.Tool` 0.8.2 through an operator-owned,
+Foundry will pilot `RepositoryAutomation.Tool` 0.8.4 through an operator-owned,
 read-only PitCrew volume.
 
 The public repository contains only owner-neutral schemas, adapter scripts,
@@ -54,14 +54,14 @@ The `foundry-ci` profile mounts one external volume named
 `foundry-repository-automation` at
 `/mnt/pitcrew-data/repository-automation`. Profile verification checks:
 
-- the exact package SHA-256;
-- the exact full-file integrity manifest;
-- the installed command;
-- runtime version 0.8.2; and
-- contract version 1.
+- the exact package filename; and
+- the exact package SHA-256.
 
-GitHub-hosted runtime initialization fails explicitly. Missing or incompatible
-self-hosted capability fails before analysis.
+Each analyze or apply job copies the verified package into the ephemeral checkout and
+installs it into job-local storage. The initializer then checks runtime version 0.8.4,
+contract version 1, module capabilities, mutation operations, and artifact-free
+transport requirements. GitHub-hosted initialization fails explicitly. A missing,
+modified, or incompatible package fails before analysis or apply.
 
 The research workflow:
 
@@ -71,6 +71,7 @@ The research workflow:
 - requires a false-by-default confirmation, public reason, issue number, and bounded
   AI credit limit;
 - runs every job exactly on `foundry-ci`;
+- shares one repository-and-issue concurrency lane with future issue-oriented modules;
 - requires the open issue to carry `research-needed`;
 - gives Copilot analysis read-only issue and content access without issue-write
   permission;
@@ -125,15 +126,17 @@ guardrail is generalized to support permission-separated jobs instead.
 - Automated triggers cannot spend AI credits.
 - Model execution never receives issue-write permission.
 - Failure retains a retryable labeled issue.
+- Bounded transient GitHub transport failures can recover without paying for another
+  model analysis.
 - Removing the activation variable disables the pilot immediately.
 
 ### Negative
 
-- Every PitCrew host must provision and maintain the exact external volume.
+- Every PitCrew host must provision and maintain the exact package volume.
 - Public contributors cannot execute the private runtime locally.
 - The pilot depends on a privately maintained package until the extraction review.
-- Updating the runtime requires a reviewed package digest, volume update, and profile
-  replay.
+- Updating the runtime requires a reviewed package digest, volume update, profile
+  replay, and workflow contract update.
 
 ### Neutral
 

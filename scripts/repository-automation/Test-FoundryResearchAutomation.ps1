@@ -89,13 +89,15 @@ function Test-ResearchAutomationContract {
         ConvertFrom-Json
     Assert-Contract (
         [string]$distribution.runtime.command -ceq 'repository-automation' -and
-        [string]$distribution.runtime.version -ceq '0.8.2' -and
+        [string]$distribution.runtime.version -ceq '0.8.4' -and
         [string]$distribution.runtime.contract_version -ceq '1'
-    ) 'The private repository-automation runtime must remain pinned to 0.8.2 contract 1.'
+    ) 'The private repository-automation runtime must remain pinned to 0.8.4 contract 1.'
     Assert-Contract (
         [string]$distribution.installation.github_hosted -ceq 'unavailable' -and
-        [string]$distribution.installation.self_hosted -ceq 'preinstalled-only'
-    ) 'The runtime must remain unavailable on hosted runners and preinstalled-only on PitCrew.'
+        [string]$distribution.installation.self_hosted -ceq 'bundled-exact-package' -and
+        [string]$distribution.installation.missing_self_hosted_behavior -ceq
+            'install-bundled-exact-package'
+    ) 'The runtime must remain unavailable on hosted runners and install an exact staged package on PitCrew.'
     Assert-Contract (
         [string]$distribution.analysis_engine.package_id -ceq '@github/copilot' -and
         [string]$distribution.analysis_engine.version -ceq '1.0.78'
@@ -114,8 +116,8 @@ function Test-ResearchAutomationContract {
         [string]$module[0].version -ceq '1'
     ) 'Configuration must contain only research-needed v1.'
     Assert-Contract (
-        [string]$configuration.runtime.minimum_version -ceq '0.8.2'
-    ) 'Configuration must require repository-automation 0.8.2.'
+        [string]$configuration.runtime.minimum_version -ceq '0.8.4'
+    ) 'Configuration must require repository-automation 0.8.4.'
     Assert-Contract (
         @($module[0].triggers).Count -eq 1 -and
         [string]$module[0].triggers[0].kind -ceq 'manual'
@@ -182,12 +184,21 @@ function Test-ResearchAutomationContract {
         $workflow -match "vars\.REPOSITORY_AUTOMATION_RESEARCH_NEEDED_ENABLED == 'manual'"
     ) 'Research workflow must remain disabled unless its activation variable is manual.'
     Assert-Contract (
+        $workflow -match 'group:\s*repository-automation-issue-\$\{\{\s*github\.repository_id\s*\}\}-\$\{\{\s*inputs\.work_item_number\s*\}\}'
+    ) 'Research workflow must use the shared per-issue repository-automation concurrency lane.'
+    Assert-Contract (
         $workflow -match 'IsNullOrWhiteSpace\(\$env:AUTHORIZATION_REASON\)'
     ) 'Research workflow must reject whitespace-only authorization reasons.'
     Assert-Contract (
         $workflow -match '/mnt/pitcrew-data/repository-automation' -and
-        $workflow -match 'expected repository-automation 0\.8\.2'
-    ) 'Research workflow must select and verify the private PitCrew runtime.'
+        $workflow -match 'RepositoryAutomation\.Tool\.0\.8\.4\.nupkg' -and
+        $workflow -match 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b' -and
+        $workflow -match 'Copy-Item -LiteralPath \$source -Destination \$destination' -and
+        $workflow -match "-MinimumRuntimeVersion '0\.8\.4'"
+    ) 'Research workflow must verify, stage, install, and require the exact private 0.8.4 package.'
+    Assert-Contract (
+        $workflow -notmatch 'files\.sha256|expected repository-automation 0\.8\.2'
+    ) 'Research workflow must not depend on the obsolete mounted executable bundle.'
     Assert-Contract (
         $workflow -match 'COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*github\.token\s*\}\}' -and
         $workflow -notmatch 'secrets\.COPILOT_GITHUB_TOKEN'
@@ -211,15 +222,15 @@ function Test-ResearchAutomationContract {
     $verification = @($profile.verificationCommands) -join "`n"
     Assert-Contract (
         $verification.Contains(
-            'a960047f3034b77ffc6e3d793bada073469c3e04a7ef86c1ea667e66dfe10421',
+            'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b',
             [StringComparison]::Ordinal) -and
         $verification.Contains(
-            'a4b6a68551a0b5906ef309c33538481cf2de67b1d2d8f781b7d9dd7c84390b41',
-            [StringComparison]::Ordinal) -and
-        $verification.Contains(
-            '"version":"0.8.2"',
+            'RepositoryAutomation.Tool.0.8.4.nupkg',
             [StringComparison]::Ordinal)
-    ) 'PitCrew profile must verify the exact package, file manifest, and runtime version.'
+    ) 'PitCrew profile must verify the exact package supplied to job-local installation.'
+    Assert-Contract (
+        $verification -notmatch 'files\.sha256|repository-automation capabilities'
+    ) 'PitCrew profile must not depend on an installed executable in the private volume.'
 
     foreach ($path in @(
         $automationRoot,

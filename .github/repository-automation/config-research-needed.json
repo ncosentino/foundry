@@ -3,7 +3,7 @@
   "schema_version": "1",
   "configuration_version": 1,
   "runtime": {
-    "minimum_version": "0.8.2",
+    "minimum_version": "0.8.4",
     "contract_version": "1"
   },
   "execution_capabilities": {
