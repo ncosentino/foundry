@@ -13,6 +13,11 @@ Adding the label never invokes a model. The only live-model path is an explicit
 job runs on the `foundry-ci` PitCrew profile, and GitHub Copilot CLI is the only
 permitted live-model process.
 
+Foundry owns the issue form, labels, activation choice, bounded configuration, policy,
+and local adapter. A shared immutable distribution owns schemas, runtime/bootstrap
+logic, Copilot isolation, request construction, proposal validation, mutation
+handlers, retries, and research methodology.
+
 ## Trust boundary
 
 The workflow separates three responsibilities:
@@ -58,25 +63,29 @@ This is an applicability assessment. It does not prove runtime behavior, perform
 NativeAOT compatibility, package resolution, or provider behavior. Those claims still
 require separately authorized deterministic experiments or live probes.
 
-## Runtime capability
+## Shared distribution
 
-The private `RepositoryAutomation.Tool` 0.8.4 package is not committed to this public
-repository and is unavailable on GitHub-hosted runners. Each PitCrew host must provide
-the operator-owned Docker volume `foundry-repository-automation`, mounted read-only at:
+Foundry does not commit the generic repository-automation schemas, packages, or helper
+scripts. Each PitCrew host provides immutable distribution 0.8.4 through the
+operator-owned Docker volume `foundry-repository-automation`, mounted read-only at:
 
 ```text
-/mnt/pitcrew-data/repository-automation
+/mnt/pitcrew-data/repository-automation/v0.8.4
 ```
 
-The volume contains only `RepositoryAutomation.Tool.0.8.4.nupkg`. The profile verifies
-package SHA-256
-`db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b`
-before accepting workers.
+The distribution contains the exact runtime package, adapter helpers, contract
+schemas, conformance fixtures, and conformance runner. Its `files.sha256` manifest has
+SHA-256
+`9c12dd6a66ded396436a0308d70ebc7b5293134ab5eb0eb341784497d100c7be`.
+The relative `$schema` values in Foundry's configuration and policy are contract
+identifiers resolved against this distribution; Foundry intentionally does not keep
+local schema copies.
 
-Each analyze or apply job verifies the package again, copies it into the ephemeral
-checkout, installs it into job-local storage, and verifies runtime version 0.8.4,
-contract version 1, required module operations, and artifact-free transport
-requirements. PitCrew 0.8.2 or later is required for the read-only volume contract.
+The profile verifies the full distribution and shared conformance before accepting
+workers. Analysis and apply verify the same manifest again. The consumer contract
+validates Foundry's configuration and policy against the shared schemas, and the
+runtime revalidates them before model invocation or mutation. PitCrew 0.8.2 or later
+is required for the read-only volume contract.
 
 ## Activation
 
@@ -119,6 +128,17 @@ including authoritative recovery for ambiguous issue/comment writes, without rer
 model analysis.
 
 Unset the activation variable to disable the workflow immediately. Removing the
-workflow, configuration, policy, and public support scripts does not require runtime
-state cleanup. The operator-owned volume and previously published issue comments have
-separate lifecycles.
+workflow, configuration, and policy does not require runtime state cleanup. The shared
+distribution and previously published issue comments have separate lifecycles.
+
+## Central producer migration
+
+The repository-local workflow is a temporary GitHub adapter, not Foundry's permanent
+automation architecture. A future centrally operated GitHub App or equivalent
+producer may own webhook intake, schedules, bounded dispatch retries, and
+cross-repository routing. It must continue sending the same versioned request into the
+repository-owned execution and mutation boundary.
+
+Foundry retains its configuration, policy, secrets, authoritative state, and manual
+recovery path. Moving trigger ownership must not change module identity, markers,
+labels, or idempotency.

@@ -135,7 +135,7 @@ nav:
       - ADR-0014 Phase-Local Harness Background Delegation: adr/adr-0014-phase-local-harness-background-delegation.md
       - ADR-0015 Upstream-First Checkpointed Workflow Runs: adr/adr-0015-upstream-first-checkpointed-workflow-runs.md
       - ADR-0016 Same-Run Checkpoint Restoration: adr/adr-0016-same-run-checkpoint-restoration.md
-      - ADR-0017 Manual Private-Runtime Research Automation Pilot: adr/adr-0017-manual-private-runtime-research-automation-pilot.md
+      - ADR-0017 Shared Research Automation Opt-In: adr/adr-0017-shared-research-automation-opt-in.md
 
 plugins:
   - search

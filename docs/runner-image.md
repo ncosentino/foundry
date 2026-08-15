@@ -63,13 +63,13 @@ The research-automation pilot uses logical volume `repository-automation`, backe
 operator-owned volume `foundry-repository-automation`, at:
 
 ```text
-/mnt/pitcrew-data/repository-automation
+/mnt/pitcrew-data/repository-automation/v0.8.4
 ```
 
-The profile verifies the expected private package digest before accepting workers.
-Each authorized job copies that package into its ephemeral checkout, installs the
-runtime into job-local storage, and verifies its exact version and capabilities.
-Every participating host must provision the same volume before the profile is
+The profile verifies the shared distribution's complete file manifest and runs its
+conformance contract before accepting workers. Each authorized job rechecks the
+manifest and invokes the shared adapter helpers from the read-only mount. Every
+participating host must provision the same distribution before the profile is
 replayed. PitCrew never creates or populates it.
 
 This mechanism does not alter the public image digest. A missing or mismatched volume
@@ -191,10 +191,10 @@ Every update repeats the same sequence:
 4. Roll out one approved host.
 5. Verify current and stale workers before continuing.
 
-An external-volume revision follows the same reviewed profile replay, but it does not
-publish a new image. Update the operator-owned volume first, preserve capacity and
-routing, replay the exact profile, and verify the package digest and capability
-commands before allowing new work.
+An external-distribution revision follows the same reviewed profile replay, but it
+does not publish a new image. Install the new version beside the old version, preserve
+capacity and routing, update the reviewed profile and adapter pin, replay the exact
+profile, and verify the manifest and conformance commands before allowing new work.
 
 An `update.status` of `rolling` is valid while assigned stale workers finish
 their current jobs.

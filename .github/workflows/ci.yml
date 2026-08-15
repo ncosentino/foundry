@@ -28,7 +28,7 @@ jobs:
 
       - name: Validate manual research automation
         shell: pwsh
-        run: scripts/repository-automation/Test-FoundryResearchAutomation.ps1 -SelfTest
+        run: scripts/test-research-automation-policy.ps1 -SelfTest
 
   build-test-pack:
     needs: guidance
@@ -50,6 +50,13 @@ jobs:
       - name: Validate runner profile contract
         shell: pwsh
         run: scripts/test-runner-profile.ps1 -SelfTest
+
+      - name: Validate research policy against shared distribution
+        shell: pwsh
+        run: >-
+          scripts/test-research-automation-policy.ps1
+          -DistributionRoot
+          /mnt/pitcrew-data/repository-automation/v0.8.4
 
       - name: Restore
         run: dotnet restore src/NexusLabs.Foundry.slnx

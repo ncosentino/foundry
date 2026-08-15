@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/ncosentino/pitcrew/0613544e58e20af67ff414dc3a216b3d1ee842e7/runner-profile.schema.json",
   "schemaVersion": 1,
   "name": "foundry-ci",
-  "description": "Foundry repository CI workers with exact .NET SDKs and NativeAOT prerequisites.",
+  "description": "Foundry repository workers with exact .NET SDKs, NativeAOT prerequisites, and shared automation distribution.",
   "image": "ghcr.io/ncosentino/foundry-runner@sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8",
   "labels": [
     "foundry"
@@ -24,7 +24,9 @@
     "pwsh --version",
     "git --version",
     "gh --version",
-    "test -f /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.4.nupkg",
-    "printf 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b  /mnt/pitcrew-data/repository-automation/RepositoryAutomation.Tool.0.8.4.nupkg\\n' | sha256sum --check --strict"
+    "test -f /mnt/pitcrew-data/repository-automation/v0.8.4/files.sha256",
+    "printf '9c12dd6a66ded396436a0308d70ebc7b5293134ab5eb0eb341784497d100c7be  /mnt/pitcrew-data/repository-automation/v0.8.4/files.sha256\\n' | sha256sum --check --strict",
+    "cd /mnt/pitcrew-data/repository-automation/v0.8.4 && sha256sum --check --strict files.sha256",
+    "pwsh -NoProfile -Command '$result = & \"/mnt/pitcrew-data/repository-automation/v0.8.4/contract/conformance/Invoke-RepositoryAutomationConformance.ps1\" -Root \"/mnt/pitcrew-data/repository-automation/v0.8.4/contract\"; if (-not $result.IsClean) { throw ($result.Errors -join \"; \") }'"
   ]
 }

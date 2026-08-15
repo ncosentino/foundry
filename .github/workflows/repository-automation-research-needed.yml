@@ -1,4 +1,5 @@
 # live-llm-workflow: true
+# Thin adapter for the shared repository-automation distribution.
 name: Manual research-needed analysis
 
 on:
@@ -25,6 +26,9 @@ on:
 
 permissions: {}
 
+env:
+  REPOSITORY_AUTOMATION_DISTRIBUTION_ROOT: /mnt/pitcrew-data/repository-automation/v0.8.4
+
 concurrency:
   group: repository-automation-issue-${{ github.repository_id }}-${{ inputs.work_item_number }}
   cancel-in-progress: false
@@ -42,13 +46,12 @@ jobs:
       revision: ${{ steps.resolve.outputs.revision }}
       work_item_provider_id: ${{ steps.resolve.outputs.work_item_provider_id }}
     steps:
-      - name: Validate authorization and issue
+      - name: Resolve trusted source and issue
         id: resolve
         shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_API_URL: ${{ github.api_url }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           WORK_ITEM_NUMBER: ${{ inputs.work_item_number }}
           AUTHORIZATION_REASON: ${{ inputs.reason }}
@@ -58,73 +61,41 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:AUTHORIZATION_REASON)) {
               throw 'reason must contain non-whitespace authorization context.'
           }
-          $credits = [int]::Parse(
-              $env:MAX_AI_CREDITS,
-              [Globalization.CultureInfo]::InvariantCulture)
+          $credits = [int]$env:MAX_AI_CREDITS
           if ($credits -lt 1 -or $credits -gt 100) {
               throw 'max_ai_credits must be between 1 and 100.'
           }
-
-          $issueNumber = [int]::Parse(
-              $env:WORK_ITEM_NUMBER,
-              [Globalization.CultureInfo]::InvariantCulture)
+          $issueNumber = [int]$env:WORK_ITEM_NUMBER
           if ($issueNumber -lt 1) {
               throw 'work_item_number must identify an issue.'
           }
 
-          $headers = @{
-            Accept = 'application/vnd.github+json'
-            Authorization = "Bearer $env:GITHUB_TOKEN"
-            'X-GitHub-Api-Version' = '2022-11-28'
-          }
           $branch = [Uri]::EscapeDataString($env:DEFAULT_BRANCH)
-          $branchResponse = Invoke-RestMethod `
-            -Method Get `
-            -Uri "$($env:GITHUB_API_URL.TrimEnd('/'))/repos/$env:GITHUB_REPOSITORY/branches/$branch" `
-            -Headers $headers
-          $revision = [string]$branchResponse.commit.sha
-          if ($revision -notmatch '^[0-9a-f]{40}$') {
+          $revision = [string](
+              gh api "repos/$env:GH_REPO/branches/$branch" --jq '.commit.sha')
+          if ($LASTEXITCODE -ne 0 -or $revision -notmatch '^[0-9a-f]{40}$') {
               throw 'Default-branch API response did not contain a 40-hex revision.'
           }
 
-          $issue = Invoke-RestMethod `
-            -Method Get `
-            -Uri "$($env:GITHUB_API_URL.TrimEnd('/'))/repos/$env:GITHUB_REPOSITORY/issues/$issueNumber" `
-            -Headers $headers
-          if ($issue.PSObject.Properties.Name -contains 'pull_request') {
-              throw 'work_item_number must identify an issue, not a pull request.'
-          }
-          if ([string]$issue.state -cne 'open') {
+          $issue = gh api "repos/$env:GH_REPO/issues/$issueNumber" |
+              ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or
+              $issue.PSObject.Properties.Name -contains 'pull_request' -or
+              [string]$issue.state -cne 'open') {
               throw 'Research automation requires an open issue.'
           }
           $labels = @($issue.labels | ForEach-Object { [string]$_.name })
           if ($labels -cnotcontains 'research-needed') {
               throw "Issue #$issueNumber does not carry the research-needed label."
           }
-          $providerId = [string]$issue.node_id
-          if ([string]::IsNullOrWhiteSpace($providerId)) {
+          if ([string]::IsNullOrWhiteSpace([string]$issue.node_id)) {
               throw 'Issue API response did not contain a provider identity.'
           }
 
           "revision=$revision" |
             Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding UTF8
-          "work_item_provider_id=$providerId" |
+          "work_item_provider_id=$([string]$issue.node_id)" |
             Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding UTF8
-
-          $reason = ($env:AUTHORIZATION_REASON -replace '[\r\n]+', ' ').Trim()
-          if ($reason.Length -gt 240) {
-              $reason = $reason.Substring(0, 240)
-          }
-          @(
-            '## Authorized research run',
-            '',
-            "- Issue: #$issueNumber",
-            "- Trusted revision: ``$revision``",
-            "- Actor: ``$env:GITHUB_ACTOR``",
-            "- Triggering actor: ``$env:GITHUB_TRIGGERING_ACTOR``",
-            "- Maximum AI credits: ``$credits``",
-            "- Reason: $reason"
-          ) | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding UTF8
 
   analyze:
     name: Analyze bounded research evidence
@@ -141,57 +112,53 @@ jobs:
       proposal_bytes: ${{ steps.analyze.outputs.proposal_bytes }}
       proposal_sha256: ${{ steps.analyze.outputs.proposal_sha256 }}
     steps:
-      - name: Checkout trusted automation files
+      - name: Checkout Foundry policy
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.resolve.outputs.revision }}
           persist-credentials: false
           sparse-checkout: |
-            .github/repository-automation
-            scripts/repository-automation
+            .github/repository-automation/config-research-needed.json
+            .github/repository-automation/policies/research-needed.json
           sparse-checkout-cone-mode: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: '24'
-
-      - name: Stage private repository-automation package
+      - name: Verify shared distribution
         shell: pwsh
         run: |
-          $runtimeRoot = '/mnt/pitcrew-data/repository-automation'
-          $source = Join-Path $runtimeRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
-          if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
-              throw 'capability-unavailable: private repository-automation package is not mounted.'
+          $root = $env:REPOSITORY_AUTOMATION_DISTRIBUTION_ROOT
+          $actual = (Get-FileHash `
+              -LiteralPath (Join-Path $root 'files.sha256') `
+              -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -cne '9c12dd6a66ded396436a0308d70ebc7b5293134ab5eb0eb341784497d100c7be') {
+              throw 'capability-unavailable: shared distribution is not the reviewed revision.'
           }
-          $sourceHash = (
-              Get-FileHash -LiteralPath $source -Algorithm SHA256
-            ).Hash.ToLowerInvariant()
-          if ($sourceHash -cne 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b') {
-              throw 'capability-unavailable: private repository-automation package is not the reviewed revision.'
-          }
-          $packageRoot = '.github/repository-automation/packages'
-          New-Item -ItemType Directory -Force -Path $packageRoot |
-            Out-Null
-          $destination = Join-Path $packageRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
-          Copy-Item -LiteralPath $source -Destination $destination
-          $destinationHash = (
-              Get-FileHash -LiteralPath $destination -Algorithm SHA256
-            ).Hash.ToLowerInvariant()
-          if ($destinationHash -cne $sourceHash) {
-              throw 'capability-unavailable: staged repository-automation package failed integrity verification.'
+          Push-Location $root
+          try {
+              & sha256sum --check --strict files.sha256
+              if ($LASTEXITCODE -ne 0) {
+                  throw 'capability-unavailable: shared distribution failed integrity verification.'
+              }
+          } finally {
+              Pop-Location
           }
 
-      - name: Install exact repository-automation runtime
+      - name: Initialize exact repository-automation runtime
         shell: pwsh
+        working-directory: /mnt/pitcrew-data/repository-automation/v0.8.4
         run: |
           ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
             -RunnerEnvironment self-hosted `
             -GitHubPath $env:GITHUB_PATH |
               Out-Null
 
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+
       - name: Initialize Copilot CLI
         shell: pwsh
+        working-directory: /mnt/pitcrew-data/repository-automation/v0.8.4
         run: |
           ./scripts/repository-automation/Initialize-RepositoryAutomationCopilot.ps1 `
             -GitHubPath $env:GITHUB_PATH `
@@ -207,9 +174,8 @@ jobs:
           TRUSTED_REVISION: ${{ needs.resolve.outputs.revision }}
           WORK_ITEM_NUMBER: ${{ inputs.work_item_number }}
           WORK_ITEM_PROVIDER_ID: ${{ needs.resolve.outputs.work_item_provider_id }}
-          REQUEST_ID: github-${{ github.run_id }}-${{ github.run_attempt }}-analyze
         run: |
-          ./scripts/repository-automation/New-RepositoryAutomationWorkRequest.ps1 `
+          & "$env:REPOSITORY_AUTOMATION_DISTRIBUTION_ROOT/scripts/repository-automation/New-RepositoryAutomationWorkRequest.ps1" `
             -ModuleId 'research-needed' `
             -ModuleVersion '1' `
             -ConfigurationPath '.github/repository-automation/config-research-needed.json' `
@@ -219,7 +185,7 @@ jobs:
             -Repository $env:REPOSITORY_NAME `
             -Revision $env:TRUSTED_REVISION `
             -DeliveryId '${{ github.run_id }}:${{ github.run_attempt }}' `
-            -RequestId $env:REQUEST_ID `
+            -RequestId 'github-${{ github.run_id }}-${{ github.run_attempt }}-analyze' `
             -WorkItemNumber ([int]$env:WORK_ITEM_NUMBER) `
             -WorkItemProviderId $env:WORK_ITEM_PROVIDER_ID `
             -GitHubOutputPath $env:GITHUB_OUTPUT |
@@ -239,7 +205,7 @@ jobs:
           GITHUB_API_URL: ${{ github.api_url }}
           REQUEST_JSON: ${{ steps.request.outputs.request }}
         run: |
-          ./scripts/repository-automation/Invoke-RepositoryAutomationAnalyze.ps1 `
+          & "$env:REPOSITORY_AUTOMATION_DISTRIBUTION_ROOT/scripts/repository-automation/Invoke-RepositoryAutomationAnalyze.ps1" `
             -ConfigurationPath '.github/repository-automation/config-research-needed.json' `
             -RequestJson $env:REQUEST_JSON `
             -GitHubOutputPath $env:GITHUB_OUTPUT `
@@ -259,44 +225,39 @@ jobs:
       contents: read
       issues: write
     steps:
-      - name: Checkout trusted automation files
+      - name: Checkout Foundry policy
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.resolve.outputs.revision }}
           persist-credentials: false
           sparse-checkout: |
-            .github/repository-automation
-            scripts/repository-automation
+            .github/repository-automation/config-research-needed.json
+            .github/repository-automation/policies/research-needed.json
           sparse-checkout-cone-mode: false
 
-      - name: Stage private repository-automation package
+      - name: Verify shared distribution
         shell: pwsh
         run: |
-          $runtimeRoot = '/mnt/pitcrew-data/repository-automation'
-          $source = Join-Path $runtimeRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
-          if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
-              throw 'capability-unavailable: private repository-automation package is not mounted.'
+          $root = $env:REPOSITORY_AUTOMATION_DISTRIBUTION_ROOT
+          $actual = (Get-FileHash `
+              -LiteralPath (Join-Path $root 'files.sha256') `
+              -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -cne '9c12dd6a66ded396436a0308d70ebc7b5293134ab5eb0eb341784497d100c7be') {
+              throw 'capability-unavailable: shared distribution is not the reviewed revision.'
           }
-          $sourceHash = (
-              Get-FileHash -LiteralPath $source -Algorithm SHA256
-            ).Hash.ToLowerInvariant()
-          if ($sourceHash -cne 'db11a63a6a697bf8dec02d5e67767f553946cc05b5db366ecb40b4d697197d8b') {
-              throw 'capability-unavailable: private repository-automation package is not the reviewed revision.'
-          }
-          $packageRoot = '.github/repository-automation/packages'
-          New-Item -ItemType Directory -Force -Path $packageRoot |
-            Out-Null
-          $destination = Join-Path $packageRoot 'RepositoryAutomation.Tool.0.8.4.nupkg'
-          Copy-Item -LiteralPath $source -Destination $destination
-          $destinationHash = (
-              Get-FileHash -LiteralPath $destination -Algorithm SHA256
-            ).Hash.ToLowerInvariant()
-          if ($destinationHash -cne $sourceHash) {
-              throw 'capability-unavailable: staged repository-automation package failed integrity verification.'
+          Push-Location $root
+          try {
+              & sha256sum --check --strict files.sha256
+              if ($LASTEXITCODE -ne 0) {
+                  throw 'capability-unavailable: shared distribution failed integrity verification.'
+              }
+          } finally {
+              Pop-Location
           }
 
-      - name: Install exact repository-automation runtime
+      - name: Initialize exact repository-automation runtime
         shell: pwsh
+        working-directory: /mnt/pitcrew-data/repository-automation/v0.8.4
         run: |
           ./scripts/repository-automation/Initialize-RepositoryAutomationRuntime.ps1 `
             -RunnerEnvironment self-hosted `
@@ -314,7 +275,7 @@ jobs:
           PROPOSAL_BYTES: ${{ needs.analyze.outputs.proposal_bytes }}
           PROPOSAL_SHA256: ${{ needs.analyze.outputs.proposal_sha256 }}
         run: |
-          ./scripts/repository-automation/Invoke-RepositoryAutomationApply.ps1 `
+          & "$env:REPOSITORY_AUTOMATION_DISTRIBUTION_ROOT/scripts/repository-automation/Invoke-RepositoryAutomationApply.ps1" `
             -ConfigurationPath '.github/repository-automation/config-research-needed.json' `
             -ProposalJson $env:PROPOSAL_JSON `
             -ExpectedProposalBytes ([int]$env:PROPOSAL_BYTES) `
