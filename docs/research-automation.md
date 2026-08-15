@@ -87,6 +87,10 @@ validates Foundry's configuration and policy against the shared schemas, and the
 runtime revalidates them before model invocation or mutation. PitCrew 0.8.2 or later
 is required for the read-only volume contract.
 
+The path-scoped `Research Automation Contract` workflow owns this deterministic
+validation. Foundry's product `build-test-pack` job does not depend on the optional
+research distribution.
+
 ## Activation
 
 The workflow remains inert unless the repository variable

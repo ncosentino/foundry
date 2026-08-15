@@ -53,6 +53,8 @@ function Test-ResearchPolicyContract {
         $Root '.github/repository-automation/policies/research-needed.json'
     $workflowPath = Get-RepositoryFile `
         $Root '.github/workflows/repository-automation-research-needed.yml'
+    $contractWorkflowPath = Get-RepositoryFile `
+        $Root '.github/workflows/research-automation-contract.yml'
     $profilePath = Get-RepositoryFile `
         $Root '.pitcrew/runner-profile.json'
 
@@ -154,6 +156,25 @@ function Test-ResearchPolicyContract {
         $workflow -match '(?m)^\s{6}issues:\s*write\s*$'
     ) 'Research workflow must retain separate Copilot and issue-write jobs.'
 
+    $contractWorkflow = Get-Content `
+        -LiteralPath $contractWorkflowPath `
+        -Raw `
+        -Encoding UTF8
+    Assert-Contract (
+        $contractWorkflow -match '(?m)^  pull_request:\s*$' -and
+        $contractWorkflow -match '(?m)^  workflow_dispatch:\s*$' -and
+        $contractWorkflow -match
+            "github\.event\.pull_request\.head\.repo\.fork == false" -and
+        $contractWorkflow -match '(?m)^\s{4}runs-on:\s*foundry-ci\s*$'
+    ) 'Research contract workflow trigger, fork isolation, or runner changed.'
+    Assert-Contract (
+        $contractWorkflow -match
+            'scripts/test-research-automation-policy\.ps1' -and
+        $contractWorkflow -match
+            '/mnt/pitcrew-data/repository-automation/v0\.8\.4' -and
+        $contractWorkflow -notmatch '(?m)^\s+copilot-requests:\s*write\s*$'
+    ) 'Research contract workflow must remain deterministic and distribution-backed.'
+
     $profile = Get-Content -LiteralPath $profilePath -Raw |
         ConvertFrom-Json
     Assert-Contract (
@@ -242,6 +263,7 @@ if ($SelfTest) {
             '.github/repository-automation/config-research-needed.json',
             '.github/repository-automation/policies/research-needed.json',
             '.github/workflows/repository-automation-research-needed.yml',
+            '.github/workflows/research-automation-contract.yml',
             '.pitcrew/runner-profile.json'
         )) {
             $source = Join-Path $RepositoryRoot ($relativePath -replace '/', '\')

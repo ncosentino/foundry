@@ -51,13 +51,6 @@ jobs:
         shell: pwsh
         run: scripts/test-runner-profile.ps1 -SelfTest
 
-      - name: Validate research policy against shared distribution
-        shell: pwsh
-        run: >-
-          scripts/test-research-automation-policy.ps1
-          -DistributionRoot
-          /mnt/pitcrew-data/repository-automation/v0.8.4
-
       - name: Restore
         run: dotnet restore src/NexusLabs.Foundry.slnx
 

@@ -1,0 +1,47 @@
+name: Research Automation Contract
+
+on:
+  pull_request:
+    paths:
+      - .github/repository-automation/**
+      - .github/workflows/repository-automation-research-needed.yml
+      - .github/workflows/research-automation-contract.yml
+      - .pitcrew/runner-profile.json
+      - scripts/test-research-automation-policy.ps1
+      - scripts/test-runner-profile.ps1
+  push:
+    branches:
+      - main
+    paths:
+      - .github/repository-automation/**
+      - .github/workflows/repository-automation-research-needed.yml
+      - .github/workflows/research-automation-contract.yml
+      - .pitcrew/runner-profile.json
+      - scripts/test-research-automation-policy.ps1
+      - scripts/test-runner-profile.ps1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-automation-contract-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    name: research-automation-contract
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
+    runs-on: foundry-ci
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate shared distribution and Foundry policy
+        shell: pwsh
+        run: >-
+          scripts/test-research-automation-policy.ps1
+          -SelfTest
+          -DistributionRoot
+          /mnt/pitcrew-data/repository-automation/v0.8.4
