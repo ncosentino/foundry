@@ -3002,42 +3002,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
+      <a href="../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3472,7 +3444,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3728,6 +3700,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3768,15 +3775,15 @@
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">serviceProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Syringe</span><span class="p">()</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingReflection</span><span class="p">()</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.Agents&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.Pipelines&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"MyApp.Agents"</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"MyApp.Pipelines"</span><span class="p">))</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">(</span><span class="n">configuration</span><span class="p">);</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1">// 2. Resolve the runner — IPipelineMetrics is injected automatically.</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kt">var</span><span class="w"> </span><span class="n">runner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">serviceProvider</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">SequentialPipelineRunner</span><span class="o">&gt;</span><span class="p">();</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1">// 3. Optionally name the pipeline (per-call) so the pipeline_name tag is meaningful.</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kt">var</span><span class="w"> </span><span class="n">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SequentialPipelineOptions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">PipelineName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ArticlePipeline&quot;</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kt">var</span><span class="w"> </span><span class="n">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SequentialPipelineOptions</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">PipelineName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ArticlePipeline"</span><span class="w"> </span><span class="p">};</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="kt">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">runner</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span><span class="w"> </span><span class="n">stages</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1">// 4. Wire the meter + activity source into your OpenTelemetry pipeline.</span>
@@ -3906,9 +3913,9 @@
 <p><code>PipelineName</code> is per-call, on <code>SequentialPipelineOptions</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SequentialPipelineOptions</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">PipelineName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ArticlePipeline&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// pipeline_name tag value for this run</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">PipelineName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ArticlePipeline"</span><span class="p">,</span><span class="w">  </span><span class="c1">// pipeline_name tag value for this run</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">TotalTokenBudget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="n">_000</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">CompletionGate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">Succeeded</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s">&quot;draft missing&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">CompletionGate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">Succeeded</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s">"draft missing"</span><span class="p">,</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">};</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">await</span><span class="w"> </span><span class="n">runner</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span><span class="w"> </span><span class="n">stages</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">);</span>
 </code></pre></div>
@@ -3926,8 +3933,8 @@
 <h3 id="configurepipelinemetrics"><code>ConfigurePipelineMetrics</code><a class="headerlink" href="#configurepipelinemetrics" title="Permanent link">&para;</a></h3>
 <p>The fluent extension on <code>AgentFrameworkBuilder</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.Agents&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.Pipelines&quot;</span><span class="p">))</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"MyApp.Agents"</span><span class="p">)</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"MyApp.Pipelines"</span><span class="p">))</span>
 </code></pre></div>
 <p>Subsequent calls mutate the same options instance via the record-with rebind — same semantics as <code>ConfigureMetrics</code>.</p>
 <h3 id="pipelinemetricsoptions"><code>PipelineMetricsOptions</code><a class="headerlink" href="#pipelinemetricsoptions" title="Permanent link">&para;</a></h3>
@@ -3961,12 +3968,12 @@
 <p>Add the configured meter and activity source to your OTel pipeline. Both are picked up automatically when listeners attach:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">services</span><span class="p">.</span><span class="n">AddOpenTelemetry</span><span class="p">()</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="p">.</span><span class="n">WithMetrics</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">b</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="p">.</span><span class="n">AddMeter</span><span class="p">(</span><span class="s">&quot;MyApp.Agents&quot;</span><span class="p">)</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="p">.</span><span class="n">AddMeter</span><span class="p">(</span><span class="s">&quot;MyApp.Pipelines&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="p">.</span><span class="n">AddMeter</span><span class="p">(</span><span class="s">"MyApp.Agents"</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="p">.</span><span class="n">AddMeter</span><span class="p">(</span><span class="s">"MyApp.Pipelines"</span><span class="p">)</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="p">.</span><span class="n">AddPrometheusExporter</span><span class="p">())</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="p">.</span><span class="n">WithTracing</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">b</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="p">.</span><span class="n">AddSource</span><span class="p">(</span><span class="s">&quot;MyApp.Agents&quot;</span><span class="p">)</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="p">.</span><span class="n">AddSource</span><span class="p">(</span><span class="s">&quot;MyApp.Pipelines&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="p">.</span><span class="n">AddSource</span><span class="p">(</span><span class="s">"MyApp.Agents"</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="p">.</span><span class="n">AddSource</span><span class="p">(</span><span class="s">"MyApp.Pipelines"</span><span class="p">)</span>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="p">.</span><span class="n">AddOtlpExporter</span><span class="p">());</span>
 </code></pre></div>
 <p>Wildcard meter names work for the metrics side (<code>AddMeter("MyApp.*")</code>) but <code>ActivitySource</code> requires explicit source names — there's no <code>AddSource("MyApp.*")</code> API. List both source names explicitly.</p>
@@ -3983,9 +3990,9 @@
 <p><code>termination_cause</code> is bounded by construction: every <code>StageTermination</code> case — including <code>Custom</code> — emits a case-name discriminator (<code>Custom</code>'s free-form <code>Reason</code> is kept for diagnostics on the record / in JSON, never used as the tag). A third-party <code>IStageTermination</code> controls its own <code>ToTagValue()</code>, so only a deliberately unbounded third-party impl can reintroduce a problem there.</p>
 <p>For dropping a tag via OTel views:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">.</span><span class="n">WithMetrics</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">b</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="p">.</span><span class="n">AddView</span><span class="p">(</span><span class="n">instrumentName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;pipeline.stage.completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MetricStreamConfiguration</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="p">.</span><span class="n">AddView</span><span class="p">(</span><span class="n">instrumentName</span><span class="p">:</span><span class="w"> </span><span class="s">"pipeline.stage.completed"</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MetricStreamConfiguration</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="n">TagKeys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;pipeline_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;stage_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;outcome&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;phase_name&quot;</span><span class="p">],</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="n">TagKeys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s">"pipeline_name"</span><span class="p">,</span><span class="w"> </span><span class="s">"stage_name"</span><span class="p">,</span><span class="w"> </span><span class="s">"outcome"</span><span class="p">,</span><span class="w"> </span><span class="s">"phase_name"</span><span class="p">],</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">        </span><span class="c1">// termination_cause dropped from this view</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="p">}))</span>
 </code></pre></div>
@@ -3995,7 +4002,7 @@
 <p><strong>Before</strong> — bespoke metrics class + recording wiring in your pipeline runner wrapper:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">internal</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">PipelineMetrics</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">{</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="n">Meter</span><span class="w"> </span><span class="n">_meter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="p">(</span><span class="s">&quot;MyApp.Pipelines&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="n">Meter</span><span class="w"> </span><span class="n">_meter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="p">(</span><span class="s">"MyApp.Pipelines"</span><span class="p">);</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="n">Counter</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_runs</span><span class="p">;</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="n">Histogram</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_runDuration</span><span class="p">;</span>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="c1">// ... ~180 lines of instrument creation + RecordRun + RecordStage + ...</span>
@@ -4007,7 +4014,7 @@
 </code></pre></div>
 <p><strong>After</strong> — opt into the framework-emitted metrics + spans by configuring once in DI:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyApp.Pipelines&quot;</span><span class="p">))</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"MyApp.Pipelines"</span><span class="p">))</span>
 </code></pre></div>
 <p>Delete the bespoke metrics class. Delete the <code>RecordRun</code> / <code>RecordStage</code> calls in the wrapper. Re-point dashboard queries to the new instrument names (<code>pipeline.run.*</code>, <code>pipeline.stage.*</code>) — the tag schema is documented above.</p>
 <p>If the bespoke metrics class implemented bucketing for a stringly-typed termination reason, that helper deletes too: <code>termination_cause</code> is now <code>Termination?.ToTagValue()</code>, which is cardinality-safe by default for <strong>every</strong> case — <code>Custom</code> emits the bounded <code>"Custom"</code> discriminator, and its free-form <code>Reason</code> is preserved on the typed record / in JSON for diagnostics instead of becoming a label. No consumer-side bucketing is needed.</p>

@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3471,42 +3478,42 @@ retry attempt and item evaluation.</p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseExperimentItemScopeProvider_TCase,TOutput_.CorrelationNamespace'></a></p>
 <h2 id="langfuseexperimentitemscopeprovidertcasetoutputcorrelationnamespace-field">LangfuseExperimentItemScopeProvider&lt;TCase,TOutput&gt;.CorrelationNamespace Field<a class="headerlink" href="#langfuseexperimentitemscopeprovidertcasetoutputcorrelationnamespace-field" title="Permanent link">&para;</a></h2>
 <p>Gets the namespace used for Langfuse item correlations.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">CorrelationNamespace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;langfuse&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">CorrelationNamespace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"langfuse"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value">Field Value<a class="headerlink" href="#field-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseExperimentItemScopeProvider_TCase,TOutput_.DatasetRunIdCorrelationName'></a></p>
 <h2 id="langfuseexperimentitemscopeprovidertcasetoutputdatasetrunidcorrelationname-field">LangfuseExperimentItemScopeProvider&lt;TCase,TOutput&gt;.DatasetRunIdCorrelationName Field<a class="headerlink" href="#langfuseexperimentitemscopeprovidertcasetoutputdatasetrunidcorrelationname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the dataset-run-id correlation name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DatasetRunIdCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;dataset.run.id&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DatasetRunIdCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"dataset.run.id"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_1">Field Value<a class="headerlink" href="#field-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseExperimentItemScopeProvider_TCase,TOutput_.DatasetRunItemIdCorrelationName'></a></p>
 <h2 id="langfuseexperimentitemscopeprovidertcasetoutputdatasetrunitemidcorrelationname-field">LangfuseExperimentItemScopeProvider&lt;TCase,TOutput&gt;.DatasetRunItemIdCorrelationName Field<a class="headerlink" href="#langfuseexperimentitemscopeprovidertcasetoutputdatasetrunitemidcorrelationname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the dataset-run-item-id correlation name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DatasetRunItemIdCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;dataset.run.item.id&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DatasetRunItemIdCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"dataset.run.item.id"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_2">Field Value<a class="headerlink" href="#field-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseExperimentItemScopeProvider_TCase,TOutput_.DefaultScenarioName'></a></p>
 <h2 id="langfuseexperimentitemscopeprovidertcasetoutputdefaultscenarioname-field">LangfuseExperimentItemScopeProvider&lt;TCase,TOutput&gt;.DefaultScenarioName Field<a class="headerlink" href="#langfuseexperimentitemscopeprovidertcasetoutputdefaultscenarioname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the default low-cardinality scenario trace name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DefaultScenarioName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;evaluate-experiment-item&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DefaultScenarioName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"evaluate-experiment-item"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_3">Field Value<a class="headerlink" href="#field-value_3" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseExperimentItemScopeProvider_TCase,TOutput_.ProviderName'></a></p>
 <h2 id="langfuseexperimentitemscopeprovidertcasetoutputprovidername-field">LangfuseExperimentItemScopeProvider&lt;TCase,TOutput&gt;.ProviderName Field<a class="headerlink" href="#langfuseexperimentitemscopeprovidertcasetoutputprovidername-field" title="Permanent link">&para;</a></h2>
 <p>Gets the provider name used in item publication results.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ProviderName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;langfuse&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ProviderName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"langfuse"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_4">Field Value<a class="headerlink" href="#field-value_4" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseExperimentItemScopeProvider_TCase,TOutput_.TraceIdCorrelationName'></a></p>
 <h2 id="langfuseexperimentitemscopeprovidertcasetoutputtraceidcorrelationname-field">LangfuseExperimentItemScopeProvider&lt;TCase,TOutput&gt;.TraceIdCorrelationName Field<a class="headerlink" href="#langfuseexperimentitemscopeprovidertcasetoutputtraceidcorrelationname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the trace-id correlation name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TraceIdCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;trace.id&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TraceIdCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"trace.id"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_5">Field Value<a class="headerlink" href="#field-value_5" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>

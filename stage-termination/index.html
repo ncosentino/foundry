@@ -3068,42 +3068,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
+      <a href="../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3538,7 +3510,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3794,6 +3766,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3846,10 +3853,10 @@
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">{</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="kt">var</span><span class="w"> </span><span class="n">findingCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pipelineRunAccessor</span><span class="p">.</span><span class="n">ColdReaderFindings</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">Custom</span><span class="p">(</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">            </span><span class="n">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Reconciled&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">            </span><span class="n">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">"Reconciled"</span><span class="p">,</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">            </span><span class="n">Properties</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dictionary</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">object?</span><span class="o">&gt;</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">            </span><span class="p">{</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                </span><span class="na">[&quot;FindingCount&quot;]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findingCount</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                </span><span class="na">["FindingCount"]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findingCount</span><span class="p">,</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">            </span><span class="p">});</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="p">});</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
@@ -3858,13 +3865,13 @@
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">{</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">MaxToolCallsReached</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Limit</span><span class="p">:</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="n">_logger</span><span class="p">.</span><span class="n">LogWarning</span><span class="p">(</span><span class="s">&quot;Stage {Name} exceeded {Limit} tool calls&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="n">_logger</span><span class="p">.</span><span class="n">LogWarning</span><span class="p">(</span><span class="s">"Stage {Name} exceeded {Limit} tool calls"</span><span class="p">,</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">            </span><span class="n">stage</span><span class="p">.</span><span class="n">AgentName</span><span class="p">,</span><span class="w"> </span><span class="n">limit</span><span class="p">);</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="nf">if</span><span class="w"> </span><span class="p">(</span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">Custom</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Reconciled&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Properties</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">props</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">             </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">props</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="s">&quot;FindingCount&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">n</span><span class="p">))</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="nf">if</span><span class="w"> </span><span class="p">(</span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">Custom</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">"Reconciled"</span><span class="p">,</span><span class="w"> </span><span class="n">Properties</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">props</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">             </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">props</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="s">"FindingCount"</span><span class="p">,</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">n</span><span class="p">))</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="n">_logger</span><span class="p">.</span><span class="n">LogInformation</span><span class="p">(</span><span class="s">&quot;Stage {Name} reconciled with {Count} findings&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="n">_logger</span><span class="p">.</span><span class="n">LogInformation</span><span class="p">(</span><span class="s">"Stage {Name} reconciled with {Count} findings"</span><span class="p">,</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">            </span><span class="n">stage</span><span class="p">.</span><span class="n">AgentName</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
 <a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">}</span>
@@ -3995,7 +4002,7 @@
 <li><strong><code>Custom</code></strong> does <strong>not</strong> override <code>ToTagValue()</code> — it inherits the default and returns the bounded discriminator <code>"Custom"</code>, so <code>new Custom("Reconciled — 7 issues remaining")</code> produces <code>"Custom"</code>. The free-form <code>Reason</code> is therefore <em>never</em> a metric/span tag value and cannot explode cardinality. The reason is still preserved on the record, round-trips through JSON, and is reachable via <code>Custom.Properties</code> — read it from there (or from a JSON-serialized result) for diagnostics, not from the tag.</li>
 </ul>
 <p>Pipeline-shape metrics use this automatically as the <code>termination_cause</code> tag — see <a href="../pipeline-metrics/">Pipeline Metrics</a> for the full tag schema.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">string</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="o">?.</span><span class="n">ToTagValue</span><span class="p">()</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s">&quot;Unspecified&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">string</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="o">?.</span><span class="n">ToTagValue</span><span class="p">()</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s">"Unspecified"</span><span class="p">;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">metrics</span><span class="p">.</span><span class="n">RecordStageOutcome</span><span class="p">(</span><span class="n">tag</span><span class="p">);</span>
 </code></pre></div>
 <hr />
@@ -4004,7 +4011,7 @@
 <p>Consumers who want their own typed extension case (with named-record pattern matching like <code>is MyDomainTermination { FindingCount: var c }</code>) implement the <strong><code>IStageTermination</code></strong> interface directly:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">record</span><span class="w"> </span><span class="nf">MyDomainTermination</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">FindingCount</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IStageTermination</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">ToTagValue</span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">&quot;MyDomain&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">ToTagValue</span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">"MyDomain"</span><span class="p">;</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
 </code></pre></div>
 <p><code>IAgentStageResult.Termination</code> is declared as <code>IStageTermination?</code>, so a third-party impl flows through the runner and pipeline metrics seamlessly. Pattern matching against your own type works exactly as it does for framework cases:</p>
@@ -4012,7 +4019,7 @@
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">MyDomainTermination</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">FindingCount</span><span class="p">:</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="n">_logger</span><span class="p">.</span><span class="n">LogInformation</span><span class="p">(</span><span class="s">&quot;Stage reconciled with {Count} findings&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="n">_logger</span><span class="p">.</span><span class="n">LogInformation</span><span class="p">(</span><span class="s">"Stage reconciled with {Count} findings"</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
 </code></pre></div>
@@ -4037,7 +4044,7 @@
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">                    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">info</span><span class="p">.</span><span class="n">PolymorphismOptions</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">poly</span><span class="p">)</span>
 <a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">                </span><span class="p">{</span>
 <a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">                    </span><span class="n">poly</span><span class="p">.</span><span class="n">DerivedTypes</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">JsonDerivedType</span><span class="p">(</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">                        </span><span class="k">typeof</span><span class="p">(</span><span class="n">MyDomainTermination</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;MyDomainTermination&quot;</span><span class="p">));</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">                        </span><span class="k">typeof</span><span class="p">(</span><span class="n">MyDomainTermination</span><span class="p">),</span><span class="w"> </span><span class="s">"MyDomainTermination"</span><span class="p">));</span>
 <a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">                </span><span class="p">}</span>
 <a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">            </span><span class="p">},</span>
 <a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">        </span><span class="p">},</span>
@@ -4045,7 +4052,7 @@
 <a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="p">};</span>
 <a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>
 <a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="kt">var</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JsonSerializer</span><span class="p">.</span><span class="n">Serialize</span><span class="o">&lt;</span><span class="n">IStageTermination</span><span class="o">&gt;</span><span class="p">(</span><span class="n">myInstance</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">);</span>
-<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="c1">// {&quot;$kind&quot;:&quot;MyDomainTermination&quot;,&quot;FindingCount&quot;:7}</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="c1">// {"$kind":"MyDomainTermination","FindingCount":7}</span>
 </code></pre></div>
 <p>Your derived type joins the polymorphism table for that <code>JsonSerializerOptions</code> instance. The <code>$kind</code> discriminator stays uniform across framework + third-party cases. Apply the modifier to <strong>every</strong> <code>JsonSerializerOptions</code> your code uses to serialise <code>StageTermination</code> results — easy to forget, but the failure mode (<code>NotSupportedException</code>) is loud.</p>
 <h4 id="option-b-custom-jsonconverteristagetermination-full-control">Option B — custom <code>JsonConverter&lt;IStageTermination&gt;</code> (full control)<a class="headerlink" href="#option-b-custom-jsonconverteristagetermination-full-control" title="Permanent link">&para;</a></h4>
@@ -4108,7 +4115,7 @@
 <hr />
 <h2 id="json-wire-format">JSON wire format<a class="headerlink" href="#json-wire-format" title="Permanent link">&para;</a></h2>
 <p><code>StageTermination</code> participates in <code>System.Text.Json</code> polymorphic serialization via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="na">[JsonPolymorphic(TypeDiscriminatorPropertyName = &quot;$kind&quot;)]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="na">[JsonPolymorphic(TypeDiscriminatorPropertyName = "$kind")]</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="na">[JsonDerivedType(typeof(Completed), nameof(Completed))]</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="na">[JsonDerivedType(typeof(MaxIterationsReached), nameof(MaxIterationsReached))]</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">// ... per-case [JsonDerivedType] entries ...</span>
@@ -4116,15 +4123,15 @@
 <p>Discriminator values use <code>nameof()</code> so refactor renames cannot silently change the wire format. <strong>Once shipped, the JSON wire format is part of the public API surface</strong> — renaming or removing a case breaks downstream consumers that deserialize on the other end of an HTTP boundary or a job-queue message.</p>
 <p>Round-trip example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;$kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MaxIterationsReached&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;Limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;IterationsUsed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">"$kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MaxIterationsReached"</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">"Limit"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">"IterationsUsed"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span>
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="customproperties-json-caveat"><code>Custom.Properties</code> JSON caveat<a class="headerlink" href="#customproperties-json-caveat" title="Permanent link">&para;</a></h3>
 <p><code>Custom.Properties</code> is typed as <code>IReadOnlyDictionary&lt;string, object?&gt;</code> for flexibility, but <code>System.Text.Json</code> round-trips <code>object?</code> values as <code>JsonElement</code> — not the original concrete types. A <code>Properties["FindingCount"] = 4</code> serialised and deserialised yields a <code>JsonElement</code> (numeric) on the other end, not an <code>int</code>.</p>
 <p>Consumers needing type-safe per-property access should call <code>JsonElement.Deserialize&lt;T&gt;()</code> per value:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">custom</span><span class="p">.</span><span class="n">Properties</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">props</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">props</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="s">&quot;FindingCount&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">raw</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">custom</span><span class="p">.</span><span class="n">Properties</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">props</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">props</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="s">"FindingCount"</span><span class="p">,</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">var</span><span class="w"> </span><span class="n">raw</span><span class="p">))</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="p">{</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="kt">var</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">JsonElement</span><span class="w"> </span><span class="n">element</span>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">        </span><span class="o">?</span><span class="w"> </span><span class="n">element</span><span class="p">.</span><span class="n">Deserialize</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">()</span>
@@ -4138,10 +4145,10 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// Soft-breaks if a new framework case is added later — compile error on the missed arm.</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kt">string</span><span class="w"> </span><span class="n">label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="w"> </span><span class="k">switch</span>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">{</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">Completed</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">&quot;OK&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">MaxIterationsReached</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">&quot;OverIterations&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">Completed</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">"OK"</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">MaxIterationsReached</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">"OverIterations"</span><span class="p">,</span>
 <a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="c1">// ... 10 more arms ...</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="k">null</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">&quot;—&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="k">null</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">"—"</span><span class="p">,</span>
 <a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="p">};</span>
 </code></pre></div>
 <p>Switch <em>statements</em> without a return value continue to work without modification. Switch expressions can defend by adding a <code>_ =&gt; "Unknown"</code> default arm. Document policy: new framework cases will be released as minor-version additions.</p>
@@ -4153,12 +4160,12 @@
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">IReadOnlyDictionary</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">StageTerminationReasons</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">void</span><span class="w"> </span><span class="nf">SetStageTerminationReason</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">stageName</span><span class="p">,</span><span class="w"> </span><span class="kt">string?</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1">// In every stage factory&#39;s onLoopCompleted callback:</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1">// In every stage factory's onLoopCompleted callback:</span>
 <a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">onLoopCompleted</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="n">loopResult</span><span class="p">,</span><span class="w"> </span><span class="n">ctx</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span>
 <a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="p">{</span>
 <a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="n">pipelineRunAccessor</span><span class="p">.</span><span class="n">SetStageTerminationReason</span><span class="p">(</span>
 <a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">        </span><span class="n">ctx</span><span class="p">.</span><span class="n">StageName</span><span class="p">,</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="s">$&quot;Completed — {findingCount} finding(s) recorded&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="s">$"Completed — {findingCount} finding(s) recorded"</span><span class="p">);</span>
 <a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="p">};</span>
 <a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>
 <a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="c1">// In the runner that reads results:</span>
@@ -4169,16 +4176,16 @@
 <a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="p">}</span>
 </code></pre></div>
 <p><strong>After</strong> — typed <code>Custom</code> cases on the result itself:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// In every stage factory&#39;s onLoopCompleted callback:</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// In every stage factory's onLoopCompleted callback:</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">onLoopCompleted</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="n">loopResult</span><span class="p">,</span><span class="w"> </span><span class="n">ctx</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StageTermination</span><span class="p">.</span><span class="n">Custom</span><span class="p">(</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="n">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">$&quot;Reconciled — {findingCount} findings&quot;</span><span class="p">,</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="n">Properties</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dictionary</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">object?</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;FindingCount&quot;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findingCount</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="n">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">$"Reconciled — {findingCount} findings"</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="n">Properties</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dictionary</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">object?</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="s">"FindingCount"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findingCount</span><span class="w"> </span><span class="p">});</span>
 <a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
 <a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1">// In the runner that reads results:</span>
 <a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="n">stage</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">Stages</span><span class="p">)</span>
 <a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="p">{</span>
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="c1">// Bounded value for metric labels (the Custom case yields &quot;Custom&quot;):</span>
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span><span class="kt">var</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="o">?.</span><span class="n">ToTagValue</span><span class="p">()</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s">&quot;Unspecified&quot;</span><span class="p">;</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="c1">// Bounded value for metric labels (the Custom case yields "Custom"):</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span><span class="kt">var</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stage</span><span class="p">.</span><span class="n">Termination</span><span class="o">?.</span><span class="n">ToTagValue</span><span class="p">()</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s">"Unspecified"</span><span class="p">;</span>
 <a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
 <a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="c1">// Full reason for Loki / job-result JSON — serialize the termination, or read</span>
 <a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="c1">// Custom.Reason / Custom.Properties directly:</span>

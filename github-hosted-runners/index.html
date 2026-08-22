@@ -6,16 +6,16 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Understand how Foundry builds, publishes, pins, activates, updates, and rolls back its repository-owned CI runner image.">
+        <meta name="description" content="Understand Foundry's standard GitHub-hosted runner and public-repository billing boundary.">
       
       
         <meta name="author" content="Nick Cosentino">
       
       
-        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/runner-image/">
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/github-hosted-runners/">
       
       
-        <link rel="prev" href="../local-runners/">
+        <link rel="prev" href="../agent-guidance/">
       
       
         <link rel="next" href="../publishing/">
@@ -29,7 +29,7 @@
     
     
       
-        <title>Repository-Owned Runner Image - Foundry</title>
+        <title>GitHub-Hosted CI Runners - Foundry</title>
       
     
     
@@ -64,13 +64,13 @@
   
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Repository-Owned Runner Image – Foundry" />
-  <meta property="og:description" content="Understand how Foundry builds, publishes, pins, activates, updates, and rolls back its repository-owned CI runner image." />
+  <meta property="og:title" content="GitHub-Hosted CI Runners – Foundry" />
+  <meta property="og:description" content="Understand Foundry's standard GitHub-hosted runner and public-repository billing boundary." />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
-  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/runner-image/" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/github-hosted-runners/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Repository-Owned Runner Image – Foundry" />
-  <meta name="twitter:description" content="Understand how Foundry builds, publishes, pins, activates, updates, and rolls back its repository-owned CI runner image." />
+  <meta name="twitter:title" content="GitHub-Hosted CI Runners – Foundry" />
+  <meta name="twitter:description" content="Understand Foundry's standard GitHub-hosted runner and public-repository billing boundary." />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
   
@@ -94,8 +94,8 @@
       {
         "@type": "ListItem",
         "position": 3,
-        "name": "Repository-Owned Runner Image",
-        "item": "https://www.devleader.ca/projects/foundry/runner-image/"
+        "name": "GitHub-Hosted CI Runners",
+        "item": "https://www.devleader.ca/projects/foundry/github-hosted-runners/"
       }
     ]
   }
@@ -122,7 +122,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#repository-owned-runner-image" class="md-skip">
+        <a href="#github-hosted-ci-runners" class="md-skip">
           Skip to content
         </a>
       
@@ -155,7 +155,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Repository-Owned Runner Image
+              GitHub-Hosted CI Runners
             
           </span>
         </div>
@@ -2730,34 +2730,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -2777,7 +2749,7 @@
   <span class="md-ellipsis">
     
   
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -2795,7 +2767,7 @@
   <span class="md-ellipsis">
     
   
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -2821,10 +2793,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#trust-boundaries" class="md-nav__link">
+  <a href="#portable-toolchain-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Trust boundaries
+        Portable toolchain setup
       
     </span>
   </a>
@@ -2832,10 +2804,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#two-change-bootstrap" class="md-nav__link">
+  <a href="#enforcement" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Two-change bootstrap
+        Enforcement
       
     </span>
   </a>
@@ -2843,43 +2815,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#portable-sdk-setup" class="md-nav__link">
+  <a href="#github-references" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Portable SDK setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#activation-boundary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Activation boundary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#updating-the-image" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Updating the image
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rollback" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rollback
+        GitHub references
       
     </span>
   </a>
@@ -3316,7 +3255,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3572,6 +3511,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3599,139 +3573,50 @@
   
 
 
-<h1 id="repository-owned-runner-image">Repository-Owned Runner Image<a class="headerlink" href="#repository-owned-runner-image" title="Permanent link">&para;</a></h1>
-<p>Foundry owns a dedicated Linux amd64 worker image for trusted PitCrew jobs:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ghcr.io/ncosentino/foundry-runner
+<h1 id="github-hosted-ci-runners">GitHub-Hosted CI Runners<a class="headerlink" href="#github-hosted-ci-runners" title="Permanent link">&para;</a></h1>
+<p>Foundry is a public repository. Every repository workflow uses a standard
+GitHub-hosted runner with a literal label; there is no self-hosted route,
+custom runner image, runner group, or repository-variable override.</p>
+<p>GitHub's runner reference states that standard GitHub-hosted runners are free
+and unlimited for public repositories. All current Foundry jobs are Linux jobs
+and use <code>ubuntu-24.04</code>.</p>
+<p>Foundry has no Windows workflow job today. If Windows-specific coverage is
+added, it uses <code>windows-latest</code>. GitHub lists <code>windows-latest</code> in the Windows
+row for standard public-repository runners, so it has the same free and
+unlimited public-repository usage terms as <code>ubuntu-24.04</code>.</p>
+<p>Larger runners are a different product and are always billed, including for
+public repositories. Foundry's CI contract rejects unknown runner labels so a
+workflow cannot silently move onto a larger or custom runner.</p>
+<h2 id="portable-toolchain-setup">Portable toolchain setup<a class="headerlink" href="#portable-toolchain-setup" title="Permanent link">&para;</a></h2>
+<p>GitHub-hosted VMs start clean. Workflows use
+<code>.github/actions/setup-dotnet/action.yml</code> to validate the exact SDK contracts
+in <code>global.json</code> and <code>.github/dotnet/sdk-9/global.json</code>, then install any
+missing SDKs into <code>runner.temp</code>.</p>
+<p>NativeAOT jobs install their Linux prerequisites in the workflow. This costs
+startup time compared with a prebuilt image, but avoids maintaining runner
+infrastructure for compute GitHub already provides without charge to public
+repositories.</p>
+<h2 id="enforcement">Enforcement<a class="headerlink" href="#enforcement" title="Permanent link">&para;</a></h2>
+<p>Run the deterministic contract after changing workflows, runner labels, the
+setup action, or SDK inputs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="nb">test-ci</span><span class="n">-contract</span><span class="p">.</span><span class="n">ps1</span> <span class="n">-SelfTest</span>
 </code></pre></div>
-<p>The image prepares stable prerequisites once per reviewed image revision:</p>
+<p>The contract:</p>
 <ul>
-<li>.NET SDK 9.0.316;</li>
-<li>.NET SDK 10.0.302;</li>
-<li>NativeAOT compiler and runtime packages;</li>
-<li>the GitHub Actions runner runtime;</li>
-<li>PowerShell;</li>
-<li>Git; and</li>
-<li>the GitHub CLI.</li>
+<li>allows only <code>ubuntu-24.04</code> and <code>windows-latest</code>;</li>
+<li>rejects self-hosted, custom, larger-runner, and variable-based routing;</li>
+<li>verifies every workflow states the public-repository runner terms;</li>
+<li>preserves required CI check names and release permissions; and</li>
+<li>validates exact, portable .NET SDK setup.</li>
 </ul>
-<p>Python and Node.js remain workflow-managed.</p>
-<h2 id="trust-boundaries">Trust boundaries<a class="headerlink" href="#trust-boundaries" title="Permanent link">&para;</a></h2>
-<p>Pull requests build and execute the candidate image only on GitHub-hosted
-<code>ubuntu-24.04</code>. They do not receive package-write permission and cannot publish
-the image.</p>
-<p>A trusted push to <code>main</code> publishes the source-SHA tag:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ghcr.io/ncosentino/foundry-runner:sha-&lt;commit&gt;
-</code></pre></div>
-<p>Publication includes provenance and an SBOM. The workflow records the resulting
-manifest digest as both a job summary and a retained artifact.</p>
-<p>The first trusted publication completed in
-<a href="https://github.com/ncosentino/foundry/actions/runs/30495344544">workflow run 30495344544</a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>source SHA: 7aa13e31d4eda724f362fdadc446661ca28ca74a
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>manifest:   sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>image:      ghcr.io/ncosentino/foundry-runner@sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8
-</code></pre></div>
-<p>The exact digest was also resolved successfully with a clean anonymous Docker
-configuration.</p>
-<p>The image build context is <code>.github/runner-images/foundry-ci/</code>. It contains no
-repository source, credentials, runner registration token, or generated
-workload output.</p>
-<h2 id="two-change-bootstrap">Two-change bootstrap<a class="headerlink" href="#two-change-bootstrap" title="Permanent link">&para;</a></h2>
-<p>The repository cannot safely commit a final PitCrew profile until the first
-trusted publication produces its real public manifest digest.</p>
-<ol>
-<li>Merge the image-contract pull request.</li>
-<li>Wait for the trusted <code>main</code> publication.</li>
-<li>Record the source SHA, immutable tag, and manifest digest.</li>
-<li>Make the GHCR package public if its initial visibility is private.</li>
-<li>Verify anonymous retrieval of the exact digest.</li>
-<li>From this Foundry repository, commit a second pull request that pins that
-   digest in <code>.pitcrew/runner-profile.json</code>.</li>
-</ol>
-<p>Use a clean Docker client configuration to prove that the selected digest is
-publicly readable without cached GHCR credentials:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">$originalDockerConfig</span> <span class="p">=</span> <span class="nv">$env:DOCKER_CONFIG</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">$anonymousDockerConfig</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$env:TEMP</span> <span class="s2">&quot;foundry-ghcr-anonymous&quot;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">try</span> <span class="p">{</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Path</span> <span class="nv">$anonymousDockerConfig</span> <span class="n">-Force</span> <span class="p">|</span> <span class="nb">Out-Null</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="nv">$env:DOCKER_CONFIG</span> <span class="p">=</span> <span class="nv">$anonymousDockerConfig</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">docker</span> <span class="n">buildx</span> <span class="n">imagetools</span> <span class="n">inspect</span> <span class="p">`</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">ghcr</span><span class="p">.</span><span class="n">io</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry-runner</span><span class="nv">@sha256</span><span class="p">:&lt;</span><span class="n">manifest-digest</span><span class="p">&gt;</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">finally</span> <span class="p">{</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="nv">$env:DOCKER_CONFIG</span> <span class="p">=</span> <span class="nv">$originalDockerConfig</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="nb">Remove-Item</span> <span class="n">-LiteralPath</span> <span class="nv">$anonymousDockerConfig</span> <span class="n">-Recurse</span> <span class="n">-Force</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p">}</span>
-</code></pre></div>
-<p>Record that output with the trusted publication run before pull request 2 is
-treated as ready.</p>
-<p>Mutable tags are never used as the deployed profile identity.</p>
-<h2 id="portable-sdk-setup">Portable SDK setup<a class="headerlink" href="#portable-sdk-setup" title="Permanent link">&para;</a></h2>
-<p>Affected workflows call the repository action:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Setup exact .NET SDKs</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./.github/actions/setup-dotnet</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">with</span><span class="p">:</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">global-json-files</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="no">global.json</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">      </span><span class="no">.github/dotnet/sdk-9/global.json</span>
-</code></pre></div>
-<p>The action validates every contract, inventories installed SDKs, and skips
-installation only when the complete requested set is present. If any SDK is
-missing, pinned <code>actions/setup-dotnet</code> installs the full set into
-<code>$RUNNER_TEMP/foundry-dotnet</code>, preserving hosted portability without allowing
-one SDK root to hide another.</p>
-<h2 id="activation-boundary">Activation boundary<a class="headerlink" href="#activation-boundary" title="Permanent link">&para;</a></h2>
-<p>Repository workflows do not install or update PitCrew. After the profile pull
-request merges, an operator applies the profile from an approved PitCrew
-checkout, verifies manager and worker convergence, then sets <code>CI_RUNNER</code> to the
-dedicated profile label.</p>
-<p>Apply the committed profile with the existing capacity:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">.\</span><span class="n">Setup-Runner</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">-ProfilePath</span> <span class="p">&lt;</span><span class="n">foundry-checkout</span><span class="p">&gt;\.</span><span class="n">pitcrew</span><span class="p">\</span><span class="n">runner-profile</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">-Repos</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry</span><span class="p">=</span><span class="n">2</span>
-</code></pre></div>
-<p>Before changing routing, verify:</p>
+<p>Repository workflows never invoke a live LLM. Live Copilot integration tests
+are manual local operations requiring explicit opt-in and are rejected when
+<code>GITHUB_ACTIONS=true</code>.</p>
+<h2 id="github-references">GitHub references<a class="headerlink" href="#github-references" title="Permanent link">&para;</a></h2>
 <ul>
-<li>the replacement manager reports the current manager contract;</li>
-<li><code>observed-state.json</code> is fresh and reports <code>managerStatus: running</code>;</li>
-<li>the desired generation is accepted;</li>
-<li>the target image and image ID match the committed digest;</li>
-<li>two configured slots remain available; and</li>
-<li>a repository runner carrying label <code>foundry-ci</code> is online.</li>
+<li><a href="https://docs.github.com/en/actions/reference/runners/github-hosted-runners">GitHub-hosted runners reference</a></li>
+<li><a href="https://docs.github.com/en/billing/concepts/product-billing/github-actions">GitHub Actions billing</a></li>
 </ul>
-<p>Then set <code>CI_RUNNER=foundry-ci</code>, run CI and Documentation from <code>main</code>, and prove
-the exact SDK action reports <code>Setup performed: false</code> for every SDK baked into
-the image. Required checks <code>build-test-pack</code>, <code>docs</code>, and <code>aot</code> must pass on the
-activation SHA. Do not dispatch Release from a non-tag as a smoke test.</p>
-<p>The existing general-purpose route remains intact until CI and Documentation
-have passed on the dedicated profile. Fork pull requests remain GitHub-hosted,
-and <code>CI_RUNNER=ubuntu-latest</code> remains the hosted fallback.</p>
-<p>Only after the dedicated route is proven should the operator remove Foundry
-from the general-purpose profile. First record that profile's non-secret
-<code>desired-capacity.json</code>, <code>acknowledged-capacity.json</code>, and <code>observed-state.json</code>.
-Then use the exact running profile and PitCrew's capacity-only removal path:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">.\</span><span class="n">Setup-Runner</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">-Profile</span> <span class="p">&lt;</span><span class="n">general-purpose-profile</span><span class="p">&gt;</span> <span class="p">`</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">-RemoveRepos</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry</span> <span class="p">`</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">-CapacityOnly</span>
-</code></pre></div>
-<p>If the stored profile is autoscaled, replay its existing <code>-Autoscale</code>,
-<code>-MinimumIdle</code>, and <code>-ScaleDownDelaySeconds</code> values unchanged. Verify the
-manager container ID did not change and every unrelated repository/count
-remains in desired and acknowledged state.</p>
-<h2 id="updating-the-image">Updating the image<a class="headerlink" href="#updating-the-image" title="Permanent link">&para;</a></h2>
-<p>Every update repeats the same sequence:</p>
-<ol>
-<li>Review and merge an image or SDK contract change.</li>
-<li>Publish a new source-SHA tag and immutable digest from <code>main</code>.</li>
-<li>Review and merge the profile digest change.</li>
-<li>Roll out one approved host.</li>
-<li>Verify current and stale workers before continuing.</li>
-</ol>
-<p>An <code>update.status</code> of <code>rolling</code> is valid while assigned stale workers finish
-their current jobs.</p>
-<h2 id="rollback">Rollback<a class="headerlink" href="#rollback" title="Permanent link">&para;</a></h2>
-<p>Rollback restores a previously reviewed profile digest and replays the complete
-PitCrew profile command. Do not use a mutable tag, broad container teardown,
-Docker daemon restart, or forceful classic-runner deletion.</p>
 
 
 

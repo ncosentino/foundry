@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3512,13 +3519,13 @@ The canonical form of <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Work
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.argumentexception" title="System.ArgumentException">System.ArgumentException</a><br />
 <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.WorkspacePath.Canonicalize(string).path" title="NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.WorkspacePath.Canonicalize(string).path">path</a> is empty, whitespace-only, contains a <code>..</code> segment, or canonicalizes to the empty string.</p>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">&quot;kb/foo.md&quot;</span><span class="p">)</span><span class="w">        </span><span class="c1">// → &quot;kb/foo.md&quot;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">&quot;./kb/foo.md&quot;</span><span class="p">)</span><span class="w">      </span><span class="c1">// → &quot;kb/foo.md&quot;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">&quot;kb//foo.md&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// → &quot;kb/foo.md&quot;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">@&quot;kb\foo.md&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// → &quot;kb/foo.md&quot;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">&quot;/kb/foo.md/&quot;</span><span class="p">)</span><span class="w">      </span><span class="c1">// → &quot;kb/foo.md&quot;</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">&quot;kb/../foo.md&quot;</span><span class="p">)</span><span class="w">     </span><span class="c1">// throws ArgumentException</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span><span class="w">                </span><span class="c1">// throws ArgumentException</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">"kb/foo.md"</span><span class="p">)</span><span class="w">        </span><span class="c1">// → "kb/foo.md"</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">"./kb/foo.md"</span><span class="p">)</span><span class="w">      </span><span class="c1">// → "kb/foo.md"</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">"kb//foo.md"</span><span class="p">)</span><span class="w">       </span><span class="c1">// → "kb/foo.md"</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">@"kb\foo.md"</span><span class="p">)</span><span class="w">       </span><span class="c1">// → "kb/foo.md"</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">"/kb/foo.md/"</span><span class="p">)</span><span class="w">      </span><span class="c1">// → "kb/foo.md"</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">"kb/../foo.md"</span><span class="p">)</span><span class="w">     </span><span class="c1">// throws ArgumentException</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span><span class="w">                </span><span class="c1">// throws ArgumentException</span>
 </code></pre></div>
 <h3 id="remarks_1">Remarks<a class="headerlink" href="#remarks_1" title="Permanent link">&para;</a></h3>
 <p>Rules applied, in order:
@@ -3553,13 +3560,13 @@ root-equivalent inputs.</p>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.argumentexception" title="System.ArgumentException">System.ArgumentException</a><br />
 <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.WorkspacePath.CanonicalizeDirectory(string).directory" title="NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.WorkspacePath.CanonicalizeDirectory(string).directory">directory</a> contains a <code>..</code> segment.</p>
 <h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span><span class="w">        </span><span class="c1">// → &quot;&quot;</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// → &quot;&quot;</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// → &quot;&quot;</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;./src&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// → &quot;src&quot;</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;src/&quot;</span><span class="p">)</span><span class="w">    </span><span class="c1">// → &quot;src&quot;</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;src//&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// → &quot;src&quot;</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">&quot;../src&quot;</span><span class="p">)</span><span class="w">  </span><span class="c1">// throws ArgumentException</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">""</span><span class="p">)</span><span class="w">        </span><span class="c1">// → ""</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">"."</span><span class="p">)</span><span class="w">       </span><span class="c1">// → ""</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span><span class="w">       </span><span class="c1">// → ""</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">"./src"</span><span class="p">)</span><span class="w">   </span><span class="c1">// → "src"</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">"src/"</span><span class="p">)</span><span class="w">    </span><span class="c1">// → "src"</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">"src//"</span><span class="p">)</span><span class="w">   </span><span class="c1">// → "src"</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">CanonicalizeDirectory</span><span class="p">(</span><span class="s">"../src"</span><span class="p">)</span><span class="w">  </span><span class="c1">// throws ArgumentException</span>
 </code></pre></div>
 <h3 id="remarks_2">Remarks<a class="headerlink" href="#remarks_2" title="Permanent link">&para;</a></h3>
 <p>Same rules as <a href="./#NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.WorkspacePath.Canonicalize(string)" title="NexusLabs.Foundry.MicrosoftAgentFramework.Workspace.WorkspacePath.Canonicalize(string)">Canonicalize(string)</a>, with one difference:

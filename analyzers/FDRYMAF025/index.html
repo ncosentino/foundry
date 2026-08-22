@@ -2863,42 +2863,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../local-runners/" class="md-nav__link">
+      <a href="../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3333,7 +3305,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3589,6 +3561,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3627,12 +3634,12 @@
 <p>Replace <code>CreateGraphWorkflow</code> with <code>RunGraphAsync</code>.</p>
 <h3 id="before">Before<a class="headerlink" href="#before" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// WRONG — will throw NotSupportedException at runtime</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">CreateGraphWorkflow</span><span class="p">(</span><span class="s">&quot;my-graph&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">CreateGraphWorkflow</span><span class="p">(</span><span class="s">"my-graph"</span><span class="p">);</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">workflow</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="n">question</span><span class="p">);</span>
 </code></pre></div>
 <h3 id="after">After<a class="headerlink" href="#after" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// CORRECT — auto-selects MAF BSP for WaitAll, Foundry executor for WaitAny</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunGraphAsync</span><span class="p">(</span><span class="s">&quot;my-graph&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">question</span><span class="p">);</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="n">RunGraphAsync</span><span class="p">(</span><span class="s">"my-graph"</span><span class="p">,</span><span class="w"> </span><span class="n">question</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="when-to-suppress">When to Suppress<a class="headerlink" href="#when-to-suppress" title="Permanent link">&para;</a></h2>
 <p>Do not suppress this diagnostic. The code will throw <code>NotSupportedException</code> at runtime.</p>

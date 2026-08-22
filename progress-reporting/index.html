@@ -2941,42 +2941,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
+      <a href="../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3411,7 +3383,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3667,6 +3639,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3705,7 +3712,7 @@
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="n">IProgressEvent</span><span class="w"> </span><span class="n">progressEvent</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">)</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;[{progressEvent.WorkflowId}] {progressEvent.GetType().Name}&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$"[{progressEvent.WorkflowId}] {progressEvent.GetType().Name}"</span><span class="p">);</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ValueTask</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
@@ -3716,11 +3723,11 @@
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">progressAccessor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sp</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IProgressReporterAccessor</span><span class="o">&gt;</span><span class="p">();</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// Create() with one argument uses all auto-discovered default sinks.</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">&quot;my-workflow-run-123&quot;</span><span class="p">);</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">"my-workflow-run-123"</span><span class="p">);</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="n">progressAccessor</span><span class="p">.</span><span class="n">BeginScope</span><span class="p">(</span><span class="n">reporter</span><span class="p">))</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">{</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">workflow</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="s">&quot;Generate a blog post&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">workflow</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="s">"Generate a blog post"</span><span class="p">,</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1">// ConsoleSink receives LlmCallStarted, LlmCallCompleted, WorkflowCompleted, etc.</span>
 </code></pre></div>
@@ -3735,14 +3742,14 @@
 <li>Sinks <strong>manually registered</strong> via <code>services.AddSingleton&lt;IProgressSink, MySink&gt;()</code></li>
 </ul>
 <p>Best for: <strong>simple applications</strong> with a single agentic workflow where all events go to the same place.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">&quot;my-workflow&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">"my-workflow"</span><span class="p">);</span>
 </code></pre></div>
 <h3 id="per-orchestration-sinks-createworkflowid-sinks">Per-orchestration sinks — <code>Create(workflowId, sinks)</code><a class="headerlink" href="#per-orchestration-sinks-createworkflowid-sinks" title="Permanent link">&para;</a></h3>
 <p>Uses <strong>only</strong> the sinks you provide. Default DI sinks are <strong>not</strong> included. The caller has full control.</p>
 <p>Best for: <strong>complex server applications</strong> (multi-tenant, parallel workflows) where each orchestration requires its own isolated reporting channel — per-tenant SSE streams, per-workflow log files, etc.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// Each tenant gets their own sink — events are completely isolated.</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">tenantSink</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TenantSseSink</span><span class="p">(</span><span class="n">tenantId</span><span class="p">,</span><span class="w"> </span><span class="n">httpContext</span><span class="p">);</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">$&quot;tenant-{tenantId}-run-{runId}&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">tenantSink</span><span class="p">]);</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">reporter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progressFactory</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">$"tenant-{tenantId}-run-{runId}"</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">tenantSink</span><span class="p">]);</span>
 </code></pre></div>
 <hr />
 <h2 id="auto-discovery">Auto-Discovery<a class="headerlink" href="#auto-discovery" title="Permanent link">&para;</a></h2>
@@ -3754,7 +3761,7 @@
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TenantSseSink</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IProgressSink</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">{</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="c1">// This sink is only used via the per-orchestration Create() overload.</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="c1">// It requires tenant-specific constructor arguments that DI can&#39;t provide.</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="c1">// It requires tenant-specific constructor arguments that DI can't provide.</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="nf">TenantSseSink</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">tenantId</span><span class="p">,</span><span class="w"> </span><span class="n">HttpContext</span><span class="w"> </span><span class="n">httpContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">ValueTask</span><span class="w"> </span><span class="nf">OnEventAsync</span><span class="p">(</span><span class="n">IProgressEvent</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">ct</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span>
@@ -3769,7 +3776,7 @@
 <hr />
 <h2 id="declaring-sinks-per-agent-with-progresssinks">Declaring Sinks per Agent with <code>[ProgressSinks]</code><a class="headerlink" href="#declaring-sinks-per-agent-with-progresssinks" title="Permanent link">&para;</a></h2>
 <p>The <code>[ProgressSinks]</code> attribute lets you declare at compile time which sinks an agent should use. The source generator emits a helper method that creates a properly scoped reporter:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="na">[FoundryAgent(Instructions = &quot;Write blog articles.&quot;)]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="na">[FoundryAgent(Instructions = "Write blog articles.")]</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="na">[ProgressSinks(typeof(CostTrackingSink), typeof(AuditSink))]</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">public</span><span class="w"> </span><span class="k">partial</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WriterAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
@@ -3784,7 +3791,7 @@
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="n">progressAccessor</span><span class="p">.</span><span class="n">BeginScope</span><span class="p">(</span><span class="n">reporter</span><span class="p">))</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">{</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="c1">// All code in this scope (including middleware) sees this reporter.</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="n">agent</span><span class="p">.</span><span class="n">RunAsync</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="n">cancellationToken</span><span class="p">:</span><span class="w"> </span><span class="n">ct</span><span class="p">);</span>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">}</span>
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1">// Outside the scope, accessor.Current returns NullProgressReporter.Instance</span>

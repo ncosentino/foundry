@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3462,35 +3469,35 @@
 <p><a name='NexusLabs.Foundry.Evaluation.Reporting.MeaiReportingExperimentSchema.CorrelationNamespace'></a></p>
 <h2 id="meaireportingexperimentschemacorrelationnamespace-field">MeaiReportingExperimentSchema.CorrelationNamespace Field<a class="headerlink" href="#meaireportingexperimentschemacorrelationnamespace-field" title="Permanent link">&para;</a></h2>
 <p>Gets the namespace used for MEAI Reporting item correlations.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">CorrelationNamespace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;meai.reporting&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">CorrelationNamespace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"meai.reporting"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value">Field Value<a class="headerlink" href="#field-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.Reporting.MeaiReportingExperimentSchema.ExecutionNameCorrelationName'></a></p>
 <h2 id="meaireportingexperimentschemaexecutionnamecorrelationname-field">MeaiReportingExperimentSchema.ExecutionNameCorrelationName Field<a class="headerlink" href="#meaireportingexperimentschemaexecutionnamecorrelationname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the execution-name correlation name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ExecutionNameCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;execution.name&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ExecutionNameCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"execution.name"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_1">Field Value<a class="headerlink" href="#field-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.Reporting.MeaiReportingExperimentSchema.IterationNameCorrelationName'></a></p>
 <h2 id="meaireportingexperimentschemaiterationnamecorrelationname-field">MeaiReportingExperimentSchema.IterationNameCorrelationName Field<a class="headerlink" href="#meaireportingexperimentschemaiterationnamecorrelationname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the iteration-name correlation name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">IterationNameCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;iteration.name&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">IterationNameCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"iteration.name"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_2">Field Value<a class="headerlink" href="#field-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.Reporting.MeaiReportingExperimentSchema.ProviderName'></a></p>
 <h2 id="meaireportingexperimentschemaprovidername-field">MeaiReportingExperimentSchema.ProviderName Field<a class="headerlink" href="#meaireportingexperimentschemaprovidername-field" title="Permanent link">&para;</a></h2>
 <p>Gets the provider name used in item publication results.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ProviderName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;meai-reporting&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ProviderName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"meai-reporting"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_3">Field Value<a class="headerlink" href="#field-value_3" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.Reporting.MeaiReportingExperimentSchema.ScenarioNameCorrelationName'></a></p>
 <h2 id="meaireportingexperimentschemascenarionamecorrelationname-field">MeaiReportingExperimentSchema.ScenarioNameCorrelationName Field<a class="headerlink" href="#meaireportingexperimentschemascenarionamecorrelationname-field" title="Permanent link">&para;</a></h2>
 <p>Gets the scenario-name correlation name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ScenarioNameCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;scenario.name&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ScenarioNameCorrelationName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"scenario.name"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_4">Field Value<a class="headerlink" href="#field-value_4" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>

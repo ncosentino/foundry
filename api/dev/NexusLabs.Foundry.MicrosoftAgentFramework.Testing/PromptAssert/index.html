@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3464,9 +3471,9 @@ sections, forbidden patterns) at zero token cost.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="na">[Fact]</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">public</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">WriterPrompt_HasSafetyRules</span><span class="p">()</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">{</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">PromptAssert</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="n">WriterPrompt</span><span class="p">.</span><span class="n">Text</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ABSOLUTE RULE&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">PromptAssert</span><span class="p">.</span><span class="n">ContainsInSection</span><span class="p">(</span><span class="n">WriterPrompt</span><span class="p">.</span><span class="n">Text</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;### Critical&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;meta-instruction-leak&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">PromptAssert</span><span class="p">.</span><span class="n">ForbidsPattern</span><span class="p">(</span><span class="n">WriterPrompt</span><span class="p">.</span><span class="n">Text</span><span class="p">,</span><span class="w"> </span><span class="s">@&quot;TODO|FIXME|HACK&quot;</span><span class="p">);</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">PromptAssert</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="n">WriterPrompt</span><span class="p">.</span><span class="n">Text</span><span class="p">,</span><span class="w"> </span><span class="s">"ABSOLUTE RULE"</span><span class="p">);</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">PromptAssert</span><span class="p">.</span><span class="n">ContainsInSection</span><span class="p">(</span><span class="n">WriterPrompt</span><span class="p">.</span><span class="n">Text</span><span class="p">,</span><span class="w"> </span><span class="s">"### Critical"</span><span class="p">,</span><span class="w"> </span><span class="s">"meta-instruction-leak"</span><span class="p">);</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">PromptAssert</span><span class="p">.</span><span class="n">ForbidsPattern</span><span class="p">(</span><span class="n">WriterPrompt</span><span class="p">.</span><span class="n">Text</span><span class="p">,</span><span class="w"> </span><span class="s">@"TODO|FIXME|HACK"</span><span class="p">);</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>

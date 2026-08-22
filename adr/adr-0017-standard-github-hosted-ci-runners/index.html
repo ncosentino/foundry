@@ -12,31 +12,29 @@
         <meta name="author" content="Nick Cosentino">
       
       
-        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/local-runners/">
+        <link rel="canonical" href="https://www.devleader.ca/projects/foundry/adr/adr-0017-standard-github-hosted-ci-runners/">
       
       
-        <link rel="prev" href="../agent-guidance/">
+        <link rel="prev" href="../adr-0016-same-run-checkpoint-restoration/">
       
-      
-        <link rel="next" href="../runner-image/">
       
       
         
       
       
-      <link rel="icon" href="../assets/foundry.webp">
+      <link rel="icon" href="../../assets/foundry.webp">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Local CI Runners - Foundry</title>
+        <title>ADR-0017: Standard GitHub-hosted CI runners - Foundry</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -64,12 +62,12 @@
   
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Local CI Runners – Foundry" />
+  <meta property="og:title" content="ADR-0017 Standard GitHub-Hosted CI Runners – Foundry" />
   <meta property="og:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
-  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/local-runners/" />
+  <meta property="og:url" content="https://www.devleader.ca/projects/foundry/adr/adr-0017-standard-github-hosted-ci-runners/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Local CI Runners – Foundry" />
+  <meta name="twitter:title" content="ADR-0017 Standard GitHub-Hosted CI Runners – Foundry" />
   <meta name="twitter:description" content="Build reliable, observable, and testable AI agent systems in .NET" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   
@@ -88,14 +86,14 @@
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Operations",
+        "name": "Architecture Decisions",
         "item": "https://www.devleader.ca/projects/foundry/"
       },
       {
         "@type": "ListItem",
         "position": 3,
-        "name": "Local CI Runners",
-        "item": "https://www.devleader.ca/projects/foundry/local-runners/"
+        "name": "ADR-0017 Standard GitHub-Hosted CI Runners",
+        "item": "https://www.devleader.ca/projects/foundry/adr/adr-0017-standard-github-hosted-ci-runners/"
       }
     ]
   }
@@ -122,7 +120,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#local-ci-runners" class="md-skip">
+        <a href="#adr-0017-standard-github-hosted-ci-runners" class="md-skip">
           Skip to content
         </a>
       
@@ -136,9 +134,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Foundry" class="md-header__button md-logo" aria-label="Foundry" data-md-component="logo">
+    <a href="../.." title="Foundry" class="md-header__button md-logo" aria-label="Foundry" data-md-component="logo">
       
-  <img src="../assets/foundry.webp" alt="logo">
+  <img src="../../assets/foundry.webp" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -155,7 +153,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Local CI Runners
+              ADR-0017: Standard GitHub-hosted CI runners
             
           </span>
         </div>
@@ -268,7 +266,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -287,7 +285,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../getting-started/" class="md-tabs__link">
+      <a href="../../getting-started/" class="md-tabs__link">
         
   
   
@@ -306,7 +304,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../configuration/" class="md-tabs__link">
+      <a href="../../configuration/" class="md-tabs__link">
         
   
   
@@ -325,7 +323,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
+      <a href="../../building/" class="md-tabs__link">
         
   
   
@@ -346,7 +344,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../guides/" class="md-tabs__link">
+        <a href="../../guides/" class="md-tabs__link">
           
   
   
@@ -366,7 +364,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../ai-integrations/" class="md-tabs__link">
+        <a href="../../ai-integrations/" class="md-tabs__link">
           
   
   
@@ -386,7 +384,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../evaluation/" class="md-tabs__link">
+        <a href="../../evaluation/" class="md-tabs__link">
           
   
   
@@ -406,7 +404,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../copilot/" class="md-tabs__link">
+        <a href="../../copilot/" class="md-tabs__link">
           
   
   
@@ -426,7 +424,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../testing-tools/" class="md-tabs__link">
+        <a href="../../testing-tools/" class="md-tabs__link">
           
   
   
@@ -446,7 +444,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../analyzers/" class="md-tabs__link">
+        <a href="../../analyzers/" class="md-tabs__link">
           
   
   
@@ -466,11 +464,31 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/" class="md-tabs__link">
+        <a href="../../api/" class="md-tabs__link">
           
   
   
   API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../agent-guidance/" class="md-tabs__link">
+          
+  
+  
+  Operations
 
         </a>
       </li>
@@ -488,27 +506,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../agent-guidance/" class="md-tabs__link">
-          
-  
-  
-  Operations
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../adr/adr-0001-dag-graph-workflow-support/" class="md-tabs__link">
+        <a href="../adr-0001-dag-graph-workflow-support/" class="md-tabs__link">
           
   
   
@@ -544,9 +542,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Foundry" class="md-nav__button md-logo" aria-label="Foundry" data-md-component="logo">
+    <a href="../.." title="Foundry" class="md-nav__button md-logo" aria-label="Foundry" data-md-component="logo">
       
-  <img src="../assets/foundry.webp" alt="logo">
+  <img src="../../assets/foundry.webp" alt="logo">
 
     </a>
     Foundry
@@ -573,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -600,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -627,7 +625,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../../configuration/" class="md-nav__link">
         
   
   
@@ -654,7 +652,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
+      <a href="../../building/" class="md-nav__link">
         
   
   
@@ -735,7 +733,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/" class="md-nav__link">
+      <a href="../../guides/" class="md-nav__link">
         
   
   
@@ -824,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ai-integrations/" class="md-nav__link">
+      <a href="../../ai-integrations/" class="md-nav__link">
         
   
   
@@ -852,7 +850,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../maf-harness/" class="md-nav__link">
+      <a href="../../maf-harness/" class="md-nav__link">
         
   
   
@@ -880,7 +878,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agent-functions/" class="md-nav__link">
+      <a href="../../agent-functions/" class="md-nav__link">
         
   
   
@@ -908,7 +906,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../iterative-agent-loop/" class="md-nav__link">
+      <a href="../../iterative-agent-loop/" class="md-nav__link">
         
   
   
@@ -936,7 +934,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../declarative-workflows/" class="md-nav__link">
+      <a href="../../declarative-workflows/" class="md-nav__link">
         
   
   
@@ -964,7 +962,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../checkpointed-workflows/" class="md-nav__link">
+      <a href="../../checkpointed-workflows/" class="md-nav__link">
         
   
   
@@ -992,7 +990,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../autonomous-phase-pipeline/" class="md-nav__link">
+      <a href="../../autonomous-phase-pipeline/" class="md-nav__link">
         
   
   
@@ -1020,7 +1018,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workspace/" class="md-nav__link">
+      <a href="../../workspace/" class="md-nav__link">
         
   
   
@@ -1048,7 +1046,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../progress-reporting/" class="md-nav__link">
+      <a href="../../progress-reporting/" class="md-nav__link">
         
   
   
@@ -1076,7 +1074,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-metrics/" class="md-nav__link">
+      <a href="../../pipeline-metrics/" class="md-nav__link">
         
   
   
@@ -1104,7 +1102,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../gen-ai-token-metrics/" class="md-nav__link">
+      <a href="../../gen-ai-token-metrics/" class="md-nav__link">
         
   
   
@@ -1132,7 +1130,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../stage-termination/" class="md-nav__link">
+      <a href="../../stage-termination/" class="md-nav__link">
         
   
   
@@ -1160,7 +1158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tool-result-middleware/" class="md-nav__link">
+      <a href="../../tool-result-middleware/" class="md-nav__link">
         
   
   
@@ -1188,7 +1186,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tiered-provider-selector/" class="md-nav__link">
+      <a href="../../tiered-provider-selector/" class="md-nav__link">
         
   
   
@@ -1277,7 +1275,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../evaluation/" class="md-nav__link">
+      <a href="../../evaluation/" class="md-nav__link">
         
   
   
@@ -1305,7 +1303,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../experiment-runner/" class="md-nav__link">
+      <a href="../../experiment-runner/" class="md-nav__link">
         
   
   
@@ -1333,7 +1331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../langfuse/" class="md-nav__link">
+      <a href="../../langfuse/" class="md-nav__link">
         
   
   
@@ -1422,7 +1420,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../copilot/" class="md-nav__link">
+      <a href="../../copilot/" class="md-nav__link">
         
   
   
@@ -1511,7 +1509,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../testing-tools/" class="md-nav__link">
+      <a href="../../testing-tools/" class="md-nav__link">
         
   
   
@@ -1600,7 +1598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/" class="md-nav__link">
+      <a href="../../analyzers/" class="md-nav__link">
         
   
   
@@ -1628,7 +1626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF001/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF001/" class="md-nav__link">
         
   
   
@@ -1656,7 +1654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF002/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF002/" class="md-nav__link">
         
   
   
@@ -1684,7 +1682,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF003/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF003/" class="md-nav__link">
         
   
   
@@ -1712,7 +1710,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF004/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF004/" class="md-nav__link">
         
   
   
@@ -1740,7 +1738,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF005/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF005/" class="md-nav__link">
         
   
   
@@ -1768,7 +1766,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF006/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF006/" class="md-nav__link">
         
   
   
@@ -1796,7 +1794,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF007/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF007/" class="md-nav__link">
         
   
   
@@ -1824,7 +1822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF008/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF008/" class="md-nav__link">
         
   
   
@@ -1852,7 +1850,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF009/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF009/" class="md-nav__link">
         
   
   
@@ -1880,7 +1878,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF010/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF010/" class="md-nav__link">
         
   
   
@@ -1908,7 +1906,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF011/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF011/" class="md-nav__link">
         
   
   
@@ -1936,7 +1934,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF012/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF012/" class="md-nav__link">
         
   
   
@@ -1964,7 +1962,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF013/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF013/" class="md-nav__link">
         
   
   
@@ -1992,7 +1990,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF014/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF014/" class="md-nav__link">
         
   
   
@@ -2020,7 +2018,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF015/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF015/" class="md-nav__link">
         
   
   
@@ -2048,7 +2046,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF016/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF016/" class="md-nav__link">
         
   
   
@@ -2076,7 +2074,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF017/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF017/" class="md-nav__link">
         
   
   
@@ -2104,7 +2102,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF018/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF018/" class="md-nav__link">
         
   
   
@@ -2132,7 +2130,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF019/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF019/" class="md-nav__link">
         
   
   
@@ -2160,7 +2158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF020/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF020/" class="md-nav__link">
         
   
   
@@ -2188,7 +2186,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF021/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF021/" class="md-nav__link">
         
   
   
@@ -2216,7 +2214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF022/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF022/" class="md-nav__link">
         
   
   
@@ -2244,7 +2242,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF024/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF024/" class="md-nav__link">
         
   
   
@@ -2272,7 +2270,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF025/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF025/" class="md-nav__link">
         
   
   
@@ -2300,7 +2298,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF027/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF027/" class="md-nav__link">
         
   
   
@@ -2328,7 +2326,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF028/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF028/" class="md-nav__link">
         
   
   
@@ -2356,7 +2354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF029/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF029/" class="md-nav__link">
         
   
   
@@ -2384,7 +2382,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF030/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF030/" class="md-nav__link">
         
   
   
@@ -2412,7 +2410,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF031/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF031/" class="md-nav__link">
         
   
   
@@ -2440,7 +2438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF032/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF032/" class="md-nav__link">
         
   
   
@@ -2468,7 +2466,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analyzers/FDRYMAF033/" class="md-nav__link">
+      <a href="../../analyzers/FDRYMAF033/" class="md-nav__link">
         
   
   
@@ -2557,7 +2555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/" class="md-nav__link">
+      <a href="../../api/" class="md-nav__link">
         
   
   
@@ -2585,7 +2583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/dev/" class="md-nav__link">
+      <a href="../../api/dev/" class="md-nav__link">
         
   
   
@@ -2613,7 +2611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/stable/" class="md-nav__link">
+      <a href="../../api/stable/" class="md-nav__link">
         
   
   
@@ -2621,6 +2619,179 @@
     
   
     Stable
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../github-hosted-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publishing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Publishing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
   
 
     
@@ -2666,221 +2837,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" checked>
         
           
-          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Operations
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_12">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Operations
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../agent-guidance/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Agent Guidance
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../publishing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Documentation Publishing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../releasing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Releasing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
-        
-          
-          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
             
   
   
@@ -2898,7 +2858,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_13">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2916,7 +2876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0001-dag-graph-workflow-support/" class="md-nav__link">
+      <a href="../adr-0001-dag-graph-workflow-support/" class="md-nav__link">
         
   
   
@@ -2951,7 +2911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0002-build-scriptedchatclient-locally/" class="md-nav__link">
+      <a href="../adr-0002-build-scriptedchatclient-locally/" class="md-nav__link">
         
   
   
@@ -2986,7 +2946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0003-provider-neutral-experiment-runner/" class="md-nav__link">
+      <a href="../adr-0003-provider-neutral-experiment-runner/" class="md-nav__link">
         
   
   
@@ -3021,7 +2981,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0004-extract-ai-platform-from-needlr/" class="md-nav__link">
+      <a href="../adr-0004-extract-ai-platform-from-needlr/" class="md-nav__link">
         
   
   
@@ -3056,7 +3016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0005-first-class-maf-harness-integration/" class="md-nav__link">
+      <a href="../adr-0005-first-class-maf-harness-integration/" class="md-nav__link">
         
   
   
@@ -3091,7 +3051,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0006-hybrid-context-and-workspace-authority/" class="md-nav__link">
+      <a href="../adr-0006-hybrid-context-and-workspace-authority/" class="md-nav__link">
         
   
   
@@ -3126,7 +3086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0007-experimental-hybrid-context-compaction/" class="md-nav__link">
+      <a href="../adr-0007-experimental-hybrid-context-compaction/" class="md-nav__link">
         
   
   
@@ -3161,7 +3121,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0008-optional-harness-bundle/" class="md-nav__link">
+      <a href="../adr-0008-optional-harness-bundle/" class="md-nav__link">
         
   
   
@@ -3196,7 +3156,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0009-repository-owned-ci-runner-image/" class="md-nav__link">
+      <a href="../adr-0009-repository-owned-ci-runner-image/" class="md-nav__link">
         
   
   
@@ -3213,7 +3173,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3231,7 +3191,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0010-harness-execution-mode-retention/" class="md-nav__link">
+      <a href="../adr-0010-harness-execution-mode-retention/" class="md-nav__link">
         
   
   
@@ -3266,7 +3226,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0011-public-hybrid-context-compaction/" class="md-nav__link">
+      <a href="../adr-0011-public-hybrid-context-compaction/" class="md-nav__link">
         
   
   
@@ -3301,7 +3261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0012-docs-first-agent-guidance/" class="md-nav__link">
+      <a href="../adr-0012-docs-first-agent-guidance/" class="md-nav__link">
         
   
   
@@ -3336,7 +3296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0013-phase-local-harness-loop-evaluation/" class="md-nav__link">
+      <a href="../adr-0013-phase-local-harness-loop-evaluation/" class="md-nav__link">
         
   
   
@@ -3371,7 +3331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0014-phase-local-harness-background-delegation/" class="md-nav__link">
+      <a href="../adr-0014-phase-local-harness-background-delegation/" class="md-nav__link">
         
   
   
@@ -3406,7 +3366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0015-upstream-first-checkpointed-workflow-runs/" class="md-nav__link">
+      <a href="../adr-0015-upstream-first-checkpointed-workflow-runs/" class="md-nav__link">
         
   
   
@@ -3441,7 +3401,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/adr-0016-same-run-checkpoint-restoration/" class="md-nav__link">
+      <a href="../adr-0016-same-run-checkpoint-restoration/" class="md-nav__link">
         
   
   
@@ -3464,6 +3424,250 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context-and-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context and scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-drivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision drivers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#keep-the-self-hosted-runner-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep the self-hosted runner path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keep-a-runner-override-with-a-hosted-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep a runner override with a hosted default
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-github-hosted-larger-runners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use GitHub-hosted larger runners
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Negative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neutral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neutral
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#confirmation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Confirmation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3496,40 +3700,117 @@
   
 
 
-<h1 id="local-ci-runners">Local CI Runners<a class="headerlink" href="#local-ci-runners" title="Permanent link">&para;</a></h1>
-<p>Foundry routes trusted Linux jobs to
-<a href="https://github.com/ncosentino/pitcrew">PitCrew</a> using its default
-<code>general-purpose</code> profile:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">self-hosted</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">linux</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x64</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">general-purpose</span><span class="p p-Indicator">]</span>
-</code></pre></div>
-<p>Provision repository-scoped capacity from a PitCrew checkout:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">.\</span><span class="n">Setup-Runner</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">-Repos</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">ncosentino</span><span class="p">/</span><span class="n">foundry</span><span class="p">=</span><span class="n">2</span>
-</code></pre></div>
-<p>The workflow uses the <code>CI_RUNNER</code> repository variable as PitCrew's manual
-cloud fallback. Leave it unset for local ephemeral runners, or set it to
-<code>ubuntu-latest</code> to route Linux jobs to GitHub-hosted runners.</p>
-<p>Pull requests from forks always use <code>ubuntu-latest</code>; untrusted code must never
-run on self-hosted infrastructure.</p>
-<p>PitCrew workers are socketless Linux containers. Workloads requiring Docker,
-service containers, Testcontainers, Windows, or macOS must remain on an
-appropriate hosted or isolated runner profile.</p>
-<p>Foundry also publishes a repository-owned worker image for a dedicated
-<code>foundry-ci</code> profile. The image and profile are delivered in separate reviewed
-changes because the profile must pin the real public manifest digest produced
-after trusted publication. See <a href="../runner-image/">Repository-Owned Runner Image</a>
-for publication, activation, update, fallback, and rollback boundaries.</p>
-<p>The approved profile is stored at <code>.pitcrew/runner-profile.json</code> and preserves
-two repository workers. Until operator activation is complete, keep
-<code>CI_RUNNER=ubuntu-latest</code> for the hosted fallback. Activation changes that
-repository variable to <code>foundry-ci</code> only after the dedicated profile is online
-and verified.</p>
+<h1 id="adr-0017-standard-github-hosted-ci-runners">ADR-0017: Standard GitHub-hosted CI runners<a class="headerlink" href="#adr-0017-standard-github-hosted-ci-runners" title="Permanent link">&para;</a></h1>
+<h2 id="context-and-scope">Context and scope<a class="headerlink" href="#context-and-scope" title="Permanent link">&para;</a></h2>
+<p>ADR-0009 introduced a repository-owned runner image and a self-hosted runner
+profile to reduce repeated SDK and NativeAOT setup on ephemeral workers.
+Foundry is a public repository, and GitHub documents standard GitHub-hosted
+runners as free and unlimited for public repositories. Maintaining separate
+runner capacity therefore adds infrastructure, routing, image-publication, and
+trust-boundary complexity without reducing GitHub Actions runner charges.</p>
+<p>GitHub's public-repository runner table explicitly includes both
+<code>ubuntu-24.04</code> and <code>windows-latest</code>. Larger runners are a separate product and
+are always billed, including for public repositories.</p>
+<p>This decision governs repository workflow runner selection, portable toolchain
+setup, and live-model execution boundaries. It does not prohibit developers
+from running deterministic repository commands on their own machines.</p>
+<h2 id="decision-drivers">Decision drivers<a class="headerlink" href="#decision-drivers" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Use the free public-repository compute GitHub already provides.</li>
+<li>Make the runner class visible from each workflow without repository settings.</li>
+<li>Prevent a variable or custom label from silently selecting paid capacity.</li>
+<li>Preserve exact SDK, required-check, release-permission, and fork-isolation
+  behavior.</li>
+<li>Keep live-model execution out of repository CI/CD.</li>
+<li>Make future Windows workflow selection unambiguous.</li>
+</ul>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p>Every Foundry workflow uses a literal standard GitHub-hosted runner label.
+Linux jobs use <code>ubuntu-24.04</code>. A future Windows job uses <code>windows-latest</code>.
+Both labels are in GitHub's standard public-repository runner table and inherit
+the documented free and unlimited public-repository usage terms.</p>
+<p>Foundry does not use:</p>
+<ul>
+<li>self-hosted runners or runner groups;</li>
+<li>repository-variable runner overrides;</li>
+<li>repository-owned runner images or profiles;</li>
+<li>GitHub-hosted larger runners; or</li>
+<li>repository workflows that invoke a live LLM.</li>
+</ul>
+<p>The repository setup action remains responsible for validating and installing
+the exact SDKs requested by each job. NativeAOT jobs install their Linux
+prerequisites on the hosted VM.</p>
+<p><code>scripts/test-ci-contract.ps1</code> enforces the allowed runner labels, rejects the
+removed routing mechanisms, preserves required check names and release
+permissions, and exercises <code>windows-latest</code> as an accepted mutation. The
+guidance contract rejects every live-LLM workflow. Live Copilot integration
+tests may run only as explicitly approved local operations and skip when
+<code>GITHUB_ACTIONS=true</code>.</p>
+<h2 id="alternatives-considered">Alternatives considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">&para;</a></h2>
+<h3 id="keep-the-self-hosted-runner-path">Keep the self-hosted runner path<a class="headerlink" href="#keep-the-self-hosted-runner-path" title="Permanent link">&para;</a></h3>
+<p>Prebuilt workers can reduce setup time and provide direct capacity control.
+They also require external hosts, image and profile lifecycle management,
+registration trust, routing variables, and operator recovery. That cost is not
+justified while standard public-repository runners are free and unlimited.</p>
+<h3 id="keep-a-runner-override-with-a-hosted-default">Keep a runner override with a hosted default<a class="headerlink" href="#keep-a-runner-override-with-a-hosted-default" title="Permanent link">&para;</a></h3>
+<p>A repository variable would preserve deployment flexibility. It would also
+hide the actual runner class from review and allow a settings change to route
+jobs to custom or paid capacity without changing workflow source. Literal
+labels provide a stronger and simpler contract.</p>
+<h3 id="use-github-hosted-larger-runners">Use GitHub-hosted larger runners<a class="headerlink" href="#use-github-hosted-larger-runners" title="Permanent link">&para;</a></h3>
+<p>Larger runners could shorten broad builds and NativeAOT publication. GitHub
+states that larger runners are always billed, even for public repositories.
+Foundry prefers the standard runner unless measured evidence later justifies a
+separate accepted decision.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<h3 id="positive">Positive<a class="headerlink" href="#positive" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Standard Linux and Windows capacity is free and unlimited for this public
+  repository.</li>
+<li>Pull requests, trusted pushes, documentation, and releases use the same
+  GitHub-managed trust boundary.</li>
+<li>Runner selection is reviewable directly in workflow source.</li>
+<li>No custom runner image, profile, or host requires maintenance.</li>
+</ul>
+<h3 id="negative">Negative<a class="headerlink" href="#negative" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Clean hosted VMs reinstall missing SDKs and NativeAOT prerequisites.</li>
+<li>Jobs may take longer than equivalent prebuilt workers.</li>
+<li>Repository CI cannot host live-model evaluation.</li>
+</ul>
+<h3 id="neutral">Neutral<a class="headerlink" href="#neutral" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Current workflows remain Linux-only.</li>
+<li>Public package, artifact, cache, and release-asset policies remain separate
+  from runner selection.</li>
+<li>Required check names and release publishing behavior remain unchanged.</li>
+</ul>
+<h2 id="confirmation">Confirmation<a class="headerlink" href="#confirmation" title="Permanent link">&para;</a></h2>
+<p>The decision is confirmed when:</p>
+<ul>
+<li>every workflow uses only <code>ubuntu-24.04</code> or <code>windows-latest</code>;</li>
+<li>the CI contract and guidance self-tests pass;</li>
+<li>the repository runner override is no longer used;</li>
+<li>the self-hosted profile, custom image, image workflow, and live-model
+  workflow are absent; and</li>
+<li>required pull-request checks pass on GitHub-hosted runners.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://docs.github.com/en/actions/reference/runners/github-hosted-runners">GitHub-hosted runners reference</a></li>
+<li><a href="https://docs.github.com/en/billing/concepts/product-billing/github-actions">GitHub Actions billing</a></li>
+<li><code>docs/github-hosted-runners.md</code></li>
+<li><code>scripts/test-ci-contract.ps1</code></li>
+</ul>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -3608,12 +3889,12 @@ and verified.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.highlight", "search.suggest", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "content.code.copy", "content.code.annotate", "search.highlight", "search.suggest", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../javascripts/api-version-switcher.js"></script>
+        <script src="../../javascripts/api-version-switcher.js"></script>
       
     
   </body>

@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3473,28 +3480,28 @@ an empty <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensi
 <p><a name='NexusLabs.Foundry.Evaluation.TerminationAppropriatenessEvaluator.ExecutionModeMetricName'></a></p>
 <h2 id="terminationappropriatenessevaluatorexecutionmodemetricname-field">TerminationAppropriatenessEvaluator.ExecutionModeMetricName Field<a class="headerlink" href="#terminationappropriatenessevaluatorexecutionmodemetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the captured execution mode string.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ExecutionModeMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Execution Mode&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ExecutionModeMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Execution Mode"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value">Field Value<a class="headerlink" href="#field-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.TerminationAppropriatenessEvaluator.RunSucceededMetricName'></a></p>
 <h2 id="terminationappropriatenessevaluatorrunsucceededmetricname-field">TerminationAppropriatenessEvaluator.RunSucceededMetricName Field<a class="headerlink" href="#terminationappropriatenessevaluatorrunsucceededmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the success rollup.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">RunSucceededMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Run Succeeded&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">RunSucceededMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Run Succeeded"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_1">Field Value<a class="headerlink" href="#field-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.TerminationAppropriatenessEvaluator.TerminationConsistentMetricName'></a></p>
 <h2 id="terminationappropriatenessevaluatorterminationconsistentmetricname-field">TerminationAppropriatenessEvaluator.TerminationConsistentMetricName Field<a class="headerlink" href="#terminationappropriatenessevaluatorterminationconsistentmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the success/error consistency check.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TerminationConsistentMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Termination Consistent&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TerminationConsistentMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Termination Consistent"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_2">Field Value<a class="headerlink" href="#field-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.TerminationAppropriatenessEvaluator.UnknownExecutionMode'></a></p>
 <h2 id="terminationappropriatenessevaluatorunknownexecutionmode-field">TerminationAppropriatenessEvaluator.UnknownExecutionMode Field<a class="headerlink" href="#terminationappropriatenessevaluatorunknownexecutionmode-field" title="Permanent link">&para;</a></h2>
 <p>Execution mode string emitted when the diagnostics do not carry one.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">UnknownExecutionMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Unknown&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">UnknownExecutionMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Unknown"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_3">Field Value<a class="headerlink" href="#field-value_3" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>

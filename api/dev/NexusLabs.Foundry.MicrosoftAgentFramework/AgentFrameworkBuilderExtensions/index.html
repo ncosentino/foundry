@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3571,7 +3578,7 @@ Without this call, both default to <code>"NexusLabs.Foundry.MicrosoftAgentFramew
 <p>Consumers with existing dashboards keyed to a specific meter name can set it here
 to avoid a dashboard migration when adopting Foundry's metrics:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ExampleProduct.Agents&quot;</span><span class="p">))</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ExampleProduct.Agents"</span><span class="p">))</span>
 </code></pre></div>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.AgentFrameworkBuilderExtensions.ConfigurePipelineMetrics(thisNexusLabs.Foundry.MicrosoftAgentFramework.AgentFrameworkBuilder,System.Action_NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics.PipelineMetricsOptions_)'></a></p>
 <h2 id="agentframeworkbuilderextensionsconfigurepipelinemetricsthis-agentframeworkbuilder-actionpipelinemetricsoptions-method">AgentFrameworkBuilderExtensions.ConfigurePipelineMetrics(this AgentFrameworkBuilder, Action&lt;PipelineMetricsOptions&gt;) Method<a class="headerlink" href="#agentframeworkbuilderextensionsconfigurepipelinemetricsthis-agentframeworkbuilder-actionpipelinemetricsoptions-method" title="Permanent link">&para;</a></h2>
@@ -3596,8 +3603,8 @@ metrics; this one targets per-pipeline / per-stage metrics emitted by
 under a separate meter (e.g. <code>"ExampleProduct.Pipelines"</code>) so OTel views
 and Prometheus aggregation can target each scope independently:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">.</span><span class="n">UsingAgentFramework</span><span class="p">(</span><span class="n">af</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">af</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ExampleProduct.Agents&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ExampleProduct.Pipelines&quot;</span><span class="p">))</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigureMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ExampleProduct.Agents"</span><span class="p">)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="p">.</span><span class="n">ConfigurePipelineMetrics</span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">MeterName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ExampleProduct.Pipelines"</span><span class="p">))</span>
 </code></pre></div>
 <p><a name='NexusLabs.Foundry.MicrosoftAgentFramework.AgentFrameworkBuilderExtensions.UsingChatClient(thisNexusLabs.Foundry.MicrosoftAgentFramework.AgentFrameworkBuilder,Microsoft.Extensions.AI.IChatClient)'></a></p>
 <h2 id="agentframeworkbuilderextensionsusingchatclientthis-agentframeworkbuilder-ichatclient-method">AgentFrameworkBuilderExtensions.UsingChatClient(this AgentFrameworkBuilder, IChatClient) Method<a class="headerlink" href="#agentframeworkbuilderextensionsusingchatclientthis-agentframeworkbuilder-ichatclient-method" title="Permanent link">&para;</a></h2>

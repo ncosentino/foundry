@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3473,21 +3480,21 @@ customised those names via <code>ConfigureMetrics(...)</code>, set
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseOptions.HostEnvironmentVariable'></a></p>
 <h2 id="langfuseoptionshostenvironmentvariable-field">LangfuseOptions.HostEnvironmentVariable Field<a class="headerlink" href="#langfuseoptionshostenvironmentvariable-field" title="Permanent link">&para;</a></h2>
 <p>Environment variable read for the Langfuse host (base URL) by <a href="./#NexusLabs.Foundry.Langfuse.LangfuseOptions.FromEnvironment()" title="NexusLabs.Foundry.Langfuse.LangfuseOptions.FromEnvironment()">FromEnvironment()</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">HostEnvironmentVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;LANGFUSE_HOST&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">HostEnvironmentVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"LANGFUSE_HOST"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value">Field Value<a class="headerlink" href="#field-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseOptions.PublicKeyEnvironmentVariable'></a></p>
 <h2 id="langfuseoptionspublickeyenvironmentvariable-field">LangfuseOptions.PublicKeyEnvironmentVariable Field<a class="headerlink" href="#langfuseoptionspublickeyenvironmentvariable-field" title="Permanent link">&para;</a></h2>
 <p>Environment variable read for the Langfuse public key by <a href="./#NexusLabs.Foundry.Langfuse.LangfuseOptions.FromEnvironment()" title="NexusLabs.Foundry.Langfuse.LangfuseOptions.FromEnvironment()">FromEnvironment()</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">PublicKeyEnvironmentVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;LANGFUSE_PUBLIC_KEY&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">PublicKeyEnvironmentVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"LANGFUSE_PUBLIC_KEY"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_1">Field Value<a class="headerlink" href="#field-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Langfuse.LangfuseOptions.SecretKeyEnvironmentVariable'></a></p>
 <h2 id="langfuseoptionssecretkeyenvironmentvariable-field">LangfuseOptions.SecretKeyEnvironmentVariable Field<a class="headerlink" href="#langfuseoptionssecretkeyenvironmentvariable-field" title="Permanent link">&para;</a></h2>
 <p>Environment variable read for the Langfuse secret key by <a href="./#NexusLabs.Foundry.Langfuse.LangfuseOptions.FromEnvironment()" title="NexusLabs.Foundry.Langfuse.LangfuseOptions.FromEnvironment()">FromEnvironment()</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">SecretKeyEnvironmentVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;LANGFUSE_SECRET_KEY&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">SecretKeyEnvironmentVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"LANGFUSE_SECRET_KEY"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_2">Field Value<a class="headerlink" href="#field-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>

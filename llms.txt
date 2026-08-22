@@ -88,8 +88,7 @@ Author: Nick Cosentino (https://www.devleader.ca).
 ## Operations
 
 - [Agent Guidance](https://www.devleader.ca/projects/foundry/agent-guidance/) -- Understand where Foundry's agent guidance lives, how it is validated, and which source owns each kind of rule.
-- [Local CI Runners](https://www.devleader.ca/projects/foundry/local-runners/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [Repository-Owned Runner Image](https://www.devleader.ca/projects/foundry/runner-image/) -- Understand how Foundry builds, publishes, pins, activates, updates, and rolls back its repository-owned CI runner image.
+- [GitHub-Hosted CI Runners](https://www.devleader.ca/projects/foundry/github-hosted-runners/) -- Understand Foundry's standard GitHub-hosted runner and public-repository billing boundary.
 - [Documentation Publishing](https://www.devleader.ca/projects/foundry/publishing/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [Releasing](https://www.devleader.ca/projects/foundry/releasing/) -- Build reliable, observable, and testable AI agent systems in .NET
 
@@ -111,3 +110,4 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [ADR-0014 Phase-Local Harness Background Delegation](https://www.devleader.ca/projects/foundry/adr/adr-0014-phase-local-harness-background-delegation/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0015 Upstream-First Checkpointed Workflow Runs](https://www.devleader.ca/projects/foundry/adr/adr-0015-upstream-first-checkpointed-workflow-runs/) -- Build reliable, observable, and testable AI agent systems in .NET
 - [ADR-0016 Same-Run Checkpoint Restoration](https://www.devleader.ca/projects/foundry/adr/adr-0016-same-run-checkpoint-restoration/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0017 Standard GitHub-Hosted CI Runners](https://www.devleader.ca/projects/foundry/adr/adr-0017-standard-github-hosted-ci-runners/) -- Build reliable, observable, and testable AI agent systems in .NET

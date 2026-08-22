@@ -2907,42 +2907,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
+      <a href="../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3377,7 +3349,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3633,6 +3605,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3788,7 +3795,7 @@
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="c1">// For file paths. Throws on null/empty/whitespace/.. segments/canonicalizes-to-empty.</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">Canonicalize</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">path</span><span class="p">);</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="c1">// For directory paths (e.g., IWorkspace.ListDirectory). Returns &quot;&quot; for</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="c1">// For directory paths (e.g., IWorkspace.ListDirectory). Returns "" for</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="c1">// root-equivalent inputs; otherwise same rules as Canonicalize.</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="nf">CanonicalizeDirectory</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">directory</span><span class="p">);</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
@@ -3796,9 +3803,9 @@
 <h2 id="inmemoryworkspace-reference-implementation"><code>InMemoryWorkspace</code> reference implementation<a class="headerlink" href="#inmemoryworkspace-reference-implementation" title="Permanent link">&para;</a></h2>
 <p><code>InMemoryWorkspace</code> is the shipping reference implementation, backed by a <code>ConcurrentDictionary&lt;string, string&gt;</code> keyed with <code>WorkspacePath.PathComparer</code>. It delegates all path inputs to <code>WorkspacePath.Canonicalize</code> (for file APIs) or <code>WorkspacePath.CanonicalizeDirectory</code> (for <code>ListDirectory</code>). It is suitable for tests, sandboxed agent runs, and any scenario where persistence is not needed.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">workspace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">InMemoryWorkspace</span><span class="p">();</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">workspace</span><span class="p">.</span><span class="n">SeedFile</span><span class="p">(</span><span class="s">&quot;config.json&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="p">);</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">workspace</span><span class="p">.</span><span class="n">SeedFile</span><span class="p">(</span><span class="s">"config.json"</span><span class="p">,</span><span class="w"> </span><span class="s">"{...}"</span><span class="p">);</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kt">var</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">workspace</span><span class="p">.</span><span class="n">TryReadFile</span><span class="p">(</span><span class="s">&quot;config.json&quot;</span><span class="p">).</span><span class="n">Value</span><span class="p">.</span><span class="n">Content</span><span class="p">;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kt">var</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">workspace</span><span class="p">.</span><span class="n">TryReadFile</span><span class="p">(</span><span class="s">"config.json"</span><span class="p">).</span><span class="n">Value</span><span class="p">.</span><span class="n">Content</span><span class="p">;</span>
 </code></pre></div>
 <h2 id="implementing-your-own-iworkspace">Implementing your own <code>IWorkspace</code><a class="headerlink" href="#implementing-your-own-iworkspace" title="Permanent link">&para;</a></h2>
 <p>When you build a custom <code>IWorkspace</code> (e.g., backed by a file system, S3, or a database), follow these rules:</p>
@@ -3831,10 +3838,10 @@
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">WorkspaceResult</span><span class="o">&lt;</span><span class="n">WriteFileResult</span><span class="o">&gt;</span><span class="w"> </span><span class="n">TryWriteFile</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">content</span><span class="p">)</span>
 <a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="p">{</span>
 <a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">        </span><span class="kt">var</span><span class="w"> </span><span class="n">canonical</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WorkspacePath</span><span class="p">.</span><span class="n">Canonicalize</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">_allowedPrefixes</span><span class="p">.</span><span class="n">Any</span><span class="p">(</span><span class="n">p</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">canonical</span><span class="p">.</span><span class="n">StartsWith</span><span class="p">(</span><span class="n">p</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">StringComparison</span><span class="p">.</span><span class="n">OrdinalIgnoreCase</span><span class="p">)))</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">_allowedPrefixes</span><span class="p">.</span><span class="n">Any</span><span class="p">(</span><span class="n">p</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">canonical</span><span class="p">.</span><span class="n">StartsWith</span><span class="p">(</span><span class="n">p</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/"</span><span class="p">,</span><span class="w"> </span><span class="n">StringComparison</span><span class="p">.</span><span class="n">OrdinalIgnoreCase</span><span class="p">)))</span>
 <a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">        </span><span class="p">{</span>
 <a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">WorkspaceResult</span><span class="o">&lt;</span><span class="n">WriteFileResult</span><span class="o">&gt;</span><span class="p">.</span><span class="n">Fail</span><span class="p">(</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="nf">UnauthorizedAccessException</span><span class="p">(</span><span class="s">$&quot;Writes to &#39;{canonical}&#39; are not allowed.&quot;</span><span class="p">));</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="nf">UnauthorizedAccessException</span><span class="p">(</span><span class="s">$"Writes to '{canonical}' are not allowed."</span><span class="p">));</span>
 <a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">        </span><span class="p">}</span>
 <a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">_inner</span><span class="p">.</span><span class="n">TryWriteFile</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span><span class="w"> </span><span class="n">content</span><span class="p">);</span>
 <a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="p">}</span>

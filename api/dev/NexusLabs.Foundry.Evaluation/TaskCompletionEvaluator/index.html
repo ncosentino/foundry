@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3489,21 +3496,21 @@ returns an empty <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft
 <p><a name='NexusLabs.Foundry.Evaluation.TaskCompletionEvaluator.TaskCompletedMetricName'></a></p>
 <h2 id="taskcompletionevaluatortaskcompletedmetricname-field">TaskCompletionEvaluator.TaskCompletedMetricName Field<a class="headerlink" href="#taskcompletionevaluatortaskcompletedmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the boolean task-completed flag.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TaskCompletedMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Task Completed&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TaskCompletedMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Task Completed"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_1">Field Value<a class="headerlink" href="#field-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.TaskCompletionEvaluator.TaskCompletionReasoningMetricName'></a></p>
 <h2 id="taskcompletionevaluatortaskcompletionreasoningmetricname-field">TaskCompletionEvaluator.TaskCompletionReasoningMetricName Field<a class="headerlink" href="#taskcompletionevaluatortaskcompletionreasoningmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the judge's reasoning.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TaskCompletionReasoningMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Task Completion Reasoning&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TaskCompletionReasoningMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Task Completion Reasoning"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_2">Field Value<a class="headerlink" href="#field-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.TaskCompletionEvaluator.TaskCompletionScoreMetricName'></a></p>
 <h2 id="taskcompletionevaluatortaskcompletionscoremetricname-field">TaskCompletionEvaluator.TaskCompletionScoreMetricName Field<a class="headerlink" href="#taskcompletionevaluatortaskcompletionscoremetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the numeric 1–5 completion score.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TaskCompletionScoreMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Task Completion Score&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TaskCompletionScoreMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Task Completion Score"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_3">Field Value<a class="headerlink" href="#field-value_3" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>

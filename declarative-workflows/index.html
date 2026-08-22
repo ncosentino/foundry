@@ -2924,42 +2924,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
+      <a href="../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3394,7 +3366,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3650,6 +3622,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3693,7 +3700,7 @@ so a declarative workflow can drive in-process agents with no remote project inv
 <h2 id="running-a-workflow">Running a workflow<a class="headerlink" href="#running-a-workflow" title="Permanent link">&para;</a></h2>
 <p>Agents are declared the same way as anywhere else in Foundry and resolved through
 <code>IAgentFactory</code>, so a declarative workflow needs no registration code of its own:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="na">[FoundryAgent(Description = &quot;...&quot;, Instructions = &quot;...&quot;)]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="na">[FoundryAgent(Description = "...", Instructions = "...")]</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ClassifierAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// composition root</span>
@@ -3705,11 +3712,11 @@ so a declarative workflow can drive in-process agents with no remote project inv
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kt">var</span><span class="w"> </span><span class="n">agentFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">serviceProvider</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="o">&lt;</span><span class="n">IAgentFactory</span><span class="o">&gt;</span><span class="p">();</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">Workflow</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agentFactory</span><span class="p">.</span><span class="n">CreateDeclarativeWorkflow</span><span class="p">(</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="s">&quot;triage-workflow.yaml&quot;</span><span class="p">));</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="s">"triage-workflow.yaml"</span><span class="p">));</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">StreamingRun</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">InProcessExecution</span><span class="p">.</span><span class="n">RunStreamingAsync</span><span class="p">(</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="n">workflow</span><span class="p">,</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="s">&quot;I cannot log in to my account&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="s">"I cannot log in to my account"</span><span class="p">,</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="n">checkpointManager</span><span class="p">:</span><span class="w"> </span><span class="n">CheckpointManager</span><span class="p">.</span><span class="n">CreateInMemory</span><span class="p">());</span>
 <a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="k">await</span><span class="w"> </span><span class="nf">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="n">workflowEvent</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">run</span><span class="p">.</span><span class="n">WatchStreamAsync</span><span class="p">().</span><span class="n">ReportProgressTo</span><span class="p">(</span><span class="n">reporter</span><span class="p">,</span><span class="w"> </span><span class="n">ct</span><span class="p">))</span>
@@ -3749,8 +3756,8 @@ engine into every consumer.</p>
 <code>IAgentFactory.CreateAgent(string)</code> matches them. That is the simple class name by
 default, or <code>[FoundryAgent(Name = "...")]</code> when one is declared:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="na">[FoundryAgent(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="na">    Name = &quot;Classifier&quot;,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="na">    Instructions = &quot;Classify the report.&quot;)]</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="na">    Name = "Classifier",</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="na">    Instructions = "Classify the report.")]</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">public</span><span class="w"> </span><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ClassifierAgent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">      </span><span class="nt">agent</span><span class="p">:</span>
@@ -3765,8 +3772,8 @@ see. Renaming the <em>published</em> name still breaks the document, so pick it 
 <p>Either way the failure is loud rather than silent. An unresolved name surfaces at the
 action that named it:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>DeclarativeActionException: Unhandled workflow failure - #classify (InvokeAzureAgent)
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a> ---&gt; InvalidOperationException: No agent named &#39;Clasifier&#39; is registered. ...
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>      Registered names: &#39;Classifier&#39;, &#39;ResponderAgent&#39;.
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a> ---&gt; InvalidOperationException: No agent named 'Clasifier' is registered. ...
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>      Registered names: 'Classifier', 'ResponderAgent'.
 </code></pre></div>
 <p>Names must be unique across all declared agents; a collision is reported by
 <a href="../analyzers/FDRYMAF031/">FDRYMAF031</a> at compile time and rejected when the agent
@@ -3866,7 +3873,7 @@ progress and still do its own handling.</p>
 <p>The package is deliberately excluded from Foundry's NativeAOT profile. A probe that
 parsed a declarative document and published with <code>PublishAot=true</code> produced <strong>44 trim
 warnings and 41 AOT warnings</strong>, and the resulting native binary failed at startup:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>NotSupportedException: &#39;Microsoft.Agents.ObjectModel.RecurrenceFrequency[]&#39;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>NotSupportedException: 'Microsoft.Agents.ObjectModel.RecurrenceFrequency[]'
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>is missing native code or metadata.
 </code></pre></div>
 <p>That is a static type initializer, so nothing declarative runs at all under AOT. The

@@ -3156,42 +3156,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../local-runners/" class="md-nav__link">
+      <a href="../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3626,7 +3598,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3882,6 +3854,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3970,7 +3977,7 @@ opt-in through the dedicated <code>NexusLabs.Foundry.Evaluation.Reporting</code>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kt">var</span><span class="w"> </span><span class="n">chatConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatConfiguration</span><span class="p">(</span><span class="n">judgeChatClient</span><span class="p">);</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">evaluator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RelevanceEvaluator</span><span class="p">();</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kt">var</span><span class="w"> </span><span class="n">userPrompt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatMessage</span><span class="p">(</span><span class="n">ChatRole</span><span class="p">.</span><span class="n">User</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Original user question here.&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kt">var</span><span class="w"> </span><span class="n">userPrompt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatMessage</span><span class="p">(</span><span class="n">ChatRole</span><span class="p">.</span><span class="n">User</span><span class="p">,</span><span class="w"> </span><span class="s">"Original user question here."</span><span class="p">);</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">EvaluationResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">evaluator</span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="na">[userPrompt]</span><span class="p">,</span>
@@ -4032,19 +4039,19 @@ opt-in through the dedicated <code>NexusLabs.Foundry.Evaluation.Reporting</code>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="na">[AgentFunction]</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">RecordFixDecisionResult</span><span class="w"> </span><span class="nf">Record</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">issueId</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">action</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">reason</span><span class="p">)</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;Applied&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">Current</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">snap</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"Applied"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">Current</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">snap</span><span class="p">)</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="p">{</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">            </span><span class="c1">// Find the most recent prior FindReplaceWithCount call. Its</span>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">            </span><span class="c1">// structured Result is captured losslessly by the diagnostics</span>
 <a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">            </span><span class="c1">// middleware — no shadow store required.</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">            </span><span class="kt">var</span><span class="w"> </span><span class="n">lastWrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snap</span><span class="p">.</span><span class="n">ToolCalls</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">                </span><span class="p">.</span><span class="n">Where</span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">ToolName</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;FindReplaceWithCount&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">                </span><span class="p">.</span><span class="n">Where</span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">ToolName</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"FindReplaceWithCount"</span><span class="p">)</span>
 <a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">                </span><span class="p">.</span><span class="n">LastOrDefault</span><span class="p">();</span>
 <a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
 <a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastWrite</span><span class="o">?.</span><span class="n">Result</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">FindReplaceWithCountResult</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Success</span><span class="p">:</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">r</span><span class="p">)</span>
 <a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">            </span><span class="p">{</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">                </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Rejected&quot;</span><span class="p">;</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">                </span><span class="n">reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">$&quot;[auto-corrected: prior write returned Success=false: {r.Error}] {reason}&quot;</span><span class="p">;</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">                </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Rejected"</span><span class="p">;</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">                </span><span class="n">reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">$"[auto-corrected: prior write returned Success=false: {r.Error}] {reason}"</span><span class="p">;</span>
 <a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">            </span><span class="p">}</span>
 <a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="p">}</span>
 <a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>
@@ -4160,7 +4167,7 @@ opt-in through the dedicated <code>NexusLabs.Foundry.Evaluation.Reporting</code>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kt">var</span><span class="w"> </span><span class="n">timeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">GetOrderedTimeline</span><span class="p">();</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">foreach</span><span class="w"> </span><span class="p">(</span><span class="kt">var</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">timeline</span><span class="p">)</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">{</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$&quot;[{entry.StartedAt:HH:mm:ss.fff}] {entry.Kind} #{entry.Sequence}&quot;</span><span class="p">);</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">$"[{entry.StartedAt:HH:mm:ss.fff}] {entry.Kind} #{entry.Sequence}"</span><span class="p">);</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
 </code></pre></div>
 <p>The returned list merges both collections and sorts them by <code>StartedAt</code> (wall-clock). When two entries share the same <code>StartedAt</code>, <code>ChatCompletion</code> entries sort before <code>ToolCall</code> entries (a chat completion is what triggers a tool call, not the reverse); further ties resolve by <code>Sequence</code> within kind. Each <code>DiagnosticsTimelineEntry</code> carries the original <code>ChatCompletionDiagnostics</code> or <code>ToolCallDiagnostics</code> reference in the property matching its <code>Kind</code>, so no information is lost in the merge — the ordered view is purely additive.</p>
@@ -4202,13 +4209,13 @@ opt-in through the dedicated <code>NexusLabs.Foundry.Evaluation.Reporting</code>
 <p>This evaluator requires a <code>ChatConfiguration</code> with a judge <code>IChatClient</code>. When no judge is configured, the evaluator returns an empty result. When <code>AgentRunDiagnosticsContext</code> is provided, tool-call counts and success status are included in the judge prompt for richer assessment.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">taskCompletion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TaskCompletionEvaluator</span><span class="p">()</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="p">.</span><span class="n">EvaluateAsync</span><span class="p">(</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="k">new</span><span class="w"> </span><span class="n">ChatMessage</span><span class="p">(</span><span class="n">ChatRole</span><span class="p">.</span><span class="n">User</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Plan a 7-day trip to Japan&quot;</span><span class="p">)],</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">        </span><span class="n">messages</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="k">new</span><span class="w"> </span><span class="n">ChatMessage</span><span class="p">(</span><span class="n">ChatRole</span><span class="p">.</span><span class="n">User</span><span class="p">,</span><span class="w"> </span><span class="s">"Plan a 7-day trip to Japan"</span><span class="p">)],</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">        </span><span class="n">modelResponse</span><span class="p">:</span><span class="w"> </span><span class="n">agentResponse</span><span class="p">,</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">        </span><span class="n">chatConfiguration</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChatConfiguration</span><span class="p">(</span><span class="n">judgeChatClient</span><span class="p">),</span>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">        </span><span class="n">additionalContext</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="k">new</span><span class="w"> </span><span class="n">AgentRunDiagnosticsContext</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">)]);</span>
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="kt">var</span><span class="w"> </span><span class="n">completed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">BooleanMetric</span><span class="p">)</span><span class="n">taskCompletion</span><span class="p">.</span><span class="n">Metrics</span><span class="p">[</span><span class="s">&quot;Task Completed&quot;</span><span class="p">]).</span><span class="n">Value</span><span class="p">;</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">NumericMetric</span><span class="p">)</span><span class="n">taskCompletion</span><span class="p">.</span><span class="n">Metrics</span><span class="p">[</span><span class="s">&quot;Task Completion Score&quot;</span><span class="p">]).</span><span class="n">Value</span><span class="p">;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="kt">var</span><span class="w"> </span><span class="n">completed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">BooleanMetric</span><span class="p">)</span><span class="n">taskCompletion</span><span class="p">.</span><span class="n">Metrics</span><span class="p">[</span><span class="s">"Task Completed"</span><span class="p">]).</span><span class="n">Value</span><span class="p">;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="kt">var</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">NumericMetric</span><span class="p">)</span><span class="n">taskCompletion</span><span class="p">.</span><span class="n">Metrics</span><span class="p">[</span><span class="s">"Task Completion Score"</span><span class="p">]).</span><span class="n">Value</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="toolcalltrajectoryevaluator">ToolCallTrajectoryEvaluator<a class="headerlink" href="#toolcalltrajectoryevaluator" title="Permanent link">&para;</a></h3>
 <p>Reports on the sequence of tool calls across a run.</p>
@@ -4302,7 +4309,7 @@ an inconclusive decision rather than hiding malformed evidence.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.MicrosoftAgentFramework.Diagnostics</span><span class="p">;</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="kt">string</span><span class="w"> </span><span class="n">transcript</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diag</span><span class="p">.</span><span class="n">ToTranscriptMarkdown</span><span class="p">();</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">File</span><span class="p">.</span><span class="n">WriteAllText</span><span class="p">(</span><span class="s">&quot;run.md&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">transcript</span><span class="p">);</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">File</span><span class="p">.</span><span class="n">WriteAllText</span><span class="p">(</span><span class="s">"run.md"</span><span class="p">,</span><span class="w"> </span><span class="n">transcript</span><span class="p">);</span>
 </code></pre></div>
 <p>The output is byte-stable across locales — it uses <code>CultureInfo.InvariantCulture</code> for numeric formatting and <code>System.Text.Json</code> with <code>WriteIndented = true</code> for embedded tool arguments and results. Structure:</p>
 <ul>
@@ -4317,7 +4324,7 @@ an inconclusive decision rather than hiding malformed evidence.</p>
 <p>Evaluation suites and CI harnesses benefit from deterministic, repeatable chat responses: the first run against a real model captures the response; subsequent runs replay it without hitting the network. <code>EvaluationCaptureChatClient</code> is a transparent <code>IChatClient</code> decorator that implements this pattern.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">using</span><span class="w"> </span><span class="nn">NexusLabs.Foundry.Evaluation</span><span class="p">;</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="s">&quot;./cache/evaluation&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="s">"./cache/evaluation"</span><span class="p">);</span>
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
 <a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1">// First call: delegates to realChatClient and persists the response.</span>
 <a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1">// Second call with the same request: served from the store, real client untouched.</span>
@@ -4357,7 +4364,7 @@ an inconclusive decision rather than hiding malformed evidence.</p>
 <li>Custom stores — implement <code>IEvaluationCaptureStore</code> for Redis, blob storage, in-memory dictionaries, or any other backing.</li>
 </ul>
 <p>Use the fluent extension to wrap a client with a file store:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="s">&quot;./cache/evaluation&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="s">"./cache/evaluation"</span><span class="p">);</span>
 </code></pre></div>
 <p>Or inject any <code>IEvaluationCaptureStore</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">IChatClient</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realChatClient</span><span class="p">.</span><span class="n">WithEvaluationCapture</span><span class="p">(</span><span class="n">myStore</span><span class="p">);</span>

@@ -2697,42 +2697,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../local-runners/" class="md-nav__link">
+      <a href="../../../../github-hosted-runners/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local CI Runners
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../runner-image/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository-Owned Runner Image
+    GitHub-Hosted CI Runners
   
 
     
@@ -3167,7 +3139,7 @@
     
   
   
-    <span class="md-status md-status--Accepted"></span>
+    <span class="md-status md-status--Superseded"></span>
   
 
   
@@ -3423,6 +3395,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/adr-0017-standard-github-hosted-ci-runners/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-0017 Standard GitHub-Hosted CI Runners
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--Accepted"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3480,56 +3487,56 @@ the captured <a href="../../NexusLabs.Foundry.MicrosoftAgentFramework/">NexusLab
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.AllSucceededMetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorallsucceededmetricname-field">ToolCallTrajectoryEvaluator.AllSucceededMetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorallsucceededmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the boolean rollup indicating every tool call succeeded.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">AllSucceededMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;All Tool Calls Succeeded&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">AllSucceededMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"All Tool Calls Succeeded"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value">Field Value<a class="headerlink" href="#field-value" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.ConsecutiveSameToolMetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorconsecutivesametoolmetricname-field">ToolCallTrajectoryEvaluator.ConsecutiveSameToolMetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorconsecutivesametoolmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the count of consecutive tool calls with the same tool name.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ConsecutiveSameToolMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Consecutive Same-Tool Calls&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ConsecutiveSameToolMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Consecutive Same-Tool Calls"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_1">Field Value<a class="headerlink" href="#field-value_1" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.FailedMetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorfailedmetricname-field">ToolCallTrajectoryEvaluator.FailedMetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorfailedmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the failed tool-call count.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">FailedMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Tool Calls Failed&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">FailedMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Tool Calls Failed"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_2">Field Value<a class="headerlink" href="#field-value_2" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.LatencyP50MetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorlatencyp50metricname-field">ToolCallTrajectoryEvaluator.LatencyP50MetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorlatencyp50metricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the 50th percentile tool-call latency in milliseconds.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">LatencyP50MetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Tool Call Latency P50&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">LatencyP50MetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Tool Call Latency P50"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_3">Field Value<a class="headerlink" href="#field-value_3" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.LatencyP95MetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorlatencyp95metricname-field">ToolCallTrajectoryEvaluator.LatencyP95MetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorlatencyp95metricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the 95th percentile tool-call latency in milliseconds.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">LatencyP95MetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Tool Call Latency P95&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">LatencyP95MetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Tool Call Latency P95"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_4">Field Value<a class="headerlink" href="#field-value_4" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.PerToolFailureRateMetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorpertoolfailureratemetricname-field">ToolCallTrajectoryEvaluator.PerToolFailureRateMetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorpertoolfailureratemetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the JSON-formatted per-tool failure rate breakdown.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">PerToolFailureRateMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Per-Tool Failure Rate&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">PerToolFailureRateMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Per-Tool Failure Rate"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_5">Field Value<a class="headerlink" href="#field-value_5" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.SequenceGapsMetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatorsequencegapsmetricname-field">ToolCallTrajectoryEvaluator.SequenceGapsMetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatorsequencegapsmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the number of gaps in the recorded tool-call sequence.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">SequenceGapsMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Tool Call Sequence Gaps&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">SequenceGapsMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Tool Call Sequence Gaps"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_6">Field Value<a class="headerlink" href="#field-value_6" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
 <p><a name='NexusLabs.Foundry.Evaluation.ToolCallTrajectoryEvaluator.TotalMetricName'></a></p>
 <h2 id="toolcalltrajectoryevaluatortotalmetricname-field">ToolCallTrajectoryEvaluator.TotalMetricName Field<a class="headerlink" href="#toolcalltrajectoryevaluatortotalmetricname-field" title="Permanent link">&para;</a></h2>
 <p>Metric name for the total tool-call count.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TotalMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Tool Calls Total&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">public</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">TotalMetricName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Tool Calls Total"</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="field-value_7">Field Value<a class="headerlink" href="#field-value_7" title="Permanent link">&para;</a></h4>
 <p><a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" title="System.String">System.String</a></p>
