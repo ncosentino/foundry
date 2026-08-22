@@ -1,11 +1,11 @@
 ---
 title: "ADR-0009: Repository-owned CI runner image"
-status: "Accepted"
+status: "Superseded"
 date: "2026-07-29"
 authors: ["Nick Cosentino"]
 tags: ["architecture", "decision", "ci", "github-actions", "pitcrew", "containers", "supply-chain"]
 supersedes: ""
-superseded_by: ""
+superseded_by: "adr-0017-standard-github-hosted-ci-runners.md"
 ---
 
 ## Context and scope

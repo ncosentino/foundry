@@ -28,10 +28,9 @@ Needlr is an optional dependency-injection integration, not the Foundry core.
 - Work from evidence and state material assumptions and tradeoffs.
 - Record costly-to-reverse architecture decisions in `docs/adr/`; preserve
   accepted records and supersede them explicitly.
-- Never create or run automated CI/CD that invokes a live LLM.
-- Live LLM execution is allowed only through Copilot CLI on the `foundry-ci`
-  PitCrew runner, from a manual dispatch by `ncosentino`, after the user gives
-  explicit permission for that specific run.
+- Never create or run repository CI/CD that invokes a live LLM.
+- Live LLM execution remains outside GitHub Actions and requires explicit
+  permission for that specific local run.
 - Never call a live model API or SDK directly from a repository workflow.
 - Never commit credentials, tokens, live identifiers, or private environment
   values.
@@ -41,6 +40,7 @@ Needlr is an optional dependency-injection integration, not the Foundry core.
 ## Delivery
 
 - Use feature branches and pull requests to the default branch.
-- Run targeted checks while iterating. Complete, hosted, platform, and broad
-  evaluation evidence belongs to configured CI and PitCrew capacity.
+- Run targeted checks while iterating. Complete hosted and platform evidence
+  belongs to standard GitHub-hosted CI; live-model evaluation remains outside
+  repository workflows.
 - Before delivery, run `.github/skills/review-changes`.

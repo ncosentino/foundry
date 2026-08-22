@@ -155,8 +155,7 @@ discovery, lifecycle, and deterministic wiring.
 
 - `AGENTS.md` is the always-loaded project entrypoint.
 - `mkdocs.yml` is the complete public documentation navigation map.
-- `scripts/test-runner-image.ps1` and
-  `scripts/test-runner-profile.ps1` demonstrate Foundry's executable contract
-  and negative-fixture pattern.
-- ADR-0009 records the CI runner trust boundaries that scoped CI guidance must
-  preserve.
+- `scripts/test-ci-contract.ps1` demonstrates Foundry's executable contract and
+  negative-fixture pattern.
+- ADR-0017 records the current CI runner trust boundaries that scoped CI
+  guidance must preserve.

@@ -165,9 +165,10 @@ python -m pip install --requirement requirements-docs.txt
 python -m mkdocs build --strict
 ```
 
-Trusted Linux CI jobs support isolated
-[PitCrew](https://github.com/ncosentino/pitcrew) runners. See
-[Local CI Runners](docs/local-runners.md) for routing and fork-safety details.
+CI uses standard GitHub-hosted runners, which GitHub documents as free and
+unlimited for public repositories. Linux jobs use `ubuntu-24.04`;
+`windows-latest` is the corresponding supported public-repository label for
+Windows jobs. See [GitHub-Hosted CI Runners](docs/github-hosted-runners.md).
 
 ## About
 

@@ -113,8 +113,7 @@ nav:
       - Stable: api/stable/index.md
   - Operations:
       - Agent Guidance: agent-guidance.md
-      - Local CI Runners: local-runners.md
-      - Repository-Owned Runner Image: runner-image.md
+      - GitHub-Hosted CI Runners: github-hosted-runners.md
       - Documentation Publishing: publishing.md
       - Releasing: releasing.md
   - Architecture Decisions:
@@ -134,6 +133,7 @@ nav:
       - ADR-0014 Phase-Local Harness Background Delegation: adr/adr-0014-phase-local-harness-background-delegation.md
       - ADR-0015 Upstream-First Checkpointed Workflow Runs: adr/adr-0015-upstream-first-checkpointed-workflow-runs.md
       - ADR-0016 Same-Run Checkpoint Restoration: adr/adr-0016-same-run-checkpoint-restoration.md
+      - ADR-0017 Standard GitHub-Hosted CI Runners: adr/adr-0017-standard-github-hosted-ci-runners.md
 
 plugins:
   - search

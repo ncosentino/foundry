@@ -167,15 +167,6 @@ $documentation = [PSCustomObject]@{
     )
 }
 
-$runnerProfiles = @(
-    $projectFiles |
-        Where-Object {
-            (Get-RelativePath $_.FullName) -like '.pitcrew/*.json'
-        } |
-        Sort-Object FullName |
-        ForEach-Object { Get-RelativePath $_.FullName }
-)
-
 $inventory = [PSCustomObject]@{
     projectRoot = $ProjectRoot
     dotnetSolutions = $dotnetSolutions
@@ -185,7 +176,6 @@ $inventory = [PSCustomObject]@{
     workflows = $workflows
     contractScripts = $contractScripts
     documentation = $documentation
-    runnerProfiles = $runnerProfiles
 }
 
 if ($Json) {

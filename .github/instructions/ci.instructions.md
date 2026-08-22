@@ -1,27 +1,22 @@
 ---
-applyTo: ".github/workflows/*.{yml,yaml},.github/actions/**/*.{yml,yaml},.github/runner-images/**/*,.pitcrew/runner-profile.json,global.json,.github/dotnet/**/global.json,scripts/{test-runner-image,test-runner-profile,resolve-dotnet-sdk-contract}.ps1"
+applyTo: ".github/workflows/*.{yml,yaml},.github/actions/**/*.{yml,yaml},global.json,.github/dotnet/**/global.json,scripts/{test-ci-contract,resolve-dotnet-sdk-contract}.ps1"
 ---
 
 # CI, runner, and SDK trust boundaries
 
-- Automated triggers must never invoke a live LLM, directly or indirectly.
-- A live-LLM workflow must be manual-only, run exactly on the `foundry-ci`
-  PitCrew runner, require an explicit approval input, and reject every actor or
-  triggering actor other than `ncosentino`.
-- The only permitted live-LLM process in a workflow is GitHub Copilot CLI.
-  Direct model APIs, provider SDKs, and live evaluation applications are
-  prohibited even in manual workflows.
-- Agents must not dispatch a permitted workflow without explicit user approval
-  for that specific run.
-- Untrusted fork pull requests must use GitHub-hosted infrastructure before any
-  repository-variable runner override is considered.
-- Runner-image validation and publication remain GitHub-hosted; pull requests
-  must never receive the trusted publication path.
+- Repository workflows must never invoke or configure a live LLM, including
+  manual workflows, Copilot CLI, provider SDKs, and direct model APIs.
+- Use only literal standard GitHub-hosted runner labels accepted by
+  `scripts/test-ci-contract.ps1`. Linux jobs use `ubuntu-24.04`; Windows jobs
+  use `windows-latest`.
+- Standard GitHub-hosted runners, including `windows-latest`, are free and
+  unlimited for this public repository. Larger runners are always billed and
+  are prohibited unless a later accepted ADR changes this boundary.
+- Do not add self-hosted routing, custom runner images, runner groups, or
+  repository-variable runner overrides.
 - SDK contracts use exact versions with roll-forward disabled and prereleases
   rejected. Workflows consume them through the repository setup action.
 - Preserve required check names and release permissions already enforced by the
-  runner contract scripts.
-- Run the affected `scripts/test-runner-*.ps1 -SelfTest` contract after changing
-  its runner, workflow, image, profile, or SDK inputs.
-- Do not place repository source, credentials, registration data, or workload
-  output in runner images or profiles.
+  CI contract script.
+- Run `scripts/test-ci-contract.ps1 -SelfTest` after changing a workflow,
+  runner label, setup action, or SDK input.
