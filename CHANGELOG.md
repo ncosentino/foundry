@@ -79,11 +79,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   AOT compatible. See `docs/declarative-workflows.md`.
 - NativeAOT Harness profile with source-generated tools, no reflection fallback,
   and a published-and-executed native application in CI.
-- Repository-owned Foundry CI runner image source and trusted GHCR publication
-  workflow with exact .NET SDKs, NativeAOT prerequisites, GitHub-hosted pull
-  request validation, provenance, SBOM generation, and retained digest evidence.
-- Digest-pinned `foundry-ci` PitCrew profile and portable exact-SDK setup action
-  that skips downloads only when every required SDK is already installed.
+- Standard GitHub-hosted CI runner contract that pins Linux jobs to
+  `ubuntu-24.04`, accepts `windows-latest` for future Windows jobs, rejects
+  self-hosted and larger-runner routing, and preserves portable exact-SDK setup.
+
+### Changed
+
+- Removed the repository-owned runner image, self-hosted runner profile,
+  variable-based runner routing, and manual live-model workflow. Live Copilot
+  integration tests now require explicit local opt-in and refuse GitHub Actions.
 
 ### Fixed
 

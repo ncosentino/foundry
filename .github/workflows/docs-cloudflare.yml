@@ -1,5 +1,8 @@
 name: Documentation Deployment
 
+# Standard GitHub-hosted runners, including windows-latest, are free and
+# unlimited for this public repository; larger runners are intentionally excluded.
+
 on:
   workflow_run:
     workflows:
@@ -24,7 +27,7 @@ jobs:
           github.event.workflow_run.event != 'pull_request'
         )
       )
-    runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    runs-on: ubuntu-24.04
     environment:
       name: documentation
       url: https://www.devleader.ca/projects/foundry/

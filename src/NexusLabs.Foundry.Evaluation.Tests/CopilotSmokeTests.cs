@@ -7,8 +7,8 @@ namespace NexusLabs.Foundry.Evaluation.Tests;
 
 /// <summary>
 /// Smoke test that exercises a real <see cref="RelevanceEvaluator"/> run against a
-/// live Copilot-backed judge. Runs only in GitHub Actions when explicit live-test
-/// approval identifies the runner as PitCrew.
+/// live Copilot-backed judge. Runs only outside GitHub Actions with explicit
+/// local live-test approval.
 /// </summary>
 [Trait("Category", "Integration")]
 public sealed class CopilotSmokeTests
@@ -18,7 +18,7 @@ public sealed class CopilotSmokeTests
     [Fact]
     public async Task RelevanceEvaluator_WithCopilotJudge_ProducesMetric()
     {
-        LiveCopilotTestGuard.RequirePitCrewOptIn();
+        LiveCopilotTestGuard.RequireLocalOptIn();
         using var judge = new CopilotChatClient(new CopilotChatClientOptions
         {
             DefaultModel = "gpt-4.1",

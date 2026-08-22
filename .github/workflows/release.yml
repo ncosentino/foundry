@@ -1,5 +1,8 @@
 name: Release
 
+# Standard GitHub-hosted runners, including windows-latest, are free and
+# unlimited for this public repository; larger runners are intentionally excluded.
+
 on:
   push:
     tags:
@@ -13,7 +16,7 @@ env:
 
 jobs:
   publish:
-    runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    runs-on: ubuntu-24.04
     environment: release
     permissions:
       contents: write
@@ -196,7 +199,7 @@ jobs:
 
   documentation:
     needs: publish
-    runs-on: ${{ vars.CI_RUNNER || fromJSON('["self-hosted","linux","x64","general-purpose"]') }}
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 

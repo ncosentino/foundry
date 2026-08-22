@@ -68,7 +68,7 @@ pwsh scripts/guidance/Get-ValidationInventory.ps1
 ```
 
 Inspect the returned solution, projects, MSBuild and SDK contracts,
-documentation inputs, workflows, runner profile, and contract scripts before
+documentation inputs, workflows, runner policy, and contract scripts before
 choosing commands.
 
 - Run only the smallest offline command covering the changed behavior.
@@ -76,8 +76,8 @@ choosing commands.
 - Do not invent a command the repository does not declare or document.
 - Do not run complete suites, NativeAOT matrices, live-provider tests,
   credentialed checks, or broad evaluation workloads on a workstation.
-- Pull-request CI and declared PitCrew routing own complete, hosted, platform,
-  and expensive evidence.
+- Pull-request CI on standard GitHub-hosted runners owns complete hosted,
+  platform, and expensive deterministic evidence.
 - For a pull request, inspect `gh pr checks` instead of reproducing hosted work.
 
 Record every command/result and required check that was not run.

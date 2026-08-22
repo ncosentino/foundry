@@ -4,8 +4,7 @@ namespace NexusLabs.Foundry.Copilot.Tests;
 
 /// <summary>
 /// Integration tests that call the real Copilot API.
-/// Runs only in GitHub Actions when explicit live-test approval identifies the
-/// runner as PitCrew.
+/// Runs only outside GitHub Actions with explicit local live-test approval.
 /// </summary>
 [Trait("Category", "Integration")]
 public class IntegrationSmokeTests
@@ -13,7 +12,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task GetResponseAsync_ReturnsTextResponse()
     {
-        LiveCopilotTestGuard.RequirePitCrewOptIn();
+        LiveCopilotTestGuard.RequireLocalOptIn();
         using var client = CreateClient();
 
         var response = await client.GetResponseAsync(
@@ -37,7 +36,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task GetStreamingResponseAsync_YieldsUpdates()
     {
-        LiveCopilotTestGuard.RequirePitCrewOptIn();
+        LiveCopilotTestGuard.RequireLocalOptIn();
         using var client = CreateClient();
 
         var updates = new List<ChatResponseUpdate>();
@@ -62,7 +61,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task GetResponseAsync_NoExtraToolsLeaked()
     {
-        LiveCopilotTestGuard.RequirePitCrewOptIn();
+        LiveCopilotTestGuard.RequireLocalOptIn();
         using var client = CreateClient();
 
         var response = await client.GetResponseAsync(
@@ -83,7 +82,7 @@ public class IntegrationSmokeTests
     [Fact]
     public async Task WebSearchFunction_ReturnsResults()
     {
-        LiveCopilotTestGuard.RequirePitCrewOptIn();
+        LiveCopilotTestGuard.RequireLocalOptIn();
         var options = new CopilotChatClientOptions();
         var oauthProvider = new GitHubOAuthTokenProvider(options);
         using var mcpClient = new CopilotMcpToolClient(oauthProvider, options);

@@ -34,6 +34,21 @@ function Get-RepositoryFile {
     return $path
 }
 
+function Get-WorkflowFiles {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Root
+    )
+
+    $workflowRoot = Join-Path $Root '.github' 'workflows'
+    Assert-Contract (Test-Path -LiteralPath $workflowRoot -PathType Container) 'Workflow directory does not exist.'
+    return @(
+        Get-ChildItem -LiteralPath $workflowRoot -File |
+            Where-Object Extension -in @('.yml', '.yaml') |
+            Sort-Object Name
+    )
+}
+
 function Invoke-SdkResolver {
     param(
         [Parameter(Mandatory = $true)]
@@ -54,70 +69,79 @@ function Invoke-SdkResolver {
     return $json | ConvertFrom-Json
 }
 
-function Test-RunnerProfileContract {
+function Test-CiContract {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Root
     )
 
-    $profilePath = Get-RepositoryFile $Root '.pitcrew/runner-profile.json'
+    $Root = [IO.Path]::GetFullPath((Resolve-Path $Root).Path)
     $actionPath = Get-RepositoryFile $Root '.github/actions/setup-dotnet/action.yml'
     $resolverPath = Get-RepositoryFile $Root 'scripts/resolve-dotnet-sdk-contract.ps1'
     $ciPath = Get-RepositoryFile $Root '.github/workflows/ci.yml'
     $docsPath = Get-RepositoryFile $Root '.github/workflows/docs.yml'
     $releasePath = Get-RepositoryFile $Root '.github/workflows/release.yml'
-    $runnerImagePath = Get-RepositoryFile $Root '.github/workflows/runner-image.yml'
+    $workflowFiles = Get-WorkflowFiles $Root
+    $allowedRunnerLabels = @('ubuntu-24.04', 'windows-latest')
 
-    $profile = Get-Content -LiteralPath $profilePath -Raw | ConvertFrom-Json
-    Assert-Contract (
-        $profile.'$schema' -eq 'https://raw.githubusercontent.com/ncosentino/pitcrew/87162e6fad6a961b9bc2f026639f2fa7df0795ba/runner-profile.schema.json'
-    ) 'The PitCrew schema must be pinned to the reviewed commit.'
-    Assert-Contract ($profile.schemaVersion -eq 1) 'The PitCrew profile schema version must be 1.'
-    Assert-Contract ($profile.name -eq 'foundry-ci') "The profile name must be 'foundry-ci'."
-    Assert-Contract (
-        $profile.image -eq 'ghcr.io/ncosentino/foundry-runner@sha256:b03be39181c9cce46a680037262e4e2bf4eaeee1539d669a81543980f5f6d8e8'
-    ) 'The profile must pin the anonymously verified public image digest.'
-    Assert-Contract (
-        $profile.image -match '^ghcr\.io/ncosentino/foundry-runner@sha256:[0-9a-f]{64}$'
-    ) 'The profile image must be an immutable GHCR digest without a mutable tag.'
-    Assert-Contract ($profile.replicas -eq 2) 'The profile must preserve two configured workers.'
-    Assert-Contract ($profile.pullImage -eq $true) 'The profile must pull the approved image.'
-    Assert-Contract ($profile.disableDefaultLabels -eq $true) 'The profile must disable default GitHub labels.'
-    Assert-Contract (
-        @($profile.labels).Count -eq 1 -and $profile.labels[0] -eq 'foundry'
-    ) "The profile must declare only the explicit capability label 'foundry'."
-    foreach ($forbiddenLabel in @('self-hosted', 'linux', 'x64', 'general-purpose')) {
+    foreach ($workflow in $workflowFiles) {
+        $relative = [IO.Path]::GetRelativePath($Root, $workflow.FullName).Replace('\', '/')
+        $content = Get-Content -LiteralPath $workflow.FullName -Raw -Encoding UTF8
+        foreach ($forbiddenToken in @('self-hosted', 'foundry-ci', 'CI_RUNNER')) {
+            Assert-Contract (
+                $content -notmatch [regex]::Escape($forbiddenToken)
+            ) "Workflow '$relative' contains prohibited runner routing token '$forbiddenToken'."
+        }
         Assert-Contract (
-            @($profile.labels) -notcontains $forbiddenLabel
-        ) "The profile must not expose broad label '$forbiddenLabel'."
+            $content.Contains('including windows-latest, are free and') -and
+            $content.Contains('unlimited for this public repository')
+        ) "Workflow '$relative' must explain that windows-latest is free and unlimited for this public repository."
+
+        $runnerMatches = @(
+            [regex]::Matches(
+                $content,
+                '(?m)^\s+runs-on:\s*(?<label>[^\r\n#]+?)\s*$')
+        )
+        Assert-Contract ($runnerMatches.Count -gt 0) "Workflow '$relative' has no runner labels."
+        foreach ($runnerMatch in $runnerMatches) {
+            $label = $runnerMatch.Groups['label'].Value.Trim()
+            Assert-Contract (
+                $allowedRunnerLabels -contains $label
+            ) "Workflow '$relative' uses unsupported runner label '$label'."
+        }
     }
-    foreach ($command in @(
-        'test -x /actions-runner/bin/Runner.Listener',
-        "dotnet --list-sdks | grep -F '9.0.316'",
-        "dotnet --list-sdks | grep -F '10.0.302'",
-        'clang --version',
-        'pwsh --version',
-        'git --version',
-        'gh --version'
+
+    foreach ($legacyPath in @(
+        '.pitcrew',
+        '.github/runner-images'
     )) {
-        Assert-Contract (
-            @($profile.verificationCommands) -contains $command
-        ) "Profile verification command '$command' is missing."
+        $path = Join-Path $Root ($legacyPath -replace '/', [IO.Path]::DirectorySeparatorChar)
+        $legacyFiles = @(
+            Get-ChildItem -LiteralPath $path -File -Recurse -ErrorAction SilentlyContinue
+        )
+        Assert-Contract ($legacyFiles.Count -eq 0) "Legacy runner support remains under '$legacyPath'."
+    }
+    foreach ($legacyWorkflow in @(
+        '.github/workflows/runner-image.yml',
+        '.github/workflows/autonomous-phase-evaluation.yml'
+    )) {
+        $path = Join-Path $Root ($legacyWorkflow -replace '/', [IO.Path]::DirectorySeparatorChar)
+        Assert-Contract (-not (Test-Path -LiteralPath $path)) "Legacy workflow '$legacyWorkflow' still exists."
     }
 
-    $action = Get-Content -LiteralPath $actionPath -Raw
+    $action = Get-Content -LiteralPath $actionPath -Raw -Encoding UTF8
     Assert-Contract ($action -match 'global-json-files:') 'The setup action must accept exact SDK contract files.'
     Assert-Contract ($action -match 'scripts/resolve-dotnet-sdk-contract\.ps1') 'The setup action must use the validated SDK resolver.'
     Assert-Contract (
         $action -match 'actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9'
-    ) 'The hosted fallback must pin actions/setup-dotnet to the reviewed commit.'
+    ) 'The setup action must pin actions/setup-dotnet to the reviewed commit.'
     Assert-Contract (
         $action -match 'DOTNET_INSTALL_DIR:\s*\$\{\{\s*runner\.temp\s*\}\}/foundry-dotnet'
     ) 'Missing SDKs must install into one RUNNER_TEMP-backed directory.'
     Assert-Contract ($action -match 'setup-performed') 'The setup action must report whether installation occurred.'
     Assert-Contract ($action -match 'required-versions') 'The setup action must report the exact required SDK set.'
 
-    $resolverText = Get-Content -LiteralPath $resolverPath -Raw
+    $resolverText = Get-Content -LiteralPath $resolverPath -Raw -Encoding UTF8
     foreach ($requiredCheck in @(
         "rollForward -eq 'disable'",
         'allowPrerelease -eq $false',
@@ -126,18 +150,25 @@ function Test-RunnerProfileContract {
     )) {
         Assert-Contract ($resolverText.Contains($requiredCheck)) "SDK resolver check '$requiredCheck' is missing."
     }
-    $allPresent = Invoke-SdkResolver $Root @('global.json', '.github/dotnet/sdk-9/global.json') @('9.0.316', '10.0.302')
+
+    $allPresent = Invoke-SdkResolver $Root @(
+        'global.json',
+        '.github/dotnet/sdk-9/global.json'
+    ) @('9.0.316', '10.0.302')
     Assert-Contract ($allPresent.setupRequired -eq $false) 'Setup must be skipped only when every exact SDK is installed.'
     Assert-Contract (
         @($allPresent.requiredVersions) -join ',' -eq '10.0.302,9.0.316'
     ) 'The resolver did not preserve the complete requested SDK set.'
-    $oneMissing = Invoke-SdkResolver $Root @('global.json', '.github/dotnet/sdk-9/global.json') @('10.0.302')
+    $oneMissing = Invoke-SdkResolver $Root @(
+        'global.json',
+        '.github/dotnet/sdk-9/global.json'
+    ) @('10.0.302')
     Assert-Contract ($oneMissing.setupRequired -eq $true) 'One missing SDK must require installation of the complete set.'
 
     $workflows = [ordered]@{
-        'ci.yml' = Get-Content -LiteralPath $ciPath -Raw
-        'docs.yml' = Get-Content -LiteralPath $docsPath -Raw
-        'release.yml' = Get-Content -LiteralPath $releasePath -Raw
+        'ci.yml' = Get-Content -LiteralPath $ciPath -Raw -Encoding UTF8
+        'docs.yml' = Get-Content -LiteralPath $docsPath -Raw -Encoding UTF8
+        'release.yml' = Get-Content -LiteralPath $releasePath -Raw -Encoding UTF8
     }
     foreach ($entry in $workflows.GetEnumerator()) {
         Assert-Contract ($entry.Value -notmatch 'actions/setup-dotnet@') "Workflow '$($entry.Key)' still calls actions/setup-dotnet directly."
@@ -157,9 +188,6 @@ function Test-RunnerProfileContract {
         $workflows['release.yml'].Contains('.github/dotnet/sdk-9/global.json')
     ) 'Release documentation must request both exact SDK contracts.'
 
-    $forkRoute = "github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER"
-    Assert-Contract ($workflows['ci.yml'].Contains($forkRoute)) 'CI fork routing must remain before CI_RUNNER.'
-    Assert-Contract ($workflows['docs.yml'].Contains($forkRoute)) 'Documentation fork routing must remain before CI_RUNNER.'
     foreach ($jobName in @('build-test-pack:', 'aot:', 'aot-harness:')) {
         Assert-Contract ($workflows['ci.yml'].Contains($jobName)) "Required CI job '$jobName' changed."
     }
@@ -168,14 +196,9 @@ function Test-RunnerProfileContract {
     Assert-Contract ($workflows['release.yml'] -match 'packages:\s*write') 'Release package permission changed.'
     Assert-Contract ($workflows['release.yml'] -match 'id-token:\s*write') 'Release identity permission changed.'
     Assert-Contract ($workflows['release.yml'].Contains('NuGet/login@v1')) 'NuGet trusted publishing changed.'
-
-    $runnerImageWorkflow = Get-Content -LiteralPath $runnerImagePath -Raw
-    Assert-Contract (
-        $runnerImageWorkflow -match 'runs-on:\s*ubuntu-24\.04'
-    ) 'Runner image publication must remain GitHub-hosted.'
 }
 
-function Copy-ContractFixture {
+function Copy-CiFixture {
     param(
         [Parameter(Mandatory = $true)]
         [string]$SourceRoot,
@@ -185,15 +208,14 @@ function Copy-ContractFixture {
     )
 
     foreach ($relativePath in @(
-        '.pitcrew/runner-profile.json',
         '.github/actions/setup-dotnet/action.yml',
-        'global.json',
         '.github/dotnet/sdk-9/global.json',
-        'scripts/resolve-dotnet-sdk-contract.ps1',
         '.github/workflows/ci.yml',
+        '.github/workflows/docs-cloudflare.yml',
         '.github/workflows/docs.yml',
         '.github/workflows/release.yml',
-        '.github/workflows/runner-image.yml'
+        'global.json',
+        'scripts/resolve-dotnet-sdk-contract.ps1'
     )) {
         $source = Join-Path $SourceRoot ($relativePath -replace '/', [IO.Path]::DirectorySeparatorChar)
         $destination = Join-Path $DestinationRoot ($relativePath -replace '/', [IO.Path]::DirectorySeparatorChar)
@@ -208,21 +230,56 @@ function Assert-MutationRejected {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [string]$ExpectedMessage,
+
+        [Parameter(Mandatory = $true)]
         [scriptblock]$Mutation
     )
 
-    $fixture = Join-Path ([IO.Path]::GetTempPath()) "foundry-profile-contract-$([Guid]::NewGuid().ToString('N'))"
+    $fixture = Join-Path ([IO.Path]::GetTempPath()) "foundry-hosted-ci-contract-$([Guid]::NewGuid().ToString('N'))"
     try {
-        Copy-ContractFixture $RepositoryRoot $fixture
+        Copy-CiFixture $RepositoryRoot $fixture
         & $Mutation $fixture
-        $rejected = $false
+        $message = ''
         try {
-            Test-RunnerProfileContract $fixture
+            Test-CiContract $fixture
         }
         catch {
-            $rejected = $true
+            $message = $_.Exception.Message
         }
-        Assert-Contract $rejected "Mutation '$Name' was not rejected."
+        Assert-Contract (
+            $message.Contains($ExpectedMessage, [StringComparison]::OrdinalIgnoreCase)
+        ) "Mutation '$Name' failed for an unexpected reason: '$message'."
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture) {
+            Remove-Item -LiteralPath $fixture -Recurse -Force
+        }
+    }
+}
+
+function Assert-WindowsRunnerAccepted {
+    $fixture = Join-Path ([IO.Path]::GetTempPath()) "foundry-windows-runner-$([Guid]::NewGuid().ToString('N'))"
+    try {
+        Copy-CiFixture $RepositoryRoot $fixture
+        $path = Join-Path $fixture '.github\workflows\windows.yml'
+        @'
+name: Windows Contract Fixture
+
+# Standard GitHub-hosted runners, including windows-latest, are free and
+# unlimited for this public repository; larger runners are intentionally excluded.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - shell: pwsh
+        run: Write-Host 'windows-latest is an allowed standard public runner.'
+'@ | Set-Content -LiteralPath $path -NoNewline
+        Test-CiContract $fixture
     }
     finally {
         if (Test-Path -LiteralPath $fixture) {
@@ -269,44 +326,70 @@ function Assert-ResolverRejected {
     }
 }
 
-Test-RunnerProfileContract ([IO.Path]::GetFullPath($RepositoryRoot))
+Test-CiContract ([IO.Path]::GetFullPath($RepositoryRoot))
 
 if ($SelfTest) {
-    Assert-MutationRejected 'mutable profile image' {
-        param($root)
-        $path = Join-Path $root '.pitcrew/runner-profile.json'
-        (Get-Content -LiteralPath $path -Raw) `
-            -replace '@sha256:[0-9a-f]{64}', ':latest' |
-            Set-Content -LiteralPath $path -NoNewline
-    }
-    Assert-MutationRejected 'broad profile label' {
-        param($root)
-        $path = Join-Path $root '.pitcrew/runner-profile.json'
-        (Get-Content -LiteralPath $path -Raw) `
-            -replace '"foundry"', '"self-hosted"' |
-            Set-Content -LiteralPath $path -NoNewline
-    }
-    Assert-MutationRejected 'mutable setup-dotnet action' {
-        param($root)
-        $path = Join-Path $root '.github/actions/setup-dotnet/action.yml'
-        (Get-Content -LiteralPath $path -Raw) `
-            -replace 'actions/setup-dotnet@[0-9a-f]{40}', 'actions/setup-dotnet@v4' |
-            Set-Content -LiteralPath $path -NoNewline
-    }
-    Assert-MutationRejected 'floating workflow SDK' {
-        param($root)
-        $path = Join-Path $root '.github/workflows/ci.yml'
-        Add-Content -LiteralPath $path "`nenv:`n  DOTNET_VERSION: 10.0.x"
-    }
-    Assert-MutationRejected 'fork routing after CI_RUNNER' {
-        param($root)
-        $path = Join-Path $root '.github/workflows/docs.yml'
-        $content = Get-Content -LiteralPath $path -Raw
-        $original = "github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.CI_RUNNER"
-        $mutated = "vars.CI_RUNNER || github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork && 'ubuntu-latest'"
-        $content.Replace($original, $mutated) |
-            Set-Content -LiteralPath $path -NoNewline
-    }
+    Assert-MutationRejected `
+        -Name 'self-hosted runner' `
+        -ExpectedMessage "prohibited runner routing token 'self-hosted'" `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\ci.yml'
+            (Get-Content -LiteralPath $path -Raw -Encoding UTF8) `
+                -replace 'runs-on: ubuntu-24\.04', 'runs-on: [self-hosted, linux, x64]' |
+                Set-Content -LiteralPath $path -NoNewline
+        }
+    Assert-MutationRejected `
+        -Name 'larger runner' `
+        -ExpectedMessage "unsupported runner label 'ubuntu-24.04-16core'" `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\docs.yml'
+            (Get-Content -LiteralPath $path -Raw -Encoding UTF8) `
+                -replace 'runs-on: ubuntu-24\.04', 'runs-on: ubuntu-24.04-16core' |
+                Set-Content -LiteralPath $path -NoNewline
+        }
+    Assert-MutationRejected `
+        -Name 'repository runner override' `
+        -ExpectedMessage "prohibited runner routing token 'CI_RUNNER'" `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\release.yml'
+            (Get-Content -LiteralPath $path -Raw -Encoding UTF8) `
+                -replace 'runs-on: ubuntu-24\.04', 'runs-on: ${{ vars.CI_RUNNER || ''ubuntu-24.04'' }}' |
+                Set-Content -LiteralPath $path -NoNewline
+        }
+    Assert-MutationRejected `
+        -Name 'missing public runner notice' `
+        -ExpectedMessage 'must explain that windows-latest is free and unlimited' `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\docs-cloudflare.yml'
+            (Get-Content -LiteralPath $path -Raw -Encoding UTF8) `
+                -replace 'including windows-latest, are free and', 'use standard hosted capacity and' |
+                Set-Content -LiteralPath $path -NoNewline
+        }
+    Assert-MutationRejected `
+        -Name 'mutable setup-dotnet action' `
+        -ExpectedMessage 'must pin actions/setup-dotnet' `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\actions\setup-dotnet\action.yml'
+            (Get-Content -LiteralPath $path -Raw -Encoding UTF8) `
+                -replace 'actions/setup-dotnet@[0-9a-f]{40}', 'actions/setup-dotnet@v4' |
+                Set-Content -LiteralPath $path -NoNewline
+        }
+    Assert-MutationRejected `
+        -Name 'floating workflow SDK' `
+        -ExpectedMessage 'still contains a floating SDK range' `
+        -Mutation {
+            param($root)
+            $path = Join-Path $root '.github\workflows\ci.yml'
+            Add-Content -LiteralPath $path "`nenv:`n  DOTNET_VERSION: 10.0.x"
+        }
+
+    Assert-WindowsRunnerAccepted
+
     $missingRejected = $false
     try {
         Invoke-SdkResolver $RepositoryRoot @('missing-global.json') @('10.0.302') | Out-Null
@@ -322,4 +405,4 @@ if ($SelfTest) {
     Assert-ResolverRejected 'prerelease opt-in' '{"sdk":{"version":"10.0.302","rollForward":"disable","allowPrerelease":true}}'
 }
 
-Write-Host 'Foundry runner profile and SDK setup contract passed.'
+Write-Host 'Foundry GitHub-hosted CI and SDK contract passed.'
