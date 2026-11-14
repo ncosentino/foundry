@@ -16,3 +16,6 @@ applyTo: "README.md,CHANGELOG.md,mkdocs.yml,docs/**/*,requirements-docs.txt,defa
   internal services, credentials, or private operational context.
 - Preserve the strict MkDocs build and documentation-script tests declared by
   the documentation workflow.
+- Descriptions derive from page identity and introductory prose. Maintain
+  ordinary XML API summaries and guide introductions, not bespoke descriptions
+  or generated API Markdown. Preserve explicit nonempty overrides.

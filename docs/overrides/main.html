@@ -13,12 +13,12 @@
   {% if page %}
   <meta property="og:type" content="website" />
   <meta property="og:title" content="{{ documentation_title | e }} – {{ config.site_name | e }}" />
-  <meta property="og:description" content="{{ page.meta.description | default(config.site_description) }}" />
+  <meta property="og:description" content="{{ page.meta.description | default(config.site_description) | e }}" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   <meta property="og:url" content="{{ page.canonical_url }}" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="{{ documentation_title | e }} – {{ config.site_name | e }}" />
-  <meta name="twitter:description" content="{{ page.meta.description | default(config.site_description) }}" />
+  <meta name="twitter:description" content="{{ page.meta.description | default(config.site_description) | e }}" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   {% endif %}
   {% if page and page.ancestors %}

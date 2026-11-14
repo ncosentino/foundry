@@ -57,11 +57,24 @@ jobs:
           echo "Baseline rendered metadata assertions failed as expected."
       - name: Validate rendered titles and title-only refresh
         run: python scripts/test-docs-titles.py
+      - name: Demonstrate generic descriptions fail rendered regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          if DOCS_DESCRIPTIONS_BASELINE=1 python scripts/test-docs-titles.py -k descriptions > baseline-description-check.log 2>&1; then
+            echo "Baseline unexpectedly passed rendered description regression."
+            exit 1
+          fi
+          grep -q 'AssertionError:' baseline-description-check.log
+          echo "Baseline descriptions failed as expected."
       - name: Validate existing documentation scripts
         run: python -m unittest discover -s scripts/tests -p "test_*.py"
       - name: Validate CI contract
         shell: pwsh
         run: ./scripts/test-ci-contract.ps1 -SelfTest
+      - name: Validate instruction context and guidance contract
+        shell: pwsh
+        run: ./scripts/guidance/Test-Guidance.ps1 -SelfTest
       - name: Checkout complete published snapshot for read-only validation
         uses: actions/checkout@v6
         with:
