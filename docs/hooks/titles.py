@@ -1,4 +1,4 @@
-"""Give generated API pages distinct metadata without changing navigation."""
+"""Give API and overview pages distinct metadata without changing navigation."""
 
 from pathlib import PurePosixPath
 
@@ -25,9 +25,17 @@ def api_title(path: PurePosixPath) -> str | None:
     return title
 
 
+def documentation_title(path: PurePosixPath) -> str | None:
+    overviews = {
+        'guides/index.md': 'Guides Overview',
+        'analyzers/index.md': 'Analyzers Overview',
+    }
+    return overviews.get(str(path)) or api_title(path)
+
+
 def on_page_context(context, page, config, nav):
-    context['api_documentation_title'] = api_title(PurePosixPath(page.file.src_uri))
+    context['qualified_documentation_title'] = documentation_title(PurePosixPath(page.file.src_uri))
     context['documentation_title'] = (
-        context['api_documentation_title'] or page.title
+        context['qualified_documentation_title'] or page.title
     )
     return context

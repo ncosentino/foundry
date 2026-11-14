@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       refresh_published_titles:
-        description: Refresh stable/archive title metadata (main only)
+        description: Refresh stable/archive and overview title metadata (main only)
         type: boolean
         default: false
 
@@ -124,7 +124,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- api/stable ':(glob)api/v*/**/*.html'
+          git add -- api/stable ':(glob)api/v*/**/*.html' api/index.html guides/index.html analyzers/index.html
           if git diff --cached --quiet; then
             echo "Published titles already match; no commit required."
           else

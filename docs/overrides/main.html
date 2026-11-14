@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block htmltitle %}
-  {% if page and api_documentation_title %}
+  {% if page and qualified_documentation_title %}
   <title>{{ documentation_title | e }} - {{ config.site_name | e }}</title>
   {% else %}
   {{ super() }}

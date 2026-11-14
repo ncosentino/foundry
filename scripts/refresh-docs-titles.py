@@ -1,4 +1,4 @@
-"""Refresh only title metadata in previously published API documentation."""
+"""Refresh only title metadata in published API documentation and overviews."""
 
 import argparse
 from hashlib import sha256
@@ -11,7 +11,7 @@ import sys
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'docs' / 'hooks'))
-from titles import api_title
+from titles import documentation_title
 
 
 ATTRIBUTE = re.compile(
@@ -112,9 +112,9 @@ def without_title_values(html: str, parser: TitleSpans) -> str:
 
 
 def refresh_html(html: str, source: PurePosixPath) -> str:
-    metadata = api_title(source)
+    metadata = documentation_title(source)
     if metadata is None:
-        raise ValueError(f'Not an API documentation source: {source}')
+        raise ValueError(f'Not a maintained documentation title source: {source}')
     parser = TitleSpans(html)
     parser.read_head(html)
     start, end, _ = parser.spans['title'][0]
@@ -155,12 +155,22 @@ def refresh_site(site: Path, *, apply=False) -> dict:
         raise ValueError('Expected a published site containing api/stable.')
     report = {'scanned': 0, 'changed': 0, 'versions': {}, 'pages': []}
     versions = sorted([api / 'stable', *api.glob('v[0-9]*')])
-    for version in versions:
+    slices = [
+        (version.name, version, sorted(version.rglob('*')))
+        for version in versions
+    ]
+    overviews = [
+        site / 'api' / 'index.html',
+        site / 'guides' / 'index.html',
+        site / 'analyzers' / 'index.html',
+    ]
+    slices.append(('overviews', site, [path for path in overviews if path.exists()]))
+    for label, version, paths in slices:
         if version.is_symlink() or not version.is_dir():
             raise ValueError(f'Expected a real API version directory: {version.name}')
         counts = {'scanned': 0, 'changed': 0}
-        for path in sorted(version.rglob('*')):
-            if path.is_symlink():
+        for path in paths:
+            if path.is_symlink() or path.parent.is_symlink():
                 raise ValueError(f'Symlink in published API: {path.relative_to(site)}')
             if not path.is_file() or path.suffix != '.html':
                 continue
@@ -176,13 +186,13 @@ def refresh_site(site: Path, *, apply=False) -> dict:
                 counts['changed'] += 1
                 report['pages'].append({
                     'path': str(relative),
-                    'title': api_title(source),
+                    'title': documentation_title(source),
                     'before_sha256': sha256(before).hexdigest(),
                     'after_sha256': sha256(after).hexdigest(),
                 })
-        if counts['scanned'] == 0:
+        if counts['scanned'] == 0 and label != 'overviews':
             raise ValueError(f'No HTML pages found for {version.name}.')
-        report['versions'][version.name] = counts
+        report['versions'][label] = counts
         report['scanned'] += counts['scanned']
         report['changed'] += counts['changed']
 

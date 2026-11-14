@@ -41,15 +41,17 @@ API browser, Open Graph, and Twitter titles include the project/namespace,
 type where applicable, and development, stable, or archived version context.
 The build hook changes only template metadata; page headings, navigation,
 canonical URLs, descriptions, and API content remain unchanged.
+Guide and analyzer overview pages also receive distinct metadata titles.
 
 The `Documentation titles` workflow validates rendered fixtures, demonstrates
 that generic baseline metadata fails those assertions, and previews every
-stable/archive HTML page in the complete current `gh-pages` snapshot without
+stable/archive HTML page and the API, guide, and analyzer overviews in the
+complete current `gh-pages` snapshot without
 writing it. The preview receipt includes page hashes and per-version counts.
 
 After merging a title correction, explicitly dispatch `Documentation titles`
 from `main` with `refresh_published_titles=true` to update existing stable and
-archived metadata without rebuilding historical APIs. Every page is validated
+archived and overview metadata without rebuilding historical APIs. Every page is validated
 before any write. Only the browser, Open Graph, and Twitter title values change;
 a second preview must report zero changes. Attempt-specific receipts are retained
 for one day. A normal non-force push rejects concurrent changes to `gh-pages`.

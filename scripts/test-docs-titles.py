@@ -52,6 +52,8 @@ class RenderedTitlesTests(unittest.TestCase):
         pages = {
             'index.md': ('Foundry', 'Foundry'),
             'getting-started.md': ('Getting Started', 'Getting Started'),
+            'guides/index.md': ('Guides', 'Guides Overview'),
+            'analyzers/index.md': ('Foundry analyzers', 'Analyzers Overview'),
             'api/index.md': ('API Reference', 'API Reference'),
             'api/dev/index.md': ('API Reference', 'API Reference (Development)'),
             'api/dev/NexusLabs.Foundry/index.md': (
@@ -103,7 +105,9 @@ class RenderedTitlesTests(unittest.TestCase):
                 docs_dir=str(docs), site_dir=str(workspace / 'site'),
                 site_url='https://example.test/foundry/',
                 nav=[
-                    {'Unchanged navigation label': source} if source == 'api/index.md' else source
+                    {'Unchanged navigation label': source}
+                    if source in ('api/index.md', 'guides/index.md', 'analyzers/index.md')
+                    else source
                     for source in pages
                 ],
                 extra_javascript=[], **overrides,
@@ -194,6 +198,27 @@ class RefreshTitlesTests(unittest.TestCase):
             'Index – Foundry', 'NexusLabs.Foundry.Factory&amp;T (Stable API) – Foundry',
         )
         self.assertEqual(actual, expected)
+
+    def test_published_overview_titles_are_refreshed_without_body_changes(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            site = Path(directory)
+            paths = {
+                'api/stable/index.html': 'API Reference (Stable)',
+                'api/index.html': 'API Reference',
+                'guides/index.html': 'Guides Overview',
+                'analyzers/index.html': 'Analyzers Overview',
+            }
+            for source in paths:
+                path = site / source
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(self.HTML.encode())
+            result = refresh.refresh_site(site, apply=True)
+            self.assertEqual(result['changed'], 4)
+            for source, title in paths.items():
+                expected = self.HTML.replace('Index - Foundry', f'{title} - Foundry')
+                expected = expected.replace('Index – Foundry', f'{title} – Foundry')
+                self.assertEqual((site / source).read_bytes(), expected.encode())
+            self.assertEqual(refresh.refresh_site(site)['changed'], 0)
 
     def test_symlinks_cannot_redirect_writes(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
