@@ -234,6 +234,28 @@ class RefreshTitlesTests(unittest.TestCase):
 
 
 class PublisherContractTests(unittest.TestCase):
+    def test_title_previews_do_not_trigger_deployment(self):
+        workflows = {}
+        for name in ('docs-titles.yml', 'docs-cloudflare.yml'):
+            workflows[name] = yaml.load(
+                (ROOT / '.github/workflows' / name).read_text(),
+                Loader=yaml.BaseLoader,
+            )
+        self.assertNotIn(
+            'Documentation titles',
+            workflows['docs-cloudflare.yml']['on']['workflow_run']['workflows'],
+        )
+        maintenance = workflows['docs-titles.yml']
+        self.assertEqual(
+            maintenance['on']['workflow_dispatch']['inputs']
+            ['refresh_published_titles']['default'],
+            'false',
+        )
+        self.assertIn(
+            'inputs.refresh_published_titles',
+            maintenance['jobs']['refresh-published-titles']['if'],
+        )
+
     def test_publishers_share_non_cancelling_lock(self):
         owners = (
             ('docs.yml', 'deploy'), ('release.yml', 'documentation'),

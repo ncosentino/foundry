@@ -58,7 +58,9 @@ for one day. A normal non-force push rejects concurrent changes to `gh-pages`.
 
 Development publication, release publication, title maintenance, and Cloudflare
 deployment share a non-cancelling publication lock. Maintenance updates the merge
-store; the existing `Documentation Deployment` workflow remains the sole
+store; explicitly dispatch `Documentation Deployment` after successful maintenance
+to update the canonical mirror. Read-only title previews never deploy.
+The existing deployment workflow remains the sole
 Cloudflare publisher and retains its deployment enablement gate and newest
 20-version mirror limit. No package or release publication is involved.
 

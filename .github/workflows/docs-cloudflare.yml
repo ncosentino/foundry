@@ -8,7 +8,6 @@ on:
     workflows:
       - Documentation
       - Release
-      - Documentation titles
     types:
       - completed
   workflow_dispatch:
@@ -20,20 +19,12 @@ concurrency:
 jobs:
   deploy:
     if: >-
-      github.ref == 'refs/heads/main' &&
       vars.DOCS_DEPLOY_ENABLED == 'true' &&
       (
         github.event_name == 'workflow_dispatch' ||
         (
           github.event.workflow_run.conclusion == 'success' &&
-          github.event.workflow_run.event != 'pull_request' &&
-          (
-            github.event.workflow_run.name != 'Documentation titles' ||
-            (
-              github.event.workflow_run.event == 'workflow_dispatch' &&
-              github.event.workflow_run.head_branch == 'main'
-            )
-          )
+          github.event.workflow_run.event != 'pull_request'
         )
       )
     runs-on: ubuntu-24.04
