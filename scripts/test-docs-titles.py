@@ -1,8 +1,9 @@
-"""Rendered and published title-only documentation regression checks."""
+"""Rendered metadata and published title-only documentation regression checks."""
 
 from html import escape
 from html.parser import HTMLParser
 import importlib.util
+import json
 import os
 from pathlib import Path, PurePosixPath
 import tempfile
@@ -129,6 +130,80 @@ class RenderedTitlesTests(unittest.TestCase):
                     self.assertEqual(parsed.metas['twitter:title'], parsed.metas['og:title'])
                     self.assertEqual(parsed.heading.rstrip('¶'), heading)
                     self.assertIn('Unchanged navigation label', html)
+
+
+class RenderedDescriptionsTests(unittest.TestCase):
+    def test_descriptions_follow_source_prose_and_render_safely(self):
+        pages = {
+            'index.md': ('# Foundry\n', 'Build reliable, observable, and testable AI agent systems in .NET'),
+            'guides/intro.md': (
+                '# Registration\n\n> Ignore this note.\n\n![Diagram](https://example.test/image.png)\n\n'
+                'Use `Factory<T>` with **services** &amp; "plugins".\n\nIgnore the second paragraph.\n',
+                'Registration. Use Factory<T> with services & "plugins".',
+            ),
+            'guides/override.md': (
+                "---\ndescription: 'Explicit \"quoted\" <T> & safe summary.'\n---\n# Override\n\nIgnore this prose.\n",
+                'Explicit "quoted" <T> & safe summary.',
+            ),
+            'guides/blank.md': (
+                "---\ndescription: '   '\n---\n# Blank\n\nRegister services.\n",
+                'Blank. Register services.',
+            ),
+            'guides/missing.md': ('# Missing\n\n```csharp\nRun();\n```\n', 'Foundry: Missing.'),
+            'guides/index.md': ('# Guides\n\nExplore agent workflows.\n', 'Guides Overview. Explore agent workflows.'),
+            'api/dev/NexusLabs.Foundry/Plugin.md': (
+                '# Plugin\n\n#### NexusLabs.Foundry\n\n### NexusLabs.Foundry\n\n'
+                '## Plugin Interface\n\nRegisters services.\n\n```csharp\ninterface Plugin {}\n```\n',
+                'NexusLabs.Foundry.Plugin (Development API). Registers services.',
+            ),
+            'api/dev/NexusLabs.Foundry.Other/Plugin.md': (
+                '# Plugin\n\n## Plugin Interface\n\nRegisters services.\n',
+                'NexusLabs.Foundry.Other.Plugin (Development API). Registers services.',
+            ),
+            'api/dev/NexusLabs.Foundry/Factory_T_.md': (
+                '# Factory<T>\n\n## Factory Class\n\n```csharp\nclass Factory<T> {}\n```\n\n'
+                'Inheritance Object.\n\n## Remarks\n\nNot a type summary.\n',
+                'Foundry: NexusLabs.Foundry.Factory_T_ (Development API).',
+            ),
+            'getting-started.md': (
+                '# Getting Started\n\nUse `</script>` &amp; "plugins".\n\n## Configure\n\nRegister services.\n',
+                'Getting Started. Use </script> & "plugins".',
+            ),
+        }
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            workspace = Path(directory)
+            docs = workspace / 'docs'
+            for source, (markdown, _) in pages.items():
+                path = docs / source
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(markdown, encoding='utf-8')
+            overrides = {}
+            if os.environ.get('DOCS_DESCRIPTIONS_BASELINE') == '1':
+                config_hooks = yaml.safe_load((ROOT / 'mkdocs.yml').read_text())['hooks']
+                overrides['hooks'] = [
+                    str(ROOT / hook) for hook in config_hooks if not hook.endswith('/metadata.py')
+                ]
+            config = load_config(
+                config_file=str(ROOT / 'mkdocs.yml'),
+                docs_dir=str(docs), site_dir=str(workspace / 'site'),
+                nav=list(pages), extra_javascript=[], **overrides,
+            )
+            build(config)
+            for source, (markdown, expected) in pages.items():
+                with self.subTest(source=source):
+                    url = PurePosixPath(source).with_suffix('')
+                    if url.name == 'index':
+                        url = url.parent
+                    html = (workspace / 'site' / str(url) / 'index.html').read_text(encoding='utf-8')
+                    parsed = Metadata()
+                    parsed.feed(html)
+                    for tag in ('description', 'og:description', 'twitter:description'):
+                        self.assertEqual(parsed.metas[tag], expected)
+                    self.assertEqual((docs / source).read_text(encoding='utf-8'), markdown)
+                    if source == 'getting-started.md':
+                        start = html.index('<script type="application/ld+json">', html.index('</head>'))
+                        payload = html[start:].split('>', 1)[1].split('</script>', 1)[0]
+                        self.assertEqual(json.loads(payload)['description'], expected)
 
 
 class RefreshTitlesTests(unittest.TestCase):
