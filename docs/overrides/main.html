@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 
+{% block htmltitle %}
+  {% if page and qualified_documentation_title %}
+  <title>{{ documentation_title | e }} - {{ config.site_name | e }}</title>
+  {% else %}
+  {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block extrahead %}
   {{ super() }}
   {% if page %}
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="{{ page.title }} – {{ config.site_name }}" />
+  <meta property="og:title" content="{{ documentation_title | e }} – {{ config.site_name | e }}" />
   <meta property="og:description" content="{{ page.meta.description | default(config.site_description) }}" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   <meta property="og:url" content="{{ page.canonical_url }}" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="{{ page.title }} – {{ config.site_name }}" />
+  <meta name="twitter:title" content="{{ documentation_title | e }} – {{ config.site_name | e }}" />
   <meta name="twitter:description" content="{{ page.meta.description | default(config.site_description) }}" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   {% endif %}

@@ -13,8 +13,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: foundry-docs-production
-  cancel-in-progress: true
+  group: foundry-documentation-publication
+  cancel-in-progress: false
 
 jobs:
   deploy:
