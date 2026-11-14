@@ -99,6 +99,9 @@ jobs:
           path: site
 
   deploy:
+    concurrency:
+      group: foundry-documentation-publication
+      cancel-in-progress: false
     needs: docs
     if: >-
       github.ref == 'refs/heads/main' &&

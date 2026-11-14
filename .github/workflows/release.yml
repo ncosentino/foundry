@@ -198,6 +198,9 @@ jobs:
             artifacts/packages/*.snupkg
 
   documentation:
+    concurrency:
+      group: foundry-documentation-publication
+      cancel-in-progress: false
     needs: publish
     runs-on: ubuntu-24.04
     permissions:

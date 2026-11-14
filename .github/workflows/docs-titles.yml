@@ -1,0 +1,137 @@
+name: Documentation titles
+
+# Standard GitHub-hosted runners, including windows-latest, are free and
+# unlimited for this public repository; larger runners are intentionally excluded.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/hooks/**'
+      - 'docs/overrides/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
+      - 'scripts/*docs-titles.py'
+      - '.github/workflows/docs*.yml'
+      - '.github/workflows/release.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/hooks/**'
+      - 'docs/overrides/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
+      - 'scripts/*docs-titles.py'
+      - '.github/workflows/docs*.yml'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+    inputs:
+      refresh_published_titles:
+        description: Refresh stable/archive title metadata (main only)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  titles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Install documentation dependencies
+        run: python -m pip install -r requirements-docs.txt
+      - name: Demonstrate duplicated baseline titles fail rendered regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          if DOCS_TITLES_BASELINE=1 python scripts/test-docs-titles.py -k rendered > baseline-title-check.log 2>&1; then
+            echo "Baseline unexpectedly passed rendered title regression."
+            exit 1
+          fi
+          grep -q 'AssertionError:' baseline-title-check.log
+          echo "Baseline rendered metadata assertions failed as expected."
+      - name: Validate rendered titles and title-only refresh
+        run: python scripts/test-docs-titles.py
+      - name: Validate existing documentation scripts
+        run: python -m unittest discover -s scripts/tests -p "test_*.py"
+      - name: Validate CI contract
+        shell: pwsh
+        run: ./scripts/test-ci-contract.ps1 -SelfTest
+      - name: Checkout complete published snapshot for read-only validation
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: published-preview
+          persist-credentials: false
+      - name: Preview complete published title refresh
+        run: python scripts/refresh-docs-titles.py published-preview --report published-title-preview.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: published-title-preview-${{ github.run_attempt }}
+          path: published-title-preview.json
+          retention-days: 1
+          if-no-files-found: error
+
+  refresh-published-titles:
+    needs: titles
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.refresh_published_titles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    concurrency:
+      group: foundry-documentation-publication
+      cancel-in-progress: false
+    steps:
+      - name: Checkout title refresh implementation
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: source
+          persist-credentials: false
+      - name: Checkout complete current published site
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: published
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Validate and apply only title metadata
+        run: python source/scripts/refresh-docs-titles.py published --apply --report published-title-refresh.json
+      - name: Verify repeat application is a no-op
+        run: |
+          python source/scripts/refresh-docs-titles.py published --report published-title-repeat.json
+          python -c "import json; assert json.load(open('published-title-repeat.json'))['changed'] == 0"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: published-title-refresh-${{ github.run_attempt }}
+          path: |
+            published-title-refresh.json
+            published-title-repeat.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Publish title metadata without overwriting newer commits
+        working-directory: published
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- api/stable ':(glob)api/v*/**/*.html'
+          if git diff --cached --quiet; then
+            echo "Published titles already match; no commit required."
+          else
+            status=$?
+            test "$status" -eq 1
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git -c commit.gpgsign=false commit -m "docs: refresh published API title metadata"
+            git push origin HEAD:gh-pages
+          fi
