@@ -151,18 +151,26 @@ function Test-CiContract {
         Assert-Contract ($resolverText.Contains($requiredCheck)) "SDK resolver check '$requiredCheck' is missing."
     }
 
+    $primarySdk = (
+        Get-Content -LiteralPath (Get-RepositoryFile $Root 'global.json') -Raw |
+            ConvertFrom-Json
+    ).sdk.version
+    $legacySdk = (
+        Get-Content -LiteralPath (Get-RepositoryFile $Root '.github/dotnet/sdk-9/global.json') -Raw |
+            ConvertFrom-Json
+    ).sdk.version
     $allPresent = Invoke-SdkResolver $Root @(
         'global.json',
         '.github/dotnet/sdk-9/global.json'
-    ) @('9.0.316', '10.0.302')
+    ) @($legacySdk, $primarySdk)
     Assert-Contract ($allPresent.setupRequired -eq $false) 'Setup must be skipped only when every exact SDK is installed.'
     Assert-Contract (
-        @($allPresent.requiredVersions) -join ',' -eq '10.0.302,9.0.316'
+        @($allPresent.requiredVersions) -join ',' -eq "$primarySdk,$legacySdk"
     ) 'The resolver did not preserve the complete requested SDK set.'
     $oneMissing = Invoke-SdkResolver $Root @(
         'global.json',
         '.github/dotnet/sdk-9/global.json'
-    ) @('10.0.302')
+    ) @($primarySdk)
     Assert-Contract ($oneMissing.setupRequired -eq $true) 'One missing SDK must require installation of the complete set.'
 
     $workflows = [ordered]@{
