@@ -57,6 +57,12 @@ class RenderedTitlesTests(unittest.TestCase):
             'api/dev/NexusLabs.Foundry/index.md': (
                 'Index', 'NexusLabs.Foundry API Reference (Development)',
             ),
+            'api/stable/NexusLabs.Foundry/index.md': (
+                'Index', 'NexusLabs.Foundry API Reference (Stable)',
+            ),
+            'api/v0.1.0-alpha.1/NexusLabs.Foundry/index.md': (
+                'Index', 'NexusLabs.Foundry API Reference (v0.1.0-alpha.1)',
+            ),
             'api/stable/NexusLabs.Foundry/Plugin.md': (
                 'Plugin', 'NexusLabs.Foundry.Plugin (Stable API)',
             ),
@@ -169,9 +175,25 @@ class RefreshTitlesTests(unittest.TestCase):
         for html in (
             self.HTML.replace('<title>Index - Foundry</title>', ''),
             self.HTML.replace('</head>', '<meta property="og:title" content="duplicate"></head>'),
+            self.HTML.replace('content="Index – Foundry"', 'content=Index'),
         ):
             with self.subTest(html=html), self.assertRaises(ValueError):
                 refresh.refresh_html(html, PurePosixPath('api/stable/index.md'))
+
+    def test_escaped_values_preserve_quotes_and_nested_attribute_text(self):
+        original = self.HTML.replace(
+            'property="og:title"',
+            'data-note=\'content="not a title"\' property="og:title"',
+        ).replace('content="Index – Foundry"', "content='Index – Foundry'")
+        actual = refresh.refresh_html(
+            original, PurePosixPath('api/stable/NexusLabs.Foundry/Factory&T.md'),
+        )
+        expected = original.replace(
+            'Index - Foundry', 'NexusLabs.Foundry.Factory&amp;T (Stable API) - Foundry',
+        ).replace(
+            'Index – Foundry', 'NexusLabs.Foundry.Factory&amp;T (Stable API) – Foundry',
+        )
+        self.assertEqual(actual, expected)
 
     def test_symlinks_cannot_redirect_writes(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:

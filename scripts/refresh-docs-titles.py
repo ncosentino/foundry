@@ -94,6 +94,8 @@ class TitleSpans(HTMLParser):
         for name, spans in self.spans.items():
             if len(spans) != 1:
                 raise ValueError(f'Expected exactly one head {name}.')
+            if spans[0][2]:
+                raise ValueError(f'Expected a quoted head {name} value.')
 
 
 def without_title_values(html: str, parser: TitleSpans) -> str:
@@ -129,7 +131,7 @@ def refresh_html(html: str, source: PurePosixPath) -> str:
     for name, spans in parser.spans.items():
         start, end, unquoted = spans[0]
         value = escape(titles[name], quote=True)
-        replacements.append((start, end, f'"{value}"' if unquoted else value))
+        replacements.append((start, end, value))
     original = html
     for start, end, value in sorted(replacements, reverse=True):
         html = html[:start] + value + html[end:]
