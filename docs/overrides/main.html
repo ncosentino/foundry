@@ -13,12 +13,12 @@
   {% if page %}
   <meta property="og:type" content="website" />
   <meta property="og:title" content="{{ documentation_title | e }} – {{ config.site_name | e }}" />
-  <meta property="og:description" content="{{ page.meta.description | default(config.site_description) }}" />
+  <meta property="og:description" content="{{ page.meta.description | default(config.site_description) | e }}" />
   <meta property="og:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   <meta property="og:url" content="{{ page.canonical_url }}" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="{{ documentation_title | e }} – {{ config.site_name | e }}" />
-  <meta name="twitter:description" content="{{ page.meta.description | default(config.site_description) }}" />
+  <meta name="twitter:description" content="{{ page.meta.description | default(config.site_description) | e }}" />
   <meta name="twitter:image" content="https://www.devleader.ca/projects/foundry/assets/foundry.webp" />
   {% endif %}
   {% if page and page.ancestors %}
@@ -30,20 +30,20 @@
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "{{ config.site_name }}",
-        "item": "{{ config.site_url }}"
+        "name": {{ config.site_name | tojson }},
+        "item": {{ config.site_url | tojson }}
       }{% for ancestor in page.ancestors %},
       {
         "@type": "ListItem",
         "position": {{ loop.index + 1 }},
-        "name": "{{ ancestor.title }}",
-        "item": "{{ config.site_url }}"
+        "name": {{ ancestor.title | tojson }},
+        "item": {{ config.site_url | tojson }}
       }{% endfor %},
       {
         "@type": "ListItem",
         "position": {{ page.ancestors | length + 2 }},
-        "name": "{{ page.title }}",
-        "item": "{{ page.canonical_url }}"
+        "name": {{ page.title | tojson }},
+        "item": {{ page.canonical_url | tojson }}
       }
     ]
   }
@@ -54,11 +54,11 @@
   {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
-    "name": "{{ config.site_name }}",
-    "description": "{{ config.site_description }}",
-    "url": "{{ config.site_url }}",
-    "codeRepository": "{{ config.repo_url }}",
-    "license": "{{ config.repo_url }}/blob/main/LICENSE",
+    "name": {{ config.site_name | tojson }},
+    "description": {{ config.site_description | tojson }},
+    "url": {{ config.site_url | tojson }},
+    "codeRepository": {{ config.repo_url | tojson }},
+    "license": {{ (config.repo_url ~ "/blob/main/LICENSE") | tojson }},
     "author": {
       "@type": "Person",
       "name": "Nick Cosentino",

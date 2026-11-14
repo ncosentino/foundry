@@ -39,9 +39,28 @@ release builds from publishing partial or stale trees.
 
 API browser, Open Graph, and Twitter titles include the project/namespace,
 type where applicable, and development, stable, or archived version context.
-The build hook changes only template metadata; page headings, navigation,
-canonical URLs, descriptions, and API content remain unchanged.
+The title hook changes only template metadata; page headings, navigation,
+canonical URLs, and API content remain unchanged.
 Guide and analyzer overview pages also receive distinct metadata titles.
+
+## Automatic documentation descriptions
+
+The metadata hook preserves explicit nonempty descriptions. Otherwise it uses
+the qualified API identity and XML-backed introduction, or the guide title and
+first prose paragraph. Notes, code, navigation, tables, and member details are
+not introductions. Missing prose produces an identity-only fallback; the home
+page retains its existing override or configured project description.
+
+Maintain ordinary XML API summaries and guide introductions rather than writing
+bespoke metadata. Generated summaries are shortened at word boundaries. Source
+metadata stays plain text, with escaping applied only when rendering HTML and
+social tags; structured data uses safe JSON serialization.
+
+This policy applies to newly built pages. Existing stable and archived output
+is not backfilled. The title-only maintenance script continues to leave
+descriptions and all content untouched.
+
+## Published title refresh
 
 The `Documentation titles` workflow validates rendered fixtures, demonstrates
 that generic baseline metadata fails those assertions, and previews every

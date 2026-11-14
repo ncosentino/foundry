@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import tempfile
+from types import SimpleNamespace
 import unittest
 
 from mkdocs.commands.build import build
@@ -20,6 +21,8 @@ spec = importlib.util.spec_from_file_location(
 )
 refresh = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(refresh)
+import titles
+import schema
 
 
 class Metadata(HTMLParser):
@@ -181,7 +184,7 @@ class RenderedDescriptionsTests(unittest.TestCase):
             if os.environ.get('DOCS_DESCRIPTIONS_BASELINE') == '1':
                 config_hooks = yaml.safe_load((ROOT / 'mkdocs.yml').read_text())['hooks']
                 overrides['hooks'] = [
-                    str(ROOT / hook) for hook in config_hooks if not hook.endswith('/metadata.py')
+                    str(ROOT / hook) for hook in config_hooks if not hook.endswith('/titles.py')
                 ]
             config = load_config(
                 config_file=str(ROOT / 'mkdocs.yml'),
@@ -204,6 +207,67 @@ class RenderedDescriptionsTests(unittest.TestCase):
                         start = html.index('<script type="application/ld+json">', html.index('</head>'))
                         payload = html[start:].split('>', 1)[1].split('</script>', 1)[0]
                         self.assertEqual(json.loads(payload)['description'], expected)
+
+
+class DescriptionPolicyTests(unittest.TestCase):
+    def page(self, description=None, homepage=False):
+        return SimpleNamespace(
+            file=SimpleNamespace(src_uri='guide.md'), title='Guide',
+            meta={} if description is None else {'description': description},
+            is_homepage=homepage,
+        )
+
+    def test_invalid_descriptions_fail_with_source_identity(self):
+        for value in (42, ['summary'], {'summary': 'text'}):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, 'guide.md: description must be a string'):
+                    titles.on_page_content('<p>Introduction.</p>', self.page(value), None, None)
+
+    def test_description_rendering_preserves_plain_metadata_and_content(self):
+        page = self.page()
+        config = SimpleNamespace(site_name='Foundry', site_description='Project summary')
+        content = '<p>Use <code>Factory&lt;T&gt;</code> &amp; "plugins".</p>'
+        self.assertEqual(titles.on_page_content(content, page, config, None), content)
+        expected = 'Guide. Use Factory<T> & "plugins".'
+        self.assertEqual(page.meta['description'], expected)
+        context = titles.on_page_context({'page': page}, page, config, None)
+        self.assertEqual(page.meta['description'], expected)
+        self.assertIsNot(context['page'], page)
+        parsed = Metadata()
+        parsed.feed(f'<meta name="description" content="{context["page"].meta["description"]}">')
+        self.assertEqual(parsed.metas['description'], expected)
+
+    def test_homepage_explicit_override_and_config_precedence(self):
+        config = SimpleNamespace(site_name='Foundry', site_description='Project summary')
+        for authored, expected in (('Home override', 'Home override'), ('  ', 'Project summary')):
+            page = self.page(authored, homepage=True)
+            titles.on_page_content('<p>Introduction.</p>', page, config, None)
+            self.assertEqual(page.meta['description'], expected)
+
+    def test_long_introductions_are_shortened_at_word_boundaries(self):
+        description = titles.page_description(
+            '<p>' + 'Register services and manage application lifetimes. ' * 15 + '</p>',
+            PurePosixPath('guide.md'), 'Guide', 'Foundry',
+        )
+        self.assertLessEqual(len(description), 240)
+        self.assertTrue(description.endswith('...'))
+        self.assertRegex(description[:-3], r'(Register|services|and|manage|application|lifetimes\.)$')
+
+    def test_admonitions_and_member_sections_are_not_type_summaries(self):
+        for content, api, expected in (
+            ('<div class="admonition note"><p>Ignore this.</p></div><p>Introduction.</p>', False, 'Introduction.'),
+            ('<h2>Type</h2><h3>Members</h3><p>Member detail.</p>', True, ''),
+            ('<h2>Type</h2><table><tr><td>Member</td></tr></table><p>Member detail.</p>', True, ''),
+        ):
+            parser = titles.IntroductionParser(api=api)
+            parser.feed(content)
+            self.assertEqual(parser.introduction, expected)
+
+    def test_schema_serialization_cannot_terminate_script(self):
+        expected = {'description': 'Use </script> & "plugins".'}
+        rendered = schema._schema_script(expected)
+        self.assertEqual(rendered.count('</script>'), 1)
+        self.assertEqual(json.loads(rendered.split('\n', 1)[1].rsplit('\n', 2)[0]), expected)
 
 
 class RefreshTitlesTests(unittest.TestCase):
