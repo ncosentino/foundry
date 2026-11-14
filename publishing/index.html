@@ -28,10 +28,14 @@
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
+  
+  
       
         <title>Documentation Publishing - Foundry</title>
       
     
+  
+
     
       <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
@@ -2832,6 +2836,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#documentation-title-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation title maintenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#safe-by-default-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3624,6 +3639,30 @@ trimmed from the Cloudflare deployment.</p>
 latest merged branch, trims old archives, and deploys that complete snapshot to
 Cloudflare. This latest-snapshot deployment prevents concurrent main and
 release builds from publishing partial or stale trees.</p>
+<h2 id="documentation-title-maintenance">Documentation title maintenance<a class="headerlink" href="#documentation-title-maintenance" title="Permanent link">&para;</a></h2>
+<p>API browser, Open Graph, and Twitter titles include the project/namespace,
+type where applicable, and development, stable, or archived version context.
+The build hook changes only template metadata; page headings, navigation,
+canonical URLs, descriptions, and API content remain unchanged.
+Guide and analyzer overview pages also receive distinct metadata titles.</p>
+<p>The <code>Documentation titles</code> workflow validates rendered fixtures, demonstrates
+that generic baseline metadata fails those assertions, and previews every
+stable/archive HTML page and the API, guide, and analyzer overviews in the
+complete current <code>gh-pages</code> snapshot without
+writing it. The preview receipt includes page hashes and per-version counts.</p>
+<p>After merging a title correction, explicitly dispatch <code>Documentation titles</code>
+from <code>main</code> with <code>refresh_published_titles=true</code> to update existing stable and
+archived and overview metadata without rebuilding historical APIs. Every page is validated
+before any write. Only the browser, Open Graph, and Twitter title values change;
+a second preview must report zero changes. Attempt-specific receipts are retained
+for one day. A normal non-force push rejects concurrent changes to <code>gh-pages</code>.</p>
+<p>Development publication, release publication, title maintenance, and Cloudflare
+deployment share a non-cancelling publication lock. Maintenance updates the merge
+store; explicitly dispatch <code>Documentation Deployment</code> after successful maintenance
+to update the canonical mirror. Read-only title previews never deploy.
+The existing deployment workflow remains the sole
+Cloudflare publisher and retains its deployment enablement gate and newest
+20-version mirror limit. No package or release publication is involved.</p>
 <h2 id="safe-by-default-deployment">Safe-by-default deployment<a class="headerlink" href="#safe-by-default-deployment" title="Permanent link">&para;</a></h2>
 <p>The <code>Documentation</code> workflow always builds and uploads the generated site as a GitHub
 Actions artifact. Deployment remains disabled until the repository variable
