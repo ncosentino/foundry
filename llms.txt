@@ -19,10 +19,10 @@ Author: Nick Cosentino (https://www.devleader.ca).
 - [MAF Harness](https://www.devleader.ca/projects/foundry/maf-harness/) -- Choose and configure Foundry's Microsoft Agent Framework Harness paths, generated tools, progress, defaults, and AOT profile.
 - [Agent Functions](https://www.devleader.ca/projects/foundry/agent-functions/) -- Parameter optionality, default-value resolution, and DTO null-handling semantics for [AgentFunction]-decorated tools in Foundry's source-generated AIFunction wrappers.
 - [Iterative Agent Loop](https://www.devleader.ca/projects/foundry/iterative-agent-loop/) -- Run workspace-driven agent iterations with bounded conversation growth and choose between iterative, Harness bundle, and hybrid context strategies.
-- [Declarative Workflows](https://www.devleader.ca/projects/foundry/declarative-workflows/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Declarative Workflows](https://www.devleader.ca/projects/foundry/declarative-workflows/) -- Declarative Workflows. Foundry can run Microsoft Agent Framework declarative workflows — orchestration authored in YAML rather than code — against agents your application already owns.
 - [Checkpointed Workflows](https://www.devleader.ca/projects/foundry/checkpointed-workflows/) -- Resume Microsoft Agent Framework workflows from caller-owned checkpoints without adding a second Foundry persistence model.
 - [Fixed-Macro Autonomous Phases](https://www.devleader.ca/projects/foundry/autonomous-phase-pipeline/) -- Build fixed macro workflows whose Harness phases remain autonomous while deterministic artifact gates own correctness.
-- [Workspace](https://www.devleader.ca/projects/foundry/workspace/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Workspace](https://www.devleader.ca/projects/foundry/workspace/) -- Workspace. IWorkspace is Foundry's file-storage abstraction for AI agent tools. It models a logical, rooted key/value store of files — agents read and write paths through this interface without caring whether the backing store is...
 - [Progress Reporting](https://www.devleader.ca/projects/foundry/progress-reporting/) -- Track agent and workflow execution in real-time with Foundry's progress reporting system -- optional Needlr discovery, per-orchestration isolation, and ambient async context.
 - [Pipeline Metrics](https://www.devleader.ca/projects/foundry/pipeline-metrics/) -- Pipeline-shape OpenTelemetry metrics and distributed-tracing spans emitted automatically by SequentialPipelineRunner — per-pipeline outcome, per-stage duration / tokens / tool-failures, parent + child activity spans.
 - [GenAI Token Metrics](https://www.devleader.ca/projects/foundry/gen-ai-token-metrics/) -- Emit cache_read and reasoning measurements on the OpenTelemetry gen_ai.client.token.usage histogram so dashboards can answer "what's my prompt-cache hit ratio?" and "how many tokens went to reasoning vs final completion?" per LLM call.
@@ -32,9 +32,9 @@ Author: Nick Cosentino (https://www.devleader.ca).
 
 ## Evaluation
 
-- [Evaluation](https://www.devleader.ca/projects/foundry/evaluation/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [Experiment Runner](https://www.devleader.ca/projects/foundry/experiment-runner/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [Langfuse](https://www.devleader.ca/projects/foundry/langfuse/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Evaluation](https://www.devleader.ca/projects/foundry/evaluation/) -- Evaluation. Foundry's agent framework plugs directly into Microsoft.Extensions.AI.Evaluation without adapters or flattening.
+- [Experiment Runner](https://www.devleader.ca/projects/foundry/experiment-runner/) -- Experiment Runner. Run finite evaluation cases and repeated trials with bounded concurrency, delayed retries, per-trial provider scopes, run-level measurement, structured quality policies, and deterministic JSON—without coupling the...
+- [Langfuse](https://www.devleader.ca/projects/foundry/langfuse/) -- Langfuse. Send Foundry agent telemetry and Microsoft.Extensions.AI.Evaluation scores to Langfuse so agent runs and evals show up on the Langfuse dashboard — with a single call.
 
 ## Providers
 
@@ -46,42 +46,42 @@ Author: Nick Cosentino (https://www.devleader.ca).
 
 ## Analyzers
 
-- [Overview](https://www.devleader.ca/projects/foundry/analyzers/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF001](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF001/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF002](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF002/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF003](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF003/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF004](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF004/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF005](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF005/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF006](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF006/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF007](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF007/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF008](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF008/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF009](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF009/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF010](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF010/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF011](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF011/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF012](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF012/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF013](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF013/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF014](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF014/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF015](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF015/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF016](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF016/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF017](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF017/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF018](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF018/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF019](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF019/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF020](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF020/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF021](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF021/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF022](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF022/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF024](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF024/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF025](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF025/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF027](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF027/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF028](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF028/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF029](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF029/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF030](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF030/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF031](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF031/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF032](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF032/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [FDRYMAF033](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF033/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Overview](https://www.devleader.ca/projects/foundry/analyzers/) -- Analyzers Overview. NexusLabs.Foundry.MicrosoftAgentFramework.Analyzers validates agent and workflow declarations at compile time. Diagnostic IDs use the FDRYMAF prefix.
+- [FDRYMAF001](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF001/) -- FDRYMAF001. A type referenced in [AgentHandoffsTo(typeof(X))] is not decorated with [FoundryAgent].
+- [FDRYMAF002](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF002/) -- FDRYMAF002. A group chat named "X" has only one class decorated with [AgentGroupChatMember("X")] in the compilation.
+- [FDRYMAF003](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF003/) -- FDRYMAF003. A class bearing [AgentHandoffsTo] is not itself decorated with [FoundryAgent].
+- [FDRYMAF004](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF004/) -- FDRYMAF004. The [AgentHandoffsTo] declarations in the compilation form a cycle (e.g. A → B → A, or A → B → C → A).
+- [FDRYMAF005](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF005/) -- FDRYMAF005. An agent declares FunctionGroups = new[] { "xyz" } but no class in the compilation is decorated with [AgentFunctionGroup("xyz")].
+- [FDRYMAF006](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF006/) -- FDRYMAF006. Two or more agents in the same sequential pipeline share the same Order value in their [AgentSequenceMember] attribute.
+- [FDRYMAF007](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF007/) -- FDRYMAF007. The Order values declared for a sequential pipeline are non-consecutive (e.g. 1, 2, 4 — missing 3).
+- [FDRYMAF008](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF008/) -- FDRYMAF008. A class decorated with [FoundryAgent] does not appear in any handoff chain, group chat, or sequential pipeline.
+- [FDRYMAF009](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF009/) -- FDRYMAF009. A class bearing [WorkflowRunTerminationCondition] is not decorated with any topology attribute ([AgentHandoffsTo], [AgentGroupChatMember], or [AgentSequenceMember]).
+- [FDRYMAF010](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF010/) -- FDRYMAF010. The type referenced in [AgentTerminationCondition(typeof(X))] or [WorkflowRunTerminationCondition(typeof(X))] does not implement IWorkflowTerminationCondition.
+- [FDRYMAF011](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF011/) -- FDRYMAF011. A class decorated with [AgentGroupChatMember] also declares [WorkflowRunTerminationCondition].
+- [FDRYMAF012](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF012/) -- FDRYMAF012. A method decorated with [AgentFunction] does not have a [System.ComponentModel.Description] attribute.
+- [FDRYMAF013](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF013/) -- FDRYMAF013. A parameter on an [AgentFunction] method does not have a [System.ComponentModel.Description] attribute. CancellationToken parameters are exempt.
+- [FDRYMAF014](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF014/) -- FDRYMAF014. A type listed in FoundryAgentAttribute.FunctionTypes contains no methods decorated with [AgentFunction].
+- [FDRYMAF015](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF015/) -- FDRYMAF015. Code calls .ToString() on a tool result property such as ToolCallResult.Result or FunctionResultContent.Result.
+- [FDRYMAF016](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF016/) -- FDRYMAF016. A named agent graph declared via [AgentGraphEdge] attributes contains a cycle.
+- [FDRYMAF017](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF017/) -- FDRYMAF017. A named agent graph has [AgentGraphEdge] declarations but no [AgentGraphEntry] to identify the starting agent.
+- [FDRYMAF018](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF018/) -- FDRYMAF018. A named agent graph has more than one [AgentGraphEntry] declaration.
+- [FDRYMAF019](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF019/) -- FDRYMAF019. An [AgentGraphEdge] references a target type that is not decorated with [FoundryAgent].
+- [FDRYMAF020](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF020/) -- FDRYMAF020. A class has [AgentGraphEdge] but is not itself decorated with [FoundryAgent].
+- [FDRYMAF021](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF021/) -- FDRYMAF021. A class has [AgentGraphEntry] but is not itself decorated with [FoundryAgent].
+- [FDRYMAF022](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF022/) -- FDRYMAF022. An agent that declares [AgentGraphEdge] for a named graph is not reachable from that graph's [AgentGraphEntry] point via any path.
+- [FDRYMAF024](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF024/) -- FDRYMAF024. A fan-out node (a node with multiple outgoing edges) has all edges marked as IsRequired = false.
+- [FDRYMAF025](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF025/) -- FDRYMAF025. Code calls CreateGraphWorkflow("graphName") on a graph that declares [AgentGraphNode(JoinMode = GraphJoinMode.WaitAny)] on one or more nodes.
+- [FDRYMAF027](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF027/) -- FDRYMAF027. A node marked with [AgentGraphNode(IsTerminal = true)] also has outgoing [AgentGraphEdge] declarations.
+- [FDRYMAF028](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF028/) -- FDRYMAF028. The Condition property on [AgentGraphEdge] references a method name that does not exist on the declaring class, is not static, does not return bool, or does not accept a single object? parameter.
+- [FDRYMAF029](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF029/) -- FDRYMAF029. The ReducerMethod property on [AgentGraphReducer] references a method name that does not exist on the declaring class, is not static, does not return string, or does not accept IReadOnlyList<string>.
+- [FDRYMAF030](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF030/) -- FDRYMAF030. An [AgentFunction] parameter is typed as string and EITHER:
+- [FDRYMAF031](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF031/) -- FDRYMAF031. Two or more classes decorated with [FoundryAgent] resolve to the same published name.
+- [FDRYMAF032](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF032/) -- FDRYMAF032. An [AIFunctionName] or [AIParameterName] applied to an [AgentFunction] declares a null, empty, or whitespace-only name.
+- [FDRYMAF033](https://www.devleader.ca/projects/foundry/analyzers/FDRYMAF033/) -- FDRYMAF033. Either:
 
 ## API Reference
 
-- [Overview](https://www.devleader.ca/projects/foundry/api/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Overview](https://www.devleader.ca/projects/foundry/api/) -- API Reference. Select an API view:
 - [Development](https://www.devleader.ca/projects/foundry/api/dev/) -- Browse API documentation generated from the latest Foundry main branch.
 - [Stable](https://www.devleader.ca/projects/foundry/api/stable/) -- Browse API documentation for the latest published Foundry release.
 
@@ -89,25 +89,25 @@ Author: Nick Cosentino (https://www.devleader.ca).
 
 - [Agent Guidance](https://www.devleader.ca/projects/foundry/agent-guidance/) -- Understand where Foundry's agent guidance lives, how it is validated, and which source owns each kind of rule.
 - [GitHub-Hosted CI Runners](https://www.devleader.ca/projects/foundry/github-hosted-runners/) -- Understand Foundry's standard GitHub-hosted runner and public-repository billing boundary.
-- [Documentation Publishing](https://www.devleader.ca/projects/foundry/publishing/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [Releasing](https://www.devleader.ca/projects/foundry/releasing/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [Documentation Publishing](https://www.devleader.ca/projects/foundry/publishing/) -- Documentation Publishing. Foundry documentation is built with MkDocs and published to a dedicated Cloudflare Pages project. The public URL is routed through the existing Dev Leader project-documentation Worker:
+- [Releasing](https://www.devleader.ca/projects/foundry/releasing/) -- Releasing. Foundry releases are tag-driven and publish all production NexusLabs.Foundry.* packages together.
 
 ## Architecture Decisions
 
-- [ADR-0001 DAG Graph Workflow Support](https://www.devleader.ca/projects/foundry/adr/adr-0001-dag-graph-workflow-support/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0002 Build ScriptedChatClient Locally](https://www.devleader.ca/projects/foundry/adr/adr-0002-build-scriptedchatclient-locally/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0003 Provider-Neutral Experiment Runner](https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0004 Extract AI Platform from Needlr](https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0005 First-Class MAF Harness Integration](https://www.devleader.ca/projects/foundry/adr/adr-0005-first-class-maf-harness-integration/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0006 Hybrid Context and Workspace Authority](https://www.devleader.ca/projects/foundry/adr/adr-0006-hybrid-context-and-workspace-authority/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0007 Experimental Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0007-experimental-hybrid-context-compaction/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0008 Optional Harness Bundle](https://www.devleader.ca/projects/foundry/adr/adr-0008-optional-harness-bundle/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0009 Repository-Owned CI Runner Image](https://www.devleader.ca/projects/foundry/adr/adr-0009-repository-owned-ci-runner-image/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0010 Harness Execution Mode Retention](https://www.devleader.ca/projects/foundry/adr/adr-0010-harness-execution-mode-retention/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0011 Public Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0011-public-hybrid-context-compaction/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0012 Docs-First Agent Guidance](https://www.devleader.ca/projects/foundry/adr/adr-0012-docs-first-agent-guidance/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0013 Phase-Local Harness Loop Evaluation](https://www.devleader.ca/projects/foundry/adr/adr-0013-phase-local-harness-loop-evaluation/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0014 Phase-Local Harness Background Delegation](https://www.devleader.ca/projects/foundry/adr/adr-0014-phase-local-harness-background-delegation/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0015 Upstream-First Checkpointed Workflow Runs](https://www.devleader.ca/projects/foundry/adr/adr-0015-upstream-first-checkpointed-workflow-runs/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0016 Same-Run Checkpoint Restoration](https://www.devleader.ca/projects/foundry/adr/adr-0016-same-run-checkpoint-restoration/) -- Build reliable, observable, and testable AI agent systems in .NET
-- [ADR-0017 Standard GitHub-Hosted CI Runners](https://www.devleader.ca/projects/foundry/adr/adr-0017-standard-github-hosted-ci-runners/) -- Build reliable, observable, and testable AI agent systems in .NET
+- [ADR-0001 DAG Graph Workflow Support](https://www.devleader.ca/projects/foundry/adr/adr-0001-dag-graph-workflow-support/) -- ADR-0001 DAG Graph Workflow Support. Needlr's Agent Framework originally supported handoff, group-chat, and sequential workflows through a consistent model: attributes declare topology, source generation emits registration and factory...
+- [ADR-0002 Build ScriptedChatClient Locally](https://www.devleader.ca/projects/foundry/adr/adr-0002-build-scriptedchatclient-locally/) -- ADR-0002 Build ScriptedChatClient Locally. NexusLabs.Foundry.MicrosoftAgentFramework.Testing provides runners for deterministic agent and pipeline scenarios, but callers must supply an IChatClient. Needlr's tests and examples therefore...
+- [ADR-0003 Provider-Neutral Experiment Runner](https://www.devleader.ca/projects/foundry/adr/adr-0003-provider-neutral-experiment-runner/) -- ADR-0003 Provider-Neutral Experiment Runner. Needlr already supported individual MEAI evaluations, deterministic and LLM-judged evaluators, response capture, quality thresholds, and Langfuse tracing and scoring. It did not provide one...
+- [ADR-0004 Extract AI Platform from Needlr](https://www.devleader.ca/projects/foundry/adr/adr-0004-extract-ai-platform-from-needlr/) -- ADR-0004 Extract AI Platform from Needlr. Needlr began as an opinionated dependency-injection, plugin, and source-generation framework. Its public identity, documentation, package metadata, and core architecture continue to describe that...
+- [ADR-0005 First-Class MAF Harness Integration](https://www.devleader.ca/projects/foundry/adr/adr-0005-first-class-maf-harness-integration/) -- ADR-0005 First-Class MAF Harness Integration. Foundry added workspace state, iterative execution, diagnostics, generated tools, and evaluation support while Microsoft Agent Framework did not yet offer a complete agent Harness. MAF 1.15...
+- [ADR-0006 Hybrid Context and Workspace Authority](https://www.devleader.ca/projects/foundry/adr/adr-0006-hybrid-context-and-workspace-authority/) -- ADR-0006 Hybrid Context and Workspace Authority. ADR-0005 established that IWorkspace remains Foundry's authoritative bulk-artifact abstraction and that no AgentFileStore bridge is approved as a second authority. Building on that...
+- [ADR-0007 Experimental Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0007-experimental-hybrid-context-compaction/) -- ADR-0007 Experimental Hybrid Context Compaction. ADR-0006 established that IWorkspace is Foundry's sole authoritative store for bulk artifact bytes and that a conversation carries only a bounded artifact://sha256/... reference in place...
+- [ADR-0008 Optional Harness Bundle](https://www.devleader.ca/projects/foundry/adr/adr-0008-optional-harness-bundle/) -- ADR-0008 Optional Harness Bundle. ADR-0005 established two independent Microsoft Agent Framework integration lanes: a neutral selected-provider lane in NexusLabs.Foundry.MicrosoftAgentFramework, and a separately gated, complete-bundle...
+- [ADR-0009 Repository-Owned CI Runner Image](https://www.devleader.ca/projects/foundry/adr/adr-0009-repository-owned-ci-runner-image/) -- ADR-0009 Repository-Owned CI Runner Image. Foundry's trusted Linux workflows use ephemeral PitCrew workers, but each new worker currently downloads the same .NET SDKs and installs the same NativeAOT packages. Source, package, and AOT...
+- [ADR-0010 Harness Execution Mode Retention](https://www.devleader.ca/projects/foundry/adr/adr-0010-harness-execution-mode-retention/) -- ADR-0010 Harness Execution Mode Retention. Accepted — 2026-07-30
+- [ADR-0011 Public Hybrid Context Compaction](https://www.devleader.ca/projects/foundry/adr/adr-0011-public-hybrid-context-compaction/) -- ADR-0011 Public Hybrid Context Compaction. ADR-0007 built a per-provider-call hybrid compaction seam and then deliberately withheld it: every mechanism it introduced stayed internal, and it explicitly declined to approve "a public...
+- [ADR-0012 Docs-First Agent Guidance](https://www.devleader.ca/projects/foundry/adr/adr-0012-docs-first-agent-guidance/) -- ADR-0012 Docs-First Agent Guidance. Foundry already has a compact root AGENTS.md, a complete MkDocs navigation map, accepted ADRs, and executable package, runner, SDK, and workflow contracts. Its agent-guidance structure is incomplete:...
+- [ADR-0013 Phase-Local Harness Loop Evaluation](https://www.devleader.ca/projects/foundry/adr/adr-0013-phase-local-harness-loop-evaluation/) -- ADR-0013 Phase-Local Harness Loop Evaluation. ADR-0008 established the optional complete-bundle Harness package and deliberately left upstream loop evaluation outside its initial public candidate. The delivered bundle can autonomously...
+- [ADR-0014 Phase-Local Harness Background Delegation](https://www.devleader.ca/projects/foundry/adr/adr-0014-phase-local-harness-background-delegation/) -- ADR-0014 Phase-Local Harness Background Delegation. ADR-0008 established the optional complete-bundle Harness package and left background-agent delegation outside its initial public candidate. ADR-0013 later exposed upstream loop...
+- [ADR-0015 Upstream-First Checkpointed Workflow Runs](https://www.devleader.ca/projects/foundry/adr/adr-0015-upstream-first-checkpointed-workflow-runs/) -- ADR-0015 Upstream-First Checkpointed Workflow Runs. Foundry's existing workflow conveniences run to a terminal result. They do not accept an upstream CheckpointManager, return a restorable run handle, or define how a caller selects...
+- [ADR-0016 Same-Run Checkpoint Restoration](https://www.devleader.ca/projects/foundry/adr/adr-0016-same-run-checkpoint-restoration/) -- ADR-0016 Same-Run Checkpoint Restoration. ADR-0015 exposed both checkpoint-enabled workflow start and fresh-workflow resume. Review against Microsoft Agent Framework 1.17 found that the start and same-run restore paths have a defensible...
+- [ADR-0017 Standard GitHub-Hosted CI Runners](https://www.devleader.ca/projects/foundry/adr/adr-0017-standard-github-hosted-ci-runners/) -- ADR-0017 Standard GitHub-Hosted CI Runners. ADR-0009 introduced a repository-owned runner image and a self-hosted runner profile to reduce repeated SDK and NativeAOT setup on ephemeral workers. Foundry is a public repository, and GitHub...
