@@ -30,20 +30,20 @@
       {
         "@type": "ListItem",
         "position": 1,
-        "name": {{ config.site_name | tojson }},
-        "item": {{ config.site_url | tojson }}
+        "name": "{{ config.site_name }}",
+        "item": "{{ config.site_url }}"
       }{% for ancestor in page.ancestors %},
       {
         "@type": "ListItem",
         "position": {{ loop.index + 1 }},
-        "name": {{ ancestor.title | tojson }},
-        "item": {{ config.site_url | tojson }}
+        "name": "{{ ancestor.title }}",
+        "item": "{{ config.site_url }}"
       }{% endfor %},
       {
         "@type": "ListItem",
         "position": {{ page.ancestors | length + 2 }},
-        "name": {{ page.title | tojson }},
-        "item": {{ page.canonical_url | tojson }}
+        "name": "{{ page.title }}",
+        "item": "{{ page.canonical_url }}"
       }
     ]
   }
@@ -54,11 +54,11 @@
   {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
-    "name": {{ config.site_name | tojson }},
-    "description": {{ config.site_description | tojson }},
-    "url": {{ config.site_url | tojson }},
-    "codeRepository": {{ config.repo_url | tojson }},
-    "license": {{ (config.repo_url ~ "/blob/main/LICENSE") | tojson }},
+    "name": "{{ config.site_name }}",
+    "description": "{{ config.site_description }}",
+    "url": "{{ config.site_url }}",
+    "codeRepository": "{{ config.repo_url }}",
+    "license": "{{ config.repo_url }}/blob/main/LICENSE",
     "author": {
       "@type": "Person",
       "name": "Nick Cosentino",
