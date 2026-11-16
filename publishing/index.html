@@ -2858,6 +2858,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#api-structured-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API structured data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#published-title-refresh" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3680,6 +3691,12 @@ social tags; structured data uses safe JSON serialization.</p>
 <p>This policy applies to newly built pages. Existing stable and archived output
 is not backfilled. The title-only maintenance script continues to leave
 descriptions and all content untouched.</p>
+<h2 id="api-structured-data">API structured data<a class="headerlink" href="#api-structured-data" title="Permanent link">&para;</a></h2>
+<p>Newly built API pages emit one <code>APIReference</code> entity using the same qualified
+title and XML-derived description as their page metadata. Its <code>@id</code> and <code>url</code>
+match the public canonical URL: slashless, with each path segment URI-escaped
+once. Existing stable and archived snapshots are not rewritten. Guide schemas
+and the home-page project entity retain their existing behavior.</p>
 <h2 id="published-title-refresh">Published title refresh<a class="headerlink" href="#published-title-refresh" title="Permanent link">&para;</a></h2>
 <p>The <code>Documentation titles</code> workflow validates rendered fixtures, demonstrates
 that generic baseline metadata fails those assertions, and previews every
