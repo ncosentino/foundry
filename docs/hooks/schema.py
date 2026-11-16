@@ -2,6 +2,7 @@
 
 Injects JSON-LD based on a page's URL:
 
+- APIReference from the existing API page metadata.
 - HowTo on the Getting Started page (one step per H2).
 - FAQPage on guide pages under ``guides/`` (one Q&A per H2).
 
@@ -42,6 +43,16 @@ def _extract_h2_sections(html: str) -> list[tuple[str, str]]:
 def on_page_content(html: str, page, config, files) -> str:
     """Inject structured data JSON-LD blocks based on page URL."""
     url = page.url or ''
+
+    if page.meta.get('api_reference_title') is not None:
+        html += _schema_script({
+            '@context': 'https://schema.org',
+            '@type': 'APIReference',
+            '@id': page.canonical_url,
+            'name': page.meta['api_reference_title'],
+            'url': page.canonical_url,
+            'description': page.meta['description'],
+        })
 
     if url == 'getting-started/':
         html = _inject_howto_schema(html, page)
