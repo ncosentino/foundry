@@ -4,16 +4,16 @@ description: Build reliable .NET AI agents with generated discovery, workflows, 
 
 # Foundry
 
-![Foundry](assets/foundry.webp){ width="240" }
+![Foundry](assets/foundry.webp){ width="240" height="240" }
 
 **Forge reliable, observable, and testable AI agent systems in .NET.**
 
-[![CI](https://github.com/ncosentino/foundry/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ncosentino/foundry/actions/workflows/ci.yml)
-[![Documentation](https://github.com/ncosentino/foundry/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/ncosentino/foundry/actions/workflows/docs.yml)
-[![NuGet prerelease](https://img.shields.io/nuget/vpre/NexusLabs.Foundry.MicrosoftAgentFramework.svg)](https://www.nuget.org/packages/NexusLabs.Foundry.MicrosoftAgentFramework)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ncosentino/foundry/blob/main/LICENSE)
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
-![Status: Alpha](https://img.shields.io/badge/status-alpha-orange)
+[![CI](https://github.com/ncosentino/foundry/actions/workflows/ci.yml/badge.svg?branch=main){ .doc-badge width="90" height="20" }](https://github.com/ncosentino/foundry/actions/workflows/ci.yml)
+[![Documentation](https://github.com/ncosentino/foundry/actions/workflows/docs.yml/badge.svg?branch=main){ .doc-badge width="161" height="20" }](https://github.com/ncosentino/foundry/actions/workflows/docs.yml)
+[![NuGet prerelease](https://img.shields.io/nuget/vpre/NexusLabs.Foundry.MicrosoftAgentFramework.svg){ .doc-badge width="154" height="20" }](https://www.nuget.org/packages/NexusLabs.Foundry.MicrosoftAgentFramework)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg){ .doc-badge width="78" height="20" }](https://github.com/ncosentino/foundry/blob/main/LICENSE)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4){ .doc-badge width="70" height="20" }](https://dotnet.microsoft.com/download/dotnet/10.0)
+![Status: Alpha](https://img.shields.io/badge/status-alpha-orange){ .doc-badge width="84" height="20" }
 
 Foundry is an AI and agentic application framework for .NET. It brings agent
 construction, orchestration, diagnostics, evaluation, experimentation,

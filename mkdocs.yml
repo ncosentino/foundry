@@ -8,12 +8,11 @@ strict: true
 
 copyright: >
   &copy; Nick Cosentino
-  <br>
+  <nav class="doc-footer-links" aria-label="Related sites">
   <a href="https://www.devleader.ca">Dev Leader: software engineering articles and C# tutorials</a>
-  <br>
   <a href="https://links.devleader.ca">Dev Leader links, videos, newsletter, and social channels</a>
-  <br>
   <a href="https://www.brandghost.ai">BrandGhost: AI-assisted social media management</a>
+  </nav>
 
 theme:
   name: material
@@ -142,6 +141,9 @@ hooks:
   - docs/hooks/titles.py
   - docs/hooks/schema.py
   - docs/hooks/llms_txt.py
+
+extra_css:
+  - stylesheets/layout.css
 
 extra_javascript:
   - javascripts/api-version-switcher.js
