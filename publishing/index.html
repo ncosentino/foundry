@@ -59,6 +59,8 @@
       
     
     
+      <link rel="stylesheet" href="../stylesheets/layout.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -2825,6 +2827,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#layout-checks-and-review-screenshots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layout checks and review screenshots
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#versioned-api-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3653,6 +3666,18 @@ Dev Leader project-documentation Worker:</p>
 </code></pre></div>
 <p>No Cloudflare custom domain is required for the Pages project. The Worker owns
 the public path on <code>www.devleader.ca</code>.</p>
+<h2 id="layout-checks-and-review-screenshots">Layout checks and review screenshots<a class="headerlink" href="#layout-checks-and-review-screenshots" title="Permanent link">&para;</a></h2>
+<p>The hosted Documentation workflow checks the actual built homepage at 375px
+and 1440px in both themes before its API build. It holds image responses,
+compares geometry before and after release, and requires separate 44px footer
+targets with 4px gaps. Regression checks use deliberately wide synthetic
+badges rather than depending on external badge services.</p>
+<p>Manual feature-branch runs additionally capture real-image homepage loading
+states and footer screenshots for human review. Screenshots are evidence,
+never screenshot assertions or pixel-comparison baselines.
+The <code>documentation-layout</code> artifact retains bounded JSON and PNG evidence for
+one day, capped at 20 MiB per run; ordinary regression evidence is much smaller.
+Feature-branch runs do not merge or deploy published documentation.</p>
 <h2 id="versioned-api-documentation">Versioned API documentation<a class="headerlink" href="#versioned-api-documentation" title="Permanent link">&para;</a></h2>
 <p>Foundry preserves the same API-documentation model as Needlr:</p>
 <ul>
@@ -3814,7 +3839,7 @@ locations, and internal links under <code>/projects/foundry</code>.</p>
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      &copy; Nick Cosentino <br> <a href="https://www.devleader.ca">Dev Leader: software engineering articles and C# tutorials</a> <br> <a href="https://links.devleader.ca">Dev Leader links, videos, newsletter, and social channels</a> <br> <a href="https://www.brandghost.ai">BrandGhost: AI-assisted social media management</a>
+      &copy; Nick Cosentino <nav class="doc-footer-links" aria-label="Related sites"> <a href="https://www.devleader.ca">Dev Leader: software engineering articles and C# tutorials</a> <a href="https://links.devleader.ca">Dev Leader links, videos, newsletter, and social channels</a> <a href="https://www.brandghost.ai">BrandGhost: AI-assisted social media management</a> </nav>
 
     </div>
   
