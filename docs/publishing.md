@@ -13,6 +13,21 @@ https://www.devleader.ca/projects/foundry/
 No Cloudflare custom domain is required for the Pages project. The Worker owns
 the public path on `www.devleader.ca`.
 
+## Layout checks and review screenshots
+
+The hosted Documentation workflow checks the actual built homepage at 375px
+and 1440px in both themes before its API build. It holds image responses,
+compares geometry before and after release, and requires separate 44px footer
+targets with 4px gaps. Regression checks use deliberately wide synthetic
+badges rather than depending on external badge services.
+
+Manual feature-branch runs additionally capture real-image homepage loading
+states and footer screenshots for human review. Screenshots are evidence,
+never screenshot assertions or pixel-comparison baselines.
+The `documentation-layout` artifact retains bounded JSON and PNG evidence for
+one day, capped at 20 MiB per run; ordinary regression evidence is much smaller.
+Feature-branch runs do not merge or deploy published documentation.
+
 ## Versioned API documentation
 
 Foundry preserves the same API-documentation model as Needlr:
