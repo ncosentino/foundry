@@ -60,6 +60,14 @@ This policy applies to newly built pages. Existing stable and archived output
 is not backfilled. The title-only maintenance script continues to leave
 descriptions and all content untouched.
 
+## API structured data
+
+Newly built API pages emit one `APIReference` entity using the same qualified
+title and XML-derived description as their page metadata. Its `@id` and `url`
+match the public canonical URL: slashless, with each path segment URI-escaped
+once. Existing stable and archived snapshots are not rewritten. Guide schemas
+and the home-page project entity retain their existing behavior.
+
 ## Published title refresh
 
 The `Documentation titles` workflow validates rendered fixtures, demonstrates
